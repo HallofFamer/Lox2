@@ -483,6 +483,12 @@ Value callGenerator(VM* vm, ObjGenerator* generator) {
     loadGeneratorFrame(vm, generator);
     InterpretResult result = run(vm);
     if (result == INTERPRET_RUNTIME_ERROR) exit(70);
+
+    Value value = peek(vm, 0);
+    if (IS_PROMISE(value)) {
+        ObjPromise* promise = AS_PROMISE(value);
+        if (promise->state == PROMISE_REJECTED) promiseReject(vm, promise, OBJ_VAL(promise->exception));
+    }
     if(vm->runningGenerator->frame->closure->function->name != NULL) vm->runningGenerator = outer;
     return pop(vm);
 }

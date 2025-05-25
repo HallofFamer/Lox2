@@ -1,9 +1,9 @@
-# CLox
-Another implementation of ByteCode Interpreter for Lox in C, with tons of new features.
+# Lox2
+A superset of Lox with ByteCode Interpreter, with multi-pass compiler, optional type checker and tons of new features.
 
 
 ## Introduction
-CLox is an implementation of the programming language Lox in C. Currently it uses naive single-pass compiler, and only runtime optimization is performed. In future it is planned to have a multi-pass compiler with AST and compiler optimization. The initial version of CLox has only features already present in the original Lox reference implementation, but subsequent versions will continue to add new features to make it a powerful language. This is an experiment on the design and implementation of language features, before I start to implement the backend of my own programming language Mysidia. Stay tuned. 
+Lox2 is an extended version of the programming language Lox in C. It has new features such as namespace system, exception handling, async/await and optional static typing. The future versions of Lox2 will continue to add more useful features, with improvement of the type system as top priority.
 
 The original version of Lox programming language can be found at Bob Nystrom's repository:
 https://github.com/munificent/craftinginterpreters
@@ -11,7 +11,7 @@ https://github.com/munificent/craftinginterpreters
 
 ## Features
 
-### Original Features
+### Original Features from Lox
 - Stacked based bytecode VM with the basic OPCode support.
 - On-demand Scanner, Pratt Parser and Single-Pass Compiler.
 - Uniform runtime representation for Lox Value. 
@@ -25,7 +25,7 @@ https://github.com/munificent/craftinginterpreters
 - Single Inheritance and `super` keyword.
 - Performance improvement with Faster hash table probing and Nan-Boxing.
 
-### New Features
+### New Features in Lox2
 - Framework for creating native functions, methods and classes.
 - Array/Dictionary Literals and square bracket notation for array/dictionary access.
 - New Operators: Modulo(`%`), Range(`..`) and Nil Handling(`?.`, `??`, `?:`).
@@ -72,31 +72,31 @@ Below are the features planned for future versions of Lox2, the list is subject 
 
 For a list of implemented features, please see the change logs in /notes directory.
 
-### Lox 2.1.0(next version)
+### Lox2 2.1.0(next version)
 - Extend parser with infinite lookahead, allowing qualified names to be used for function/method signature, class/trait declaration and catch statement.
 - Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be typed. 
 - Allow declaration of object properties outside of class initializer, which also enables optional static typing.
 - Redesign of Iterator/Enumerator API for ease of use and implementation of iterable types.
 
-### Lox 2.2.0
+### Lox2 2.2.0
 - Enhanced type system with basic support for generics/parametric polymorphism.
 - `type` keyword used as declaration of type alias, useful for complex generic types.
 - Capability of saving bytecode into disk as .loxo file, which can be loaded later for faster compilation.
 - Refactor classes in the existing standard library to use generics(in `clox.std` parent package), such as `Array<T>` and `Promise<T>`.
 
-### Lox 2.3.0
+### Lox2 2.3.0
 - Additional type system enhancement for union types, with `|` operator on types such as `String | Number`.
 - Support for structural pattern matching using `match` keyword, remove `switch` statement as it has been superceded.
 - Improved type system with non-nullable by default for type declaration, as well as variance for method parameter/return types.
 - Trailing closure similar to Kotlin and Swift which allows last lambda argument to be placed outside of parenthesis.
 
-### Lox 2.4.0
+### Lox2 2.4.0
 - Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body. 
 - Object literal syntax similar to Javascript which can be good for configuration objects. 
 - Add new package `clox.std.text` which handles text processing for MIME types such as json and xml.
 - Foreign function interface(FFI) as a way to write CLox libraries in C and load in lox script.
 
-### Lox 2.5.0
+### Lox2 2.5.0
 - C# style property accessor syntax, also inline simple getter/setter calls. 
 - First class continuation with keyword `context`, enabling manipulation of call stack in userland.
 - Add CLox CLI to run Lox scripts easily from command line, backed by libuv. 
@@ -135,7 +135,7 @@ docker run -w /CLox-1.9.0/CLox -i -t clox:linux
 
 ## Credits & Special Thanks
 
-#### Below is the attribution list for my CLox's design and implementation, please contact me if anything else is missing. This does not include 3rd-party libraries whose copyrights are already present in the header files.
+#### Below is the attribution list for my Lox2's design and implementation, please contact me if anything else is missing. This does not include 3rd-party libraries whose copyrights are already present in the header files.
 
 - [Robert Nystrom](https://github.com/munificent/craftinginterpreters): For the original Lox language specification and source code that this project is based on. 
 - Smalltalk-lang: For the inspiration of object and class model.
@@ -148,12 +148,12 @@ docker run -w /CLox-1.9.0/CLox -i -t clox:linux
 ## FAQ
 
 #### What is the purpose of this project?
-CLox is an implementation of Lox language with bytecode VM instead of treewalk interpreter. It is the last experiment on feature implementations, before I will begin writing my own programming language `Mysidia` in C.
+Lox2 is an implementation of Lox language with bytecode VM instead of treewalk interpreter. It is the last experiment on feature implementations, before I will begin writing my own programming language `Mysidia` in C. It serves as an education and experimental language, yet it is meant to be production ready instead of being a toy language. 
 
-#### What are the reasons behind the design of CLox?
-Please see DESIGN.md document for more information, it provides a detailed explanation on the choice of new features being implemented, as well as insights into the evolution of CLox as a general purpose programming language.
+#### What are the reasons behind the design of Lox2?
+Please see DESIGN.md document for more information, it provides a detailed explanation on the choice of new features being implemented, as well as insights into the evolution of Lox2 as a general purpose programming language.
 
-#### Can I use the code of CLox as base for my own project?
+#### Can I use the code of Lox2 as base for my own project?
 This project is open source and the codebase can be used as base for someone else's project. It has an MIT license, and attribution must be given except for code from the original Lox implementation or third party libraries.
 
 #### What will happen to KtLox?
