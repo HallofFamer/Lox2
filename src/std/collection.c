@@ -1519,10 +1519,16 @@ LOX_METHOD(Queue, dequeue) {
     ObjNode* first = AS_NODE(getObjProperty(vm, self, "first"));
     int length = AS_INT(getObjProperty(vm, AS_INSTANCE(receiver), "length"));
     if (length == 0) RETURN_NIL;
-
-    ObjNode* node = first;
-    setObjProperty(vm, self, "first", OBJ_VAL(first->next));
-    if (first->next == NULL) setObjProperty(vm, self, "last", OBJ_VAL(first->next));
+    else if (length == 1) {
+        ObjNode* new = newNode(vm, args[0], NULL, NULL);
+        push(vm, OBJ_VAL(new));
+        setObjProperty(vm, self, "first", OBJ_VAL(new));
+        setObjProperty(vm, self, "last", OBJ_VAL(new));
+        pop(vm);
+    }
+    else {
+        setObjProperty(vm, self, "first", OBJ_VAL(first->next));
+    }
     collectionLengthDecrement(vm, self);
     RETURN_VAL(first->element);
 }
