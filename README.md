@@ -35,8 +35,8 @@ https://github.com/munificent/craftinginterpreters
 - Object ID and generic object map which enable inheritance for special build-in classes such as `String` and `Array`.
 - Class methods in class declaration using `class` keyword, and trait declaration using `trait` keyword.
 - Anonymous classes/traits similar to anonymous functions/lambda.
-- Namespace as CLox's module system, allowing importing namespace and aliasing of imported classes, traits and functions.
-- CLox Standard Library for packages `lang`, `util`, `collection`, `io` and `net` in bullt-in namespace `clox.std`.
+- Namespace as Lox2's module system, allowing importing namespace and aliasing of imported classes, traits and functions.
+- Lox2 Standard Library for packages `lang`, `util`, `collection`, `io` and `net` in bullt-in namespace `clox.std`.
 - Raise exception with `throw` keyword, and exception handling with try/catch/finally statement.
 - Interceptor methods which are invoked automatically when getting/setting properties, invoking methods or throwing exceptions.
 - Generator functions/methods which can yield control back to the caller and resume at a later point of execution.
@@ -44,12 +44,12 @@ https://github.com/munificent/craftinginterpreters
 - Introduction of `async` and `await` keywords, which allows C#/JS style of concurrency.
 - Optional static typing support for function/method parameters and return values, types only exist at compile time and are erased at runtime. 
 - Semicolon inference as well as basic type inference for immutable local/global variables. 
-- Customized Runtime configuration for CLox using clox.ini.
+- Customized Runtime configuration for Lox2 using lox2.ini.
 - Allow loading lox source files in lox script and another lox source file with `require` keyword.
 - Cross-platform build with Cmake and package manager with vcpkg.
 
 ### Enhanced or Removed Features
-- VM is no longer a global variable, allowing CLox VM to be embedded in other host applications.
+- VM is no longer a global variable, allowing Lox2 VM to be embedded in other host applications.
 - Multi-pass compiler with abstract syntax tree, semantic analyzer(resolver), symbol table, type checker, and generation of bytecode by walking AST. 
 - Parser is extended with look-ahead capability, with field next storing the next token. 
 - Print statement removed, use native function `print` and `println` instead.
@@ -61,7 +61,7 @@ https://github.com/munificent/craftinginterpreters
 - Global variables are scoped within the file it is declared, effectively becoming module variable.
 - Function/Method parameters become immutable by default, but may be mutable with `var` keyword.
 - Built-in and user defined classes/functions become immutable, and cannot be accidentally overwritten.
-- Fix reentrancy problem with CLox, calling Lox closures in C API becomes possible.
+- Fix reentrancy problem with Lox2, calling Lox2 closures in C API becomes possible.
 - Most runtime errors in VM interpreter loop replaced with Exceptions that can be caught at runtime.
 - Inline caching for VM optimization, as well as implementation of Shape(Hidden Class) for better instance variable representation.
 - Upgraded the mark and sweep GC with a generational GC which has multiple regions for objects of various generations, which leads to GC running faster when marking/freeing objects. 
@@ -94,42 +94,42 @@ For a list of implemented features, please see the change logs in /notes directo
 - Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body. 
 - Object literal syntax similar to Javascript which can be good for configuration objects. 
 - Add new package `clox.std.text` which handles text processing for MIME types such as json and xml.
-- Foreign function interface(FFI) as a way to write CLox libraries in C and load in lox script.
+- Foreign function interface(FFI) as a way to write Lox2 libraries in C and load in lox script.
 
 ### Lox2 2.5.0
 - C# style property accessor syntax, also inline simple getter/setter calls. 
 - First class continuation with keyword `context`, enabling manipulation of call stack in userland.
-- Add CLox CLI to run Lox scripts easily from command line, backed by libuv. 
+- Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
 - Implement a profiler which can identify the "Hotspots" of the program and how long they execute, prerequiste for future JIT. 
 
 
-## Build and Run Clox
+## Build and Run Lox2
 
 #### Windows(with git, cmake and vcpkg, need to replace [$VCPKG_PATH] with installation path of vcpkg)
 ```
-git clone -b master https://github.com/HallofFamer/CLox.git
-cd CLox
+git clone -b master https://github.com/HallofFamer/Lox2.git
+cd Lox2
 cmake -DCMAKE_TOOLCHAIN_FILE:STRING="[$VCPKG_PATH]/scripts/buildsystems/vcpkg.cmake" -S . -B ./build
 cmake --build ./build --config Release
-./x64/Release/CLox
+./x64/Release/Lox2
 ```
 
 #### Linux(with git, cmake, curl and libuv, need to install one of the libcurl4-dev and libuv1.dev packages)
 ```
-git clone -b master https://github.com/HallofFamer/CLox.git
-cd CLox
+git clone -b master https://github.com/HallofFamer/Lox2.git
+cd Lox2
 mkdir build
 cmake -S . -B ./build
 cmake --build ./build --config Release
-./build/CLox
+./build/Lox2
 ```
 
 #### Docker(linux, need to replace [$LinuxDockerfile] by actual docker file name, ie. UbuntuDockerfile)
 ```
-git clone -b master https://github.com/HallofFamer/CLox.git
-cd CLox
-docker build -t clox:linux -f Docker/[$LinuxDockerfile] .
-docker run -w /CLox-1.9.0/CLox -i -t clox:linux
+git clone -b master https://github.com/HallofFamer/Lox2.git
+cd Lox2
+docker build -t Lox2:linux -f Docker/[$LinuxDockerfile] .
+docker run -w /Lox2-2.0.0/Lox2 -i -t lox2:linux
 ```
 
 

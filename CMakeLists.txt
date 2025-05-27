@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 
 set(CMAKE_SYSTEM_VERSION 10.0 CACHE STRING "" FORCE)
 
-project(CLox C)
+project(Lox2 C)
 
 ################################################################################
 # Set target arch type if empty. Visual studio solution generator provides it.
@@ -83,13 +83,13 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Sub-projects
 ################################################################################
 
-set(PROJECT_NAME CLox)
+set(PROJECT_NAME Lox2)
 
 ################################################################################
 # Source groups
 ################################################################################
 set(no_group_source_files
-    "clox.ini"
+    "lox2.ini"
     "CMakeLists.txt"
     "main.c"
 )
@@ -241,7 +241,7 @@ else ()
 endif()
 
 use_props(${PROJECT_NAME} "${CMAKE_CONFIGURATION_TYPES}" "${DEFAULT_CXX_PROPS}")
-set(ROOT_NAMESPACE CLox)
+set(ROOT_NAMESPACE Lox2)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VS_GLOBAL_KEYWORD "Win32Proj"
@@ -351,5 +351,5 @@ else ()
 endif()
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_LIST_DIR}/clox.ini $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_LIST_DIR}/lox2.ini $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
