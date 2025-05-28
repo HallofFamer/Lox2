@@ -699,7 +699,6 @@ static void markRoots(VM* vm, GCGenerationType generation) {
 
     markGlobals(vm, generation);
     markRememberedSet(vm, generation);
-    markCompilerRoots(vm);
 }
 
 static void traceReferences(VM* vm, GCGenerationType generation) {

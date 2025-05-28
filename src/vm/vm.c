@@ -165,8 +165,6 @@ void initVM(VM* vm) {
     resetStack(vm);
     initConfiguration(vm);
     vm->currentModule = NULL;
-    vm->currentCompiler = NULL;
-    vm->currentClass = NULL;
     vm->numSymtabs = 0;
     vm->symtab = newSymbolTable(vm->numSymtabs++, NULL, SYMBOL_SCOPE_GLOBAL, -1);
     vm->typetab = newTypeTable(0);
@@ -1476,7 +1474,6 @@ InterpretResult run(VM* vm) {
 }
 
 InterpretResult interpret(VM* vm, const char* source) {
-    //ObjFunction* function = compileV1(vm, source);
     ObjFunction* function = compile(vm, source);
     if (function == NULL) return INTERPRET_COMPILE_ERROR;
     push(vm, OBJ_VAL(function));
