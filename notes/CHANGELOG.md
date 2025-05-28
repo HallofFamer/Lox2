@@ -1,6 +1,6 @@
 # Change Log
 
-### Lox 2.0.0(current version)
+### Lox2 2.0.0(current version)
 - Multi-pass compiler with abstract syntax tree, semantic analyzer(resolver), symbol table, type checker, and generation of bytecode by walking AST. 
 - Optional static typing support for function/method parameters and return values, types only exist at compile time and are erased at runtime. 
 - Semicolon inference as well as basic type inference for immutable local/global variables. 
@@ -54,8 +54,11 @@
 - Allow customized runtime configurations for CLox at startup with clox.ini
 - Split the `Number` class into `Int` and `Float` classes, which will distinguish between integers and floating numbers.
 
-### CLox v1.1.0
+### Lox v1.1.0
 - VM is no longer a global variable, allowing CLox VM to be embedded in other host applications.
 - Full fledged Framework for writing Native functions, methods and classes.
 - Root class `Object` which serves as superclass of every class.
 - Remove print statement and replace it by `print` and `println` native functions.
+
+### Lox v1.0.0
+- Initial release with same set of features to the reference implementation in Crafting Interpreters.

@@ -14,10 +14,10 @@ Lox2 adopts the same type annotation syntax as C++, Java, C# and Dart, which loo
 It does complicate the parser, which is a challenge I gladly accept to enhance the parser with infinite look-ahead and backtrack in Lox 2.1. The choice also frees up colons that allows labeled methods to be implemented if desired one day. 
 
 ## Function/Method Param and Return Types
-The initial release of Lox2 allows programmers to optionally specify type annotations for the function/method param and return types. For return types, the type annotation precedes the `fun` keyword or method name, as the below example demonstrates:
+The initial release of Lox2 allows programmers to optionally specify type annotations for the function/method param and return types. For return types, the type annotation precedes the function or method name, as the below example demonstrates:
 
 ```
-Int fun gcd(Int first, Int second) {}
+Int gcd(Int first, Int second) {}
 
 class Calculator {
     Number calculateHypot(Number a, Number b) {}
@@ -57,7 +57,7 @@ Here the type annotations are used to declare types for instance and class field
 ## Metaclass Types
 As classes themselves are objects, they can be assigned to variables, passed to functions/methods as arguments and returned as values. This implies need to allow type annotations for metaclass types, which will be added in Lox 2.1. The syntax is `(MetaclassType class)`, note the enclosing parenthesis is mandatory. For instance the below code allows returning class Date instead of instance of Date. 
 ```
-(UserFactory class) fun getUserFactory() {}
+(UserFactory class) getUserFactory() {}
 ```
 Lox2 has an object model similar to Smalltalk, which specifies that metaclass hierarchy mirrors class hierarchy. In the above example, the function may return either class UserFactory, or a subclass of this factory.
 
@@ -72,7 +72,7 @@ At use site, an anonymous function or lambda expressions will have their param/r
 ## Qualified Names as Types
 Another new feature for type system coming to Lox 2.1 is that programmers may use qualified names in type annotations. This was not possible in the initial release of Lox2 due to the limitation of the parser, but will no longer be a hindrance in Lox2.1+. This allows the following program to parse and compile successfully:
 ```
-clox.std.util.Promise fun fetchAsync(clox.std.net.URL url) {}
+clox.std.util.Promise fetchAsync(clox.std.net.URL url) {}
 ```
 Oh the other hand, the resolver and type checker will be able to deduce types for AST with qualified names. The expression `clox.std.collection.LinkedList()` will have type LinkedList assigned to the node, instead of dynamic. 
 
@@ -106,7 +106,7 @@ The same subtyping rules will not work for param types, as type theory dictates 
 Another planned feature for Lox 2.2 is type alias, which uses keyword `type` similar to typescript. Type alias will come in handy when declaring complex generic and function types. Once created they can be substituted where the actual types are used. 
 ```
 type IDMap = Dictionary<String, ID<Int>>
-ID<Int> fun getID(IDMap map, String key) {}
+ID<Int> getID(IDMap map, String key) {}
 ```
 Type alias can also be generic, the below type alias creates a predicate with type parameter T:
 ```
@@ -124,7 +124,7 @@ class Repository<T extends Entity> {}
 Another key feature to be introduced in Lox 2.3 is union types, which works similar to Typescript. A union type consists of several types separated with pipe operator `|` , the syntax looks like `T1 | T2 | T3`. Below are common use cases for Union Types.
 ```
 void setAge(Int | Nil age)
-Bool fun isValidURL(String | URL url)
+Bool isValidURL(String | URL url)
 ```
 Lox2 performs compile time narrowing to factor out subtypes from the union type. For instance, the below two union types are equivalent:
 ```

@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-WORKDIR CLox-2.0.0
+WORKDIR Lox2-2.0.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -10,15 +10,15 @@ RUN apt-get update \
 	&& apt-get install -y --reinstall ca-certificates \
 	&& apt-get install -y --no-install-recommends git cmake libcurl4-gnutls-dev libuv1.dev
 
-RUN git clone https://github.com/HallofFamer/CLox.git
+RUN git clone https://github.com/HallofFamer/Lox2.git
 
-RUN cd CLox \
+RUN cd Lox2 \
 	&& mkdir build \
 	&& cmake -S . -B ./build \
 	&& cmake --build ./build --config Release \
-	&& ./build/CLox test/benchmarks/fibonacci.lox \
-    && cp build/CLox /usr/bin/  
+	&& ./build/Lox2 test/benchmarks/fibonacci.lox \
+    && cp build/Lox2 /usr/bin/  
 
-CMD ["CLox"]
+CMD ["Lox2"]
 
-# To run the REPL from container, use this command: docker run -w /CLox-2.0.0/CLox -i -t clox:ubuntu
+# To run the REPL from container, use this command: docker run -w /Lox2-2.0.0/Lox2 -i -t lox2:ubuntu
