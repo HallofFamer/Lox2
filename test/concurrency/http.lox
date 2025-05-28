@@ -49,18 +49,18 @@ val response4 = await client.deleteAsync("https://httpbin.org/delete")
 print("Status: ")
 println(response4.status)
 print("Cookies: ")
-println(response4.cookies);
-print("Content Type: ");
-println(response4.contentType);
-println("Content: ");
-println(response4.content);
-println("");
+println(response4.cookies)
+print("Content Type: ")
+println(response4.contentType)
+println("Content: ")
+println(response4.content)
+println("")
 
-println("Sending async patch request to httpbin.com: ");
-val response5 = await client.patchAsync("https://httpbin.org/patch", ["name" : "Hall of Famer", "location" : "New Jersey, United States"]);
-print("Status: ");
-println(response5.status);
-print("Cookies: ");
+println("Sending async patch request to httpbin.com: ")
+val response5 = await client.patchAsync("https://httpbin.org/patch", ["name" : "Hall of Famer", "location" : "New Jersey, United States"])
+print("Status: ")
+println(response5.status)
+print("Cookies: ")
 println(response5.cookies)
 print("Content Type: ")
 println(response5.contentType)

@@ -1,35 +1,35 @@
-namespace test.std;
-using clox.std.collection.Set;
-using clox.std.util.Date;
+namespace test.std
+using clox.std.collection.Set
+using clox.std.util.Date
 
-var set = Set();
-println("Testing class Set...");
-println("Class for set object: " + set.getClassName());
-print("Set is currently empty: ");
-println(set.isEmpty());
-println("");
+var set = Set()
+println("Testing class Set...")
+println("Class for set object: " + set.getClassName())
+print("Set is currently empty: ")
+println(set.isEmpty())
+println("")
 
-println("Now adding elements to set...");
-set.add(2);
-set.add(3.5);
-set.add(true);
-set.add(false);
-set.add(Date.now);
-print("Initial elements in set: ");
-println(set.toString());
-println("Add a new element current 'Hello World' to set: ");
-set.add("Hello World");
-print("Current elements in set: ");
-println(set.toString());
-println("Now add a duplicate element 2 to the set: ");
-set.add(2);
-print("Current elements in set: ");
-println(set.toString());
-print("Remove an element 3.5 from Set: ");
-set.remove(3.5);
-println(set.toString());
+println("Now adding elements to set...")
+set.add(2)
+set.add(3.5)
+set.add(true)
+set.add(false)
+set.add(Date.now)
+print("Initial elements in set: ")
+println(set.toString())
+println("Add a new element current 'Hello World' to set: ")
+set.add("Hello World")
+print("Current elements in set: ")
+println(set.toString())
+println("Now add a duplicate element 2 to the set: ")
+set.add(2)
+print("Current elements in set: ")
+println(set.toString())
+print("Remove an element 3.5 from Set: ")
+set.remove(3.5)
+println(set.toString())
 
-println("Looping through elements in set...");
+println("Looping through elements in set...")
 for(var element : set){
-    println("Element: " + element.toString());
+    println("Element: " + element.toString())
 }

@@ -4,13 +4,23 @@ using clox.std.io.IOException
 
 println("Creating a read stream from a non-existent input file.")
 try { 
-    //val fileReader = File.open("test/others/file_non_exist.txt", "r")
-    val fileReader = await File.openAsync("test/others/file_non_exist.txt", "r")
-    print("Successfully opened: ")
+    val fileReader = await File.openAsync("test/others/file_nonexist.txt", "r")
     println(fileReader)
 }
 catch(IOException e) { 
-    println("Error: ${e.message}");
+    println("Error: ${e.message}")
+}
+finally { 
+    println("Final Cleanup.")
+}
+
+println("Creating a read stream from a non-existent input file.")
+try { 
+    val fileReader = await File.openAsync("test/others/file_nonexist.txt", "r")
+    println(fileReader)
+}
+catch(IOException e) { 
+    println("Error again: ${e.message}")
 }
 finally { 
     println("Final Cleanup.")

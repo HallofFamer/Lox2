@@ -20,4 +20,4 @@ promise.then({|value|
            Promise({|fulfill, reject| Timer.timeout({ fulfill("Goodbye.") }, 2000) })
        })
        .then({|value| println("Last Promise fulfilled: ${value}") })
-       .catch({|exception| println("promise failed: ${exception.message}"); })
+       .catch({|exception| println("promise failed: ${exception.message}") })

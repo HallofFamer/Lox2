@@ -1,89 +1,89 @@
-namespace test.lang;
-using clox.std.net.HTTPClient;
-using clox.std.net.HTTPRequest;
-using clox.std.net.URL;
+namespace test.lang
+using clox.std.net.HTTPClient
+using clox.std.net.HTTPRequest
+using clox.std.net.URL
 
-val client = HTTPClient();
-print("Initializing HTTP Client: ");
-println(client);
-println("");
+val client = HTTPClient()
+print("Initializing HTTP Client: ")
+println(client)
+println("")
 
-println("Sending get request to example.com: ");
-var response = client.get(URL.parse("https://example.com"));
-print("Status: ");
-println(response.status);
-print("Cookies: ");
-println(response.cookies);
-print("Content Type: ");
-println(response.contentType);
-println("Content: ");
-println(response.content);
-println("");
+println("Sending get request to example.com: ")
+var response = client.get(URL.parse("https://example.com"))
+print("Status: ")
+println(response.status)
+print("Cookies: ")
+println(response.cookies)
+print("Content Type: ")
+println(response.contentType)
+println("Content: ")
+println(response.content)
+println("")
 
-println("Sending post request to httpbin.com: ");
-var response2 = client.post("https://httpbin.org/post", ["name" : "Ordland", "age": 34, "location" : "United States"]);
-print("Status: ");
-println(response2.status);
-print("Cookies: ");
-println(response2.cookies);
-print("Content Type: ");
-println(response2.contentType);
-println("Content: ");
-println(response2.content);
-println("");
+println("Sending post request to httpbin.com: ")
+var response2 = client.post("https://httpbin.org/post", ["name" : "Ordland", "age": 34, "location" : "United States"])
+print("Status: ")
+println(response2.status)
+print("Cookies: ")
+println(response2.cookies)
+print("Content Type: ")
+println(response2.contentType)
+println("Content: ")
+println(response2.content)
+println("")
 
-println("Sending put request to httpbin.com: ");
-var response3 = client.put("https://httpbin.org/put", ["id": 521, "name" : "Ordland", "age": 34, "location" : "United States"]);
-print("Status: ");
-println(response3.status);
-print("Cookies: ");
-println(response3.cookies);
-print("Content Type: ");
-println(response3.contentType);
-println("Content: ");
-println(response3.content);
-println("");
+println("Sending put request to httpbin.com: ")
+var response3 = client.put("https://httpbin.org/put", ["id": 521, "name" : "Ordland", "age": 34, "location" : "United States"])
+print("Status: ")
+println(response3.status)
+print("Cookies: ")
+println(response3.cookies)
+print("Content Type: ")
+println(response3.contentType)
+println("Content: ")
+println(response3.content)
+println("")
 
-println("Sending delete request to httpbin.com: ");
-var response4 = client.delete("https://httpbin.org/delete");
-print("Status: ");
-println(response4.status);
-print("Cookies: ");
-println(response4.cookies);
-print("Content Type: ");
-println(response4.contentType);
-println("Content: ");
-println(response4.content);
-println("");
+println("Sending delete request to httpbin.com: ")
+var response4 = client.delete("https://httpbin.org/delete")
+print("Status: ")
+println(response4.status)
+print("Cookies: ")
+println(response4.cookies)
+print("Content Type: ")
+println(response4.contentType)
+println("Content: ")
+println(response4.content)
+println("")
 
-println("Sending patch request to httpbin.com: ");
-var response5 = client.patch("https://httpbin.org/patch", ["name" : "Hall of Famer", "location" : "New Jersey, United States"]);
-print("Status: ");
-println(response5.status);
-print("Cookies: ");
-println(response5.cookies);
-print("Content Type: ");
-println(response5.contentType);
-println("Content: ");
-println(response5.content);
-println("");
+println("Sending patch request to httpbin.com: ")
+var response5 = client.patch("https://httpbin.org/patch", ["name" : "Hall of Famer", "location" : "New Jersey, United States"])
+print("Status: ")
+println(response5.status)
+print("Cookies: ")
+println(response5.cookies)
+print("Content Type: ")
+println(response5.contentType)
+println("Content: ")
+println(response5.content)
+println("")
 
-println("Creating a HTTPRequest object: ");
-val request = HTTPRequest("https://httpbin.org/post", HTTPRequest.httpPOST, ["Accept": "*/*", "Content-Type": "application/json"], ["name" : "Ordland", "age": 34, "location" : "United States"]);
-println(request.toString());
-println("");
+println("Creating a HTTPRequest object: ")
+val request = HTTPRequest("https://httpbin.org/post", HTTPRequest.httpPOST, ["Accept": "*/*", "Content-Type": "application/json"], ["name" : "Ordland", "age": 34, "location" : "United States"])
+println(request.toString())
+println("")
 
-println("Sending generic HTTP request to example.com: ");
-var response6 = client.send(request);
-print("Status: ");
-println(response6.status);
-print("Cookies: ");
-println(response6.cookies);
-print("Content Type: ");
-println(response6.contentType);
-println("Content: ");
-println(response6.content);
-println("");
+println("Sending generic HTTP request to example.com: ")
+var response6 = client.send(request)
+print("Status: ")
+println(response6.status)
+print("Cookies: ")
+println(response6.cookies)
+print("Content Type: ")
+println(response6.contentType)
+println("Content: ")
+println(response6.content)
+println("")
 
-println("Closing HTTP Client... ");
-client.close();
+println("Closing HTTP Client... ")
+client.close()
