@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
         runFile(&vm, argv[1]);
     } 
     else {
-        fprintf(stderr, "Usage: clox [path]\n");
+        fprintf(stderr, "Usage: lox2 [path]\n");
         exit(64);
     }
   

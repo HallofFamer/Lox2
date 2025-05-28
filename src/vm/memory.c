@@ -72,7 +72,7 @@ static void freeGCGenerations(VM* vm) {
 GC* newGC(VM* vm) {
     GC* gc = (GC*)malloc(sizeof(GC));
     if (gc != NULL) {
-        size_t heapSizes[] = { vm->config.gcEdenHeapSize, vm->config.gcYoungHeapSize, vm->config.gcOldHeapSize, vm->config.gcHeapSize };
+        size_t heapSizes[] = { vm->config.gcEdenHeapSize, vm->config.gcYoungHeapSize, vm->config.gcOldHeapSize, vm->config.gcTotalHeapSize - vm->config.gcEdenHeapSize - vm->config.gcYoungHeapSize - vm->config.gcOldHeapSize };
         initGCGenerations(gc, heapSizes);
         gc->grayCapacity = 0;
         gc->grayCount = 0;

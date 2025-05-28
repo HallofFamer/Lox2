@@ -132,19 +132,16 @@ static int parseConfiguration(void* data, const char* section, const char* name,
     else if (HAS_CONFIG("gc", "gcType")) {
         config->gcType = _strdup(value);
     }
-    else if (HAS_CONFIG("gc", "gcHeapSize")) {
-        config->gcHeapSize = (size_t)atol(value);
+    else if (HAS_CONFIG("gc", "gcTotalHeapSize")) {
+        config->gcTotalHeapSize = (size_t)atol(value);
     }
-    else if (HAS_CONFIG("gc", "gcStressMode")) {
-        config->gcStressMode = (bool)atoi(value);
-    }
-    else if (HAS_CONFIG("gc_generation", "gcEdenHeapSize")) {
+    else if (HAS_CONFIG("gc", "gcEdenHeapSize")) {
         config->gcEdenHeapSize = (size_t)atol(value);
     }
-    else if (HAS_CONFIG("gc_generation", "gcYoungHeapSize")) {
+    else if (HAS_CONFIG("gc", "gcYoungHeapSize")) {
         config->gcYoungHeapSize = (size_t)atol(value);
     }
-    else if (HAS_CONFIG("gc_generation", "gcOldHeapSize")) {
+    else if (HAS_CONFIG("gc", "gcOldHeapSize")) {
         config->gcOldHeapSize = (size_t)atol(value);
     }
     else {

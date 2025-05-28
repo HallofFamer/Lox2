@@ -53,9 +53,7 @@ typedef struct {
     uint8_t flagMutableVariable;
 
     const char* gcType;
-    size_t gcHeapSize;
-    bool gcStressMode;
-
+    size_t gcTotalHeapSize;
     size_t gcEdenHeapSize;
     size_t gcYoungHeapSize;
     size_t gcOldHeapSize;
