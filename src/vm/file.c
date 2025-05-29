@@ -172,8 +172,10 @@ void fileOnClose(uv_fs_t* fsClose) {
     LOOP_PUSH_DATA(data);
 
     if (fsClose->result < 0) {
+        data->vm->apiStackDepth++;
         ObjException* exception = createNativeException(data->vm, "clox.std.io.IOException", "Failed to close IO stream.");
         promiseReject(data->vm, data->promise, OBJ_VAL(exception));
+        data->vm->frameCount++;
     }
     else {
         data->file->isOpen = false;
@@ -205,8 +207,10 @@ void fileOnFlush(uv_fs_t* fsSync) {
     LOOP_PUSH_DATA(data);
 
     if (fsSync->result < 0) {
+        data->vm->apiStackDepth++;
         ObjException* exception = createNativeException(data->vm, "clox.std.io.IOException", "Failed to flush IO stream.");
         promiseReject(data->vm, data->promise, OBJ_VAL(exception));
+        data->vm->frameCount++;
     }
     else {
         data->file->isOpen = false;
@@ -223,8 +227,10 @@ void fileOnHandle(uv_fs_t* fsHandle) {
     LOOP_PUSH_DATA(data);
 
     if (fsHandle->result < 0) {
+        data->vm->apiStackDepth++;
         ObjException* exception = createNativeException(data->vm, "clox.std.io.IOException", "Failed to perform IO operation.");
         promiseReject(data->vm, data->promise, OBJ_VAL(exception));
+        data->vm->frameCount++;
     }
     else promiseFulfill(data->vm, data->promise, BOOL_VAL(fsHandle->result == 0));
 
@@ -238,8 +244,10 @@ void fileOnOpen(uv_fs_t* fsOpen) {
     LOOP_PUSH_DATA(data);
 
     if (fsOpen->result < 0) {
+        data->vm->apiStackDepth++;
         ObjException* exception = createNativeException(data->vm, "clox.std.io.IOException", "Failed to open IO stream.");
         promiseReject(data->vm, data->promise, OBJ_VAL(exception));
+        data->vm->frameCount++;
     }
     else { 
         data->file->isOpen = true;
@@ -619,9 +627,9 @@ char* streamClassName(const char* mode) {
             else return NULL;
         case 2:
             if (mode[0] == 'r' && mode[1] == 'b') return "clox.std.io.BinaryReadStream";
-            else if ((mode[0] == 'w' || mode[1] == 'a') && mode[1] == 'b') return "clox.std.io.BinaryWriteStream";
+            else if ((mode[0] == 'w' || mode[0] == 'a') && mode[1] == 'b') return "clox.std.io.BinaryWriteStream";
             else if (mode[0] == 'r' && mode[1] == '+') return "clox.std.io.FileReadStream";
-            else if ((mode[0] == 'w' || mode[1] == 'a') && mode[1] == '+') return "clox.std.io.FileWriteStream";
+            else if ((mode[0] == 'w' || mode[0] == 'a') && mode[1] == '+') return "clox.std.io.FileWriteStream";
             else return NULL;
         case 3:
             if (mode[0] == 'r' && mode[1] == 'b' && mode[2] == '+') return "clox.std.io.BinaryReadStream";
