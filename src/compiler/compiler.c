@@ -729,9 +729,7 @@ static void compileInterpolation(Compiler* compiler, Ast* ast) {
 
         compileChild(compiler, exprs, count);
         expr = astGetChild(exprs, count);
-        if (expr->type == NULL || !isSubtypeOfType(expr->type, getNativeType(compiler->vm, "String"))) {
-            invokeMethod(compiler, 0, "toString", 8);
-        }
+        invokeMethod(compiler, 0, "toString", 8);
 
         if (concatenate || (count >= 1 && !isString)) {
             emitByte(compiler, OP_ADD);

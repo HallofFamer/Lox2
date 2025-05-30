@@ -66,37 +66,44 @@ https://github.com/munificent/craftinginterpreters
 - Inline caching for VM optimization, as well as implementation of Shape(Hidden Class) for better instance variable representation.
 - Upgraded the mark and sweep GC with a generational GC which has multiple regions for objects of various generations, which leads to GC running faster when marking/freeing objects. 
 
+
+## Documentation
+The documentation of Lox2 can be found [on gitbook](https://mysidia-inc.gitbook.io/lox2), which explores the features in Lox2 as well as some concrete example Lox2 programs. It is still a work in progress as the standard library reference and VM internals sections are still under construction. 
+
+At this moment only the web version is available, though in Lox2 v2.1.0 onwards, Lox2 may have PDF documentation to download for interested developers. 
+
+
 ## Roadmap
 
 Below are the features planned for future versions of Lox2, the list is subject to change but it gives a basic idea of the future directions of this project. 
 
 For a list of implemented features, please see the change logs in /notes directory.
 
-### Lox2 2.1.0(next version)
+### Lox2 v2.1.0(next version)
 - Extend parser with infinite lookahead, allowing qualified names to be used for function/method signature, class/trait declaration and catch statement.
 - Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be typed. 
 - Allow declaration of object properties outside of class initializer, which also enables optional static typing.
 - Redesign of Iterator/Enumerator API for ease of use and implementation of iterable types.
 
-### Lox2 2.2.0
+### Lox2 v2.2.0
 - Enhanced type system with basic support for generics/parametric polymorphism.
 - `type` keyword used as declaration of type alias, useful for complex generic types.
 - Capability of saving bytecode into disk as .loxo file, which can be loaded later for faster compilation.
 - Refactor classes in the existing standard library to use generics(in `clox.std` parent package), such as `Array<T>` and `Promise<T>`.
 
-### Lox2 2.3.0
+### Lox2 v2.3.0
 - Additional type system enhancement for union types, with `|` operator on types such as `String | Number`.
 - Support for structural pattern matching using `match` keyword, remove `switch` statement as it has been superceded.
 - Improved type system with non-nullable by default for type declaration, as well as variance for method parameter/return types.
 - Trailing closure similar to Kotlin and Swift which allows last lambda argument to be placed outside of parenthesis.
 
-### Lox2 2.4.0
+### Lox2 v2.4.0
 - Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body. 
 - Object literal syntax similar to Javascript which can be good for configuration objects. 
 - Add new package `clox.std.text` which handles text processing for MIME types such as json and xml.
 - Foreign function interface(FFI) as a way to write Lox2 libraries in C and load in lox script.
 
-### Lox2 2.5.0
+### Lox2 v2.5.0
 - C# style property accessor syntax, also inline simple getter/setter calls. 
 - First class continuation with keyword `context`, enabling manipulation of call stack in userland.
 - Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
@@ -107,7 +114,7 @@ For a list of implemented features, please see the change logs in /notes directo
 
 #### Windows(with git, cmake and vcpkg, need to replace [$VCPKG_PATH] with installation path of vcpkg)
 ```
-git clone -b master https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.0 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 cmake -DCMAKE_TOOLCHAIN_FILE:STRING="[$VCPKG_PATH]/scripts/buildsystems/vcpkg.cmake" -S . -B ./build
 cmake --build ./build --config Release
@@ -116,7 +123,7 @@ cmake --build ./build --config Release
 
 #### Linux(with git, cmake, curl and libuv, need to install one of the libcurl4-dev and libuv1.dev packages)
 ```
-git clone -b master https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.0 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 mkdir build
 cmake -S . -B ./build
@@ -126,9 +133,9 @@ cmake --build ./build --config Release
 
 #### Docker(linux, need to replace [$LinuxDockerfile] by actual docker file name, ie. UbuntuDockerfile)
 ```
-git clone -b master https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.0 https://github.com/HallofFamer/Lox2.git
 cd Lox2
-docker build -t Lox2:linux -f Docker/[$LinuxDockerfile] .
+docker build -t lox2:linux -f Docker/[$LinuxDockerfile] .
 docker run -w /Lox2-2.0.0/Lox2 -i -t lox2:linux
 ```
 
@@ -138,9 +145,9 @@ docker run -w /Lox2-2.0.0/Lox2 -i -t lox2:linux
 #### Below is the attribution list for my Lox2's design and implementation, please contact me if anything else is missing. This does not include 3rd-party libraries whose copyrights are already present in the header files.
 
 - [Robert Nystrom](https://github.com/munificent/craftinginterpreters): For the original Lox language specification and source code that this project is based on. 
-- Smalltalk-lang: For the inspiration of object and class model.
-- Ruby-lang: For the inspiration of generic ID map/table which allows inheritance and properties on any objects.
-- Javascript-lang: For the inspiration of object shape/hidden-class.
+- [Smalltalk-lang](https://squeak.org/): For the inspiration of object and class model.
+- [Ruby-lang](https://www.ruby-lang.org/en/): For the inspiration of generic ID map/table which allows inheritance and properties on any objects.
+- [Javascript-lang](https://www.javascript.com/): For the inspiration of object shape/hidden-class.
 - [Wren-lang](https://github.com/wren-lang/wren): For the inspiration of UTF-8 string implementation as well as dynamic array macros.
 - [Michael Malone(cometlang)](https://github.com/cometlang/comet): For the inspiration of exception and try/catch/finally statement. 
 - [RevengerWizard(teascript)](https://github.com/RevengerWizard/teascript): For the inspiration of reentrancy in Lox language. 
@@ -148,13 +155,16 @@ docker run -w /Lox2-2.0.0/Lox2 -i -t lox2:linux
 ## FAQ
 
 #### What is the purpose of this project?
-Lox2 is an implementation of Lox language with bytecode VM instead of treewalk interpreter. It is the last experiment on feature implementations, before I will begin writing my own programming language `Mysidia` in C. It serves as an education and experimental language, yet it is meant to be production ready instead of being a toy language. 
+Lox2 is a superset of the original Lox language with multi-pass bytecode VM. It serves as an education and experimental language, yet it is meant to be production ready instead of being a toy language. 
 
 #### What are the reasons behind the design of Lox2?
-Please see DESIGN.md document for more information, it provides a detailed explanation on the choice of new features being implemented, as well as insights into the evolution of Lox2 as a general purpose programming language.
+Please see [DESIGN.md](https://github.com/HallofFamer/Lox2/blob/master/notes/DESIGN.md) note for more information, it provides a detailed explanation on the choice of new features being implemented, as well as insights into the evolution of Lox2 as a general purpose programming language.
+
+#### Is there a roadmap for Lox2's type system enhancement?
+Please see [TYPESYSTEM.md](https://github.com/HallofFamer/Lox2/blob/master/notes/TYPESYSTEM.md) note for more information, the type system is planned to be enhanced in the next few releases, though the feature list may be subject to change.
 
 #### Can I use the code of Lox2 as base for my own project?
 This project is open source and the codebase can be used as base for someone else's project. It has an MIT license, and attribution must be given except for code from the original Lox implementation or third party libraries.
 
 #### What will happen to KtLox?
-Nothing, KtLox development is on hold until I can figure out a way to generate JVM bytecode instead of running the interpreter by walking down the AST. Treewalk interpreters are way too slow to be practical without JIT, and in my honest opinion I do not think the book should've covered treewalk interpreters but I will digress.
+Nothing, KtLox development is on hold until I can figure out a way to generate JVM bytecode instead of running the interpreter by walking down the AST. Treewalk interpreters are way too slow to be practical without JIT.

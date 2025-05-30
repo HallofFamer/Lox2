@@ -113,8 +113,10 @@ void dnsOnGetAddrInfo(uv_getaddrinfo_t* netGetAddrInfo, int status, struct addri
     LOOP_PUSH_DATA(data);
 
     if (status < 0) {
+        data->vm->apiStackDepth++;
         ObjException* exception = createNativeException(data->vm, "clox.std.net.DomainHostException", "Failed to resolve IP addresses for domain.");
         promiseReject(data->vm, data->promise, OBJ_VAL(exception));
+        data->vm->frameCount++;
     }
     else {
         ObjArray* ipAddresses = dnsGetIPAddressesFromDomain(data->vm, result);
@@ -131,8 +133,10 @@ void dnsOnGetNameInfo(uv_getnameinfo_t* netGetNameInfo, int status, const char* 
     LOOP_PUSH_DATA(data);
 
     if (status < 0) {
+        data->vm->apiStackDepth++;
         ObjException* exception = createNativeException(data->vm, "clox.std.net.IPAddressException", "Failed to get domain name for IP Address.");
         promiseReject(data->vm, data->promise, OBJ_VAL(exception));
+        data->vm->frameCount++;
     }
     else {
         ObjString* domain = newString(data->vm, netGetNameInfo->host);

@@ -43,7 +43,7 @@ bool propagateException(VM* vm, bool isPromise) {
         if (frame->closure->function->isGenerator || frame->closure->function->isAsync) {
             vm->runningGenerator->state = GENERATOR_THROW;
             vm->runningGenerator->value = OBJ_VAL(exception);
-            vm->runningGenerator = vm->runningGenerator->outer;
+            if(vm->runningGenerator->outer != NULL) vm->runningGenerator = vm->runningGenerator->outer;
         }
 
         vm->frameCount--;
