@@ -2058,11 +2058,11 @@ void registerLangPackage(VM* vm) {
     DEF_INTERCEPTOR(vm->stringClass, String, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(String), PARAM_TYPE(String));
     DEF_METHOD(vm->stringClass, String, capitalize, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->stringClass, String, clone, 0, RETURN_TYPE(String));
-    DEF_METHOD(vm->stringClass, String, contains, 1, RETURN_TYPE(String), PARAM_TYPE(String));
-    DEF_METHOD(vm->stringClass, String, count, 0, RETURN_TYPE(String));
+    DEF_METHOD(vm->stringClass, String, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
+    DEF_METHOD(vm->stringClass, String, count, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->stringClass, String, decapitalize, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->stringClass, String, endsWith, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
-    DEF_METHOD(vm->stringClass, String, getByte, 1, RETURN_TYPE(String), PARAM_TYPE(Int));
+    DEF_METHOD(vm->stringClass, String, getByte, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(vm->stringClass, String, getCodePoint, 1, RETURN_TYPE(String), PARAM_TYPE(Int));
     DEF_METHOD(vm->stringClass, String, indexOf, 1, RETURN_TYPE(Int), PARAM_TYPE(String));
     DEF_METHOD(vm->stringClass, String, length, 0, RETURN_TYPE(Int));

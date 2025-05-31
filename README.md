@@ -68,7 +68,7 @@ https://github.com/munificent/craftinginterpreters
 
 
 ## Documentation
-The documentation of Lox2 can be found [on gitbook](https://mysidia-inc.gitbook.io/lox2), which explores the features in Lox2 as well as some concrete example Lox2 programs. It is still a work in progress as the standard library reference and VM internals sections are still under construction. 
+[Lox2's documentation](https://mysidia-inc.gitbook.io/lox2) can be found on gitbook, which explores the features in Lox2 as well as some concrete example Lox2 programs. It is still a work in progress as the standard library reference and VM internals sections are still under construction. 
 
 At this moment only the web version is available, though in Lox2 v2.1.0 onwards, Lox2 may have PDF documentation to download for interested developers. 
 
@@ -77,7 +77,7 @@ At this moment only the web version is available, though in Lox2 v2.1.0 onwards,
 
 Below are the features planned for future versions of Lox2, the list is subject to change but it gives a basic idea of the future directions of this project. 
 
-For a list of implemented features, please see the change logs in /notes directory.
+For a list of implemented features, please see [CHANGELOG.md](https://github.com/HallofFamer/Lox2/blob/master/notes/CHANGELOG.md).
 
 ### Lox2 v2.1.0(next version)
 - Extend parser with infinite lookahead, allowing qualified names to be used for function/method signature, class/trait declaration and catch statement.
