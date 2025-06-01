@@ -420,7 +420,7 @@ static bool callClass(VM* vm, ObjClass* klass, int argCount) {
         return callMethod(vm, initializer, argCount);
     }
     else if (argCount != 0) {
-        runtimeError(vm, "Expected 0 argument but got %d.", argCount);
+        throwNativeException(vm, "clox.std.lang.IllegalArgumentException", "Class %s's initializer expected 0 argument but got %d.", klass->fullName->chars, argCount);
         return false;
     }
     return true;
