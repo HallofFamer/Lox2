@@ -33,7 +33,8 @@ https://github.com/munificent/craftinginterpreters
 - Variadic Functions, Anonymous Functions(local return) and Lambda Expressions(nonlocal return).
 - `Object` root class for every class in Lox, everything is an object, and every object has a class.
 - Object ID and generic object map which enable inheritance for special build-in classes such as `String` and `Array`.
-- Class methods in class declaration using `class` keyword, and trait declaration using `trait` keyword.
+- Class methods in class declaration using `class` keyword, which are actually instance methods defined on metaclasses.
+- Trait declaration using trait keyword, as well as implementing trait via with keyword.
 - Anonymous classes/traits similar to anonymous functions/lambda.
 - Namespace as Lox2's module system, allowing importing namespace and aliasing of imported classes, traits and functions.
 - Lox2 Standard Library for packages `lang`, `util`, `collection`, `io` and `net` in bullt-in namespace `clox.std`.
@@ -110,6 +111,21 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 - Implement a profiler which can identify the "Hotspots" of the program and how long they execute, prerequiste for future JIT. 
 
 
+## Example
+The following code shows how to send a simple asynchronous HTTP request and prints its status and contents to the console. This example makes uses of various features from Lox2 such as namespace declaration/import, immutable variable, async/await, and string interpolation. 
+
+```
+namespace Lox2Example
+using clox.std.net.HTTPClient
+using clox.std.net.URL
+
+val client = HTTPClient()
+val response = await client.getAsync(URL.parse("https://example.com"))
+println("Response Status: ${response.status}")
+println("Content: ${response.content}")
+```
+
+
 ## Build and Run Lox2
 
 #### Windows(with git, cmake and vcpkg, need to replace [$VCPKG_PATH] with installation path of vcpkg)
@@ -139,6 +155,8 @@ docker build -t lox2:linux -f Docker/[$LinuxDockerfile] .
 docker run -w /Lox2-2.0.0/Lox2 -i -t lox2:linux
 ```
 
+Note: It is recommended to clone from the latest stable release branch("v2.0.0" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
+
 
 ## Credits & Special Thanks
 
@@ -148,8 +166,8 @@ docker run -w /Lox2-2.0.0/Lox2 -i -t lox2:linux
 - [Smalltalk-lang](https://squeak.org/): For the inspiration of object and class model.
 - [Ruby-lang](https://www.ruby-lang.org/en/): For the inspiration of generic ID map/table which allows inheritance and properties on any objects.
 - [Javascript-lang](https://www.javascript.com/): For the inspiration of object shape/hidden-class.
-- [Wren-lang](https://github.com/wren-lang/wren): For the inspiration of UTF-8 string implementation as well as dynamic array macros.
-- [Michael Malone(cometlang)](https://github.com/cometlang/comet): For the inspiration of exception and try/catch/finally statement. 
+- [Wren-lang](https://wren.io/): For the inspiration of UTF-8 string implementation as well as dynamic array macros.
+- [Michael Malone(cometlang)](https://cometlang.com/): For the inspiration of exception and try/catch/finally statement. 
 - [RevengerWizard(teascript)](https://github.com/RevengerWizard/teascript): For the inspiration of reentrancy in Lox language. 
 
 ## FAQ

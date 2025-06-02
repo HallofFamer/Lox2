@@ -2024,10 +2024,10 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->intClass, Int, lcm, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(vm->intClass, Int, objectID, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->intClass, Int, timesRepeat, 1, RETURN_TYPE(void));
-    DEF_METHOD(vm->intClass, Int, toBinary, 0, RETURN_TYPE(Int));
+    DEF_METHOD(vm->intClass, Int, toBinary, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toFloat, 0, RETURN_TYPE(Int));
-    DEF_METHOD(vm->intClass, Int, toHexadecimal, 0, RETURN_TYPE(Int));
-    DEF_METHOD(vm->intClass, Int, toOctal, 0, RETURN_TYPE(Int));
+    DEF_METHOD(vm->intClass, Int, toHexadecimal, 0, RETURN_TYPE(String));
+    DEF_METHOD(vm->intClass, Int, toOctal, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->intClass, Int, upTo, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE(Object));
     DEF_OPERATOR(vm->intClass, Int, +, __add__, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
