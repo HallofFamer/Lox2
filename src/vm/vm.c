@@ -367,12 +367,12 @@ static bool callClosureAsync(VM* vm, ObjClosure* closure, int argCount) {
 
 bool callClosure(VM* vm, ObjClosure* closure, int argCount) {
     if (closure->function->arity > 0 && argCount != closure->function->arity) {
-        runtimeError(vm, "Expected %d arguments but got %d.", closure->function->arity, argCount);
+        throwNativeException(vm, "clox.std.lang.IllegalArgumentException", "Expected %d argument but got %d.", closure->function->arity, argCount);
         return false;
     }
 
     if (vm->frameCount == FRAMES_MAX) {
-        runtimeError(vm, "Stack overflow.");
+        throwNativeException(vm, "clox.std.lang.StackOverflowException", "Stack overflow.");
         return false;
     }
 
