@@ -21,6 +21,5 @@ Value loadInnerGenerator(VM* vm);
 void yieldFromInnerGenerator(VM* vm, ObjGenerator* generator);
 Value stepGenerator(VM* vm, ObjGenerator* generator, Value arg);
 Value runGeneratorAsync(VM* vm, Value callee, ObjArray* arguments);
-bool isMainAsyncGenerator(VM* vm, ObjGenerator* generator);
 
 #endif // !clox_generator_h
