@@ -2022,7 +2022,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->intClass, Int, isEven, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->intClass, Int, isOdd, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->intClass, Int, lcm, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(vm->intClass, Int, objectID, 0, RETURN_TYPE(Int));
+    DEF_METHOD(vm->intClass, Int, objectID, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->intClass, Int, timesRepeat, 1, RETURN_TYPE(void));
     DEF_METHOD(vm->intClass, Int, toBinary, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toFloat, 0, RETURN_TYPE(Int));

@@ -522,6 +522,9 @@ static void yield(Resolver* resolver, Ast* ast) {
     else if (resolver->currentFunction->modifier.isInitializer) {
         semanticError(resolver, "Cannot use 'yield' from an initializer.");
     }
+    else if (resolver->currentFunction->modifier.isAsync) {
+        semanticError(resolver, "Cannot use 'yield' from async functions/methods.");
+    }
 
     if (astHasChild(ast)) {
         resolveChild(resolver, ast, 0);
