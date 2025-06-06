@@ -282,7 +282,6 @@ LOX_METHOD(DateTime, __subtract__) {
     RETURN_OBJ(dateTime);
 }
 
-
 LOX_METHOD(DateTimeClass, fromTimestamp) {
     ASSERT_ARG_COUNT("DateTime class::fromTimestamp(timestamp)", 1);
     ASSERT_ARG_TYPE("DateTime class::fromTimestamp(timestamp)", 0, Number);
@@ -596,6 +595,7 @@ LOX_METHOD(Promise, thenChain) {
         Value then = getObjMethod(vm, result, "then");
         Value thenFulfill = getObjMethod(vm, receiver, "thenFulfill");
         ObjBoundMethod* thenFulfillMethod = newBoundMethod(vm, result, thenFulfill);
+
         promiseCapture(vm, resultPromise, "thenPromise", OBJ_VAL(thenPromise));
         promiseCapture(vm, resultPromise, "onFulfilled", OBJ_VAL(thenFulfillMethod));
         callReentrantMethod(vm, OBJ_VAL(resultPromise), then, OBJ_VAL(thenFulfillMethod));
@@ -645,6 +645,7 @@ LOX_METHOD(PromiseClass, reject) {
     ObjClass* klass = AS_CLASS(receiver);
     Value reject;
     tableGet(&klass->methods, copyStringPerma(vm, "reject", 6), &reject);
+
     ObjPromise* promise = newPromise(vm, PROMISE_REJECTED, NIL_VAL, reject);
     promise->obj.klass = klass;
     promise->exception = AS_EXCEPTION(args[0]);
@@ -728,6 +729,7 @@ LOX_METHOD(Regex, replace) {
     Value pattern = getObjProperty(vm, AS_INSTANCE(receiver), "pattern");
     ObjString* original = AS_STRING(args[0]);
     ObjString* replacement = AS_STRING(args[1]);
+
     int length;
     int index = re_match(AS_CSTRING(pattern), original->chars, &length);
     if (length == -1) RETURN_OBJ(original);
@@ -748,6 +750,7 @@ LOX_METHOD(Timer, __init__) {
     ASSERT_ARG_TYPE("Timer::__init__(closure, delay, interval)", 2, Int);
     ObjTimer* self = AS_TIMER(receiver);
     TimerData* data = (TimerData*)self->timer->data;
+
     data->receiver = receiver;
     data->closure = AS_CLOSURE(args[0]);
     data->delay = AS_INT(args[1]);

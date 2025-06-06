@@ -288,6 +288,7 @@ ObjPromise* httpDownloadFileAsync(VM* vm, ObjString* src, ObjString* dest, CURLM
         ObjPromise* promise = newPromise(vm, PROMISE_PENDING, NIL_VAL, NIL_VAL);
         CURLData* curlData = httpCURLData(vm, curl, src, HTTP_GET, promise, NULL, callback);
         curlData->file = file;
+
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
         curl_easy_setopt(curl, CURLOPT_PRIVATE, curlData);
         curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -402,6 +403,7 @@ ObjPromise* httpSendRequestAsync(VM* vm, ObjString* url, HTTPMethod method, ObjD
         ObjPromise* promise = newPromise(vm, PROMISE_PENDING, NIL_VAL, NIL_VAL);
         CURLData* curlData = httpCURLData(vm, curl, url, method, promise, curlResponse, callback);
         httpCURLInitResponse(curlResponse);
+
         if (headers != NULL) curlData->curlHeaders = httpParseHeaders(vm, headers, curl);
         httpCURLRequest(vm, curl, url, method, data, curlResponse);
         curl_easy_setopt(curl, CURLOPT_PRIVATE, curlData);
