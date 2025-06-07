@@ -975,6 +975,7 @@ static Ast* switchStatement(Parser* parser) {
                 state = 1;
                 Ast* caseLabel = expression(parser);
                 consume(parser, TOKEN_COLON, "Expect ':' after case value.");
+
                 Token token = parser->previous;
                 Ast* caseBody = statement(parser);
                 Ast* caseStmt = newAst(AST_STMT_CASE, token, 2, caseLabel, caseBody);

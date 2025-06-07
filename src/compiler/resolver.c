@@ -672,7 +672,7 @@ static void resolveOr(Resolver* resolver, Ast* ast) {
 
 static void resolveParam(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, ast->modifier.isMutable);
-    item->state = SYMBOL_STATE_DEFINED;
+    item->state = (resolver->currentFunction->modifier.isLambda) ? SYMBOL_STATE_ACCESSED : SYMBOL_STATE_DEFINED;
     insertParamType(resolver, ast, astHasChild(ast));
 }
 
