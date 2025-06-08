@@ -6,21 +6,21 @@
 #include "ast.h"
 #include "../vm/string.h"
 
-DEFINE_BUFFER(AstArray, Ast*)
+DEFINE_BUFFER(AstForest, Ast*)
 
 Ast* emptyAst(AstNodeKind kind, Token token) {
     Ast* ast = (Ast*)malloc(sizeof(Ast));
     if (ast != NULL) {
         ast->category = astNodeCategory(kind);
         ast->kind = kind;
-        ast->modifier = astInitModifier();
+        ast->attribute = astInitAttribute();
         ast->token = token;
 
         ast->parent = NULL;
         ast->sibling = NULL;
-        ast->children = (AstArray*)malloc(sizeof(AstArray));
+        ast->children = (AstForest*)malloc(sizeof(AstForest));
 
-        if (ast->children != NULL) AstArrayInit(ast->children);
+        if (ast->children != NULL) AstForestInit(ast->children);
         ast->symtab = NULL;
         ast->type = NULL;
     }
@@ -40,7 +40,7 @@ Ast* newAst(AstNodeKind kind, Token token, int numChildren, ...) {
     return ast;
 }
 
-static void freeAstChildren(AstArray* children, bool freeChildren) {
+static void freeAstChildren(AstForest* children, bool freeChildren) {
     for (int i = 0; i < children->count; i++) {
         freeAst(children->elements[i], freeChildren);
     }
@@ -55,7 +55,7 @@ static bool astOwnsSymbolTable(Ast* ast) {
 void freeAst(Ast* ast, bool freeChildren) {
     if (ast->children != NULL) {
         if (freeChildren) freeAstChildren(ast->children, freeChildren);
-        AstArrayFree(ast->children);
+        AstForestFree(ast->children);
         free(ast->children);
     }
     
@@ -74,7 +74,7 @@ void astAppendChild(Ast* ast, Ast* child) {
     if (child != NULL) child->parent = ast;
     Ast* sibling = astLastChild(ast);
     if (sibling != NULL) sibling->sibling = child;
-    AstArrayAdd(ast->children, child);
+    AstForestAdd(ast->children, child);
 }
 
 Ast* astFirstChild(Ast* ast) {
@@ -171,8 +171,8 @@ static void astOutputExprBinary(Ast* ast, int indentLevel) {
 
 static void astOutputExprCall(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* modifier = ast->modifier.isOptional ? "?" : "";
-    printf("call%s\n", modifier);
+    char* attribute = ast->attribute.isOptional ? "?" : "";
+    printf("call%s\n", attribute);
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
 }
@@ -207,9 +207,9 @@ static void astOutputExprGrouping(Ast* ast, int indentLevel) {
 
 static void astOutputExprInvoke(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* modifier = ast->modifier.isOptional ? "?" : "";
+    char* attribute = ast->attribute.isOptional ? "?" : "";
     char* method = tokenToCString(ast->token);
-    printf("invoke %s.%s\n", modifier, method);
+    printf("invoke %s.%s\n", attribute, method);
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
     free(method);
@@ -261,8 +261,8 @@ static void astOutputExprOr(Ast* ast, int indentLevel) {
 
 static void astOutputExprParam(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* mutable = ast->modifier.isMutable ? "var " : "";
-    char* variadic = ast->modifier.isVariadic ? ".." : "";
+    char* mutable = ast->attribute.isMutable ? "var " : "";
+    char* variadic = ast->attribute.isVariadic ? ".." : "";
     char* name = tokenToCString(ast->token);
 
     printf("param %s%s%s\n", mutable, variadic, name);
@@ -274,9 +274,9 @@ static void astOutputExprParam(Ast* ast, int indentLevel) {
 
 static void astOutputExprPropertyGet(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* modifier = ast->modifier.isOptional ? "?" : "";
+    char* attribute = ast->attribute.isOptional ? "?" : "";
     char* prop = tokenToCString(ast->token);
-    printf("propertyGet %s.%s\n", modifier, prop);
+    printf("propertyGet %s.%s\n", attribute, prop);
     astOutputChild(ast, indentLevel + 1, 0);
     free(prop);
 }
@@ -292,8 +292,8 @@ static void astOutputExprPropertySet(Ast* ast, int indentLevel) {
 
 static void astOutputExprSubscriptGet(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* modifier = ast->modifier.isOptional ? "?" : "";
-    printf("subscriptGet%s\n", modifier);
+    char* attribute = ast->attribute.isOptional ? "?" : "";
+    printf("subscriptGet%s\n", attribute);
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
 }
@@ -343,16 +343,16 @@ static void astOutputExprUnary(Ast* ast, int indentLevel) {
 
 static void astOutputExprVariable(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* modifier = ast->modifier.isMutable ? "var " : "";
+    char* attribute = ast->attribute.isMutable ? "var " : "";
     char* name = tokenToCString(ast->token);
-    printf("%s%s\n", modifier, name);
+    printf("%s%s\n", attribute, name);
     free(name);
 }
 
 static void astOutputExprYield(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* modifier = ast->modifier.isYieldFrom ? " from" : "";
-    printf("yield%s\n", modifier);
+    char* attribute = ast->attribute.isYieldFrom ? " from" : "";
+    printf("yield%s\n", attribute);
     if (astHasChild(ast)) {
         astOutputChild(ast, indentLevel + 1, 0);
     }
@@ -507,8 +507,8 @@ static void astOutputStmtWhile(Ast* ast, int indentLevel) {
 
 static void astOutputStmtYield(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* modifier = ast->modifier.isYieldFrom ? " from" : "";
-    printf("yieldStmt%s\n", modifier);
+    char* attribute = ast->attribute.isYieldFrom ? " from" : "";
+    printf("yieldStmt%s\n", attribute);
 
     if (astHasChild(ast)) {
         astOutputChild(ast, indentLevel + 1, 0);
@@ -525,8 +525,8 @@ static void astOutputDeclClass(Ast* ast, int indentLevel) {
 
 static void astOutputDeclFun(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* async = ast->modifier.isAsync ? "async " : "";
-    char* _void = ast->modifier.isVoid ? "void " : "";
+    char* async = ast->attribute.isAsync ? "async " : "";
+    char* _void = ast->attribute.isVoid ? "void " : "";
     char* funName = tokenToCString(ast->token);
     printf("funDecl %s%s%s", async, _void, funName);
 
@@ -544,9 +544,9 @@ static void astOutputDeclFun(Ast* ast, int indentLevel) {
 
 static void astOutputDeclMethod(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* async = ast->modifier.isAsync ? "async " : "";
-    char* _class = ast->modifier.isClass ? "class " : "";
-    char* _void = ast->modifier.isVoid ? "void " : "";
+    char* async = ast->attribute.isAsync ? "async " : "";
+    char* _class = ast->attribute.isClass ? "class " : "";
+    char* _void = ast->attribute.isVoid ? "void " : "";
     char* methodName = tokenToCString(ast->token);
     printf("methodDecl %s%s%s%s", async, _class, _void, methodName);
 
@@ -589,9 +589,9 @@ static void astOutputDeclTrait(Ast* ast, int indentLevel) {
 
 static void astOutputDeclVar(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* modifier = ast->modifier.isMutable ? "var" : "val";
+    char* attribute = ast->attribute.isMutable ? "var" : "val";
     char* varName = tokenToCString(ast->token);
-    printf("varDecl %s %s\n", modifier, varName);
+    printf("varDecl %s %s\n", attribute, varName);
 
     if (astHasChild(ast)) {
         astOutputChild(ast, indentLevel + 1, 0);

@@ -8,7 +8,7 @@
 #include "token.h"
 
 typedef struct Ast Ast;
-DECLARE_BUFFER(AstArray, Ast*)
+DECLARE_BUFFER(AstForest, Ast*)
 
 typedef enum {
     AST_CATEGORY_SCRIPT,
@@ -89,22 +89,22 @@ typedef struct {
     bool isVariadic;
     bool isVoid;
     bool isYieldFrom;
-} AstModifier;
+} AstAttribute;
 
 struct Ast {
     AstNodeCategory category;
     AstNodeKind kind;
-    AstModifier modifier;
+    AstAttribute attribute;
     Token token;
     Ast* parent;
     Ast* sibling;
-    AstArray* children;
+    AstForest* children;
     SymbolTable* symtab;
     TypeInfo* type;
 };
 
-static inline AstModifier astInitModifier() {
-    return (AstModifier) {
+static inline AstAttribute astInitAttribute() {
+    return (AstAttribute) {
         .isAsync = false,
         .isClass = false,
         .isInitializer = false,

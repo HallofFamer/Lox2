@@ -50,13 +50,13 @@ typedef struct {
     bool isLambda;
     bool isVariadic;
     bool isVoid;
-} CallableTypeModifier;
+} CallableTypeAttribute;
 
 typedef struct {
     TypeInfo baseType;
     TypeInfo* returnType;
     TypeInfoArray* paramTypes;
-    CallableTypeModifier modifier;
+    CallableTypeAttribute attribute;
 } CallableTypeInfo;
 
 typedef struct {
@@ -71,8 +71,8 @@ struct TypeTable {
     TypeEntry* entries;
 };
 
-static inline CallableTypeModifier callableTypeInitModifier() {
-    CallableTypeModifier modifier = {
+static inline CallableTypeAttribute callableTypeInitModifier() {
+    CallableTypeAttribute attribute = {
         .isAsync = false,
         .isClassMethod = false,
         .isGenerator = false,
@@ -82,7 +82,7 @@ static inline CallableTypeModifier callableTypeInitModifier() {
         .isVariadic = false,
         .isVoid = false
     };
-    return modifier;
+    return attribute;
 }
 
 TypeInfo* newTypeInfo(int id, size_t size, TypeCategory category, ObjString* shortName, ObjString* fullName);

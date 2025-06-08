@@ -412,7 +412,7 @@ static Ast* question(Parser* parser, Token token, Ast* left, bool canAssign) {
         expr = nil(parser, parser->previous, left, canAssign);
     }
 
-    if (expr != NULL) expr->modifier.isOptional = true;
+    if (expr != NULL) expr->attribute.isOptional = true;
     return expr;
 }
 
@@ -548,7 +548,7 @@ static Ast* parameter(Parser* parser, const char* message) {
 
     Ast* param = emptyAst(AST_EXPR_PARAM, parser->previous);
     if (type != NULL) astAppendChild(param, type);
-    param->modifier.isMutable = isMutable;
+    param->attribute.isMutable = isMutable;
     return param;
 }
 
@@ -559,7 +559,7 @@ static Ast* parameterList(Parser* parser, Token token) {
     if (match(parser, TOKEN_RIGHT_PAREN)) return params;
     if (match(parser, TOKEN_DOT_DOT)) {
         Ast* param = parameter(parser, "Expect variadic parameter name.");
-        param->modifier.isVariadic = true;
+        param->attribute.isVariadic = true;
         astAppendChild(params, param);
         if (match(parser, TOKEN_COMMA)) parseErrorAtPrevious(parser, "Cannot have more parameters following variadic parameter.");
         return params;
@@ -596,9 +596,9 @@ static Ast* function(Parser* parser, bool isAsync, bool isLambda, bool isVoid) {
     Ast* params = isLambda ? lambdaParameters(parser) : functionParameters(parser);
     Ast* body = block(parser);
     Ast* func = newAst(AST_EXPR_FUNCTION, token, 2, params, body);
-    func->modifier.isAsync = isAsync;
-    func->modifier.isLambda = isLambda;
-    func->modifier.isVoid = isVoid;
+    func->attribute.isAsync = isAsync;
+    func->attribute.isLambda = isLambda;
+    func->attribute.isVoid = isVoid;
     return func;
 }
 
@@ -625,10 +625,10 @@ static Ast* methods(Parser* parser, Token* name) {
         Ast* methodParams = functionParameters(parser);
         Ast* methodBody = block(parser);
         Ast* method = newAst(AST_DECL_METHOD, methodName, 2, methodParams, methodBody);
-        method->modifier.isAsync = isAsync;
-        method->modifier.isClass = isClass;
-        method->modifier.isInitializer = isInitializer;
-        method->modifier.isVoid = isVoid;
+        method->attribute.isAsync = isAsync;
+        method->attribute.isClass = isClass;
+        method->attribute.isInitializer = isInitializer;
+        method->attribute.isVoid = isVoid;
 
         if (hasReturnType) {
             astAppendChild(method, returnType);
@@ -711,7 +711,7 @@ static Ast* yield(Parser* parser, Token token, bool canAssign) {
     bool isYieldFrom = match(parser, TOKEN_FROM);
     Ast* expr = expression(parser);
     Ast* ast = newAst(AST_EXPR_YIELD, token, 1, expr);
-    ast->modifier.isYieldFrom = isYieldFrom;
+    ast->attribute.isYieldFrom = isYieldFrom;
     return ast;
 }
 
@@ -896,18 +896,18 @@ static Ast* forStatement(Parser* parser) {
 
     if (match(parser, TOKEN_LEFT_PAREN)) { 
         Ast* key = identifier(parser, "Expect first variable name after '('.");
-        key->modifier.isMutable = isMutable;
+        key->attribute.isMutable = isMutable;
         astAppendChild(decl, key);
         consume(parser, TOKEN_COMMA, "Expect ',' after first variable declaration.");
         
         Ast* value = identifier(parser, "Expect second variable name after ','.");
-        value->modifier.isMutable = isMutable;
+        value->attribute.isMutable = isMutable;
         astAppendChild(decl, value);
         consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after second variable declaration.");
     }
     else {
         Ast* element = identifier(parser, "Expect variable name after 'var'.");
-        element->modifier.isMutable = isMutable;
+        element->attribute.isMutable = isMutable;
         astAppendChild(decl, element);
     }
 
@@ -1072,7 +1072,7 @@ static Ast* yieldStatement(Parser* parser) {
     Ast* expr = expression(parser);
     consumerTerminator(parser, "Expect semicolon or new line after yield value.");
     Ast* ast = newAst(AST_STMT_YIELD, token, 1, expr);
-    ast->modifier.isYieldFrom = isYieldFrom;
+    ast->attribute.isYieldFrom = isYieldFrom;
     return ast;
 }
 
@@ -1142,7 +1142,7 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     Ast* body = function(parser, isAsync, false, isVoid);
 
     Ast* ast = newAst(AST_DECL_FUN, name, 1, body);
-    ast->modifier.isVoid = isVoid;
+    ast->attribute.isVoid = isVoid;
     if (returnType != NULL) astAppendChild(ast, returnType);
     return ast;
 }
@@ -1177,7 +1177,7 @@ static Ast* varDeclaration(Parser* parser, bool isMutable) {
     consume(parser, TOKEN_IDENTIFIER, "Expect variable name.");
     Token identifier = parser->previous;
     Ast* varDecl = emptyAst(AST_DECL_VAR, identifier);
-    varDecl->modifier.isMutable = isMutable;
+    varDecl->attribute.isMutable = isMutable;
 
     if (match(parser, TOKEN_EQUAL)) {
         Ast* expr = expression(parser);

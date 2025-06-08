@@ -16,7 +16,7 @@ typedef struct {
     bool isLambda;
     bool isVariadic;
     bool isVoid;
-} ResolverModifier;
+} ResolverAttribute;
 
 struct ClassResolver {
     ClassResolver* enclosing;
@@ -37,7 +37,7 @@ struct FunctionResolver {
     int numUpvalues;
     int numGlobals;
     bool hasRequired;
-    ResolverModifier modifier;
+    ResolverAttribute attribute;
 };
 
 static void semanticWarning(Resolver* resolver, const char* format, ...) {
@@ -59,8 +59,8 @@ static void semanticError(Resolver* resolver, const char* format, ...) {
     resolver->hadError = true;
 }
 
-static ResolverModifier resolverInitModifier() {
-    ResolverModifier modifier = {
+static ResolverAttribute resolverInitModifier() {
+    return (ResolverAttribute) {
         .isAsync = false,
         .isClassMethod = false,
         .isInitializer = false,
@@ -69,7 +69,6 @@ static ResolverModifier resolverInitModifier() {
         .isVariadic = false,
         .isVoid = false
     };
-    return modifier;
 }
 
 static void initClassResolver(Resolver* resolver, ClassResolver* _class, Token name, int scopeDepth, BehaviorType type) {
@@ -96,7 +95,7 @@ static void initFunctionResolver(Resolver* resolver, FunctionResolver* function,
     function->hasRequired = false;
 
     function->scopeDepth = scopeDepth;
-    function->modifier = resolverInitModifier();
+    function->attribute = resolverInitModifier();
     resolver->currentFunction = function;
     if (resolver->currentFunction->enclosing != NULL) {
         resolver->isTopLevel = false;
@@ -167,14 +166,14 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token) {
 }
 
 static void setFunctionTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
-    callableType->modifier.isAsync = ast->modifier.isAsync;
-    callableType->modifier.isClassMethod = ast->modifier.isClass;
-    callableType->modifier.isGenerator = false;
-    callableType->modifier.isInitializer = ast->modifier.isInitializer;
-    callableType->modifier.isInstanceMethod = !ast->modifier.isClass;
-    callableType->modifier.isLambda = ast->modifier.isLambda;
-    callableType->modifier.isVariadic = ast->modifier.isVariadic;
-    callableType->modifier.isVoid = ast->modifier.isVoid;
+    callableType->attribute.isAsync = ast->attribute.isAsync;
+    callableType->attribute.isClassMethod = ast->attribute.isClass;
+    callableType->attribute.isGenerator = false;
+    callableType->attribute.isInitializer = ast->attribute.isInitializer;
+    callableType->attribute.isInstanceMethod = !ast->attribute.isClass;
+    callableType->attribute.isLambda = ast->attribute.isLambda;
+    callableType->attribute.isVariadic = ast->attribute.isVariadic;
+    callableType->attribute.isVoid = ast->attribute.isVoid;
 }
 
 static SymbolItem* insertSymbol(Resolver* resolver, Token token, SymbolCategory category, SymbolState state, TypeInfo* type, bool isMutable) {
@@ -200,7 +199,7 @@ static SymbolItem* findThis(Resolver* resolver) {
         }
         else item = newSymbolItem(resolver->thisVar, SYMBOL_CATEGORY_UPVALUE, SYMBOL_STATE_ACCESSED, false);
 
-        if (resolver->currentFunction->modifier.isClassMethod) {
+        if (resolver->currentFunction->attribute.isClassMethod) {
             ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, className);
             item->type = typeTableGet(resolver->vm->typetab, metaclassName);
         }
@@ -401,14 +400,14 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
             CallableTypeInfo* functionType = AS_CALLABLE_TYPE(typeTableGet(resolver->vm->typetab, functionName));  
             if (functionType != NULL && functionType->paramTypes != NULL) {
                 TypeInfoArrayAdd(functionType->paramTypes, ast->type);
-                if (ast->modifier.isVariadic) functionType->modifier.isVariadic = true;
+                if (ast->attribute.isVariadic) functionType->attribute.isVariadic = true;
             }
             break;
         }
         case SYMBOL_SCOPE_METHOD: {
             if (!resolver->currentClass->isAnonymous) {
                 TypeInfo* baseType = getTypeForSymbol(resolver, resolver->currentClass->name);
-                if (resolver->currentFunction->modifier.isClassMethod) {
+                if (resolver->currentFunction->attribute.isClassMethod) {
                     ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, baseType->fullName);
                     baseType = typeTableGet(resolver->vm->typetab, metaclassName);
                 }
@@ -418,7 +417,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
                 CallableTypeInfo* methodType = AS_CALLABLE_TYPE(typeTableGet(behaviorType->methods, methodName));        
                 if (methodType != NULL && methodType->paramTypes != NULL) {
                     TypeInfoArrayAdd(methodType->paramTypes, ast->type);
-                    if (ast->modifier.isVariadic) methodType->modifier.isVariadic = true;
+                    if (ast->attribute.isVariadic) methodType->attribute.isVariadic = true;
                 }
             }
             break;
@@ -459,12 +458,12 @@ static void block(Resolver* resolver, Ast* ast) {
 static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) {
     FunctionResolver functionResolver;
     initFunctionResolver(resolver, &functionResolver, ast->token, resolver->currentFunction->scopeDepth + 1);
-    functionResolver.modifier.isAsync = isAsync;
-    functionResolver.modifier.isClassMethod = ast->modifier.isClass;
-    functionResolver.modifier.isInitializer = ast->modifier.isInitializer;
-    functionResolver.modifier.isInstanceMethod = !ast->modifier.isClass;
-    functionResolver.modifier.isLambda = isLambda;
-    functionResolver.modifier.isVoid = ast->modifier.isVoid;
+    functionResolver.attribute.isAsync = isAsync;
+    functionResolver.attribute.isClassMethod = ast->attribute.isClass;
+    functionResolver.attribute.isInitializer = ast->attribute.isInitializer;
+    functionResolver.attribute.isInstanceMethod = !ast->attribute.isClass;
+    functionResolver.attribute.isLambda = isLambda;
+    functionResolver.attribute.isVoid = ast->attribute.isVoid;
 
     SymbolScope scope = (ast->kind == AST_DECL_METHOD) ? SYMBOL_SCOPE_METHOD : SYMBOL_SCOPE_FUNCTION;
     beginScope(resolver, ast, scope);
@@ -519,10 +518,10 @@ static void yield(Resolver* resolver, Ast* ast) {
     if (resolver->isTopLevel) {
         semanticError(resolver, "Cannot use 'yield' from top-level code.");
     }
-    else if (resolver->currentFunction->modifier.isInitializer) {
+    else if (resolver->currentFunction->attribute.isInitializer) {
         semanticError(resolver, "Cannot use 'yield' from an initializer.");
     }
-    else if (resolver->currentFunction->modifier.isAsync) {
+    else if (resolver->currentFunction->attribute.isAsync) {
         semanticError(resolver, "Cannot use 'yield' from async functions/methods.");
     }
 
@@ -533,9 +532,9 @@ static void yield(Resolver* resolver, Ast* ast) {
 
 static void await(Resolver* resolver, Ast* ast) {
     if (resolver->isTopLevel) {
-        resolver->currentFunction->modifier.isAsync = true;
+        resolver->currentFunction->attribute.isAsync = true;
     }
-    else if (!resolver->currentFunction->modifier.isAsync) {
+    else if (!resolver->currentFunction->attribute.isAsync) {
         semanticError(resolver, "Cannot use 'await' unless in top level code or inside async functions/methods.");
     }
     resolveChild(resolver, ast, 0);
@@ -601,7 +600,7 @@ static void resolveDictionary(Resolver* resolver, Ast* ast) {
 }
 
 static void resolveFunction(Resolver* resolver, Ast* ast) {
-    function(resolver, ast, ast->modifier.isLambda, ast->modifier.isAsync);
+    function(resolver, ast, ast->attribute.isLambda, ast->attribute.isAsync);
 }
 
 static void resolveGrouping(Resolver* resolver, Ast* ast) {
@@ -671,8 +670,8 @@ static void resolveOr(Resolver* resolver, Ast* ast) {
 }
 
 static void resolveParam(Resolver* resolver, Ast* ast) {
-    SymbolItem* item = declareVariable(resolver, ast, ast->modifier.isMutable);
-    item->state = (resolver->currentFunction->modifier.isLambda) ? SYMBOL_STATE_ACCESSED : SYMBOL_STATE_DEFINED;
+    SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
+    item->state = (resolver->currentFunction->attribute.isLambda) ? SYMBOL_STATE_ACCESSED : SYMBOL_STATE_DEFINED;
     insertParamType(resolver, ast, astHasChild(ast));
 }
 
@@ -906,7 +905,7 @@ static void resolveForStatement(Resolver* resolver, Ast* ast) {
     for (int i = 0; i < decl->children->count; i++) {
         Ast* varDecl = astGetChild(decl, i);
         varDecl->symtab = decl->symtab;
-        SymbolItem* item = declareVariable(resolver, varDecl, varDecl->modifier.isMutable);
+        SymbolItem* item = declareVariable(resolver, varDecl, varDecl->attribute.isMutable);
         item->state = SYMBOL_STATE_DEFINED;
     }
 
@@ -933,11 +932,11 @@ static void resolveReturnStatement(Resolver* resolver, Ast* ast) {
     if (resolver->isTopLevel) {
         semanticError(resolver, "Cannot use 'return' from top-level code.");
     }
-    else if (resolver->currentFunction->modifier.isInitializer) {
+    else if (resolver->currentFunction->attribute.isInitializer) {
         semanticError(resolver, "Cannot use 'return' from an initializer.");
     }
     else if (astHasChild(ast)) {
-        if (resolver->currentFunction->modifier.isVoid) {
+        if (resolver->currentFunction->attribute.isVoid) {
             semanticError(resolver, "Cannot use 'return' from a void function/method.");
         }
         resolveChild(resolver, ast, 0);
@@ -1121,7 +1120,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
 
     if (!resolver->currentClass->isAnonymous) {
         BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
-        if (ast->modifier.isClass) {
+        if (ast->attribute.isClass) {
             _class = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, _class->baseType.fullName)));
         }
 
@@ -1133,7 +1132,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
         }
     }
 
-    function(resolver, ast, false, ast->modifier.isAsync);
+    function(resolver, ast, false, ast->attribute.isAsync);
     item->state = SYMBOL_STATE_ACCESSED;
 }
 
@@ -1159,12 +1158,12 @@ static void resolveTraitDeclaration(Resolver* resolver, Ast* ast) {
 }
 
 static void resolveVarDeclaration(Resolver* resolver, Ast* ast) {
-    SymbolItem* item = declareVariable(resolver, ast, ast->modifier.isMutable);
+    SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
     if (astHasChild(ast)) {
         resolveChild(resolver, ast, 0);
         defineVariable(resolver, ast);
     }
-    else if (!ast->modifier.isMutable) {
+    else if (!ast->attribute.isMutable) {
         semanticError(resolver, "Immutable variable must be initialized upon declaration.");
     }
 }

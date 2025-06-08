@@ -102,8 +102,8 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
     va_start(args, function);
     TypeInfo* returnType = va_arg(args, TypeInfo*);
     CallableTypeInfo* functionType = newCallableTypeInfo(vm->typetab->count + 1, TYPE_CATEGORY_FUNCTION, functionName, returnType);
-    functionType->modifier.isAsync = isAsync;
-    functionType->modifier.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
+    functionType->attribute.isAsync = isAsync;
+    functionType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
     for (int i = 0; i < arity; i++) {
         TypeInfo* paramType = va_arg(args, TypeInfo*);
@@ -127,11 +127,11 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     TypeInfo* returnType = va_arg(args, TypeInfo*);
     CallableTypeInfo* methodType = newCallableTypeInfo(behaviorType->methods->count + 1, TYPE_CATEGORY_METHOD, methodName, returnType);
-    methodType->modifier.isAsync = isAsync;
-    methodType->modifier.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
+    methodType->attribute.isAsync = isAsync;
+    methodType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
     if (arity < 0) {
-        methodType->modifier.isVariadic = true;
+        methodType->attribute.isVariadic = true;
         TypeInfo* paramType = va_arg(args, TypeInfo*);
         TypeInfoArrayAdd(methodType->paramTypes, paramType);
     }

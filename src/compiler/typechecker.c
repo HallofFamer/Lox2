@@ -121,7 +121,7 @@ static bool hasAstType(TypeChecker* typeChecker, Ast* ast, const char* name) {
 }
 
 static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast* ast, CallableTypeInfo* callableType) {
-    if (!callableType->modifier.isVariadic) {
+    if (!callableType->attribute.isVariadic) {
         if (callableType->paramTypes->count != ast->children->count) {
             typeError(typeChecker, "%s expects to receive a total of %d arguments but gets %d.", 
                 calleeDesc, callableType->paramTypes->count, ast->children->count);
@@ -151,7 +151,7 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
 
 static void checkMethodSignatures(TypeChecker* typeChecker, CallableTypeInfo* subclassMethod, CallableTypeInfo* superclassMethod) {
     ObjString* className = createSymbol(typeChecker, typeChecker->currentClass->name);
-    if (!subclassMethod->modifier.isVoid && superclassMethod->modifier.isVoid) {
+    if (!subclassMethod->attribute.isVoid && superclassMethod->attribute.isVoid) {
         typeError(typeChecker, "Method %s::%s expects return type to be void.", className->chars, subclassMethod->baseType.shortName->chars);
     }
     else if (!isEqualType(subclassMethod->returnType, superclassMethod->returnType)) {
@@ -528,7 +528,7 @@ static void yield(TypeChecker* typeChecker, Ast* ast) {
     if (astHasChild(ast)) {
         typeCheckChild(typeChecker, ast, 0);
         Ast* child = astGetChild(ast, 0);
-        if (ast->modifier.isYieldFrom && !isSubtypeOfType(child->type, getNativeType(typeChecker->vm, "Generator"))) {
+        if (ast->attribute.isYieldFrom && !isSubtypeOfType(child->type, getNativeType(typeChecker->vm, "Generator"))) {
             typeError(typeChecker, "'yield from' expects expression to be an instance of Generator but gets %s.", child->type->shortName->chars);
         }
     }
@@ -600,7 +600,7 @@ static void typeCheckDictionary(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckFunction(TypeChecker* typeChecker, Ast* ast) {
     ObjString* name = copyStringPerma(typeChecker->vm, ast->token.start, ast->token.length);
     TypeInfo* calleeType = typeTableGet(typeChecker->vm->typetab, name);
-    function(typeChecker, ast, calleeType == NULL ? NULL : AS_CALLABLE_TYPE(calleeType), ast->modifier.isAsync, ast->modifier.isClass);
+    function(typeChecker, ast, calleeType == NULL ? NULL : AS_CALLABLE_TYPE(calleeType), ast->attribute.isAsync, ast->attribute.isClass);
 }
 
 static void typeCheckGrouping(TypeChecker* typeChecker, Ast* ast) {
@@ -1044,7 +1044,7 @@ static void typeCheckMethodDeclaration(TypeChecker* typeChecker, Ast* ast) {
 
     if (!typeChecker->currentClass->isAnonymous) {
         BehaviorTypeInfo* classType = NULL;
-        if (ast->modifier.isClass) {
+        if (ast->attribute.isClass) {
             ObjString* className = getClassFullName(typeChecker->vm, createSymbol(typeChecker, typeChecker->currentClass->name), typeChecker->currentNamespace);
             ObjString* metaclassName = getMetaclassNameFromClass(typeChecker->vm, className);
             classType = AS_BEHAVIOR_TYPE(typeTableGet(typeChecker->vm->typetab, metaclassName));
@@ -1052,7 +1052,7 @@ static void typeCheckMethodDeclaration(TypeChecker* typeChecker, Ast* ast) {
         else classType = typeChecker->currentClass->type;
 
         CallableTypeInfo* methodType = AS_CALLABLE_TYPE(typeTableGet(classType->methods, name));
-        function(typeChecker, ast, methodType, ast->modifier.isAsync, ast->modifier.isClass);
+        function(typeChecker, ast, methodType, ast->attribute.isAsync, ast->attribute.isClass);
     }
 }
 
@@ -1076,7 +1076,7 @@ static void typeCheckVarDeclaration(TypeChecker* typeChecker, Ast* ast) {
     SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
     if (astHasChild(ast)) {
         typeCheckChild(typeChecker, ast, 0);
-        if (!ast->modifier.isMutable) inferAstTypeFromChild(ast, 0, item);
+        if (!ast->attribute.isMutable) inferAstTypeFromChild(ast, 0, item);
     }
 }
 
@@ -1136,7 +1136,7 @@ void typeCheckChild(TypeChecker* typeChecker, Ast* ast, int index) {
 
 void typeCheck(TypeChecker* typeChecker, Ast* ast) {
     FunctionTypeChecker functionTypeChecker;
-    initFunctionTypeChecker(typeChecker, &functionTypeChecker, syntheticToken("script"), NULL, ast->modifier.isAsync, false);
+    initFunctionTypeChecker(typeChecker, &functionTypeChecker, syntheticToken("script"), NULL, ast->attribute.isAsync, false);
     typeCheckAst(typeChecker, ast);
 
     endFunctionTypeChecker(typeChecker);

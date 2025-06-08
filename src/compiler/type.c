@@ -69,7 +69,7 @@ CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* 
     if (callableType != NULL) {
         callableType->returnType = returnType;
         callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->modifier = callableTypeInitModifier();
+        callableType->attribute = callableTypeInitModifier();
         if (callableType->paramTypes != NULL) TypeInfoArrayInit(callableType->paramTypes);
     }
     return callableType;
@@ -80,7 +80,7 @@ CallableTypeInfo* newCallableTypeInfoWithParams(int id, TypeCategory category, O
     if (callableType != NULL) {
         callableType->returnType = returnType;
         callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->modifier = callableTypeInitModifier();
+        callableType->attribute = callableTypeInitModifier();
 
         if (callableType->paramTypes != NULL) {
             TypeInfoArrayInit(callableType->paramTypes);
@@ -255,10 +255,10 @@ static void typeTableOutputMethod(TypeTable* methods) {
         TypeEntry* entry = &methods->entries[i];
         if (entry != NULL && entry->key != NULL) {
             CallableTypeInfo* method = AS_CALLABLE_TYPE(entry->value);
-            printf("      %s", method->modifier.isAsync ? "async " : "");
+            printf("      %s", method->attribute.isAsync ? "async " : "");
 
             if (method->returnType == NULL) printf("dynamic ");
-            else if (method->modifier.isVoid) printf("void ");
+            else if (method->attribute.isVoid) printf("void ");
             else printf("%s ", method->returnType->shortName->chars);
             printf("%s(", entry->key->chars);
 
@@ -294,7 +294,7 @@ static void typeTableOutputBehavior(BehaviorTypeInfo* behavior) {
 static void typeTableOutputFunction(CallableTypeInfo* function) {
     printf("    signature: ");
     if (function->returnType == NULL) printf("dynamic ");
-    else if (function->modifier.isVoid) printf("void ");
+    else if (function->attribute.isVoid) printf("void ");
     else printf("%s ", function->returnType->shortName->chars);
     printf("%s(", function->baseType.shortName->chars);
 

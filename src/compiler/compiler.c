@@ -595,7 +595,7 @@ static void yield(Compiler* compiler, Ast* ast) {
     if (!astHasChild(ast)) emitBytes(compiler, OP_NIL, OP_YIELD);
     else {
         compileChild(compiler, ast, 0);
-        emitByte(compiler, ast->modifier.isYieldFrom ? OP_YIELD_FROM : OP_YIELD);
+        emitByte(compiler, ast->attribute.isYieldFrom ? OP_YIELD_FROM : OP_YIELD);
     }
 }
 
@@ -680,7 +680,7 @@ static void compileCall(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
     Ast* args = astGetChild(ast, 1);
     uint8_t argCount = argumentList(compiler, args);
-    OpCode opCode = ast->modifier.isOptional ? OP_OPTIONAL_CALL : OP_CALL;
+    OpCode opCode = ast->attribute.isOptional ? OP_OPTIONAL_CALL : OP_CALL;
     emitBytes(compiler, opCode, argCount);
 }
 
@@ -701,8 +701,8 @@ static void compileDictionary(Compiler* compiler, Ast* ast) {
 }
 
 static void compileFunction(Compiler* compiler, Ast* ast) {
-    CompileType type = ast->modifier.isLambda ? COMPILE_TYPE_LAMBDA : COMPILE_TYPE_FUNCTION;
-    bool isAsync = ast->modifier.isAsync;
+    CompileType type = ast->attribute.isLambda ? COMPILE_TYPE_LAMBDA : COMPILE_TYPE_FUNCTION;
+    bool isAsync = ast->attribute.isAsync;
     function(compiler, type, ast, isAsync);
 }
 
@@ -746,7 +746,7 @@ static void compileInvoke(Compiler* compiler, Ast* ast) {
     uint8_t methodIndex = identifierConstant(compiler, &ast->token);
     uint8_t argCount = argumentList(compiler, args);
 
-    OpCode opCode = ast->modifier.isOptional ? OP_OPTIONAL_INVOKE : OP_INVOKE;
+    OpCode opCode = ast->attribute.isOptional ? OP_OPTIONAL_INVOKE : OP_INVOKE;
     emitBytes(compiler, opCode, methodIndex);
     emitByte(compiler, argCount);
 }
@@ -783,16 +783,16 @@ static void compileOr(Compiler* compiler, Ast* ast) {
 }
 
 static void compileParam(Compiler* compiler, Ast* ast) {
-    if (ast->modifier.isVariadic) compiler->function->arity = -1;
+    if (ast->attribute.isVariadic) compiler->function->arity = -1;
     else compiler->function->arity++;
     uint8_t constant = makeVariable(compiler, &ast->token, "Expect parameter name.");
-    defineVariable(compiler, constant, ast->modifier.isMutable);
+    defineVariable(compiler, constant, ast->attribute.isMutable);
 }
 
 static void compilePropertyGet(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
     uint8_t index = identifierConstant(compiler, &ast->token);
-    OpCode opCode = ast->modifier.isOptional ? OP_GET_PROPERTY_OPTIONAL : OP_GET_PROPERTY;
+    OpCode opCode = ast->attribute.isOptional ? OP_GET_PROPERTY_OPTIONAL : OP_GET_PROPERTY;
     emitBytes(compiler, opCode, index);
 }
 
@@ -806,7 +806,7 @@ static void compilePropertySet(Compiler* compiler, Ast* ast) {
 static void compileSubscriptGet(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
     compileChild(compiler, ast, 1);
-    OpCode opCode = ast->modifier.isOptional ? OP_GET_SUBSCRIPT_OPTIONAL : OP_GET_SUBSCRIPT;
+    OpCode opCode = ast->attribute.isOptional ? OP_GET_SUBSCRIPT_OPTIONAL : OP_GET_SUBSCRIPT;
     emitByte(compiler, opCode);
 }
 
@@ -1186,7 +1186,7 @@ static void compileWhileStatement(Compiler* compiler, Ast* ast) {
 
 static void compileYieldStatement(Compiler* compiler, Ast* ast) {
     yield(compiler, ast);
-    if (!ast->modifier.isYieldFrom) emitByte(compiler, OP_POP);
+    if (!ast->attribute.isYieldFrom) emitByte(compiler, OP_POP);
 }
 
 static void compileStatement(Compiler* compiler, Ast* ast) {
@@ -1270,9 +1270,9 @@ static void compileFunDeclaration(Compiler* compiler, Ast* ast) {
 
 static void compileMethodDeclaration(Compiler* compiler, Ast* ast) {
     uint8_t index = identifierConstant(compiler, &ast->token);
-    CompileType type = ast->modifier.isInitializer ? COMPILE_TYPE_INITIALIZER : COMPILE_TYPE_METHOD;
-    function(compiler, type, ast, ast->modifier.isAsync);
-    emitBytes(compiler, ast->modifier.isClass ? OP_CLASS_METHOD : OP_INSTANCE_METHOD, index);
+    CompileType type = ast->attribute.isInitializer ? COMPILE_TYPE_INITIALIZER : COMPILE_TYPE_METHOD;
+    function(compiler, type, ast, ast->attribute.isAsync);
+    emitBytes(compiler, ast->attribute.isClass ? OP_CLASS_METHOD : OP_INSTANCE_METHOD, index);
 }
 
 static void compileNamespaceDeclaration(Compiler* compiler, Ast* ast) {
@@ -1300,7 +1300,7 @@ static void compileVarDeclaration(Compiler* compiler, Ast* ast) {
     uint8_t index = makeVariable(compiler, &ast->token, "Expect variable name.");
     if (astHasChild(ast)) compileChild(compiler, ast, 0);
     else emitByte(compiler, OP_NIL);
-    defineVariable(compiler, index, ast->modifier.isMutable);
+    defineVariable(compiler, index, ast->attribute.isMutable);
 }
 
 static void compileDeclaration(Compiler* compiler, Ast* ast) {
