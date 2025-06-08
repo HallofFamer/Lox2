@@ -63,7 +63,7 @@ println("Convert Unicode string to code point array: \n${utf8String3.toCodePoint
 println("")
 
 println("Iterate over combined unicode string: ")
-for(var codePoint : utf8String3) {
+for(val codePoint : utf8String3) {
     println(codePoint)
 }
 println("")

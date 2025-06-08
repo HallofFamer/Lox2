@@ -4,7 +4,7 @@ using clox.std.util.Timer
 
 val promise = Promise({|fulfill, reject| 
     Timer.timeout({ 
-        fulfill(1);
+        fulfill(1)
     }, 500)
 });
 

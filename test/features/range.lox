@@ -11,7 +11,7 @@ println(range.getAt(3))
 println("")
 
 println("Looping through Range: ")
-for(var n : range){ 
+for(val n : range){ 
     println(n)
 }
 println("")

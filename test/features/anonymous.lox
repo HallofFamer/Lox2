@@ -37,7 +37,7 @@ println(listenerClass.superclass())
 println("")
 
 println("Creating an instance of anonymous class: ")
-var listener = listenerClass()
+val listener = listenerClass()
 println(listenerClass)
 println("Calling method listen on object listener: ")
 listener.listen(8080)

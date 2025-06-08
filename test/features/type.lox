@@ -6,7 +6,7 @@ Number sum(Number a, Int b) {
 
 Number sum2(.. Number nums) { 
     var result = 0
-    for (var num : nums) { 
+    for (val num : nums) { 
         result = result + num
     }
     return result 

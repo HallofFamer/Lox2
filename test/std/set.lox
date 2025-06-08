@@ -30,6 +30,6 @@ set.remove(3.5)
 println(set.toString())
 
 println("Looping through elements in set...")
-for(var element : set){
+for(val element : set){
     println("Element: " + element.toString())
 }
