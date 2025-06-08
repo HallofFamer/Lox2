@@ -115,6 +115,5 @@ Value assertArgIsRange(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsString(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsTimer(VM * vm, const char* method, Value* args, int index);
 Value assertIndexWithinBounds(VM* vm, const char* method, int value, int min, int max, int index);
-void raiseError(VM* vm, const char* message);
 
 #endif // !clox_assert_h

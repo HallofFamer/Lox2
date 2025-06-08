@@ -191,8 +191,3 @@ Value assertIndexWithinBounds(VM* vm, const char* method, int value, int min, in
     }
     RETURN_NIL;
 }
-
-void raiseError(VM* vm, const char* message) {
-    runtimeError(vm, message);
-    exit(70);
-}

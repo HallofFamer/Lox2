@@ -1069,7 +1069,9 @@ InterpretResult run(VM* vm) {
                 }
 
                 if (!invoke(vm, method, argCount)) {
-                    if (IS_NIL(receiver)) runtimeError(vm, "Calling undefined method '%s' on nil.", method->chars);
+                    if (IS_NIL(receiver)) {
+                        throwNativeException(vm, "clox.std.lang.MethodNotFoundException", "Calling undefined method '%s' on nil.", method->chars);
+                    }
                     return INTERPRET_RUNTIME_ERROR;
                 }
                 LOAD_FRAME();

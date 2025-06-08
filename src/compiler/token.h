@@ -2,7 +2,11 @@
 #ifndef clox_token_h
 #define clox_token_h
 
+#include "../common/buffer.h"
 #include "../common/common.h"
+
+typedef struct Token Token;
+DECLARE_BUFFER(TokenStream, Token*)
 
 typedef enum {
     TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN,
@@ -33,12 +37,12 @@ typedef enum {
     TOKEN_ERROR, TOKEN_EMPTY, TOKEN_NEW_LINE, TOKEN_EOF
 } TokenSymbol;
 
-typedef struct {
+struct Token {
     TokenSymbol type;
     const char* start;
     int length;
     int line;
-} Token;
+};
 
 Token syntheticToken(const char* text);
 bool tokensEqual(Token* token, Token* token2);

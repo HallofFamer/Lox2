@@ -1832,8 +1832,8 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->objectClass, Object, getField, 1, RETURN_TYPE(Object), PARAM_TYPE(String));
     DEF_METHOD(vm->objectClass, Object, hasField, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
     DEF_METHOD(vm->objectClass, Object, hashCode, 0, RETURN_TYPE(Int));
-    DEF_METHOD(vm->objectClass, Object, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
-    DEF_METHOD(vm->objectClass, Object, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->objectClass, Object, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
+    DEF_METHOD(vm->objectClass, Object, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Class));
     DEF_METHOD(vm->objectClass, Object, objectID, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->objectClass, Object, toString, 0, RETURN_TYPE(String));
     DEF_OPERATOR(vm->objectClass, Object, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));

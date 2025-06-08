@@ -5,6 +5,8 @@
 #include "token.h"
 #include "../common/buffer.h"
 
+DEFINE_BUFFER(TokenStream, Token*)
+
 const char* tokenNames[] = {
     [TOKEN_LEFT_PAREN]     = "TOKEN_LEFT_PAREN",
     [TOKEN_RIGHT_PAREN]    = "TOKEN_RIGHT_PAREN",
