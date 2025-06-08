@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-WORKDIR Lox2-2.0.0
+WORKDIR Lox2-2.0.1
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -21,4 +21,4 @@ RUN cd Lox2 \
 
 CMD ["Lox2"]
 
-# To run the REPL from container, use this command: docker run -w /Lox2-2.0.0/Lox2 -i -t lox2:ubuntu
+# To run the REPL from container, use this command: docker run -w /Lox2-2.0.1/Lox2 -i -t lox2:ubuntu

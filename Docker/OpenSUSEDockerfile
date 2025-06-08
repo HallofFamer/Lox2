@@ -1,6 +1,6 @@
 FROM opensuse/leap:latest
 
-WORKDIR Lox2-2.0.0
+WORKDIR Lox2-2.0.1
 
 RUN zypper install -y git gcc-c++ cmake libcurl-devel libuv1.dev
 
@@ -15,4 +15,4 @@ RUN cd Lox2 \
 
 CMD ["Lox2"]
 
-# To run the REPL from container, use this command: docker run -w /Lox2-2.0.0/Lox2 -i -t lox2:opensuse
+# To run the REPL from container, use this command: docker run -w /Lox2-2.0.1/Lox2 -i -t lox2:opensuse
