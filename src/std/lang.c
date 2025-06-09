@@ -1995,7 +1995,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->numberClass, Number, sqrt, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, step, 3, RETURN_TYPE(void), PARAM_TYPE(Number), PARAM_TYPE(Number), PARAM_TYPE(Object));
     DEF_METHOD(vm->numberClass, Number, tan, 0, RETURN_TYPE(Number));
-    DEF_METHOD(vm->numberClass, Number, toInt, 0, RETURN_TYPE(Number));
+    DEF_METHOD(vm->numberClass, Number, toInt, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->numberClass, Number, toString, 0, RETURN_TYPE(String));
     DEF_OPERATOR(vm->numberClass, Number, ==, __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(vm->numberClass, Number, >, __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
@@ -2025,7 +2025,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->intClass, Int, objectID, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->intClass, Int, timesRepeat, 1, RETURN_TYPE(void));
     DEF_METHOD(vm->intClass, Int, toBinary, 0, RETURN_TYPE(String));
-    DEF_METHOD(vm->intClass, Int, toFloat, 0, RETURN_TYPE(Int));
+    DEF_METHOD(vm->intClass, Int, toFloat, 0, RETURN_TYPE(Float));
     DEF_METHOD(vm->intClass, Int, toHexadecimal, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toOctal, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toString, 0, RETURN_TYPE(String));
