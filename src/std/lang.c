@@ -1857,9 +1857,9 @@ void registerLangPackage(VM* vm) {
     DEF_INTERCEPTOR(vm->classClass, Class, INTERCEPTOR_INIT, __init__, 3, RETURN_TYPE(Class), PARAM_TYPE(Object), PARAM_TYPE(Class), PARAM_TYPE(Object));
     DEF_METHOD(vm->classClass, Class, getField, 1, RETURN_TYPE(Object), PARAM_TYPE(String));
     DEF_METHOD(vm->classClass, Class, hasField, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
-    DEF_METHOD(vm->classClass, Class, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->classClass, Class, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->classClass, Class, isClass, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(vm->classClass, Class, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->classClass, Class, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Class));
     DEF_METHOD(vm->classClass, Class, superclass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->classClass, Class, toString, 0, RETURN_TYPE(String));
     DEF_OPERATOR(vm->classClass, Class, (), __invoke__, -1, RETURN_TYPE(Object));
@@ -1867,9 +1867,9 @@ void registerLangPackage(VM* vm) {
     inheritSuperclass(vm, vm->metaclassClass, behaviorClass);
     DEF_METHOD(vm->metaclassClass, Metaclass, getClass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->metaclassClass, Metaclass, getClassName, 0, RETURN_TYPE(String));
-    DEF_METHOD(vm->metaclassClass, Metaclass, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->metaclassClass, Metaclass, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->metaclassClass, Metaclass, isMetaclass, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(vm->metaclassClass, Metaclass, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->metaclassClass, Metaclass, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Class));
     DEF_METHOD(vm->metaclassClass, Metaclass, namedInstance, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->metaclassClass, Metaclass, superclass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->metaclassClass, Metaclass, toString, 0, RETURN_TYPE(String));
@@ -1926,9 +1926,9 @@ void registerLangPackage(VM* vm) {
     DEF_INTERCEPTOR(vm->traitClass, Trait, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(Trait), PARAM_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->traitClass, Trait, getClass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->traitClass, Trait, getClassName, 0, RETURN_TYPE(String));
-    DEF_METHOD(vm->traitClass, Trait, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->traitClass, Trait, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->traitClass, Trait, isTrait, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(vm->traitClass, Trait, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->traitClass, Trait, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Class));
     DEF_METHOD(vm->traitClass, Trait, superclass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->traitClass, Trait, toString, 0, RETURN_TYPE(String));
 

@@ -2,6 +2,8 @@
 #ifndef clox_buffer_h
 #define clox_buffer_h
 
+#include <stdlib.h>
+
 #include "common.h"
 
 #define DECLARE_BUFFER(name, type) \
