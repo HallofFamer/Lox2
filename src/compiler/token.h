@@ -50,6 +50,7 @@ bool tokenIsLiteral(Token token);
 bool tokenIsOperator(Token token);
 char* tokenToCString(Token token);
 void outputToken(Token token);
+void outputTokenStream(TokenStream* tokens);
 
 static inline Token emptyToken() {
     return syntheticToken("");

@@ -143,3 +143,9 @@ char* tokenToCString(Token token) {
 void outputToken(Token token) {
     printf("Scanning Token type %s at line %d\n", tokenNames[token.type], token.line);
 }
+
+void outputTokenStream(TokenStream* tokens) {
+    for (int i = 0; i < tokens->count; i++) {
+        outputToken(*tokens->elements[i]);
+    }
+}
