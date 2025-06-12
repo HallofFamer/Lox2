@@ -372,3 +372,24 @@ Token scanToken(Lexer* lexer) {
 
     return errorToken(lexer, "Unexpected character.");
 }
+
+TokenStream* lex(Lexer* lexer) {
+    TokenStream* tokens = (TokenStream*)malloc(sizeof(TokenStream));
+    if (tokens == NULL) {
+        fprintf(stderr, "Not enough memory to allocate for token streams in lexer.");
+        exit(1);
+    }
+    TokenStreamInit(tokens);
+
+    const char* source = lexer->start;
+    while (!isAtEnd(lexer)) {
+        Token token = scanToken(lexer);
+        TokenStreamAdd(tokens, &token);
+    }
+    Token eofToken = makeToken(lexer, TOKEN_EOF);
+    TokenStreamAdd(tokens, &eofToken);
+
+    outputTokenStream(tokens);
+    lexer->start = source;
+    return tokens;
+}

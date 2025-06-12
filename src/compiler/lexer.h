@@ -14,5 +14,6 @@ typedef struct {
 
 void initLexer(Lexer* lexer, const char* source, bool debugToken);
 Token scanToken(Lexer* lexer);
+TokenStream* lex(Lexer* lexer);
 
 #endif // !clox_lexer_h
