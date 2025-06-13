@@ -5,8 +5,6 @@
 #include "token.h"
 #include "../common/buffer.h"
 
-DEFINE_BUFFER(TokenStream, Token*)
-
 const char* tokenNames[] = {
     [TOKEN_LEFT_PAREN]     = "TOKEN_LEFT_PAREN",
     [TOKEN_RIGHT_PAREN]    = "TOKEN_RIGHT_PAREN",
@@ -144,8 +142,42 @@ void outputToken(Token token) {
     printf("Scanning Token type %s at line %d\n", tokenNames[token.type], token.line);
 }
 
-void outputTokenStream(TokenStream* tokens) {
-    for (int i = 0; i < tokens->count; i++) {
-        outputToken(*tokens->elements[i]);
+void initTokenStream(TokenStream* tokenStream) {
+    tokenStream->elements = NULL;
+    tokenStream->capacity = 0;
+    tokenStream->count = 0;
+}
+
+void freeTokenStream(TokenStream* tokenStream) {
+    free(tokenStream->elements); 
+    free(tokenStream);
+}
+
+void tokenStreamAdd(TokenStream* tokenStream, Token token) {
+    if (tokenStream->capacity < tokenStream->count + 1) {
+        int oldCapacity = tokenStream->capacity; 
+        tokenStream->capacity = bufferGrowCapacity(oldCapacity); 
+        Token* elements = (Token*)realloc(tokenStream->elements, sizeof(Token) * tokenStream->capacity); 
+        
+        if (elements != NULL) tokenStream->elements = elements; 
+        else exit(1);
+    } 
+    
+    tokenStream->elements[tokenStream->count] = token; 
+    tokenStream->count++;
+}
+
+Token tokenStreamDelete(TokenStream* tokenStream, int index) {
+    Token token = tokenStream->elements[index]; 
+    for (int i = index; i < tokenStream->count - 1; i++) {
+        tokenStream->elements[i] = tokenStream->elements[i + 1];
+    } 
+    tokenStream->count--; 
+    return token;
+}
+
+void outputTokenStream(TokenStream* tokenStream) {
+    for (int i = 0; i < tokenStream->count; i++) {
+        outputToken(tokenStream->elements[i]);
     }
 }

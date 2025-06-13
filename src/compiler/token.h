@@ -5,9 +5,6 @@
 #include "../common/buffer.h"
 #include "../common/common.h"
 
-typedef struct Token Token;
-DECLARE_BUFFER(TokenStream, Token*)
-
 typedef enum {
     TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN,
     TOKEN_LEFT_BRACKET, TOKEN_RIGHT_BRACKET,
@@ -37,12 +34,18 @@ typedef enum {
     TOKEN_ERROR, TOKEN_EMPTY, TOKEN_NEW_LINE, TOKEN_EOF
 } TokenSymbol;
 
-struct Token {
+typedef struct {
     TokenSymbol type;
     const char* start;
     int length;
     int line;
-};
+} Token;
+
+typedef struct {
+    Token* elements;
+    int capacity;
+    int count;
+} TokenStream;
 
 Token syntheticToken(const char* text);
 bool tokensEqual(Token* token, Token* token2);
@@ -50,6 +53,10 @@ bool tokenIsLiteral(Token token);
 bool tokenIsOperator(Token token);
 char* tokenToCString(Token token);
 void outputToken(Token token);
+void initTokenStream(TokenStream* TokenStream);
+void freeTokenStream(TokenStream* TokenStream);
+void tokenStreamAdd(TokenStream* tokenStream, Token token);
+Token tokenStreamDelete(TokenStream* tokenStream, int index);
 void outputTokenStream(TokenStream* tokens);
 
 static inline Token emptyToken() {
