@@ -374,22 +374,20 @@ Token scanToken(Lexer* lexer) {
 }
 
 TokenStream* lex(Lexer* lexer) {
-    TokenStream* tokens = (TokenStream*)malloc(sizeof(TokenStream));
-    if (tokens == NULL) {
+    TokenStream* tokenStream = (TokenStream*)malloc(sizeof(TokenStream));
+    if (tokenStream == NULL) {
         fprintf(stderr, "Not enough memory to allocate for token streams in lexer.");
         exit(1);
     }
-    TokenStreamInit(tokens);
-
-    const char* source = lexer->start;
+    initTokenStream(tokenStream);
+    
     while (!isAtEnd(lexer)) {
-        Token token = scanToken(lexer);
-        TokenStreamAdd(tokens, &token);
+        tokenStreamAdd(tokenStream, scanToken(lexer));
     }
-    Token eofToken = makeToken(lexer, TOKEN_EOF);
-    TokenStreamAdd(tokens, &eofToken);
+    tokenStreamAdd(tokenStream, makeToken(lexer, TOKEN_EOF));
 
-    outputTokenStream(tokens);
-    lexer->start = source;
-    return tokens;
+    if (lexer->debugToken) {
+        outputTokenStream(tokenStream);
+    }
+    return tokenStream;
 }

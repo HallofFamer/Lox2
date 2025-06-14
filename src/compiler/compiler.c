@@ -1361,9 +1361,10 @@ void compileChild(Compiler* compiler, Ast* ast, int index) {
 ObjFunction* compile(VM* vm, const char* source) {
     Lexer lexer;
     initLexer(&lexer, source, vm->config.debugToken);
+    TokenStream* tokens = lex(&lexer);
 
     Parser parser;
-    initParser(&parser, &lexer, vm->config.debugAst);
+    initParser(&parser, &lexer, tokens, vm->config.debugAst);
     Ast* ast = parse(&parser);
     if (parser.hadError) return NULL;
 
@@ -1383,6 +1384,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     ObjFunction* function = endCompiler(&compiler);
     if (compiler.hadError) return NULL;
 
+    freeTokenStream(tokens);
     freeAst(ast, true);
     return function;
 }
