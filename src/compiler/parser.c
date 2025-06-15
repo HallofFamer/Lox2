@@ -58,7 +58,7 @@ static void advance(Parser* parser) {
     parser->newLineAtCurrent = false;
 
     for (;;) {
-        parser->next = scanToken(parser->lexer);
+        parser->next = parser->tokens->elements[parser->index++];
         if (parser->next.type == TOKEN_NEW_LINE) {
             parser->newLineAtCurrent = true;
             continue;
@@ -1234,7 +1234,9 @@ static Ast* declaration(Parser* parser) {
     }
 }
 
-void initParser(Parser* parser, Lexer* lexer, bool debugAst) {
+void initParser(Parser* parser, Lexer* lexer, TokenStream* tokens, bool debugAst) {
+    parser->tokens = tokens;
+    parser->index = 0;
     parser->lexer = lexer;
     parser->rootClass = syntheticToken("Object");
     parser->debugAst = debugAst;

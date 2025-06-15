@@ -8,6 +8,8 @@
 #include "lexer.h"
 
 typedef struct {
+    TokenStream* tokens;
+    int index;
     Lexer* lexer;
     Token previous;
     Token current;
@@ -21,7 +23,7 @@ typedef struct {
     jmp_buf jumpBuffer;
 } Parser;
 
-void initParser(Parser* parser, Lexer* lexer, bool debugAst);
+void initParser(Parser* parser, Lexer* lexer, TokenStream* tokens, bool debugAst);
 Ast* parse(Parser* parser);
 
 #endif // !clox_parser_h
