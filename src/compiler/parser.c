@@ -53,19 +53,22 @@ static void parseErrorAtCurrent(Parser* parser, const char* message) {
 
 static void advance(Parser* parser) {
     parser->previous = parser->current;
-    parser->newLineAtPrevious = parser->newLineAtCurrent;
     parser->current = parser->next;
-    parser->newLineAtCurrent = false;
 
     for (;;) {
         parser->next = parser->tokens->elements[parser->index++];
-        if (parser->next.type == TOKEN_NEW_LINE) {
-            parser->newLineAtCurrent = true;
-            continue;
-        }
+        if (parser->next.type == TOKEN_NEW_LINE) continue;
         else if (parser->next.type != TOKEN_ERROR) break;
         parseErrorAtCurrent(parser, parser->next.start);
     }
+}
+
+static bool newLineBeforePrevious(Parser* parser) {
+    return (parser->tokens->elements[parser->index - 2].type == TOKEN_NEW_LINE || parser->tokens->elements[parser->index - 3].type == TOKEN_NEW_LINE);
+}
+
+static bool newLineAtCurrent(Parser* parser) {
+    return (parser->tokens->elements[parser->index - 1].type == TOKEN_NEW_LINE);
 }
 
 static void consume(Parser* parser, TokenSymbol type, const char* message) {
@@ -81,7 +84,7 @@ static void consumerTerminator(Parser* parser, const char* message) {
         advance(parser);
         return;
     }
-    else if (parser->newLineAtPrevious || parser->current.type == TOKEN_RIGHT_BRACE || parser->current.type == TOKEN_EOF) {
+    else if (newLineBeforePrevious(parser) || parser->current.type == TOKEN_RIGHT_BRACE || parser->current.type == TOKEN_EOF) {
         return;
     }
     parseErrorAtCurrent(parser, message);
@@ -1240,8 +1243,6 @@ void initParser(Parser* parser, Lexer* lexer, TokenStream* tokens, bool debugAst
     parser->lexer = lexer;
     parser->rootClass = syntheticToken("Object");
     parser->debugAst = debugAst;
-    parser->newLineAtPrevious = false;
-    parser->newLineAtCurrent = true;
     parser->hadError = false;
     parser->panicMode = false;
     advance(parser);
