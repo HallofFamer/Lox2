@@ -1364,7 +1364,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     TokenStream* tokens = lex(&lexer);
 
     Parser parser;
-    initParser(&parser, &lexer, tokens, vm->config.debugAst);
+    initParser(&parser, tokens, vm->config.debugAst);
     Ast* ast = parse(&parser);
     if (parser.hadError) return NULL;
 

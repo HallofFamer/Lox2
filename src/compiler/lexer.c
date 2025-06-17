@@ -374,20 +374,23 @@ Token scanToken(Lexer* lexer) {
 }
 
 TokenStream* lex(Lexer* lexer) {
-    TokenStream* tokenStream = (TokenStream*)malloc(sizeof(TokenStream));
-    if (tokenStream == NULL) {
+    TokenStream* tokens = (TokenStream*)malloc(sizeof(TokenStream));
+    if (tokens == NULL) {
         fprintf(stderr, "Not enough memory to allocate for token streams in lexer.");
         exit(1);
     }
-    initTokenStream(tokenStream);
+    initTokenStream(tokens);
     
     while (!isAtEnd(lexer)) {
-        tokenStreamAdd(tokenStream, scanToken(lexer));
+        Token previousToken = tokens->elements[tokens->count - 1];
+        Token currentToken = scanToken(lexer);
+        if (currentToken.type == TOKEN_NEW_LINE && previousToken.type == TOKEN_NEW_LINE) continue;
+        tokenStreamAdd(tokens, currentToken);
     }
-    tokenStreamAdd(tokenStream, makeToken(lexer, TOKEN_EOF));
+    tokenStreamAdd(tokens, makeToken(lexer, TOKEN_EOF));
 
     if (lexer->debugToken) {
-        outputTokenStream(tokenStream);
+        outputTokenStream(tokens);
     }
-    return tokenStream;
+    return tokens;
 }
