@@ -102,6 +102,7 @@ ObjString* valueArrayToString(VM* vm, ValueArray* array) {
             char* chars = valueToString(vm, array->values[i]);
             size_t length = strlen(chars);
             memcpy(string + offset, chars, length);
+
             if (i == array->count - 1) {
                 offset += length;
             }

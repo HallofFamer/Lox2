@@ -2157,7 +2157,7 @@ void registerLangPackage(VM* vm) {
     setClassProperty(vm, vm->generatorClass, "stateReturn", INT_VAL(GENERATOR_RETURN));
     setClassProperty(vm, vm->generatorClass, "stateThrow", INT_VAL(GENERATOR_THROW));
     setClassProperty(vm, vm->generatorClass, "stateError", INT_VAL(GENERATOR_ERROR));
-    DEF_METHOD(generatorMetaclass, GeneratorClass, run, 2, RETURN_TYPE(void), PARAM_TYPE(Object), PARAM_TYPE(Object));
+    DEF_METHOD(generatorMetaclass, GeneratorClass, run, 2, RETURN_TYPE(void), PARAM_TYPE(TCallable), PARAM_TYPE(Object));
 
     bindSuperclass(vm, vm->exceptionClass, vm->objectClass);
     vm->exceptionClass->classType = OBJ_EXCEPTION;

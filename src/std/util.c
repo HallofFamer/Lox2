@@ -321,6 +321,7 @@ LOX_METHOD(Duration, __init__) {
     int hours = AS_INT(args[1]);
     int minutes = AS_INT(args[2]);
     int seconds = AS_INT(args[3]);
+
     if (days < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Duration::__init__(days, hours, minutes, seconds) expects argument 1 to be a non negative integer but got %d.", days);
     if (hours < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Duration::__init__(days, hours, minutes, seconds) expects argument 2 to be a non negative integer but got %d.", hours);
     if (minutes < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Duration::__init__(days, hours, minutes, seconds) expects argument 3 to be a non negative integer but got %d.", minutes);
@@ -537,6 +538,7 @@ LOX_METHOD(Promise, then) {
     ASSERT_ARG_COUNT("Promise::then(onFulfilled)", 1);
     ASSERT_ARG_TCALLABLE("Promise::then(onFulfilled)", 0);
     ObjPromise* self = AS_PROMISE(receiver);
+
     if (self->state == PROMISE_FULFILLED) {
         self->value = callReentrantMethod(vm, OBJ_VAL(self), args[0], self->value);
         if (IS_PROMISE(self->value)) RETURN_VAL(self->value);

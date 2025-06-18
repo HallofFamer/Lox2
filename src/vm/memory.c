@@ -309,16 +309,16 @@ static void blackenObject(VM* vm, Obj* object, GCGenerationType generation) {
             break;
         }
         case OBJ_CLASS: {
-            ObjClass* klass = (ObjClass*)object;
-            markObject(vm, (Obj*)klass->name, generation);
-            markObject(vm, (Obj*)klass->fullName, generation);
-            markObject(vm, (Obj*)klass->superclass, generation);
-            markObject(vm, (Obj*)klass->obj.klass, generation);
-            markObject(vm, (Obj*)klass->namespace, generation);
-            markArray(vm, &klass->traits, generation);
-            markIDMap(vm, &klass->indexes, generation);
-            markArray(vm, &klass->fields, generation);
-            markTable(vm, &klass->methods, generation);
+            ObjClass* _class = (ObjClass*)object;
+            markObject(vm, (Obj*)_class->name, generation);
+            markObject(vm, (Obj*)_class->fullName, generation);
+            markObject(vm, (Obj*)_class->superclass, generation);
+            markObject(vm, (Obj*)_class->obj.klass, generation);
+            markObject(vm, (Obj*)_class->namespace, generation);
+            markArray(vm, &_class->traits, generation);
+            markIDMap(vm, &_class->indexes, generation);
+            markArray(vm, &_class->fields, generation);
+            markTable(vm, &_class->methods, generation);
             break;
         }
         case OBJ_CLOSURE: {
@@ -400,11 +400,11 @@ static void blackenObject(VM* vm, Obj* object, GCGenerationType generation) {
             break;
         }
         case OBJ_NAMESPACE: {
-            ObjNamespace* namespace = (ObjNamespace*)object;
-            markObject(vm, (Obj*)namespace->shortName, generation);
-            markObject(vm, (Obj*)namespace->fullName, generation);
-            markObject(vm, (Obj*)namespace->enclosing, generation);
-            markTable(vm, &namespace->values, generation);
+            ObjNamespace* _namespace = (ObjNamespace*)object;
+            markObject(vm, (Obj*)_namespace->shortName, generation);
+            markObject(vm, (Obj*)_namespace->fullName, generation);
+            markObject(vm, (Obj*)_namespace->enclosing, generation);
+            markTable(vm, &_namespace->values, generation);
             break;
         }
         case OBJ_NATIVE_FUNCTION: {
@@ -480,11 +480,11 @@ static void freeObject(VM* vm, Obj* object) {
             FREE(ObjBoundMethod, object, object->generation);
             break;       
         case OBJ_CLASS: {
-            ObjClass* klass = (ObjClass*)object;
-            freeValueArray(vm, &klass->traits);
-            freeIDMap(vm, &klass->indexes);
-            freeValueArray(vm, &klass->fields);
-            freeTable(vm, &klass->methods);
+            ObjClass* _class = (ObjClass*)object;
+            freeValueArray(vm, &_class->traits);
+            freeIDMap(vm, &_class->indexes);
+            freeValueArray(vm, &_class->fields);
+            freeTable(vm, &_class->methods);
             FREE(ObjClass, object, object->generation);
             break;
         }
@@ -563,8 +563,8 @@ static void freeObject(VM* vm, Obj* object) {
             break;
         }             
         case OBJ_NAMESPACE: { 
-            ObjNamespace* namespace = (ObjNamespace*)object;
-            freeTable(vm, &namespace->values);
+            ObjNamespace* _namespace = (ObjNamespace*)object;
+            freeTable(vm, &_namespace->values);
             FREE(ObjNamespace, object, object->generation);
             break;
         }
@@ -659,8 +659,8 @@ static void promoteObject(VM* vm, Obj* object, GCGenerationType generation) {
             break;
         }
         case OBJ_NAMESPACE: {
-            ObjNamespace* namespace = (ObjNamespace*)object;
-            namespace->values.generation++;
+            ObjNamespace* _namespace = (ObjNamespace*)object;
+            _namespace->values.generation++;
             break;
         }
         case OBJ_VALUE_INSTANCE: {

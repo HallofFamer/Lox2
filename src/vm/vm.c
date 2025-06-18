@@ -1072,7 +1072,7 @@ InterpretResult run(VM* vm) {
                     if (IS_NIL(receiver)) {
                         throwNativeException(vm, "clox.std.lang.MethodNotFoundException", "Calling undefined method '%s' on nil.", method->chars);
                     }
-                    return INTERPRET_RUNTIME_ERROR;
+                    else return INTERPRET_RUNTIME_ERROR;
                 }
                 LOAD_FRAME();
                 break;
@@ -1103,7 +1103,9 @@ InterpretResult run(VM* vm) {
                         vm->stackTop -= (size_t)argCount + 1;
                         push(vm, NIL_VAL);
                     }
-                    else RUNTIME_ERROR("Undefined method '%s'.", method->chars);
+                    else {
+                        throwNativeException(vm, "clox.std.lang.MethodNotFoundException", "Calling undefined method '%s' on instance of %s.", method->chars, getObjClass(vm, receiver)->fullName->chars);
+                    }
                 }
                 LOAD_FRAME();
                 break;

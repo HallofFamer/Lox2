@@ -2208,7 +2208,7 @@ void registerCollectionPackage(VM* vm) {
     vm->entryClass->classType = OBJ_ENTRY;
     DEF_INTERCEPTOR(vm->entryClass, Entry, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(clox.std.collection.Entry), PARAM_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->entryClass, Entry, clone, 0, RETURN_TYPE(clox.std.collection.Entry));
-    DEF_METHOD(vm->entryClass, Entry, getKey, 0, RETURN_TYPE(String));
+    DEF_METHOD(vm->entryClass, Entry, getKey, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->entryClass, Entry, getValue, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->entryClass, Entry, setValue, 1, RETURN_TYPE(void), PARAM_TYPE(Object));
     DEF_METHOD(vm->entryClass, Entry, toString, 0, RETURN_TYPE(String));
