@@ -10,6 +10,7 @@ typedef struct {
     int line;
     int interpolationDepth;
     bool debugToken;
+    bool hadError;
 } Lexer;
 
 void initLexer(Lexer* lexer, const char* source, bool debugToken);

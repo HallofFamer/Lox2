@@ -9,6 +9,7 @@ void initLexer(Lexer* lexer, const char* source, bool debugToken) {
     lexer->line = 1;
     lexer->interpolationDepth = 0;
     lexer->debugToken = debugToken;
+    lexer->hadError = false;
 }
 
 static bool isAlpha(char c) {
@@ -53,26 +54,25 @@ static bool match(Lexer* lexer, char expected) {
 }
 
 static Token makeToken(Lexer* lexer, TokenSymbol type) {
-    Token token = {
+    return (Token) {
         .type = type,
         .start = lexer->start,
         .length = (int)(lexer->current - lexer->start),
         .line = lexer->line
     };
-
-    if (lexer->debugToken) {
-        outputToken(token);
-    }
-    return token;
 }
 
 static Token errorToken(Lexer* lexer, const char* message) {
-    return (Token) {
+    Token token = {
         .type = TOKEN_ERROR,
         .start = message,
         .length = (int)strlen(message),
         .line = lexer->line
     };
+
+    fprintf(stderr, "[line %d] Lex Error: %s\n", token.length, message);
+    lexer->hadError = true;
+    return token;
 }
 
 static void skipLineComment(Lexer* lexer) {
@@ -379,10 +379,13 @@ TokenStream* lex(Lexer* lexer) {
         fprintf(stderr, "Not enough memory to allocate for token streams in lexer.");
         exit(1);
     }
-    initTokenStream(tokens);
-    
+
+    initTokenStream(tokens); 
+    Token previousToken = scanToken(lexer);
+    tokenStreamAdd(tokens, previousToken);
+
     while (!isAtEnd(lexer)) {
-        Token previousToken = tokens->elements[tokens->count - 1];
+        previousToken = tokens->elements[tokens->count - 1];
         Token currentToken = scanToken(lexer);
         if (currentToken.type == TOKEN_NEW_LINE && previousToken.type == TOKEN_NEW_LINE) continue;
         tokenStreamAdd(tokens, currentToken);

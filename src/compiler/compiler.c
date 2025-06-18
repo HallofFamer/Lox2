@@ -1362,6 +1362,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     Lexer lexer;
     initLexer(&lexer, source, vm->config.debugToken);
     TokenStream* tokens = lex(&lexer);
+    if (lexer.hadError) return NULL;
 
     Parser parser;
     initParser(&parser, tokens, vm->config.debugAst);

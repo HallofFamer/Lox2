@@ -35,7 +35,6 @@ static void parseError(Parser* parser, Token* token, const char* message) {
     fprintf(stderr, "[line %d] Parse Error", token->line);
 
     if (token->type == TOKEN_EOF) fprintf(stderr, " at end");
-    else if (token->type == TOKEN_ERROR) { }
     else fprintf(stderr, " at '%.*s'", token->length, token->start);
 
     fprintf(stderr, ": %s\n", message);
@@ -1237,10 +1236,9 @@ static Ast* declaration(Parser* parser) {
     }
 }
 
-void initParser(Parser* parser, Lexer* lexer, TokenStream* tokens, bool debugAst) {
+void initParser(Parser* parser, TokenStream* tokens, bool debugAst) {
     parser->tokens = tokens;
     parser->index = 0;
-    parser->lexer = lexer;
     parser->rootClass = syntheticToken("Object");
     parser->debugAst = debugAst;
     parser->hadError = false;
