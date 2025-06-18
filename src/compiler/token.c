@@ -153,31 +153,31 @@ void freeTokenStream(TokenStream* tokenStream) {
     free(tokenStream);
 }
 
-void tokenStreamAdd(TokenStream* tokenStream, Token token) {
-    if (tokenStream->capacity < tokenStream->count + 1) {
-        int oldCapacity = tokenStream->capacity; 
-        tokenStream->capacity = bufferGrowCapacity(oldCapacity); 
-        Token* elements = (Token*)realloc(tokenStream->elements, sizeof(Token) * tokenStream->capacity); 
+void tokenStreamAdd(TokenStream* tokens, Token token) {
+    if (tokens->capacity < tokens->count + 1) {
+        int oldCapacity = tokens->capacity; 
+        tokens->capacity = bufferGrowCapacity(oldCapacity); 
+        Token* elements = (Token*)realloc(tokens->elements, sizeof(Token) * tokens->capacity); 
         
-        if (elements != NULL) tokenStream->elements = elements; 
+        if (elements != NULL) tokens->elements = elements; 
         else exit(1);
     } 
     
-    tokenStream->elements[tokenStream->count] = token; 
-    tokenStream->count++;
+    tokens->elements[tokens->count] = token; 
+    tokens->count++;
 }
 
-Token tokenStreamDelete(TokenStream* tokenStream, int index) {
-    Token token = tokenStream->elements[index]; 
-    for (int i = index; i < tokenStream->count - 1; i++) {
-        tokenStream->elements[i] = tokenStream->elements[i + 1];
+Token tokenStreamDelete(TokenStream* tokens, int index) {
+    Token token = tokens->elements[index]; 
+    for (int i = index; i < tokens->count - 1; i++) {
+        tokens->elements[i] = tokens->elements[i + 1];
     } 
-    tokenStream->count--; 
+    tokens->count--; 
     return token;
 }
 
-void outputTokenStream(TokenStream* tokenStream) {
-    for (int i = 0; i < tokenStream->count; i++) {
-        outputToken(tokenStream->elements[i]);
+void outputTokenStream(TokenStream* tokens) {
+    for (int i = 0; i < tokens->count; i++) {
+        outputToken(tokens->elements[i]);
     }
 }

@@ -183,6 +183,3 @@ Please see [TYPESYSTEM.md](https://github.com/HallofFamer/Lox2/blob/master/notes
 
 #### Can I use the code of Lox2 as base for my own project?
 This project is open source and the codebase can be used as base for someone else's project. It has an MIT license, and attribution must be given except for code from the original Lox implementation or third party libraries.
-
-#### What will happen to KtLox?
-Nothing, KtLox development is on hold until I can figure out a way to generate JVM bytecode instead of running the interpreter by walking down the AST. Treewalk interpreters are way too slow to be practical without JIT.

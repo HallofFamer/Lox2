@@ -53,10 +53,10 @@ bool tokenIsLiteral(Token token);
 bool tokenIsOperator(Token token);
 char* tokenToCString(Token token);
 void outputToken(Token token);
-void initTokenStream(TokenStream* TokenStream);
-void freeTokenStream(TokenStream* TokenStream);
-void tokenStreamAdd(TokenStream* tokenStream, Token token);
-Token tokenStreamDelete(TokenStream* tokenStream, int index);
+void initTokenStream(TokenStream* tokens);
+void freeTokenStream(TokenStream* tokens);
+void tokenStreamAdd(TokenStream* tokens, Token token);
+Token tokenStreamDelete(TokenStream* tokens, int index);
 void outputTokenStream(TokenStream* tokens);
 
 static inline Token emptyToken() {

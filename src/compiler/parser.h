@@ -5,7 +5,6 @@
 #include <setjmp.h>
 
 #include "ast.h"
-#include "lexer.h"
 
 typedef struct {
     TokenStream* tokens;

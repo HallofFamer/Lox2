@@ -62,6 +62,34 @@ static void advance(Parser* parser) {
     }
 }
 
+static Token currentToken(Parser* parser) {
+    return parser->tokens->elements[parser->index];
+}
+
+static TokenSymbol currentTokenType(Parser* parser) {
+    return currentToken(parser).type;
+}
+
+static Token previousToken(Parser* parser) {
+    Token previousToken = parser->tokens->elements[parser->index - 1];
+    if (previousToken.type == TOKEN_NEW_LINE) return parser->tokens->elements[parser->index - 2];
+    return previousToken;
+}
+
+static TokenSymbol previousTokenType(Parser* parser) {
+    return previousToken(parser).type;
+}
+
+static Token nextToken(Parser* parser) {
+    Token nextToken = parser->tokens->elements[parser->index + 1];
+    if (nextToken.type == TOKEN_NEW_LINE) return parser->tokens->elements[parser->index + 2];
+    return nextToken;
+}
+
+static TokenSymbol nextTokenType(Parser* parser) {
+    return nextToken(parser).type;
+}
+
 static bool newLineBeforePrevious(Parser* parser) {
     return (parser->tokens->elements[parser->index - 2].type == TOKEN_NEW_LINE || parser->tokens->elements[parser->index - 3].type == TOKEN_NEW_LINE);
 }

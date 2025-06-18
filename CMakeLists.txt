@@ -228,6 +228,7 @@ add_executable(${PROJECT_NAME} ${ALL_FILES})
 
 if (MSVC)
     find_package(CURL CONFIG REQUIRED)
+	find_package(libuv CONFIG REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE CURL::libcurl)
     target_link_libraries(${PROJECT_NAME} PRIVATE uv)
 else ()

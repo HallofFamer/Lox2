@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "compiler.h"
+#include "lexer.h"
 #include "parser.h"
 #include "resolver.h"
 #include "typechecker.h"
