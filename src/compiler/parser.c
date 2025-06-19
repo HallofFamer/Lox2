@@ -52,13 +52,9 @@ static void parseErrorAtCurrent(Parser* parser, const char* message) {
 
 static void advance(Parser* parser) {
     parser->previous = parser->current;
-    parser->current = parser->next;
-
-    for (;;) {
-        parser->next = parser->tokens->elements[parser->index++];
-        if (parser->next.type == TOKEN_NEW_LINE) continue;
-        else if (parser->next.type != TOKEN_ERROR) break;
-        parseErrorAtCurrent(parser, parser->next.start);
+    parser->current = parser->tokens->elements[++parser->index];
+    if (parser->current.type == TOKEN_NEW_LINE) {
+        parser->current = parser->tokens->elements[++parser->index];
     }
 }
 
@@ -91,11 +87,11 @@ static TokenSymbol nextTokenType(Parser* parser) {
 }
 
 static bool newLineBeforePrevious(Parser* parser) {
-    return (parser->tokens->elements[parser->index - 2].type == TOKEN_NEW_LINE || parser->tokens->elements[parser->index - 3].type == TOKEN_NEW_LINE);
+    return (parser->tokens->elements[parser->index - 1].type == TOKEN_NEW_LINE || parser->tokens->elements[parser->index - 2].type == TOKEN_NEW_LINE);
 }
 
 static bool newLineAtCurrent(Parser* parser) {
-    return (parser->tokens->elements[parser->index - 1].type == TOKEN_NEW_LINE);
+    return (parser->tokens->elements[parser->index].type == TOKEN_NEW_LINE);
 }
 
 static void consume(Parser* parser, TokenSymbol type, const char* message) {
@@ -122,7 +118,7 @@ static bool check(Parser* parser, TokenSymbol type) {
 }
 
 static bool checkNext(Parser* parser, TokenSymbol type) {
-    return parser->next.type == type;
+    return parser->tokens->elements[parser->index + 1].type == type;
 }
 
 static bool check2(Parser* parser, TokenSymbol type) {
@@ -642,7 +638,7 @@ static Ast* methods(Parser* parser, Token* name) {
         if (match(parser, TOKEN_ASYNC)) isAsync = true;
         if (match(parser, TOKEN_CLASS)) isClass = true;
         if (match(parser, TOKEN_VOID)) isVoid = true;
-        if (check2(parser, TOKEN_IDENTIFIER) || (check(parser, TOKEN_IDENTIFIER) && tokenIsOperator(parser->next))) {
+        if (check2(parser, TOKEN_IDENTIFIER) || (check(parser, TOKEN_IDENTIFIER) && tokenIsOperator(parser->tokens->elements[parser->index]))) {
             hasReturnType = true;
             returnType = type_(parser, "Expect method return type.");
         }
@@ -1266,12 +1262,11 @@ static Ast* declaration(Parser* parser) {
 
 void initParser(Parser* parser, TokenStream* tokens, bool debugAst) {
     parser->tokens = tokens;
-    parser->index = 0;
+    parser->index = -1;
     parser->rootClass = syntheticToken("Object");
     parser->debugAst = debugAst;
     parser->hadError = false;
     parser->panicMode = false;
-    advance(parser);
     advance(parser);
 }
 

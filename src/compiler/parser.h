@@ -11,7 +11,6 @@ typedef struct {
     int index;
     Token previous;
     Token current;
-    Token next;
     Token rootClass;
     bool debugAst;
     bool hadError;
