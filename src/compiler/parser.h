@@ -9,7 +9,6 @@
 typedef struct {
     TokenStream* tokens;
     int index;
-    Token previous;
     Token current;
     Token rootClass;
     bool debugAst;

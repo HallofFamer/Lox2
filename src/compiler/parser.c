@@ -29,35 +29,6 @@ typedef struct {
     bool startExpr;
 } ParseRule;
 
-static void parseError(Parser* parser, Token* token, const char* message) {
-    if (parser->panicMode) return;
-    parser->panicMode = true;
-    fprintf(stderr, "[line %d] Parse Error", token->line);
-
-    if (token->type == TOKEN_EOF) fprintf(stderr, " at end");
-    else fprintf(stderr, " at '%.*s'", token->length, token->start);
-
-    fprintf(stderr, ": %s\n", message);
-    parser->hadError = true;
-    longjmp(parser->jumpBuffer, 1);
-}
-
-static void parseErrorAtPrevious(Parser* parser, const char* message) {
-    parseError(parser, &parser->previous, message);
-}
-
-static void parseErrorAtCurrent(Parser* parser, const char* message) {
-    parseError(parser, &parser->current, message);
-}
-
-static void advance(Parser* parser) {
-    parser->previous = parser->current;
-    parser->current = parser->tokens->elements[++parser->index];
-    if (parser->current.type == TOKEN_NEW_LINE) {
-        parser->current = parser->tokens->elements[++parser->index];
-    }
-}
-
 static Token currentToken(Parser* parser) {
     return parser->tokens->elements[parser->index];
 }
@@ -90,8 +61,36 @@ static bool newLineBeforePrevious(Parser* parser) {
     return (parser->tokens->elements[parser->index - 1].type == TOKEN_NEW_LINE || parser->tokens->elements[parser->index - 2].type == TOKEN_NEW_LINE);
 }
 
-static bool newLineAtCurrent(Parser* parser) {
-    return (parser->tokens->elements[parser->index].type == TOKEN_NEW_LINE);
+static bool newLineAfterCurrent(Parser* parser) {
+    return (parser->tokens->elements[parser->index + 1].type == TOKEN_NEW_LINE);
+}
+
+static void parseError(Parser* parser, Token token, const char* message) {
+    if (parser->panicMode) return;
+    parser->panicMode = true;
+    fprintf(stderr, "[line %d] Parse Error", token.line);
+
+    if (token.type == TOKEN_EOF) fprintf(stderr, " at end");
+    else fprintf(stderr, " at '%.*s'", token.length, token.start);
+
+    fprintf(stderr, ": %s\n", message);
+    parser->hadError = true;
+    longjmp(parser->jumpBuffer, 1);
+}
+
+static void parseErrorAtPrevious(Parser* parser, const char* message) {
+    parseError(parser, previousToken(parser), message);
+}
+
+static void parseErrorAtCurrent(Parser* parser, const char* message) {
+    parseError(parser, parser->current, message);
+}
+
+static void advance(Parser* parser) {
+    parser->current = parser->tokens->elements[++parser->index];
+    if (parser->current.type == TOKEN_NEW_LINE) {
+        parser->current = parser->tokens->elements[++parser->index];
+    }
 }
 
 static void consume(Parser* parser, TokenSymbol type, const char* message) {
@@ -114,11 +113,11 @@ static void consumerTerminator(Parser* parser, const char* message) {
 }
 
 static bool check(Parser* parser, TokenSymbol type) {
-    return parser->current.type == type;
+    return currentTokenType(parser) == type;
 }
 
 static bool checkNext(Parser* parser, TokenSymbol type) {
-    return parser->tokens->elements[parser->index + 1].type == type;
+    return nextTokenType(parser) == type;
 }
 
 static bool check2(Parser* parser, TokenSymbol type) {
@@ -179,8 +178,8 @@ static void* resizeString(char* string, size_t newSize) {
 }
 
 static char* parseString(Parser* parser, int* length) {
-    int maxLength = parser->previous.length - 2;
-    const char* source = parser->previous.start + 1;
+    int maxLength = previousToken(parser).length - 2;
+    const char* source = previousToken(parser).start + 1;
     char* target = (char*)malloc((size_t)maxLength + 1);
     if (target == NULL) {
         fprintf(stderr, "Not enough memory to parser string token.");
@@ -274,7 +273,7 @@ static void synchronize(Parser* parser) {
     parser->panicMode = false;
 
     while (parser->current.type != TOKEN_EOF) {
-        if (parser->previous.type == TOKEN_SEMICOLON) return;
+        if (previousToken(parser).type == TOKEN_SEMICOLON) return;
 
         switch (parser->current.type) {
             case TOKEN_ASYNC:
@@ -312,7 +311,7 @@ static ParseRule* getRule(TokenSymbol type);
 static Ast* parsePrecedence(Parser* parser, Precedence precedence);
 
 static Ast* argumentList(Parser* parser) {
-    Ast* argList = emptyAst(AST_LIST_EXPR, parser->previous);
+    Ast* argList = emptyAst(AST_LIST_EXPR, previousToken(parser));
     uint8_t argCount = 0;
 
     if (!check(parser, TOKEN_RIGHT_PAREN)) {
@@ -330,7 +329,7 @@ static Ast* argumentList(Parser* parser) {
 
 static Ast* identifier(Parser* parser, const char* message) {
     consume(parser, TOKEN_IDENTIFIER, message);
-    return emptyAst(AST_EXPR_VARIABLE, parser->previous);
+    return emptyAst(AST_EXPR_VARIABLE, previousToken(parser));
 }
 
 static Token identifierToken(Parser* parser, const char* message) {
@@ -346,7 +345,7 @@ static Token identifierToken(Parser* parser, const char* message) {
         case TOKEN_MODULO:
         case TOKEN_DOT_DOT:
             advance(parser);
-            return parser->previous;
+            return previousToken(parser);
         case TOKEN_LEFT_BRACKET:
             advance(parser);
             if (match(parser, TOKEN_RIGHT_BRACKET)) {
@@ -362,17 +361,17 @@ static Token identifierToken(Parser* parser, const char* message) {
     }
 
     parseErrorAtCurrent(parser, message);
-    return parser->previous;
+    return previousToken(parser);
 }
 
 static Ast* and_(Parser* parser, Token token, Ast* left, bool canAssign) {
-    ParseRule* rule = getRule(parser->previous.type);
+    ParseRule* rule = getRule(previousToken(parser).type);
     Ast* right = parsePrecedence(parser, PREC_AND);
     return newAst(AST_EXPR_AND, token, 2, left, right);
 }
 
 static Ast* binary(Parser* parser, Token token, Ast* left, bool canAssign) {
-    ParseRule* rule = getRule(parser->previous.type);
+    ParseRule* rule = getRule(previousToken(parser).type);
     Ast* right = parsePrecedence(parser, (Precedence)(rule->precedence + 1));
     return newAst(AST_EXPR_BINARY, token, 2, left, right);
 }
@@ -404,7 +403,7 @@ static Ast* nil(Parser* parser, Token token, Ast* left, bool canAssign) {
 }
 
 static Ast* or_(Parser* parser, Token token, Ast* left, bool canAssign) {
-    ParseRule* rule = getRule(parser->previous.type);
+    ParseRule* rule = getRule(previousToken(parser).type);
     Ast* right = parsePrecedence(parser, PREC_OR);
     return newAst(AST_EXPR_OR, token, 2, left, right);
 }
@@ -435,7 +434,7 @@ static Ast* question(Parser* parser, Token token, Ast* left, bool canAssign) {
         expr = call(parser, token, left, canAssign);
     }
     else if (match(parser, TOKEN_QUESTION) || match(parser, TOKEN_COLON)) {
-        expr = nil(parser, parser->previous, left, canAssign);
+        expr = nil(parser, previousToken(parser), left, canAssign);
     }
 
     if (expr != NULL) expr->attribute.isOptional = true;
@@ -473,8 +472,8 @@ static Ast* interpolation(Parser* parser, Token token, bool canAssign) {
         bool concatenate = false;
         bool isString = false;
 
-        if (parser->previous.length > 2) {
-            Ast* str = string(parser, parser->previous, false);
+        if (previousToken(parser).length > 2) {
+            Ast* str = string(parser, previousToken(parser), false);
             concatenate = true;
             isString = true;
             astAppendChild(exprs, str);
@@ -486,8 +485,8 @@ static Ast* interpolation(Parser* parser, Token token, bool canAssign) {
     } while (match(parser, TOKEN_INTERPOLATION));
 
     consume(parser, TOKEN_STRING, "Expect end of string interpolation.");
-    if (parser->previous.length > 2) {
-        Ast* str = string(parser, parser->previous, false);
+    if (previousToken(parser).length > 2) {
+        Ast* str = string(parser, previousToken(parser), false);
         astAppendChild(exprs, str);
     }
     return newAst(AST_EXPR_INTERPOLATION, token, 1, exprs);
@@ -563,7 +562,7 @@ static Ast* variable(Parser* parser, Token token, bool canAssign) {
 
 static Ast* type_(Parser* parser, const char* message) {
     consume(parser, TOKEN_IDENTIFIER, message);
-    return variable(parser, parser->previous, false);
+    return variable(parser, previousToken(parser), false);
 }
 
 static Ast* parameter(Parser* parser, const char* message) {
@@ -572,7 +571,7 @@ static Ast* parameter(Parser* parser, const char* message) {
     if (check2(parser, TOKEN_IDENTIFIER)) type = type_(parser, "Expect type declaration.");
     consume(parser, TOKEN_IDENTIFIER, message);
 
-    Ast* param = emptyAst(AST_EXPR_PARAM, parser->previous);
+    Ast* param = emptyAst(AST_EXPR_PARAM, previousToken(parser));
     if (type != NULL) astAppendChild(param, type);
     param->attribute.isMutable = isMutable;
     return param;
@@ -601,7 +600,7 @@ static Ast* parameterList(Parser* parser, Token token) {
 }
 
 static Ast* functionParameters(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after function keyword/name.");
     Ast* params = check(parser, TOKEN_RIGHT_PAREN) ? emptyAst(AST_LIST_VAR, token) : parameterList(parser, token);
     consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
@@ -610,7 +609,7 @@ static Ast* functionParameters(Parser* parser) {
 }
 
 static Ast* lambdaParameters(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     if (!match(parser, TOKEN_PIPE)) return emptyAst(AST_LIST_VAR, token);
     Ast* params = parameterList(parser, token);
     consume(parser, TOKEN_PIPE, "Expect '|' after lambda parameters.");
@@ -618,7 +617,7 @@ static Ast* lambdaParameters(Parser* parser) {
 }
 
 static Ast* function(Parser* parser, bool isAsync, bool isLambda, bool isVoid) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     Ast* params = isLambda ? lambdaParameters(parser) : functionParameters(parser);
     Ast* body = block(parser);
     Ast* func = newAst(AST_EXPR_FUNCTION, token, 2, params, body);
@@ -644,7 +643,7 @@ static Ast* methods(Parser* parser, Token* name) {
         }
 
         Token methodName = identifierToken(parser, "Expect method name.");
-        if (parser->previous.length == 8 && memcmp(parser->previous.start, "__init__", 8) == 0) {
+        if (previousToken(parser).length == 8 && memcmp(previousToken(parser).start, "__init__", 8) == 0) {
             isInitializer = true;
         }
 
@@ -709,7 +708,7 @@ static Ast* trait(Parser* parser, Token token, bool canAssign) {
 static Ast* super_(Parser* parser, Token token, bool canAssign) {
     consume(parser, TOKEN_DOT, "Expect '.' after 'super'.");
     consume(parser, TOKEN_IDENTIFIER, "Expect superclass method name.");
-    Token method = parser->previous;
+    Token method = previousToken(parser);
 
     if (match(parser, TOKEN_LEFT_PAREN)) {
         Ast* arguments = argumentList(parser);
@@ -835,19 +834,19 @@ ParseRule parseRules[] = {
 };
 
 static Ast* parsePrefix(Parser* parser, Precedence precedence, bool canAssign) {
-    ParsePrefixFn prefixRule = getRule(parser->previous.type)->prefix;
+    ParsePrefixFn prefixRule = getRule(previousToken(parser).type)->prefix;
     if (prefixRule == NULL) {
         parseErrorAtPrevious(parser, "Expect expression.");
         return NULL;
     }
-    return prefixRule(parser, parser->previous, canAssign);
+    return prefixRule(parser, previousToken(parser), canAssign);
 }
 
 static Ast* parseInfix(Parser* parser, Precedence precedence, Ast* left, bool canAssign) {
     while (precedence <= getRule(parser->current.type)->precedence) {
         advance(parser);
-        ParseInfixFn infixRule = getRule(parser->previous.type)->infix;
-        left = infixRule(parser, parser->previous, left, canAssign);
+        ParseInfixFn infixRule = getRule(previousToken(parser).type)->infix;
+        left = infixRule(parser, previousToken(parser), left, canAssign);
     }
 
     if (!canAssign && match(parser, TOKEN_EQUAL)) {
@@ -872,7 +871,7 @@ static Ast* expression(Parser* parser) {
 }
 
 static Ast* block(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     Ast* stmtList = emptyAst(AST_LIST_STMT, token);
     while (!check(parser, TOKEN_RIGHT_BRACE) && !check(parser, TOKEN_EOF)) {
         Ast* decl = declaration(parser);
@@ -884,41 +883,41 @@ static Ast* block(Parser* parser) {
 }
 
 static Ast* awaitStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     Ast* expr = expression(parser);
     consumerTerminator(parser, "Expect semicolon or new line after awaiting promise.");
     return newAst(AST_STMT_AWAIT, token, 1, expr);
 }
 
 static Ast* breakStatement(Parser* parser) {
-    Ast* stmt = emptyAst(AST_STMT_BREAK, parser->previous);
+    Ast* stmt = emptyAst(AST_STMT_BREAK, previousToken(parser));
     consumerTerminator(parser, "Expect semicolon or new line after 'break'.");
     return stmt;
 }
 
 static Ast* continueStatement(Parser* parser) {
-    Ast* stmt = emptyAst(AST_STMT_CONTINUE, parser->previous);
+    Ast* stmt = emptyAst(AST_STMT_CONTINUE, previousToken(parser));
     consumerTerminator(parser, "Expect semicolon or new line after 'continue'.");
     return stmt;
 }
 
 static Ast* expressionStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     Ast* expr = expression(parser);
     consumerTerminator(parser, "Expect semicolon or new line after expression.");
     return newAst(AST_STMT_EXPRESSION, token, 1, expr);
 }
 
 static Ast* forStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     Ast* stmt = emptyAst(AST_STMT_FOR, token);
     consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
 
     if (!match(parser, TOKEN_VAL) && !match(parser, TOKEN_VAR)) {
         parseErrorAtCurrent(parser, "Expect 'val' or 'var' keyword after '(' in for loop.");
     }
-    bool isMutable = (parser->previous.type == TOKEN_VAR);
-    Ast* decl = emptyAst(AST_LIST_VAR, parser->previous);
+    bool isMutable = (previousToken(parser).type == TOKEN_VAR);
+    Ast* decl = emptyAst(AST_LIST_VAR, previousToken(parser));
 
     if (match(parser, TOKEN_LEFT_PAREN)) { 
         Ast* key = identifier(parser, "Expect first variable name after '('.");
@@ -945,7 +944,7 @@ static Ast* forStatement(Parser* parser) {
 }
 
 static Ast* ifStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
     Ast* condition = expression(parser);
     consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
@@ -960,14 +959,14 @@ static Ast* ifStatement(Parser* parser) {
 }
 
 static Ast* requireStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     Ast* expr = expression(parser);
     consumerTerminator(parser, "Expect semicolon or new line after required file path.");
     return newAst(AST_STMT_REQUIRE, token, 1, expr);
 }
 
 static Ast* returnStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     if (match(parser, TOKEN_SEMICOLON) || !getRule(parser->current.type)->startExpr) {
         return emptyAst(AST_STMT_RETURN, token);
     }
@@ -979,21 +978,21 @@ static Ast* returnStatement(Parser* parser) {
 }
 
 static Ast* switchStatement(Parser* parser) {
-    Ast* stmt = emptyAst(AST_STMT_SWITCH, parser->previous);
+    Ast* stmt = emptyAst(AST_STMT_SWITCH, previousToken(parser));
     consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after 'switch'.");
     Ast* expr = expression(parser);
     astAppendChild(stmt, expr);
 
     consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after value.");
     consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before switch cases.");
-    Ast* caseListStmt = emptyAst(AST_LIST_STMT, parser->previous);
+    Ast* caseListStmt = emptyAst(AST_LIST_STMT, previousToken(parser));
     astAppendChild(stmt, caseListStmt);
 
     int state = 0;
     int caseCount = 0;
     while (!match(parser, TOKEN_RIGHT_BRACE) && !check(parser, TOKEN_EOF)) {
         if (match(parser, TOKEN_CASE) || match(parser, TOKEN_DEFAULT)) {
-            Token caseToken = parser->previous;
+            Token caseToken = previousToken(parser);
             if (state == 1) caseCount++;
             if (state == 2) parseErrorAtPrevious(parser, "Can't have another 'case' or 'default' after the default case.");
 
@@ -1002,7 +1001,7 @@ static Ast* switchStatement(Parser* parser) {
                 Ast* caseLabel = expression(parser);
                 consume(parser, TOKEN_COLON, "Expect ':' after case value.");
 
-                Token token = parser->previous;
+                Token token = previousToken(parser);
                 Ast* caseBody = statement(parser);
                 Ast* caseStmt = newAst(AST_STMT_CASE, token, 2, caseLabel, caseBody);
                 astAppendChild(caseListStmt, caseStmt);
@@ -1021,21 +1020,21 @@ static Ast* switchStatement(Parser* parser) {
 }
 
 static Ast* throwStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     Ast* expr = expression(parser);
     consumerTerminator(parser, "Expect semicolon or new line after thrown exception.");
     return newAst(AST_STMT_THROW, token, 1, expr);
 }
 
 static Ast* tryStatement(Parser* parser) {
-    Ast* stmt = emptyAst(AST_STMT_TRY, parser->previous);
+    Ast* stmt = emptyAst(AST_STMT_TRY, previousToken(parser));
     Ast* tryStmt = statement(parser);
     astAppendChild(stmt, tryStmt);
 
     if (match(parser, TOKEN_CATCH)) {
         consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after 'catch'");
         consume(parser, TOKEN_IDENTIFIER, "Expect type name to catch");
-        Token exceptionType = parser->previous;
+        Token exceptionType = previousToken(parser);
         Ast* exceptionVar = identifier(parser, "Expect identifier after exception type.");
 
         consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after 'catch' statement");
@@ -1056,7 +1055,7 @@ static Ast* tryStatement(Parser* parser) {
 }
 
 static Ast* usingStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     Ast* stmt = emptyAst(AST_STMT_USING, token);
     Ast* _namespace = emptyAst(AST_LIST_VAR, token);
     Ast* subNamespace = NULL;
@@ -1064,14 +1063,14 @@ static Ast* usingStatement(Parser* parser) {
 
     do {
         consume(parser, TOKEN_IDENTIFIER, "Expect namespace identifier.");
-        subNamespace = emptyAst(AST_EXPR_VARIABLE, parser->previous);
+        subNamespace = emptyAst(AST_EXPR_VARIABLE, previousToken(parser));
         astAppendChild(_namespace, subNamespace);
     } while (match(parser, TOKEN_DOT));
     astAppendChild(stmt, _namespace);
 
     if (match(parser, TOKEN_AS)) {
         consume(parser, TOKEN_IDENTIFIER, "Expect alias after 'as'.");
-        alias = emptyAst(AST_EXPR_VARIABLE, parser->previous);
+        alias = emptyAst(AST_EXPR_VARIABLE, previousToken(parser));
         astAppendChild(stmt, alias);
     }
 
@@ -1080,7 +1079,7 @@ static Ast* usingStatement(Parser* parser) {
 }
 
 static Ast* whileStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after 'while'.");
     Ast* condition = expression(parser);
     consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after loop condition.");
@@ -1089,7 +1088,7 @@ static Ast* whileStatement(Parser* parser) {
 }
 
 static Ast* yieldStatement(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     bool isYieldFrom = match(parser, TOKEN_FROM);
     if (match(parser, TOKEN_SEMICOLON) || !getRule(parser->current.type)->startExpr) {
         return emptyAst(AST_STMT_YIELD, token);
@@ -1152,7 +1151,7 @@ static Ast* statement(Parser* parser) {
 
 static Ast* classDeclaration(Parser* parser) {
     consume(parser, TOKEN_IDENTIFIER, "Expect class name.");
-    Token name = parser->previous;
+    Token name = previousToken(parser);
     Ast* superClass = superclass_(parser);
     Ast* traitList = traits(parser, &name);
     Ast* methodList = methods(parser, &name);
@@ -1164,7 +1163,7 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     bool isVoid = match(parser, TOKEN_VOID);
     Ast* returnType = hasReturnType ? type_(parser, "Expect function return type.") : NULL;
     consume(parser, TOKEN_IDENTIFIER, "Expect function name.");
-    Token name = parser->previous;
+    Token name = previousToken(parser);
     Ast* body = function(parser, isAsync, false, isVoid);
 
     Ast* ast = newAst(AST_DECL_FUN, name, 1, body);
@@ -1174,7 +1173,7 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
 }
 
 static Ast* namespaceDeclaration(Parser* parser) {
-    Token token = parser->previous;
+    Token token = previousToken(parser);
     Ast* _namespace = emptyAst(AST_LIST_VAR, token);
     uint8_t namespaceDepth = 0;
 
@@ -1192,7 +1191,7 @@ static Ast* namespaceDeclaration(Parser* parser) {
 
 static Ast* traitDeclaration(Parser* parser) {
     consume(parser, TOKEN_IDENTIFIER, "Expect trait name.");
-    Token name = parser->previous;
+    Token name = previousToken(parser);
     Ast* traitList = traits(parser, &name);
     Ast* methodList = methods(parser, &name);
     Ast* trait = newAst(AST_EXPR_TRAIT, name, 2, traitList, methodList);
@@ -1201,7 +1200,7 @@ static Ast* traitDeclaration(Parser* parser) {
 
 static Ast* varDeclaration(Parser* parser, bool isMutable) {
     consume(parser, TOKEN_IDENTIFIER, "Expect variable name.");
-    Token identifier = parser->previous;
+    Token identifier = previousToken(parser);
     Ast* varDecl = emptyAst(AST_DECL_VAR, identifier);
     varDecl->attribute.isMutable = isMutable;
 
