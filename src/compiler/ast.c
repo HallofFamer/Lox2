@@ -523,6 +523,18 @@ static void astOutputDeclClass(Ast* ast, int indentLevel) {
     free(className);
 }
 
+static void astOutputDeclField(Ast* ast, int indentLevel) {
+    astOutputIndent(indentLevel);
+    char* mutable = ast->attribute.isMutable ? "val " : "var ";
+    char* name = tokenToCString(ast->token);
+
+    printf("fieldDecl %s%s\n", mutable, name);
+    if (astNumChild(ast) > 0) {
+        astOutputChild(ast, indentLevel + 1, 0);
+    }
+    free(name);
+}
+
 static void astOutputDeclFun(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     char* async = ast->attribute.isAsync ? "async " : "";
@@ -602,6 +614,14 @@ static void astOutputDeclVar(Ast* ast, int indentLevel) {
 static void astOutputListExpr(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     printf("listExpr(%d)\n", astNumChild(ast));
+    for (int i = 0; i < ast->children->count; i++) {
+        astOutput(astGetChild(ast, i), indentLevel + 1);
+    }
+}
+
+static void astOutputListField(Ast* ast, int indentLevel) {
+    astOutputIndent(indentLevel);
+    printf("listField(%d)\n", astNumChild(ast));
     for (int i = 0; i < ast->children->count; i++) {
         astOutput(astGetChild(ast, i), indentLevel + 1);
     }
@@ -797,6 +817,9 @@ void astOutput(Ast* ast, int indentLevel) {
                 case AST_DECL_CLASS:
                     astOutputDeclClass(ast, indentLevel);
                     break;
+                case AST_DECL_FIELD:
+                    astOutputDeclField(ast, indentLevel);
+                    break;
                 case AST_DECL_FUN:
                     astOutputDeclFun(ast, indentLevel);
                     break;
@@ -820,6 +843,9 @@ void astOutput(Ast* ast, int indentLevel) {
             switch (ast->kind) {
                 case AST_LIST_EXPR:
                     astOutputListExpr(ast, indentLevel);
+                    break;
+                case AST_LIST_FIELD:
+                    astOutputListField(ast, indentLevel);
                     break;
                 case AST_LIST_METHOD:
                     astOutputListMethod(ast, indentLevel);
