@@ -88,6 +88,7 @@ typedef struct {
     bool isLambda;
     bool isMutable;
     bool isOptional;
+    bool isTyped;
     bool isVariadic;
     bool isVoid;
     bool isYieldFrom;
@@ -113,6 +114,7 @@ static inline AstAttribute astInitAttribute() {
         .isLambda = false,
         .isMutable = false,
         .isOptional = false,
+        .isTyped = false,
         .isVariadic = false,
         .isVoid = false,    
         .isYieldFrom = false

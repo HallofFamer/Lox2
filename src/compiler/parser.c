@@ -627,8 +627,36 @@ static Ast* function(Parser* parser, bool isAsync, bool isLambda, bool isVoid) {
     return func;
 }
 
+static Ast* fields(Parser* parser, Token* name) {
+    Ast* fieldList = emptyAst(AST_LIST_FIELD, *name);
+
+    while (match(parser, TOKEN_VAL) || match(parser, TOKEN_VAR)) {
+        bool hasFieldType = false, hasInitializer = false;
+        bool isMutable = (currentTokenType(parser) == TOKEN_VAR);
+        Ast* fieldType = NULL;
+        if (check2(parser, TOKEN_IDENTIFIER)) {
+            hasFieldType = true;
+            fieldType = type_(parser, "Expect field type.");
+        }
+
+        Token fieldName = identifierToken(parser, "Expect field name.");
+        Ast* initializer = NULL;
+        if (match(parser, TOKEN_EQUAL)) {
+            hasInitializer = true;
+            initializer = expression(parser);
+        }
+
+        Ast* field = emptyAst(AST_DECL_FIELD, fieldName);
+        if (hasFieldType) astAppendChild(field, fieldType);
+        if (hasInitializer) astAppendChild(field, initializer);
+        astAppendChild(fieldList, field);
+        consumerTerminator(parser, "Expect semicolon or new-line after field declaration.");
+    }
+
+    return fieldList;
+}
+
 static Ast* methods(Parser* parser, Token* name) {
-    consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before class/trait body.");
     Ast* methodList = emptyAst(AST_LIST_METHOD, *name);
 
     while (!check(parser, TOKEN_RIGHT_BRACE) && !check(parser, TOKEN_EOF)) {
@@ -661,7 +689,6 @@ static Ast* methods(Parser* parser, Token* name) {
         astAppendChild(methodList, method);
     }
 
-    consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after class/trait body.");
     return methodList;
 }
 
@@ -694,14 +721,19 @@ static Ast* class_(Parser* parser, Token token, bool canAssign) {
     Token className = syntheticToken("@");
     Ast* superClass = superclass_(parser);
     Ast* traitList = traits(parser, &className);
+    consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+    Ast* fieldList = fields(parser, &className);
     Ast* methodList = methods(parser, &className);
-    return newAst(AST_EXPR_CLASS, className, 3, superClass, traitList, methodList);
+    consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+    return newAst(AST_EXPR_CLASS, className, 4, superClass, traitList, fieldList, methodList);
 }
 
 static Ast* trait(Parser* parser, Token token, bool canAssign) {
     Token traitName = syntheticToken("@");
     Ast* traitList = traits(parser, &traitName);
+    consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before trait body.");
     Ast* methodList = methods(parser, &traitName);
+    consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after trait body.");
     return newAst(AST_EXPR_TRAIT, traitName, 2, traitList, methodList);
 }
 
@@ -1154,8 +1186,11 @@ static Ast* classDeclaration(Parser* parser) {
     Token name = previousToken(parser);
     Ast* superClass = superclass_(parser);
     Ast* traitList = traits(parser, &name);
+    consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+    Ast* fieldList = fields(parser, &name);
     Ast* methodList = methods(parser, &name);
-    Ast* _class = newAst(AST_EXPR_CLASS, name, 3, superClass, traitList, methodList);
+    consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+    Ast* _class = newAst(AST_EXPR_CLASS, name, 4, superClass, traitList, fieldList, methodList);
     return newAst(AST_DECL_CLASS, name, 1, _class);
 }
 
@@ -1193,7 +1228,9 @@ static Ast* traitDeclaration(Parser* parser) {
     consume(parser, TOKEN_IDENTIFIER, "Expect trait name.");
     Token name = previousToken(parser);
     Ast* traitList = traits(parser, &name);
+    consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before trait body.");
     Ast* methodList = methods(parser, &name);
+    consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after trait body.");
     Ast* trait = newAst(AST_EXPR_TRAIT, name, 2, traitList, methodList);
     return newAst(AST_DECL_TRAIT, name, 1, trait);
 }
