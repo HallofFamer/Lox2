@@ -183,6 +183,7 @@ static void astOutputExprClass(Ast* ast, int indentLevel) {
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
     astOutputChild(ast, indentLevel + 1, 2);
+    astOutputChild(ast, indentLevel + 1, 3);
 }
 
 static void astOutputExprDictionary(Ast* ast, int indentLevel) {
@@ -527,9 +528,13 @@ static void astOutputDeclField(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     char* mutable = ast->attribute.isMutable ? "val " : "var ";
     char* name = tokenToCString(ast->token);
-
     printf("fieldDecl %s%s\n", mutable, name);
-    if (astNumChild(ast) > 0) {
+
+    if (ast->attribute.isTyped) {
+        astOutputChild(ast, indentLevel + 1, 0);
+        if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
+    }
+    else if (astNumChild(ast) > 0) {
         astOutputChild(ast, indentLevel + 1, 0);
     }
     free(name);

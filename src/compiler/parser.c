@@ -632,7 +632,7 @@ static Ast* fields(Parser* parser, Token* name) {
 
     while (match(parser, TOKEN_VAL) || match(parser, TOKEN_VAR)) {
         bool hasFieldType = false, hasInitializer = false;
-        bool isMutable = (currentTokenType(parser) == TOKEN_VAR);
+        bool isMutable = (previousTokenType(parser) == TOKEN_VAR);
         Ast* fieldType = NULL;
         if (check2(parser, TOKEN_IDENTIFIER)) {
             hasFieldType = true;
@@ -646,9 +646,12 @@ static Ast* fields(Parser* parser, Token* name) {
             initializer = expression(parser);
         }
 
-        Ast* field = emptyAst(AST_DECL_FIELD, fieldName);
+        Ast* field = emptyAst(AST_DECL_FIELD, fieldName);       
         if (hasFieldType) astAppendChild(field, fieldType);
         if (hasInitializer) astAppendChild(field, initializer);
+
+        field->attribute.isMutable = isMutable;
+        field->attribute.isTyped = hasFieldType;
         astAppendChild(fieldList, field);
         consumerTerminator(parser, "Expect semicolon or new-line after field declaration.");
     }
