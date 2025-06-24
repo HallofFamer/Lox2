@@ -13,7 +13,7 @@ typedef enum {
     SYMBOL_CATEGORY_LOCAL,
     SYMBOL_CATEGORY_UPVALUE,
     SYMBOL_CATEGORY_GLOBAL,
-    SYMBOL_CATEGORY_PROPERTY,
+    SYMBOL_CATEGORY_FIELD,
     SYMBOL_CATEGORY_METHOD
 } SymbolCategory;
 
@@ -66,6 +66,10 @@ SymbolItem* symbolTableGet(SymbolTable* symtab, ObjString* key);
 bool symbolTableSet(SymbolTable* symtab, ObjString* key, SymbolItem* value);
 SymbolItem* symbolTableLookup(SymbolTable* symtab, ObjString* key);
 void symbolTableOutput(SymbolTable* symtab);
+
+static inline bool isClassScope(SymbolScope scope) {
+    return (scope == SYMBOL_SCOPE_CLASS || scope == SYMBOL_SCOPE_TRAIT);
+}
 
 static inline bool isFunctionScope(SymbolScope scope) {
     return (scope == SYMBOL_SCOPE_FUNCTION || scope == SYMBOL_SCOPE_METHOD);

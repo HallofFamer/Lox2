@@ -139,8 +139,8 @@ static void symbolTableOutputCategory(SymbolCategory category) {
         case SYMBOL_CATEGORY_GLOBAL:
             printf("global");
             break;
-        case SYMBOL_CATEGORY_PROPERTY:
-            printf("property");
+        case SYMBOL_CATEGORY_FIELD:
+            printf("field");
             break;
         case SYMBOL_CATEGORY_METHOD:
             printf("method");
