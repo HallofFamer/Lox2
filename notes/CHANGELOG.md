@@ -1,11 +1,16 @@
 # Change Log
 
-### Lox2 v2.0.1(current version)
+### Lox2 v2.0.2(current version)
+- Fix buffer.h to include header for <stdlib.h>, which used to prevent Lox2 from compiling on certain platforms.
+- Fix CMakeLists.txt to find package libuv correctly on windows with vcpkg installation. 
+- Modify docker files to fetch latest stable version of Lox2 instead of from main branch directly.
+
+### Lox2 v2.0.1(last version)
 - Fix incorrect return types for some Int and String methods.
 - Add optimization for string interpolation to not emit OP_INVOKE instructions for toString method if expression is confirmed to have type String.
 - Disallow 'yield' keyword in async functions/methods. 
 
-### Lox2 v2.0.0(last version)
+### Lox2 v2.0.0
 - Multi-pass compiler with abstract syntax tree, semantic analyzer(resolver), symbol table, type checker, and generation of bytecode by walking AST. 
 - Optional static typing support for function/method parameters and return values, types only exist at compile time and are erased at runtime. 
 - Semicolon inference as well as basic type inference for immutable local/global variables. 

@@ -94,21 +94,27 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 
 ### Lox2 v2.3.0
 - Additional type system enhancement for union types, with `|` operator on types such as `String | Number`.
-- Support for structural pattern matching using `match` keyword, remove `switch` statement as it has been superceded.
+- Add new namespace `clox.ext` which may be optionally enabled/disabled in lox2.ini, add new package `clox.ext.text` for text processing.
 - Improved type system with non-nullable by default for type declaration, as well as variance for method parameter/return types.
 - Trailing closure similar to Kotlin and Swift which allows last lambda argument to be placed outside of parenthesis.
 
 ### Lox2 v2.4.0
-- Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body. 
+- Support for structural pattern matching using `match` keyword, remove `switch` statement as it has been superceded.
 - Object literal syntax similar to Javascript which can be good for configuration objects. 
-- Add new package `clox.std.text` which handles text processing for MIME types such as json and xml.
+- Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
 - Foreign function interface(FFI) as a way to write Lox2 libraries in C and load in lox script.
 
 ### Lox2 v2.5.0
-- C# style property accessor syntax, also inline simple getter/setter calls. 
-- First class continuation with keyword `context`, enabling manipulation of call stack in userland.
-- Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
+- C# style property accessor syntax which provides a flexible way to access and modify the value of instance fields. 
+- Add new package `clox.ext.sql` which supports database connections and queries for mysql/mariadb, postgres, sqlite, etc.
+- Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body. 
 - Implement a profiler which can identify the "Hotspots" of the program and how long they execute, prerequiste for future JIT. 
+
+### Lox2 v2.6.0
+- Initial implementation of tracing JIT compiler that optimizes hot loops, only for x64 architecture. 
+- First class continuation with keyword `thisContext`, enabling manipulation of call stack in userland.
+- Add new package `clox.ext.gui` which supports writing GUI applications using gtk binding for Lox2.
+- Optimization for property accessors which can inline simple one-line getters/setters.
 
 
 ## Example
@@ -130,7 +136,7 @@ println("Content: ${response.content}")
 
 #### Windows(with git, cmake and vcpkg, need to replace [$VCPKG_PATH] with installation path of vcpkg)
 ```
-git clone -b v2.0.1 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.2 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 cmake -DCMAKE_TOOLCHAIN_FILE:STRING="[$VCPKG_PATH]/scripts/buildsystems/vcpkg.cmake" -S . -B ./build
 cmake --build ./build --config Release
@@ -139,7 +145,7 @@ cmake --build ./build --config Release
 
 #### Linux(with git, cmake, curl and libuv, need to install one of the libcurl4-dev and libuv1.dev packages)
 ```
-git clone -b v2.0.1 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.2 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 mkdir build
 cmake -S . -B ./build
@@ -149,10 +155,10 @@ cmake --build ./build --config Release
 
 #### Docker(linux, need to replace [$LinuxDockerfile] by actual docker file name, ie. UbuntuDockerfile)
 ```
-git clone -b v2.0.1 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.2 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 docker build -t lox2:linux -f Docker/[$LinuxDockerfile] .
-docker run -w /Lox2-2.0.1/Lox2 -i -t lox2:linux
+docker run -w /Lox2-2.0.2/Lox2 -i -t lox2:linux
 ```
 
 Note: It is recommended to clone from the latest stable release branch("v2.0.1" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
@@ -183,6 +189,3 @@ Please see [TYPESYSTEM.md](https://github.com/HallofFamer/Lox2/blob/master/notes
 
 #### Can I use the code of Lox2 as base for my own project?
 This project is open source and the codebase can be used as base for someone else's project. It has an MIT license, and attribution must be given except for code from the original Lox implementation or third party libraries.
-
-#### What will happen to KtLox?
-Nothing, KtLox development is on hold until I can figure out a way to generate JVM bytecode instead of running the interpreter by walking down the AST. Treewalk interpreters are way too slow to be practical without JIT.
