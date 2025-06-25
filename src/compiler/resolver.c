@@ -261,6 +261,7 @@ static void beginScope(Resolver* resolver, Ast* ast, SymbolScope scope) {
     resolver->currentSymtab = newSymbolTable(nextSymbolTableIndex(resolver), resolver->currentSymtab, scope, resolver->currentSymtab->depth + 1);
     ast->symtab = resolver->currentSymtab;
     if (isFunctionScope(scope)) resolver->currentFunction->symtab = resolver->currentSymtab;
+    if (isClassScope(scope)) resolver->currentClass->symtab = resolver->currentSymtab;
     if (resolver->isTopLevel) resolver->globalSymtab = resolver->currentSymtab;
 }
 
@@ -510,6 +511,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
 
     childIndex++;
     resolveChild(resolver, ast, childIndex);
+    if (type != BEHAVIOR_TRAIT) resolveChild(resolver, ast, childIndex + 1);
     endScope(resolver);
     endClassResolver(resolver);
 }
@@ -677,11 +679,33 @@ static void resolveParam(Resolver* resolver, Ast* ast) {
 
 static void resolvePropertyGet(Resolver* resolver, Ast* ast) {
     resolveChild(resolver, ast, 0);
+    Ast* child = astGetChild(ast, 0);
+    if (child->kind != AST_EXPR_THIS) return;
+
+    ObjString* name = createSymbol(resolver, ast->token);
+    SymbolItem* item = symbolTableLookup(ast->symtab, name);
+    if (item != NULL && item->state != SYMBOL_STATE_MODIFIED) {
+        item->state = SYMBOL_STATE_ACCESSED;
+    }
 }
 
 static void resolvePropertySet(Resolver* resolver, Ast* ast) {
     resolveChild(resolver, ast, 0);
     resolveChild(resolver, ast, 1);
+    Ast* child = astGetChild(ast, 0);
+    if (child->kind != AST_EXPR_THIS) return;
+
+    ObjString* name = createSymbol(resolver, ast->token);
+    SymbolItem* item = symbolTableLookup(resolver->currentClass->symtab, name);
+    if (item != NULL) {
+        if (item->isMutable) item->state = SYMBOL_STATE_MODIFIED;
+        else {
+            item->state = SYMBOL_STATE_ACCESSED;
+            if (!resolver->currentFunction->attribute.isInitializer) {
+                semanticError(resolver, "Cannot modify immutable field '%s'.", name->chars);
+            }
+        }
+    }
 }
 
 static void resolveSubscriptGet(Resolver* resolver, Ast* ast) {
@@ -1100,6 +1124,21 @@ static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
     item->state = SYMBOL_STATE_ACCESSED;
 }
 
+static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
+    SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
+    item->category = SYMBOL_CATEGORY_FIELD;
+    int numChild = astNumChild(ast);
+
+    for (int i = 0; i < numChild; i++) {
+        resolveChild(resolver, ast, i);
+    }
+
+    bool hasInitializer = (ast->attribute.isTyped && numChild == 2) || (!ast->attribute.isTyped && numChild == 1);
+    if (hasInitializer) {
+        item->state = SYMBOL_STATE_DEFINED;
+    }
+}
+
 static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     ObjString* name = createSymbol(resolver, item->token);
@@ -1172,6 +1211,9 @@ static void resolveDeclaration(Resolver* resolver, Ast* ast) {
     switch (ast->kind) {
         case AST_DECL_CLASS:
             resolveClassDeclaration(resolver, ast);
+            break;
+        case AST_DECL_FIELD:
+            resolveFieldDeclaration(resolver, ast);
             break;
         case AST_DECL_FUN:
             resolveFunDeclaration(resolver, ast);

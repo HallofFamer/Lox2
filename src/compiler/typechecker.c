@@ -521,6 +521,7 @@ static void behavior(TypeChecker* typeChecker, BehaviorType type, Ast* ast) {
 
     childIndex++;
     typeCheckChild(typeChecker, ast, childIndex);
+    if (type != BEHAVIOR_TRAIT) typeCheckChild(typeChecker, ast, childIndex + 1);
     endClassTypeChecker(typeChecker);
 }
 
@@ -1029,6 +1030,14 @@ static void typeCheckClassDeclaration(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
 }
 
+static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
+    SymbolItem* item = symbolTableLookup(ast->symtab, createSymbol(typeChecker, ast->token));
+    ast->type = item->type;
+    for (int i = 0; i < astNumChild(ast); i++) {
+        typeCheckChild(typeChecker, ast, i);
+    }
+}
+
 static void typeCheckFunDeclaration(TypeChecker* typeChecker, Ast* ast) {
     SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
     defineAstType(typeChecker, ast, "Function", item);
@@ -1084,6 +1093,9 @@ static void typeCheckDeclaration(TypeChecker* typeChecker, Ast* ast) {
     switch (ast->kind) {
         case AST_DECL_CLASS:
             typeCheckClassDeclaration(typeChecker, ast);
+            break;
+        case AST_DECL_FIELD:
+            typeCheckFieldDeclaration(typeChecker, ast);
             break;
         case AST_DECL_FUN:
             typeCheckFunDeclaration(typeChecker, ast);
