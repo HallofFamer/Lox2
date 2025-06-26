@@ -76,7 +76,6 @@ LOX_FUNCTION(read) {
 
 ObjClass* defineNativeClass(VM* vm, const char* name) {
     ObjString* className = newStringPerma(vm, name);
-    push(vm, OBJ_VAL(className));
     ObjClass* nativeClass = newClass(vm, className, OBJ_INSTANCE);
     nativeClass->isNative = true;
     nativeClass->obj.klass->isNative = true;
@@ -84,7 +83,6 @@ ObjClass* defineNativeClass(VM* vm, const char* name) {
 
     tableSet(vm, &vm->classes, nativeClass->fullName, OBJ_VAL(nativeClass));
     tableSet(vm, &vm->currentNamespace->values, AS_STRING(vm->stack[0]), vm->stack[1]); 
-    pop(vm);
     pop(vm);
     return nativeClass;
 }
@@ -115,11 +113,9 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
 
 void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bool isAsync, NativeMethod method, ...) {
     ObjString* methodName = newStringPerma(vm, name);
-    push(vm, OBJ_VAL(methodName));
     ObjNativeMethod* nativeMethod = newNativeMethod(vm, klass, methodName, arity, isAsync, method);
     push(vm, OBJ_VAL(nativeMethod));
     tableSet(vm, &klass->methods, methodName, OBJ_VAL(nativeMethod));
-    pop(vm);
     pop(vm);
 
     va_list args;

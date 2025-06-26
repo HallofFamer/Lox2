@@ -1133,6 +1133,10 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
         resolveChild(resolver, ast, i);
     }
 
+    BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
+    TypeInfo* fieldType = ast->attribute.isTyped ? getTypeForSymbol(resolver, astGetChild(ast, 0)->token) : NULL;
+    TypeInfoArrayAdd(_class->fieldTypes, fieldType);
+
     bool hasInitializer = (ast->attribute.isTyped && numChild == 2) || (!ast->attribute.isTyped && numChild == 1);
     if (hasInitializer) {
         item->state = SYMBOL_STATE_DEFINED;
