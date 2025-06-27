@@ -25,7 +25,10 @@ BehaviorTypeInfo* newBehaviorTypeInfo(int id, TypeCategory category, ObjString* 
     if (behaviorType != NULL) {
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        if(behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
+        if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
+
+        behaviorType->fieldTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (behaviorType->fieldTypes != NULL) TypeInfoArrayInit(behaviorType->fieldTypes);
         behaviorType->methods = newTypeTable(id);
     }
     return behaviorType;
@@ -36,6 +39,8 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
     if (behaviorType != NULL) {
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        behaviorType->fieldTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (behaviorType->fieldTypes != NULL) TypeInfoArrayInit(behaviorType->fieldTypes);
         behaviorType->methods = newTypeTable(id);
 
         if (behaviorType->traitTypes != NULL) {
@@ -58,7 +63,10 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
     if (behaviorType != NULL) {
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        TypeInfoArrayInit(behaviorType->traitTypes);
+        if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
+
+        behaviorType->fieldTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (behaviorType->fieldTypes != NULL) TypeInfoArrayInit(behaviorType->fieldTypes);
         behaviorType->methods = methods;
     }
     return behaviorType;
@@ -101,6 +109,7 @@ void freeTypeInfo(TypeInfo* type) {
     if (IS_BEHAVIOR_TYPE(type)) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
+        if (behaviorType->fieldTypes != NULL) TypeInfoArrayFree(behaviorType->fieldTypes);
         freeTypeTable(behaviorType->methods);
         free(behaviorType);
     }
@@ -282,6 +291,16 @@ static void typeTableOutputBehavior(BehaviorTypeInfo* behavior) {
         printf("    traits: %s", behavior->traitTypes->elements[0]->fullName->chars);
         for (int i = 1; i < behavior->traitTypes->count; i++) {
             printf(", %s", behavior->traitTypes->elements[i]->fullName->chars);
+        }
+        printf("\n");
+    }
+
+    if (behavior->fieldTypes != NULL && behavior->fieldTypes->count > 0) {
+        TypeInfo* fieldType = behavior->fieldTypes->elements[0];
+        printf("    fields: %s", (fieldType != NULL) ? fieldType->shortName->chars : "dynamic");
+        for (int i = 1; i < behavior->fieldTypes->count; i++) {
+            fieldType = behavior->fieldTypes->elements[i];
+            printf(", %s", (fieldType != NULL) ? fieldType->shortName->chars : "dynamic");
         }
         printf("\n");
     }

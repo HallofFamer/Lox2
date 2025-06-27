@@ -38,6 +38,7 @@ typedef struct {
     TypeInfo baseType;
     TypeInfo* superclassType;
     TypeInfoArray* traitTypes;
+    TypeInfoArray* fieldTypes;
     TypeTable* methods;
 } BehaviorTypeInfo;
 
