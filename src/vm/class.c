@@ -25,6 +25,7 @@ void initClass(VM* vm, ObjClass* klass, ObjString* name, ObjClass* metaclass, Be
     klass->superclass = NULL;
     klass->isNative = false;
     klass->interceptors = 0;
+    klass->defaultShapeID = 0;
 
     if (!klass->namespace->isRoot) {
         char chars[UINT8_MAX];
@@ -37,6 +38,7 @@ void initClass(VM* vm, ObjClass* klass, ObjString* name, ObjClass* metaclass, Be
     initIDMap(&klass->indexes, klass->obj.generation);
     initValueArray(&klass->fields, klass->obj.generation);
     initTable(&klass->methods, klass->obj.generation);
+    initValueArray(&klass->defaultFieldValues, klass->obj.generation);
     pop(vm);
 }
 
@@ -56,6 +58,7 @@ void initTrait(VM* vm, ObjClass* trait, ObjString* name) {
     trait->superclass = NULL;
     trait->isNative = false;
     trait->interceptors = 0;
+    trait->defaultShapeID = 0;
 
     if (!trait->namespace->isRoot) {
         char chars[UINT8_MAX];
@@ -68,6 +71,7 @@ void initTrait(VM* vm, ObjClass* trait, ObjString* name) {
     initIDMap(&trait->indexes, trait->obj.generation);
     initValueArray(&trait->fields, trait->obj.generation);
     initTable(&trait->methods, trait->obj.generation);
+    initValueArray(&trait->defaultFieldValues, trait->obj.generation);
     pop(vm);
 }
 

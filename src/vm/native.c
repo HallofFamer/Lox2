@@ -111,6 +111,14 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
     va_end(args);
 }
 
+void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type, bool isMutable, Value defaultValue) {
+    ObjString* fieldName = newStringPerma(vm, name);
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
+    typeTableInsertField(behaviorType->fields, fieldName, type, isMutable, !IS_NIL(defaultValue));
+    klass->defaultShapeID = createShapeFromParent(vm, klass->defaultShapeID, fieldName);
+    valueArrayWrite(vm, &klass->defaultFieldValues, defaultValue);
+}
+
 void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bool isAsync, NativeMethod method, ...) {
     ObjString* methodName = newStringPerma(vm, name);
     ObjNativeMethod* nativeMethod = newNativeMethod(vm, klass, methodName, arity, isAsync, method);

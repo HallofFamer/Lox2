@@ -294,9 +294,7 @@ ObjTimer* newTimer(VM* vm, ObjClosure* closure, int delay, int interval) {
         timer->id = 0;
         timer->isRunning = false;
     }
-    else {
-        throwNativeException(vm, "clox.std.lang.OutOfMemoryException", "Not enough memory to allocate timer object.");
-    }
+    else throwNativeException(vm, "clox.std.lang.OutOfMemoryException", "Not enough memory to allocate timer object.");
 
     return timer;
 }

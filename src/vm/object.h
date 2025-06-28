@@ -277,6 +277,8 @@ struct ObjClass {
     IDMap indexes;
     ValueArray fields;
     Table methods;
+    int defaultShapeID;
+    ValueArray defaultFieldValues;
 };
 
 struct ObjClosure {

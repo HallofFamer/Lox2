@@ -174,7 +174,7 @@ int transitionShapeForObject(VM* vm, Obj* object, ObjString* edge) {
     return object->shapeID;
 }
 
-int getShapeFromParent(VM* vm, int parentID, ObjString* edge) {
+static int getShapeFromParent(VM* vm, int parentID, ObjString* edge) {
     ShapeTree* shapeTree = &vm->shapes;
     if (shapeTree->count >= UINT32_MAX) {
         runtimeError(vm, "Too many shapes have been created.");
