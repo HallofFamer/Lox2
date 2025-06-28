@@ -3,7 +3,7 @@ using clox.std.util.Date
 using clox.std.util.DateTime
 using clox.std.util.Duration
 
-var nowDate = Date.now
+val nowDate = Date.now
 println("Current Date is: " + nowDate.toString())
 println("Current Date's timestamp is: " + nowDate.getTimestamp().toString())
 println("")
@@ -15,7 +15,7 @@ println("Birthday is before current Date: " + (birthday < nowDate).toString())
 println("Converting birthday to DateTime: " + birthday.toDateTime().toString())
 println("");
 
-var nowDateTime = DateTime.now;
+val nowDateTime = DateTime.now;
 println("Current DateTime is: " + nowDateTime.toString());
 println("Current DateTime's timestamp is: " + nowDateTime.getTimestamp().toString());
 println("Birthday is after current DateTime: " + (birthday.toDateTime() > nowDateTime).toString());
@@ -27,12 +27,12 @@ println("current Date is instance of DateTime: " + nowDate.instanceOf(DateTime).
 println("current DateTime is instance of Date: " + nowDateTime.instanceOf(Date).toString())
 println("current DateTime is instance of DateTime: " + nowDateTime.instanceOf(DateTime).toString())
 
-var duration = Duration(1, 15, 80, 280);
+val duration = Duration(1, 15, 80, 280);
 println("Creating Duration: " + duration.toString());
 println("Total number of seconds in Duration: " + duration.getTotalSeconds().toString());
 println("")
 
-var duration2 = Duration.ofDays(1)
+val duration2 = Duration.ofDays(1)
 println("Creating Duration 2: " + duration2.toString())
 println("Adding two durations: " + (duration + duration2).toString())
 println("Subtracting two durations: " + (duration - duration2).toString())

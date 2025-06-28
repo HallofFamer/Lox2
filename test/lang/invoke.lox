@@ -9,5 +9,5 @@ class Oops {
     }
 }
 
-var oops = Oops()
+val oops = Oops()
 oops.field()

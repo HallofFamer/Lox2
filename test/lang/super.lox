@@ -22,9 +22,9 @@ class B extends A {
 
 class C extends B { }
 
-var a = A()
-var b = B()
-var c = C()
+val a = A()
+val b = B()
+val c = C()
 c.test()
 
 println(c.toString())

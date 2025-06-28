@@ -18,8 +18,8 @@ fun outer() {
   return middle
 }
 
-var mid = outer()
-var in = mid()
+val mid = outer()
+val in = mid()
 in()
 
 print("Class of function 'in()' is: ")
@@ -31,7 +31,7 @@ println(in.isAnonymous())
 print("function 'in()' is native: ")
 println(in.isNative())
 
-var time = clock
+val time = clock
 println("Assinging variable 'time' as native function 'clock'...")
 print("Class of function 'time()' is: ")
 println(time.getClassName())

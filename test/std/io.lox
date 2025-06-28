@@ -5,10 +5,11 @@ using clox.std.io.File
 using clox.std.io.FileReadStream
 using clox.std.io.FileWriteStream
 
-var fileIn = File("test/others/file_input.txt")
+val fileIn = File("test/others/file_input.txt")
 println(fileIn)
 println("Creating a read stream for input file.")
-var fileReader = FileReadStream(fileIn)
+
+val fileReader = FileReadStream(fileIn)
 println("The first character of the file is: ${fileReader.peek()}")
 println("")
 
@@ -24,10 +25,11 @@ println("Closing read stream for file.")
 fileReader.close()
 println("")
 
-var fileOut = File("test/others/file_output.txt")
+val fileOut = File("test/others/file_output.txt")
 println(fileOut)
 println("Creating a write stream for out file.")
-var fileWriter = FileWriteStream(fileOut)
+
+val fileWriter = FileWriteStream(fileOut)
 println("")
 
 println("Now write character 'B' to file.")
@@ -42,11 +44,12 @@ println("Close write stream for file.")
 fileWriter.close()
 println("")
 
-var binaryFileIn = File("test/others/binary_input.bin")
+val binaryFileIn = File("test/others/binary_input.bin")
 println(binaryFileIn)
 println("Creating a binary read stream.")
 println("Now read the binary file to the screen:")
-var binaryReader = BinaryReadStream(binaryFileIn)
+
+val binaryReader = BinaryReadStream(binaryFileIn)
 while(!binaryReader.isAtEnd()){
     print(binaryReader.read())
     print(" ")
@@ -55,13 +58,14 @@ binaryReader.close()
 println("")
 
 println("")
-var fileBinaryOut = File("test/others/binary_output.bin")
+val fileBinaryOut = File("test/others/binary_output.bin")
 println(fileBinaryOut)
 fileBinaryOut.setWritable(true)
 println("Creating a binary write stream.")
 println("Now write to a binary file with the following bytes: ")
-var binaryWriter = BinaryWriteStream(fileBinaryOut)
-var bytes = [5, 37, 0, 88, 255, 12]
+
+val binaryWriter = BinaryWriteStream(fileBinaryOut)
+val bytes = [5, 37, 0, 88, 255, 12]
 println(bytes)
 binaryWriter.writeBytes(bytes)
 println("Close binary write stream.")
