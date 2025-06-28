@@ -105,6 +105,7 @@ FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType,
     FieldTypeInfo* fieldType = (FieldTypeInfo*)newTypeInfo(id, sizeof(FieldTypeInfo), TYPE_CATEGORY_FIELD, name, name);
     if (fieldType != NULL) {
         fieldType->declaredType = declaredType;
+        fieldType->index = id - 1;
         fieldType->isMutable = isMutable;
         fieldType->hasInitializer = hasInitializer;
     }
@@ -281,6 +282,15 @@ static void typeTableOutputCategory(TypeCategory category) {
 
 static void typeTableOutputFields(TypeTable* fields) {
     printf("    fields:\n");
+    for (int i = 0; i < fields->capacity; i++) {
+        TypeEntry* entry = &fields->entries[i];
+        if (entry != NULL && entry->key != NULL) {
+            FieldTypeInfo* field = AS_FIELD_TYPE(entry->value);
+            printf("      %s", field->isMutable ? "val " : "var ");
+            if (field->declaredType != NULL) printf("%s ", field->declaredType->shortName->chars);
+            printf("%s\n", entry->key->chars);
+        }
+    }
 }
 
 static void typeTableOutputMethod(TypeTable* methods) {

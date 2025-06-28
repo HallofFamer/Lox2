@@ -66,6 +66,7 @@ typedef struct {
 typedef struct {
     TypeInfo baseType;
     TypeInfo* declaredType;
+    int index;
     bool isMutable;
     bool hasInitializer;
 } FieldTypeInfo;

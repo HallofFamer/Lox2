@@ -1139,9 +1139,17 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
     }
 
     ObjString* name = createSymbol(resolver, item->token);
-    BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
+    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
     TypeInfo* fieldType = ast->attribute.isTyped ? getTypeForSymbol(resolver, astGetChild(ast, 0)->token) : NULL;
-    typeTableInsertField(_class->fields, name, fieldType, ast->attribute.isMutable, hasInitializer);
+    typeTableInsertField(classType->fields, name, fieldType, ast->attribute.isMutable, hasInitializer);
+
+    if (classType->superclassType != NULL) {
+        BehaviorTypeInfo* superclass = AS_BEHAVIOR_TYPE(classType->superclassType);
+        TypeInfo* fieldSuperType = typeTableGet(superclass->fields, name);
+        if (fieldSuperType != NULL) {
+            semanticError(resolver, "Cannot redeclare inherited instance field %s from superclass.", name->chars);
+        }
+    }
 }
 
 static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {

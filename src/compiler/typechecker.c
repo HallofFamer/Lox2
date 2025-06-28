@@ -1031,12 +1031,30 @@ static void typeCheckClassDeclaration(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
-    SymbolItem* item = symbolTableLookup(ast->symtab, createSymbol(typeChecker, ast->token));
-    ast->type = item->type;
-
-    for (int i = 0; i < astNumChild(ast); i++) {
+    int numChild = astNumChild(ast);
+    for (int i = 0; i < numChild; i++) {
         typeCheckChild(typeChecker, ast, i);
     }
+    
+    if (!typeChecker->currentClass->isAnonymous) {
+        ObjString* name = createSymbol(typeChecker, ast->token);
+        SymbolItem* item = symbolTableLookup(ast->symtab, name);
+        BehaviorTypeInfo* behaviorType = typeChecker->currentClass->type;
+        TypeInfo* type = typeTableGet(typeChecker->currentClass->type->fields, name);
+        if (type == NULL) return;
+
+        FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);
+        item->type = fieldType->declaredType;
+        Ast* initializer = NULL;
+        if (ast->attribute.isTyped && numChild == 2) initializer = astGetChild(ast, 1);
+        else if (!ast->attribute.isTyped && numChild == 1) initializer = astGetChild(ast, 0);
+        
+        TypeInfo* initializerType = (initializer == NULL) ? NULL : initializer->type;
+        if (!isSubtypeOfType(initializerType, fieldType->declaredType)) {
+            typeError(typeChecker, "Initial value for instance field must be a subtype of %s.", fieldType->declaredType->shortName->chars);
+        }
+    }
+
 }
 
 static void typeCheckFunDeclaration(TypeChecker* typeChecker, Ast* ast) {
