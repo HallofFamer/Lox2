@@ -259,6 +259,7 @@ static char* parseString(Parser* parser, int* length) {
         else {
             target[j] = source[i];
         }
+
         i++;
         j++;
     }

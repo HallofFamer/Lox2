@@ -1033,6 +1033,7 @@ static void typeCheckClassDeclaration(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
     SymbolItem* item = symbolTableLookup(ast->symtab, createSymbol(typeChecker, ast->token));
     ast->type = item->type;
+
     for (int i = 0; i < astNumChild(ast); i++) {
         typeCheckChild(typeChecker, ast, i);
     }

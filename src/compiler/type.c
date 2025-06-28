@@ -27,8 +27,7 @@ BehaviorTypeInfo* newBehaviorTypeInfo(int id, TypeCategory category, ObjString* 
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
 
-        behaviorType->fieldTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        if (behaviorType->fieldTypes != NULL) TypeInfoArrayInit(behaviorType->fieldTypes);
+        behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
     }
     return behaviorType;
@@ -39,8 +38,7 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
     if (behaviorType != NULL) {
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        behaviorType->fieldTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        if (behaviorType->fieldTypes != NULL) TypeInfoArrayInit(behaviorType->fieldTypes);
+        behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 
         if (behaviorType->traitTypes != NULL) {
@@ -65,8 +63,7 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
 
-        behaviorType->fieldTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        if (behaviorType->fieldTypes != NULL) TypeInfoArrayInit(behaviorType->fieldTypes);
+        behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = methods;
     }
     return behaviorType;
@@ -104,12 +101,22 @@ CallableTypeInfo* newCallableTypeInfoWithParams(int id, TypeCategory category, O
     return callableType;
 }
 
+FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer) {
+    FieldTypeInfo* fieldType = (FieldTypeInfo*)newTypeInfo(id, sizeof(FieldTypeInfo), TYPE_CATEGORY_FIELD, name, name);
+    if (fieldType != NULL) {
+        fieldType->declaredType = declaredType;
+        fieldType->isMutable = isMutable;
+        fieldType->hasInitializer = hasInitializer;
+    }
+    return fieldType;
+}
+
 void freeTypeInfo(TypeInfo* type) {
     if (type == NULL) return;
     if (IS_BEHAVIOR_TYPE(type)) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
-        if (behaviorType->fieldTypes != NULL) TypeInfoArrayFree(behaviorType->fieldTypes);
+        freeTypeTable(behaviorType->fields);
         freeTypeTable(behaviorType->methods);
         free(behaviorType);
     }
@@ -117,6 +124,13 @@ void freeTypeInfo(TypeInfo* type) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
         if (callableType->paramTypes != NULL) TypeInfoArrayFree(callableType->paramTypes);
         free(callableType);
+    }
+    else if (IS_FIELD_TYPE(type)) {
+        FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);
+        free(fieldType);
+    }
+    else {
+        free(type);
     }
 }
 
@@ -232,6 +246,13 @@ CallableTypeInfo* typeTableInsertCallable(TypeTable* typetab, TypeCategory categ
     return callableType;
 }
 
+FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer) {
+    int id = typetab->count + 1;
+    FieldTypeInfo* fieldType = newFieldTypeInfo(id, name, declaredType, isMutable, hasInitializer);
+    typeTableSet(typetab, name, (TypeInfo*)fieldType);
+    return fieldType;
+}
+
 static void typeTableOutputCategory(TypeCategory category) {
     switch (category) {
         case TYPE_CATEGORY_CLASS:
@@ -256,6 +277,10 @@ static void typeTableOutputCategory(TypeCategory category) {
             printf("none");
     }
     printf("\n");
+}
+
+static void typeTableOutputFields(TypeTable* fields) {
+    printf("    fields:\n");
 }
 
 static void typeTableOutputMethod(TypeTable* methods) {
@@ -295,14 +320,8 @@ static void typeTableOutputBehavior(BehaviorTypeInfo* behavior) {
         printf("\n");
     }
 
-    if (behavior->fieldTypes != NULL && behavior->fieldTypes->count > 0) {
-        TypeInfo* fieldType = behavior->fieldTypes->elements[0];
-        printf("    fields: %s", (fieldType != NULL) ? fieldType->shortName->chars : "dynamic");
-        for (int i = 1; i < behavior->fieldTypes->count; i++) {
-            fieldType = behavior->fieldTypes->elements[i];
-            printf(", %s", (fieldType != NULL) ? fieldType->shortName->chars : "dynamic");
-        }
-        printf("\n");
+    if (behavior->fields != NULL && behavior->fields->count > 0) {
+        typeTableOutputFields(behavior->fields);
     }
 
     if (behavior->methods != NULL && behavior->methods->count > 0) {

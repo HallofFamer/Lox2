@@ -1133,14 +1133,15 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
         resolveChild(resolver, ast, i);
     }
 
-    BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
-    TypeInfo* fieldType = ast->attribute.isTyped ? getTypeForSymbol(resolver, astGetChild(ast, 0)->token) : NULL;
-    TypeInfoArrayAdd(_class->fieldTypes, fieldType);
-
     bool hasInitializer = (ast->attribute.isTyped && numChild == 2) || (!ast->attribute.isTyped && numChild == 1);
     if (hasInitializer) {
         item->state = SYMBOL_STATE_DEFINED;
     }
+
+    ObjString* name = createSymbol(resolver, item->token);
+    BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
+    TypeInfo* fieldType = ast->attribute.isTyped ? getTypeForSymbol(resolver, astGetChild(ast, 0)->token) : NULL;
+    typeTableInsertField(_class->fields, name, fieldType, ast->attribute.isMutable, hasInitializer);
 }
 
 static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {

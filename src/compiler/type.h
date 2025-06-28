@@ -12,10 +12,12 @@ DECLARE_BUFFER(TypeInfoArray, TypeInfo*)
 
 #define IS_BEHAVIOR_TYPE(type) (type->category == TYPE_CATEGORY_CLASS || type->category == TYPE_CATEGORY_METACLASS || type->category == TYPE_CATEGORY_TRAIT)
 #define IS_CALLABLE_TYPE(type) (type->category == TYPE_CATEGORY_FUNCTION || type->category == TYPE_CATEGORY_METHOD)
+#define IS_FIELD_TYPE(type) (type->category == TYPE_CATEGORY_FIELD)
 #define IS_VOID_TYPE(type) (type->category == TYPE_CATEGORY_VOID)
 
 #define AS_BEHAVIOR_TYPE(type) ((BehaviorTypeInfo*)type)
 #define AS_CALLABLE_TYPE(type) ((CallableTypeInfo*)type)
+#define AS_FIELD_TYPE(type) ((FieldTypeInfo*)type)
 
 typedef enum {
     TYPE_CATEGORY_NONE,
@@ -23,6 +25,7 @@ typedef enum {
     TYPE_CATEGORY_METACLASS,
     TYPE_CATEGORY_TRAIT,
     TYPE_CATEGORY_FUNCTION,
+    TYPE_CATEGORY_FIELD,
     TYPE_CATEGORY_METHOD,
     TYPE_CATEGORY_VOID
 } TypeCategory;
@@ -38,7 +41,7 @@ typedef struct {
     TypeInfo baseType;
     TypeInfo* superclassType;
     TypeInfoArray* traitTypes;
-    TypeInfoArray* fieldTypes;
+    TypeTable* fields;
     TypeTable* methods;
 } BehaviorTypeInfo;
 
@@ -59,6 +62,13 @@ typedef struct {
     TypeInfoArray* paramTypes;
     CallableTypeAttribute attribute;
 } CallableTypeInfo;
+
+typedef struct {
+    TypeInfo baseType;
+    TypeInfo* declaredType;
+    bool isMutable;
+    bool hasInitializer;
+} FieldTypeInfo;
 
 typedef struct {
     ObjString* key;
@@ -92,6 +102,7 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
 BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType, TypeTable* methods);
 CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* name, TypeInfo* returnType);
 CallableTypeInfo* newCallableTypeInfoWithParams(int id, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...);
+FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 void freeTypeInfo(TypeInfo* type);
 TypeTable* newTypeTable(int id);
 void freeTypeTable(TypeTable* typeTable);
@@ -100,6 +111,7 @@ bool typeTableSet(TypeTable* typetab, ObjString* key, TypeInfo* value);
 TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key);
 BehaviorTypeInfo* typeTableInsertBehavior(TypeTable* typetab, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType);
 CallableTypeInfo* typeTableInsertCallable(TypeTable* typetab, TypeCategory category, ObjString* name, TypeInfo* returnType);
+FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 void typeTableOutput(TypeTable* typetab);
 
 bool isEqualType(TypeInfo* type, TypeInfo* type2);
