@@ -233,6 +233,15 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Token sup
     BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
     TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassType->fullName));
     currentMetaclassType->superclassType = superMetaclassType;
+
+    TypeTable* superclassFields = AS_BEHAVIOR_TYPE(superclassType)->fields;
+    for (int i = 0; i < superclassFields->capacity; i++) {
+        TypeEntry* entry = &superclassFields->entries[i];
+        if (entry != NULL && entry->key != NULL) {
+            FieldTypeInfo* fieldType = AS_FIELD_TYPE(entry->value);
+            typeTableInsertField(currentClassType->fields, entry->key, fieldType->declaredType, fieldType->isMutable, fieldType->hasInitializer);
+        }
+    }
 }
 
 static void checkUnusedVariables(Resolver* resolver, int flag) {

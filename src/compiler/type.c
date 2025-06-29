@@ -288,7 +288,7 @@ static void typeTableOutputFields(TypeTable* fields) {
             FieldTypeInfo* field = AS_FIELD_TYPE(entry->value);
             printf("      %s", field->isMutable ? "val " : "var ");
             if (field->declaredType != NULL) printf("%s ", field->declaredType->shortName->chars);
-            printf("%s\n", entry->key->chars);
+            printf("%s(index: %d)\n", entry->key->chars, field->index);
         }
     }
 }
