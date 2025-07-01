@@ -222,7 +222,7 @@ void typeTableAddAll(TypeTable* from, TypeTable* to) {
         if (entry != NULL && entry->key != NULL) {
             FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);
             FieldTypeInfo* fieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, fromFieldType->declaredType, fromFieldType->isMutable, fromFieldType->hasInitializer);
-            entry->value = (TypeInfo*)fieldType;
+            typeTableSet(to, entry->key, (TypeInfo*)fieldType);       
         }
     }
 }
