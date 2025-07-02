@@ -53,6 +53,7 @@ typedef enum {
     OP_ANONYMOUS,
     OP_INHERIT,
     OP_IMPLEMENT,
+    OP_FIELD,
     OP_INSTANCE_METHOD,
     OP_CLASS_METHOD,
     OP_ARRAY,
