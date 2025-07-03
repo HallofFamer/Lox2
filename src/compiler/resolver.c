@@ -361,6 +361,7 @@ static SymbolItem* findGlobal(Resolver* resolver, Ast* ast) {
     if (item == NULL) {
         item = symbolTableGet(resolver->rootSymtab, symbol);
         if (item == NULL) item = symbolTableGet(resolver->vm->symtab, symbol);
+
         if (item != NULL) {
             return insertSymbol(resolver, ast->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, item->type, item->isMutable);
         }

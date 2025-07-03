@@ -657,6 +657,13 @@ static void typeCheckParam(TypeChecker* typeChecker, Ast* ast) {
 
 static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
+    Ast* receiver = astGetChild(ast, 0);
+    BehaviorTypeInfo* receiverType = (receiver->type != NULL) ? AS_BEHAVIOR_TYPE(receiver->type) : NULL;
+    if (receiverType == NULL) return;
+
+    ObjString* fieldName = createSymbol(typeChecker, ast->token);
+    FieldTypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
+    if (fieldType != NULL) ast->type = fieldType->declaredType;
 }
 
 static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
@@ -717,7 +724,8 @@ static void typeCheckUnary(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckVariable(TypeChecker* typeChecker, Ast* ast) {
-    SymbolItem* item = symbolTableLookup(ast->symtab, createSymbol(typeChecker, ast->token));
+    ObjString* name = createSymbol(typeChecker, ast->token);
+    SymbolItem* item = symbolTableLookup(ast->symtab, name);
     ast->type = item->type;
 }
 
