@@ -658,17 +658,28 @@ static void typeCheckParam(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     Ast* receiver = astGetChild(ast, 0);
-    BehaviorTypeInfo* receiverType = (receiver->type != NULL) ? AS_BEHAVIOR_TYPE(receiver->type) : NULL;
-    if (receiverType == NULL) return;
+    if (receiver->type == NULL) return;
 
+    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
     ObjString* fieldName = createSymbol(typeChecker, ast->token);
-    FieldTypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
-    if (fieldType != NULL) ast->type = fieldType->declaredType;
+    TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
+    if (fieldType != NULL) ast->type = AS_FIELD_TYPE(fieldType)->declaredType;
 }
 
 static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     typeCheckChild(typeChecker, ast, 1);
+    Ast* receiver = astGetChild(ast, 0);
+    if (receiver->type == NULL) return;
+    
+    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
+    ObjString* fieldName = createSymbol(typeChecker, ast->token);
+    TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
+    Ast* value = astGetChild(ast, 1);
+
+    if (!isSubtypeOfType(value->type, AS_FIELD_TYPE(fieldType)->declaredType)) {
+        typeError(typeChecker, "Assignment to field %s expects type %s but gets %s.", fieldName->chars, AS_FIELD_TYPE(fieldType)->declaredType->shortName->chars, value->type->shortName->chars);
+    }
     defineAstType(typeChecker, ast, "Nil", NULL);
 }
 

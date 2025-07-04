@@ -581,6 +581,7 @@ static void behavior(Compiler* compiler, BehaviorType type, Ast* ast) {
 
     childIndex++; 
     compileChild(compiler, ast, childIndex);
+    if (type != BEHAVIOR_TRAIT) compileChild(compiler, ast, childIndex + 1);
     endScope(compiler);
     endClassCompiler(compiler);
 }
@@ -1262,6 +1263,14 @@ static void compileClassDeclaration(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
 }
 
+static void compileFieldDeclaration(Compiler* compiler, Ast* ast) {
+    uint8_t index = identifierConstant(compiler, &ast->token);
+    if (ast->attribute.isTyped && astNumChild(ast) == 2) compileChild(compiler, ast, 1);
+    else if (!ast->attribute.isTyped && astNumChild(ast) == 1) compileChild(compiler, ast, 0);
+    else emitByte(compiler, OP_NIL);
+    emitBytes(compiler, OP_FIELD, index);
+}
+
 static void compileFunDeclaration(Compiler* compiler, Ast* ast) {
     uint8_t index = makeVariable(compiler, &ast->token, "Expect function name.");
     markInitialized(compiler, false);
@@ -1308,6 +1317,9 @@ static void compileDeclaration(Compiler* compiler, Ast* ast) {
     switch (ast->kind) {
         case AST_DECL_CLASS:
             compileClassDeclaration(compiler, ast);
+            break;
+        case AST_DECL_FIELD:
+            compileFieldDeclaration(compiler, ast);
             break;
         case AST_DECL_FUN:
             compileFunDeclaration(compiler, ast);
