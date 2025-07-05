@@ -95,7 +95,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
     pop(vm);
     pop(vm);
 
-    SymbolItem* item = insertGlobalSymbolTable(vm, name, getNativeType(vm, "Function"));
+    SymbolItem* item = insertGlobalSymbolTable(vm, name, "Function");
     va_list args;
     va_start(args, function);
     TypeInfo* returnType = va_arg(args, TypeInfo*);
@@ -291,7 +291,8 @@ ObjNamespace* getNativeNamespace(VM* vm, const char* name) {
     return AS_NAMESPACE(namespace);
 }
 
-SymbolItem* insertGlobalSymbolTable(VM* vm, const char* symbolName, TypeInfo* type) {
+SymbolItem* insertGlobalSymbolTable(VM* vm, const char* symbolName, const char* typeName) {
+    TypeInfo* type = getNativeType(vm, typeName);
     ObjString* symbol = newStringPerma(vm, symbolName);
     SymbolItem* item = newSymbolItemWithType(syntheticToken(symbolName), SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, false, type);
     symbolTableSet(vm->symtab, symbol, item);
