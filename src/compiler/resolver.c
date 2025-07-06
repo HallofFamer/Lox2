@@ -210,17 +210,19 @@ static SymbolItem* findThis(Resolver* resolver) {
     return item;
 }
 
-static void insertMetaclassType(Resolver* resolver, ObjString* classShortName, ObjString* classFullName) {
+static BehaviorTypeInfo* insertMetaclassType(Resolver* resolver, ObjString* classShortName, ObjString* classFullName) {
     ObjString* metaclassShortName = getMetaclassNameFromClass(resolver->vm, classShortName);
     ObjString* metaclassFullName = getMetaclassNameFromClass(resolver->vm, classFullName);
-    typeTableInsertBehavior(resolver->vm->typetab, TYPE_CATEGORY_CLASS, metaclassShortName, metaclassFullName, NULL);
+    return typeTableInsertBehavior(resolver->vm->typetab, TYPE_CATEGORY_CLASS, metaclassShortName, metaclassFullName, NULL);
 }
 
 static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, TypeCategory category) {
     ObjString* shortName = createSymbol(resolver, item->token);
     ObjString* fullName = getSymbolFullName(resolver, item->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
-    if (category == TYPE_CATEGORY_CLASS) insertMetaclassType(resolver, shortName, fullName);
+    if (category == TYPE_CATEGORY_CLASS) item->type = (TypeInfo*)insertMetaclassType(resolver, shortName, fullName);
+    else if (category == TYPE_CATEGORY_METACLASS) item->type = getNativeType(resolver->vm, "Metaclass");
+    else if (category == TYPE_CATEGORY_TRAIT) item->type = getNativeType(resolver->vm, "Trait");
     return item;
 }
 
@@ -276,11 +278,20 @@ static void endScope(Resolver* resolver) {
 
 static SymbolItem* declareVariable(Resolver* resolver, Ast* ast, bool isMutable) {
     SymbolCategory category = (resolver->currentSymtab == resolver->rootSymtab) ? SYMBOL_CATEGORY_GLOBAL : SYMBOL_CATEGORY_LOCAL;
-    if (ast->kind == AST_DECL_METHOD) category = SYMBOL_CATEGORY_METHOD;
-    SymbolItem* item = insertSymbol(resolver, ast->token, category, SYMBOL_STATE_DECLARED, NULL, isMutable);
+    ObjString* name = createSymbol(resolver, ast->token);
+    Token token = ast->token;
 
+    if (ast->kind == AST_DECL_METHOD) category = SYMBOL_CATEGORY_METHOD;
+    else if (ast->kind == AST_DECL_FIELD) {
+        category = SYMBOL_CATEGORY_FIELD;
+        if (ast->attribute.isClass) {
+            ObjString* symbol = concatenateString(resolver->vm, newStringPerma(resolver->vm, "class"), name, " ");
+            token = syntheticToken(symbol->chars);
+        }
+    }
+
+    SymbolItem* item = insertSymbol(resolver, token, category, SYMBOL_STATE_DECLARED, NULL, isMutable);
     if (item == NULL) {
-        ObjString* name = createSymbol(resolver, ast->token);
         semanticError(resolver, "Already a variable with name '%s' in this scope.", name->chars);
     }
     return item;
@@ -1122,15 +1133,15 @@ static void resolveStatement(Resolver* resolver, Ast* ast) {
 
 static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
-    item->type = getNativeType(resolver->vm, "Class");
     insertBehaviorType(resolver, item, TYPE_CATEGORY_CLASS);
     resolveChild(resolver, ast, 0);
     item->state = SYMBOL_STATE_ACCESSED;
 }
 
 static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
+    ObjString* name = createSymbol(resolver, ast->token);
     SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
-    item->category = SYMBOL_CATEGORY_FIELD;
+    if (item == NULL) return;
     int numChild = astNumChild(ast);
 
     for (int i = 0; i < numChild; i++) {
@@ -1142,8 +1153,8 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
         item->state = SYMBOL_STATE_DEFINED;
     }
 
-    ObjString* name = createSymbol(resolver, item->token);
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
+    if (ast->attribute.isClass) classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
     TypeInfo* fieldType = ast->attribute.isTyped ? getTypeForSymbol(resolver, astGetChild(ast, 0)->token) : NULL;
     typeTableInsertField(classType->fields, name, fieldType, ast->attribute.isMutable, hasInitializer);
 
