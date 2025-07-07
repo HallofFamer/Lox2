@@ -675,6 +675,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
     ObjString* fieldName = createSymbol(typeChecker, ast->token);
     TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
+    if (fieldType == NULL) return;
     Ast* value = astGetChild(ast, 1);
 
     if (!isSubtypeOfType(value->type, AS_FIELD_TYPE(fieldType)->declaredType)) {
@@ -1057,13 +1058,11 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
     
     if (!typeChecker->currentClass->isAnonymous) {
         ObjString* name = createSymbol(typeChecker, ast->token);
-        SymbolItem* item = symbolTableLookup(ast->symtab, name);
         BehaviorTypeInfo* behaviorType = typeChecker->currentClass->type;
         TypeInfo* type = typeTableGet(typeChecker->currentClass->type->fields, name);
         if (type == NULL) return;
 
         FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);
-        item->type = fieldType->declaredType;
         Ast* initializer = NULL;
         if (ast->attribute.isTyped && numChild == 2) initializer = astGetChild(ast, 1);
         else if (!ast->attribute.isTyped && numChild == 1) initializer = astGetChild(ast, 0);

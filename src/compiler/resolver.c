@@ -693,30 +693,37 @@ static void resolveParam(Resolver* resolver, Ast* ast) {
 
 static void resolvePropertyGet(Resolver* resolver, Ast* ast) {
     resolveChild(resolver, ast, 0);
-    Ast* child = astGetChild(ast, 0);
-    if (child->kind != AST_EXPR_THIS) return;
-
-    ObjString* name = createSymbol(resolver, ast->token);
-    SymbolItem* item = symbolTableLookup(ast->symtab, name);
-    if (item != NULL && item->state != SYMBOL_STATE_MODIFIED) {
-        item->state = SYMBOL_STATE_ACCESSED;
-    }
 }
 
 static void resolvePropertySet(Resolver* resolver, Ast* ast) {
     resolveChild(resolver, ast, 0);
     resolveChild(resolver, ast, 1);
-    Ast* child = astGetChild(ast, 0);
-    if (child->kind != AST_EXPR_THIS) return;
+    Ast* receiver = astGetChild(ast, 0);
+    ObjString* fieldName = createSymbol(resolver, ast->token);
 
-    ObjString* name = createSymbol(resolver, ast->token);
-    SymbolItem* item = symbolTableLookup(resolver->currentClass->symtab, name);
-    if (item != NULL) {
-        if (item->isMutable) item->state = SYMBOL_STATE_MODIFIED;
-        else {
-            item->state = SYMBOL_STATE_ACCESSED;
-            if (!resolver->currentFunction->attribute.isInitializer) {
-                semanticError(resolver, "Cannot modify immutable field '%s'.", name->chars);
+    if (receiver->kind == AST_EXPR_THIS && resolver->currentClass != NULL && !resolver->currentClass->isAnonymous) {
+        TypeInfo* receiverType = getTypeForSymbol(resolver, resolver->currentClass->name);
+        TypeInfo* type = typeTableGet(AS_BEHAVIOR_TYPE(receiverType)->fields, fieldName);
+
+        if (type != NULL) {
+            FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);
+            if (fieldType != NULL && !fieldType->isMutable && !resolver->currentFunction->attribute.isInitializer) {
+                semanticError(resolver, "Cannot modify immutable instance field '%s' except in class initializer.", fieldName->chars);
+            }
+        }
+    }
+    else{
+        TypeInfo* classType = getTypeForSymbol(resolver, receiver->token);
+        if (classType != NULL) {
+            ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, classType->fullName);
+            TypeInfo* metaclassType = getTypeForSymbol(resolver, syntheticToken(metaclassName->chars));
+            TypeInfo* type = typeTableGet(AS_BEHAVIOR_TYPE(metaclassType)->fields, fieldName);
+
+            if (type != NULL) {
+                FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);
+                if (fieldType != NULL && !fieldType->isMutable) {
+                    semanticError(resolver, "Cannot modify immutable class field '%s'.", fieldName->chars);
+                }
             }
         }
     }
@@ -1139,22 +1146,15 @@ static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
 }
 
 static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
-    ObjString* name = createSymbol(resolver, ast->token);
-    SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
-    if (item == NULL) return;
     int numChild = astNumChild(ast);
-
     for (int i = 0; i < numChild; i++) {
         resolveChild(resolver, ast, i);
     }
 
     bool hasInitializer = (ast->attribute.isTyped && numChild == 2) || (!ast->attribute.isTyped && numChild == 1);
-    if (hasInitializer) {
-        item->state = SYMBOL_STATE_DEFINED;
-    }
-
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
     if (ast->attribute.isClass) classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
+    ObjString* name = createSymbol(resolver, ast->token);
     TypeInfo* fieldType = ast->attribute.isTyped ? getTypeForSymbol(resolver, astGetChild(ast, 0)->token) : NULL;
     typeTableInsertField(classType->fields, name, fieldType, ast->attribute.isMutable, hasInitializer);
 
