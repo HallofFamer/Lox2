@@ -22,6 +22,7 @@ struct FunctionTypeChecker {
     CallableTypeInfo* type;
     bool isAsync;
     bool isClass;
+    bool isInitializer;
 };
 
 static void typeError(TypeChecker* typeChecker, const char* format, ...) {
@@ -46,12 +47,13 @@ static void endClassTypeChecker(TypeChecker* typeChecker) {
     typeChecker->currentClass = typeChecker->currentClass->enclosing;
 }
 
-static void initFunctionTypeChecker(TypeChecker* typeChecker, FunctionTypeChecker* function, Token name, CallableTypeInfo* type, bool isAsync, bool isClass) {
+static void initFunctionTypeChecker(TypeChecker* typeChecker, FunctionTypeChecker* function, Token name, CallableTypeInfo* type, bool isAsync, bool isClass, bool isInitializer) {
     function->enclosing = typeChecker->currentFunction;
     function->name = name;
     function->type = type;
     function->isAsync = isAsync;
     function->isClass = isClass;
+    function->isInitializer = isInitializer;
     typeChecker->currentFunction = function;
 }
 
@@ -478,9 +480,9 @@ static void block(TypeChecker* typeChecker, Ast* ast) {
     }
 }
 
-static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass) {
+static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer) {
     FunctionTypeChecker functionTypeChecker;
-    initFunctionTypeChecker(typeChecker, &functionTypeChecker, ast->token, calleeType, isAsync, isClass);
+    initFunctionTypeChecker(typeChecker, &functionTypeChecker, ast->token, calleeType, isAsync, isClass, isInitializer);
     functionTypeChecker.symtab = ast->symtab;
 
     typeCheckChild(typeChecker, ast, 0);
@@ -601,7 +603,7 @@ static void typeCheckDictionary(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckFunction(TypeChecker* typeChecker, Ast* ast) {
     ObjString* name = copyStringPerma(typeChecker->vm, ast->token.start, ast->token.length);
     TypeInfo* calleeType = typeTableGet(typeChecker->vm->typetab, name);
-    function(typeChecker, ast, calleeType == NULL ? NULL : AS_CALLABLE_TYPE(calleeType), ast->attribute.isAsync, ast->attribute.isClass);
+    function(typeChecker, ast, calleeType == NULL ? NULL : AS_CALLABLE_TYPE(calleeType), ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
 }
 
 static void typeCheckGrouping(TypeChecker* typeChecker, Ast* ast) {
@@ -674,12 +676,21 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
     ObjString* fieldName = createSymbol(typeChecker, ast->token);
-    TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
-    if (fieldType == NULL) return;
+    TypeInfo* type = typeTableGet(receiverType->fields, fieldName);
+    if (type == NULL) return;
     Ast* value = astGetChild(ast, 1);
 
-    if (!isSubtypeOfType(value->type, AS_FIELD_TYPE(fieldType)->declaredType)) {
-        typeError(typeChecker, "Assignment to field %s expects type %s but gets %s.", fieldName->chars, AS_FIELD_TYPE(fieldType)->declaredType->shortName->chars, value->type->shortName->chars);
+    FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);
+    if (!fieldType->isMutable) {
+        if (receiver->kind == AST_EXPR_THIS && !typeChecker->currentFunction->isInitializer) {
+            typeError(typeChecker, "Cannot modify immutable instance field '%s' except in its own class initializer.", fieldName->chars);
+        }
+        else if (receiver->kind != AST_EXPR_THIS) {
+            typeError(typeChecker, "Cannot modify immutable instance field '%s'.", fieldName->chars);
+        }
+    }
+    else if (!isSubtypeOfType(value->type, fieldType->declaredType)) {
+        typeError(typeChecker, "Assignment to field %s expects type %s but gets %s.", fieldName->chars, fieldType->declaredType->shortName->chars, value->type->shortName->chars);
     }
     defineAstType(typeChecker, ast, "Nil", NULL);
 }
@@ -1098,7 +1109,7 @@ static void typeCheckMethodDeclaration(TypeChecker* typeChecker, Ast* ast) {
         else classType = typeChecker->currentClass->type;
 
         CallableTypeInfo* methodType = AS_CALLABLE_TYPE(typeTableGet(classType->methods, name));
-        function(typeChecker, ast, methodType, ast->attribute.isAsync, ast->attribute.isClass);
+        function(typeChecker, ast, methodType, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
     }
 }
 
@@ -1185,7 +1196,7 @@ void typeCheckChild(TypeChecker* typeChecker, Ast* ast, int index) {
 
 void typeCheck(TypeChecker* typeChecker, Ast* ast) {
     FunctionTypeChecker functionTypeChecker;
-    initFunctionTypeChecker(typeChecker, &functionTypeChecker, syntheticToken("script"), NULL, ast->attribute.isAsync, false);
+    initFunctionTypeChecker(typeChecker, &functionTypeChecker, syntheticToken("script"), NULL, ast->attribute.isAsync, false, false);
     typeCheckAst(typeChecker, ast);
 
     endFunctionTypeChecker(typeChecker);

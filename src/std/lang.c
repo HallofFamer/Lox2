@@ -1932,39 +1932,35 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->traitClass, Trait, superclass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->traitClass, Trait, toString, 0, RETURN_TYPE(String));
 
-    TypeInfo* classType = getNativeType(vm, "Class");
-    TypeInfo* namespaceType = getNativeType(vm, "Namespace");
-    TypeInfo* traitType = getNativeType(vm, "Trait");
-
-    insertGlobalSymbolTable(vm, "clox", namespaceType);
-    insertGlobalSymbolTable(vm, "Object", classType);
-    insertGlobalSymbolTable(vm, "Behavior", classType);
-    insertGlobalSymbolTable(vm, "Class", classType);
-    insertGlobalSymbolTable(vm, "Metaclass", classType);
-    insertGlobalSymbolTable(vm, "Method", classType);
-    insertGlobalSymbolTable(vm, "Namespace", classType);
-    insertGlobalSymbolTable(vm, "Trait", classType);
+    insertGlobalSymbolTable(vm, "clox", "Namespace");
+    insertGlobalSymbolTable(vm, "Object", "Object class");
+    insertGlobalSymbolTable(vm, "Behavior", "Behavior class");
+    insertGlobalSymbolTable(vm, "Class", "Class class");
+    insertGlobalSymbolTable(vm, "Metaclass", "Metaclass class");
+    insertGlobalSymbolTable(vm, "Method", "Method class");
+    insertGlobalSymbolTable(vm, "Namespace", "Namespace class");
+    insertGlobalSymbolTable(vm, "Trait", "Trait class");
 
     bindSuperclass(vm, vm->nilClass, vm->objectClass);
     DEF_INTERCEPTOR(vm->nilClass, Nil, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Nil));
     DEF_METHOD(vm->nilClass, Nil, clone, 0, RETURN_TYPE(Nil));
     DEF_METHOD(vm->nilClass, Nil, objectID, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->nilClass, Nil, toString, 0, RETURN_TYPE(String));
-    insertGlobalSymbolTable(vm, "Nil", classType);
+    insertGlobalSymbolTable(vm, "Nil", "Nil class");
 
     bindSuperclass(vm, vm->boolClass, vm->objectClass);
     DEF_INTERCEPTOR(vm->boolClass, Bool, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(vm->boolClass, Bool, clone, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->boolClass, Bool, objectID, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->boolClass, Bool, toString, 0, RETURN_TYPE(String));
-    insertGlobalSymbolTable(vm, "Bool", classType);
+    insertGlobalSymbolTable(vm, "Bool", "Bool class");
 
     DEF_METHOD(comparableTrait, TComparable, compareTo, 1, RETURN_TYPE(Object), PARAM_TYPE(TComparable));
     DEF_METHOD(comparableTrait, TComparable, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(comparableTrait, TComparable, ==, __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(comparableTrait, TComparable, >, __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(comparableTrait, TComparable, <, __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
-    insertGlobalSymbolTable(vm, "TComparable", traitType);
+    insertGlobalSymbolTable(vm, "TComparable", "Trait");
 
     bindSuperclass(vm, vm->numberClass, vm->objectClass);
     bindTrait(vm, vm->numberClass, comparableTrait);
@@ -2005,7 +2001,7 @@ void registerLangPackage(VM* vm) {
     DEF_OPERATOR(vm->numberClass, Number, *, __multiply__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, /, __divide__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, %, __modulo__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
-    insertGlobalSymbolTable(vm, "Number", classType);
+    insertGlobalSymbolTable(vm, "Number", "Number class");
 
     ObjClass* numberMetaclass = vm->numberClass->obj.klass;
     setClassProperty(vm, vm->numberClass, "infinity", NUMBER_VAL(INFINITY));
@@ -2035,7 +2031,7 @@ void registerLangPackage(VM* vm) {
     DEF_OPERATOR(vm->intClass, Int, *, __multiply__, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
     DEF_OPERATOR(vm->intClass, Int, %, __modulo__, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
     DEF_OPERATOR(vm->intClass, Int, .., __range__, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
-    insertGlobalSymbolTable(vm, "Int", classType);
+    insertGlobalSymbolTable(vm, "Int", "Int class");
 
     ObjClass* intMetaclass = vm->intClass->obj.klass;
     setClassProperty(vm, vm->intClass, "max", INT_VAL(INT32_MAX));
@@ -2046,7 +2042,7 @@ void registerLangPackage(VM* vm) {
     DEF_INTERCEPTOR(vm->floatClass, Float, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Float), PARAM_TYPE(Object));
     DEF_METHOD(vm->floatClass, Float, clone, 0, RETURN_TYPE(Float));
     DEF_METHOD(vm->floatClass, Float, toString, 0, RETURN_TYPE(String));
-    insertGlobalSymbolTable(vm, "Float", classType);
+    insertGlobalSymbolTable(vm, "Float", "Float class");
 
     ObjClass* floatMetaclass = vm->floatClass->obj.klass;
     setClassProperty(vm, vm->floatClass, "max", NUMBER_VAL(DBL_MAX));
@@ -2082,7 +2078,7 @@ void registerLangPackage(VM* vm) {
     DEF_OPERATOR(vm->stringClass, String, +, __add__, 1, RETURN_TYPE(String), PARAM_TYPE(String));
     DEF_OPERATOR(vm->stringClass, String, [], __getSubscript__, 1, RETURN_TYPE(String), PARAM_TYPE(Int));
     bindStringClass(vm);
-    insertGlobalSymbolTable(vm, "String", classType);
+    insertGlobalSymbolTable(vm, "String", "String class");
 
     ObjClass* stringMetaclass = vm->stringClass->obj.klass;
     DEF_METHOD(stringMetaclass, StringClass, fromByte, 1, RETURN_TYPE(String), PARAM_TYPE(Object));
@@ -2094,7 +2090,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(callableTrait, TCallable, isVariadic, 0, RETURN_TYPE(Bool));
     DEF_METHOD(callableTrait, TCallable, name, 0, RETURN_TYPE(String));
     DEF_OPERATOR(callableTrait, TCallable, (), __invoke__, -1, RETURN_TYPE(Object));
-    insertGlobalSymbolTable(vm, "TCallable", traitType);
+    insertGlobalSymbolTable(vm, "TCallable", "Trait");
 
     bindSuperclass(vm, vm->functionClass, vm->objectClass);
     bindTrait(vm, vm->functionClass, callableTrait);
@@ -2114,7 +2110,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->functionClass, Function, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->functionClass, Function, upvalueCount, 0, RETURN_TYPE(Int));
     DEF_OPERATOR(vm->functionClass, Function, (), __invoke__, -1, RETURN_TYPE(Object));
-    insertGlobalSymbolTable(vm, "Function", classType);
+    insertGlobalSymbolTable(vm, "Function", "Function class");
 
     bindSuperclass(vm, vm->boundMethodClass, vm->objectClass);
     bindTrait(vm, vm->boundMethodClass, callableTrait);
@@ -2130,7 +2126,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->boundMethodClass, BoundMethod, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->boundMethodClass, BoundMethod, upvalueCount, 0, RETURN_TYPE(Int));
     DEF_OPERATOR(vm->boundMethodClass, BoundMethod, (), __invoke__, -1, RETURN_TYPE(Object));
-    insertGlobalSymbolTable(vm, "BoundMethod", classType);
+    insertGlobalSymbolTable(vm, "BoundMethod", "BoundMethod class");
 
     bindSuperclass(vm, vm->generatorClass, vm->objectClass);
     vm->generatorClass->classType = OBJ_GENERATOR;
@@ -2148,7 +2144,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->generatorClass, Generator, throws, 1, RETURN_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->generatorClass, Generator, toString, 0, RETURN_TYPE(String));
     DEF_OPERATOR(vm->generatorClass, Generator, (), __invoke__, -1, RETURN_TYPE(Object));
-    insertGlobalSymbolTable(vm, "Generator", classType);
+    insertGlobalSymbolTable(vm, "Generator", "Generator class");
 
     ObjClass* generatorMetaclass = vm->generatorClass->obj.klass;
     setClassProperty(vm, vm->generatorClass, "stateStart", INT_VAL(GENERATOR_START));
@@ -2164,7 +2160,7 @@ void registerLangPackage(VM* vm) {
     DEF_INTERCEPTOR(vm->exceptionClass, Exception, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Exception), PARAM_TYPE(String));
     DEF_METHOD(vm->exceptionClass, Exception, message, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->exceptionClass, Exception, toString, 0, RETURN_TYPE(String));
-    insertGlobalSymbolTable(vm, "Exception", classType);
+    insertGlobalSymbolTable(vm, "Exception", "Exception class");
 
     ObjClass* runtimeExceptionClass = defineNativeException(vm, "RuntimeException", vm->exceptionClass);
     defineNativeException(vm, "AssertionException", runtimeExceptionClass);
@@ -2178,16 +2174,16 @@ void registerLangPackage(VM* vm) {
     defineNativeException(vm, "StackOverflowException", runtimeExceptionClass);
     defineNativeException(vm, "UnsupportedOperationException", runtimeExceptionClass);
 
-    insertGlobalSymbolTable(vm, "AssertionException", classType);
-    insertGlobalSymbolTable(vm, "ArithmeticException", classType);
-    insertGlobalSymbolTable(vm, "FormatException", classType);
-    insertGlobalSymbolTable(vm, "IllegalArgumentException", classType);
-    insertGlobalSymbolTable(vm, "IndexOutOfBoundsException", classType);
-    insertGlobalSymbolTable(vm, "MethodNotFoundException", classType);
-    insertGlobalSymbolTable(vm, "NotImplementedException", classType);
-    insertGlobalSymbolTable(vm, "OutOfMemoryException", classType);
-    insertGlobalSymbolTable(vm, "StackOverflowException", classType);
-    insertGlobalSymbolTable(vm, "UnsupportedOperationException", classType);
+    insertGlobalSymbolTable(vm, "AssertionException", "AssertionException class");
+    insertGlobalSymbolTable(vm, "ArithmeticException", "ArithmeticException class");
+    insertGlobalSymbolTable(vm, "FormatException", "FormatException class");
+    insertGlobalSymbolTable(vm, "IllegalArgumentException", "IllegalArgumentException class");
+    insertGlobalSymbolTable(vm, "IndexOutOfBoundsException", "IndexOutOfBoundsException class");
+    insertGlobalSymbolTable(vm, "MethodNotFoundException", "MethodNotFoundException class");
+    insertGlobalSymbolTable(vm, "NotImplementedException", "NotImplementedException class");
+    insertGlobalSymbolTable(vm, "OutOfMemoryException", "OutOfMemoryException class");
+    insertGlobalSymbolTable(vm, "StackOverflowException", "StackOverflowException class");
+    insertGlobalSymbolTable(vm, "UnsupportedOperationException", "UnsupportedOperationException class");
 
     vm->currentNamespace = vm->rootNamespace;
 }

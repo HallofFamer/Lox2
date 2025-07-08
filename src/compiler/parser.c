@@ -628,12 +628,21 @@ static Ast* function(Parser* parser, bool isAsync, bool isLambda, bool isVoid) {
     return func;
 }
 
+static bool isFieldDeclaration(Parser* parser) {
+    if (check(parser, TOKEN_VAL) || check(parser, TOKEN_VAR)) return true;
+    else if (check(parser, TOKEN_CLASS) && (checkNext(parser, TOKEN_VAL) || checkNext(parser, TOKEN_VAR))) return true;
+    return false;
+}
+
 static Ast* fields(Parser* parser, Token* name) {
     Ast* fieldList = emptyAst(AST_LIST_FIELD, *name);
 
-    while (match(parser, TOKEN_VAL) || match(parser, TOKEN_VAR)) {
+    while (isFieldDeclaration(parser)) {
         bool hasFieldType = false, hasInitializer = false;
-        bool isMutable = (previousTokenType(parser) == TOKEN_VAR);
+        bool isClass = match(parser, TOKEN_CLASS);
+        bool isMutable = (currentTokenType(parser) == TOKEN_VAR);
+        advance(parser);
+
         Ast* fieldType = NULL;
         if (check2(parser, TOKEN_IDENTIFIER)) {
             hasFieldType = true;
@@ -651,6 +660,7 @@ static Ast* fields(Parser* parser, Token* name) {
         if (hasFieldType) astAppendChild(field, fieldType);
         if (hasInitializer) astAppendChild(field, initializer);
 
+        field->attribute.isClass = isClass;
         field->attribute.isMutable = isMutable;
         field->attribute.isTyped = hasFieldType;
         astAppendChild(fieldList, field);
