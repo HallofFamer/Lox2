@@ -278,7 +278,7 @@ struct ObjClass {
     ValueArray fields;
     Table methods;
     int defaultShapeID;
-    ValueArray defaultFieldValues;
+    ValueArray defaultInstanceFields;
 };
 
 struct ObjClosure {

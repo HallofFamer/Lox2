@@ -27,6 +27,15 @@ static int identifierInstruction(const char* name, Chunk* chunk, int offset) {
     return offset + 2;
 }
 
+static int memberInstruction(const char* name, Chunk* chunk, int offset) {
+    uint8_t identifier = chunk->code[offset + 1];
+    uint8_t isClass = (bool)chunk->code[offset + 2];
+    printf("%-16s %s %4d '", name, isClass ? "(class) " : "", identifier);
+    printValue(chunk->identifiers.values[identifier]);
+    printf("'\n");
+    return offset + 3;
+}
+
 static int invokeInstruction(const char* name, Chunk* chunk, int offset) {
     uint8_t identifier = chunk->code[offset + 1];
     uint8_t argCount = chunk->code[offset + 2];
@@ -190,11 +199,9 @@ int disassembleInstruction(Chunk* chunk, int offset) {
         case OP_IMPLEMENT:
             return byteInstruction("OP_IMPLEMENT", chunk, offset);
         case OP_FIELD:
-            return identifierInstruction("OP_FIELD", chunk, offset);
-        case OP_INSTANCE_METHOD:
-            return identifierInstruction("OP_INSTANCE_METHOD", chunk, offset);
-        case OP_CLASS_METHOD:
-            return identifierInstruction("OP_CLASS_METHOD", chunk, offset);
+            return memberInstruction("OP_FIELD", chunk, offset);
+        case OP_METHOD:
+            return memberInstruction("OP_METHOD", chunk, offset);
         case OP_ARRAY: 
             return byteInstruction("OP_ARRAY", chunk, offset);
         case OP_DICTIONARY:

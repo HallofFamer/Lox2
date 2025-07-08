@@ -577,6 +577,33 @@ bool bindMethod(VM* vm, ObjClass* klass, ObjString* name) {
     return true;
 }
 
+static void defineField(VM* vm, ObjString* name, bool isClassField) {
+    Value defaultValue = peek(vm, 0);
+    ObjClass* klass = AS_CLASS(peek(vm, 1));
+
+    if (isClassField) {
+        if (klass->behaviorType != BEHAVIOR_CLASS) {
+            runtimeError(vm, "Class field '%s' can only be defined in class body.", name->chars);
+        }
+        klass = klass->obj.klass;
+    }
+
+    Shape* parentShape = &vm->shapes.list[klass->defaultShapeID];
+    int index;
+    if (idMapGet(&parentShape->edges, name, &index)) klass->defaultShapeID = index;
+    else klass->defaultShapeID = createShapeFromParent(vm, klass->defaultShapeID, name);    
+    valueArrayWrite(vm, &klass->defaultInstanceFields, defaultValue);
+
+    if (isClassField) {
+        ObjClass* metaclass = klass;
+        klass = AS_CLASS(peek(vm, 1));
+        klass->obj.shapeID = metaclass->defaultShapeID;
+        idMapSet(vm, &klass->indexes, name, metaclass->defaultInstanceFields.count - 1);
+        valueArrayWrite(vm, &klass->fields, defaultValue);
+    }
+    pop(vm);
+}
+
 static void defineMethod(VM* vm, ObjString* name, bool isClassMethod) {
     Value method = peek(vm, 0);
     ObjClass* klass = AS_CLASS(peek(vm, 1));
@@ -1174,12 +1201,18 @@ InterpretResult run(VM* vm) {
                 pop(vm);
                 break;
             }
-            case OP_INSTANCE_METHOD:
-                defineMethod(vm, READ_STRING(), false);
+            case OP_FIELD: {
+                ObjString* fieldName = READ_STRING();
+                bool isClassField = (bool)READ_BYTE();
+                defineField(vm, fieldName, isClassField);
                 break;
-            case OP_CLASS_METHOD:
-                defineMethod(vm, READ_STRING(), true);
+            }
+            case OP_METHOD: {
+                ObjString* methodName = READ_STRING();
+                bool isClassMethod = (bool)READ_BYTE();
+                defineMethod(vm, methodName, isClassMethod);
                 break;
+            }
             case OP_ARRAY: {
                 uint8_t elementCount = READ_BYTE();
                 makeArray(vm, elementCount);

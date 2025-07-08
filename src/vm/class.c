@@ -38,7 +38,7 @@ void initClass(VM* vm, ObjClass* klass, ObjString* name, ObjClass* metaclass, Be
     initIDMap(&klass->indexes, klass->obj.generation);
     initValueArray(&klass->fields, klass->obj.generation);
     initTable(&klass->methods, klass->obj.generation);
-    initValueArray(&klass->defaultFieldValues, klass->obj.generation);
+    initValueArray(&klass->defaultInstanceFields, klass->obj.generation);
     pop(vm);
 }
 
@@ -71,7 +71,7 @@ void initTrait(VM* vm, ObjClass* trait, ObjString* name) {
     initIDMap(&trait->indexes, trait->obj.generation);
     initValueArray(&trait->fields, trait->obj.generation);
     initTable(&trait->methods, trait->obj.generation);
-    initValueArray(&trait->defaultFieldValues, trait->obj.generation);
+    initValueArray(&trait->defaultInstanceFields, trait->obj.generation);
     pop(vm);
 }
 
@@ -153,6 +153,11 @@ void inheritSuperclass(VM* vm, ObjClass* subclass, ObjClass* superclass) {
     subclass->superclass = superclass;
     subclass->classType = superclass->classType;
     subclass->interceptors = superclass->interceptors;
+    subclass->defaultShapeID = superclass->defaultShapeID;
+
+    for (int i = 0; i < superclass->defaultInstanceFields.count; i++) {
+        valueArrayWrite(vm, &subclass->defaultInstanceFields, superclass->defaultInstanceFields.values[i]);
+    }
 
     if (subclass->isNative) {
         BehaviorTypeInfo* subclassType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, subclass->fullName));

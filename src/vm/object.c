@@ -53,6 +53,13 @@ ObjClass* newClass(VM* vm, ObjString* name, ObjType classType) {
 
     ObjClass* klass = createClass(vm, name, metaclass, BEHAVIOR_CLASS);
     klass->classType = classType;
+    klass->obj.shapeID = metaclass->defaultShapeID;
+
+    for (int i = 0; i < metaclass->defaultInstanceFields.count; i++) {
+        idMapSet(vm, &klass->indexes, name, i);
+        valueArrayWrite(vm, &klass->fields, metaclass->defaultInstanceFields.values[i]);
+    }
+
     pop(vm);
     return klass;
 }
@@ -159,6 +166,11 @@ ObjGenerator* newGenerator(VM* vm, ObjFrame* frame, ObjGenerator* outer) {
 ObjInstance* newInstance(VM* vm, ObjClass* klass) {
     ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE, klass);
     initValueArray(&instance->fields, instance->obj.generation);
+    instance->obj.shapeID = klass->defaultShapeID;
+
+    for (int i = 0; i < klass->defaultInstanceFields.count; i++) {
+        valueArrayWrite(vm, &instance->fields, klass->defaultInstanceFields.values[i]);
+    }
     return instance;
 }
 

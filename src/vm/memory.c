@@ -216,7 +216,7 @@ static size_t sizeOfObject(Obj* object) {
         case OBJ_CLASS: {
             ObjClass* _class = (ObjClass*)object;
             return sizeof(ObjClass) + sizeof(Value) * _class->traits.capacity + sizeof(Value) * _class->fields.capacity
-                + sizeof(Entry) * _class->methods.capacity + sizeof(IDEntry) * _class->indexes.capacity + sizeof(Value) * _class->defaultFieldValues.capacity; 
+                + sizeof(Entry) * _class->methods.capacity + sizeof(IDEntry) * _class->indexes.capacity + sizeof(Value) * _class->defaultInstanceFields.capacity; 
         }
         case OBJ_CLOSURE: {
             ObjClosure* closure = (ObjClosure*)object;
@@ -319,7 +319,7 @@ static void blackenObject(VM* vm, Obj* object, GCGenerationType generation) {
             markIDMap(vm, &_class->indexes, generation);
             markArray(vm, &_class->fields, generation);
             markTable(vm, &_class->methods, generation);
-            markArray(vm, &_class->defaultFieldValues, generation);
+            markArray(vm, &_class->defaultInstanceFields, generation);
             break;
         }
         case OBJ_CLOSURE: {
@@ -486,7 +486,7 @@ static void freeObject(VM* vm, Obj* object) {
             freeIDMap(vm, &_class->indexes);
             freeValueArray(vm, &_class->fields);
             freeTable(vm, &_class->methods);
-            freeValueArray(vm, &_class->defaultFieldValues);
+            freeValueArray(vm, &_class->defaultInstanceFields);
             FREE(ObjClass, object, object->generation);
             break;
         }

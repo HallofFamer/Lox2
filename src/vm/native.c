@@ -116,7 +116,7 @@ void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     typeTableInsertField(behaviorType->fields, fieldName, type, isMutable, !IS_NIL(defaultValue));
     klass->defaultShapeID = createShapeFromParent(vm, klass->defaultShapeID, fieldName);
-    valueArrayWrite(vm, &klass->defaultFieldValues, defaultValue);
+    valueArrayWrite(vm, &klass->defaultInstanceFields, defaultValue);
 }
 
 void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bool isAsync, NativeMethod method, ...) {
