@@ -1,0 +1,20 @@
+namespace test.types
+
+class Calculator {
+    
+    Int sumInt(Int a, Int b) {
+        return a + b
+    }
+
+    class Number sumNumber(Number a, Number b) { 
+        return a + b
+    }
+
+    void printSum(Int a, Int b) {
+        println(a + b)
+    }
+}
+
+val calc = Calculator()
+println(calc.sumInt(1, 2))
+calc.printSum(2, 4)

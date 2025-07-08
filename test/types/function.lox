@@ -1,0 +1,21 @@
+namespace test.types
+
+Number sum(Number a, Int b) { 
+    return a + b 
+}
+
+Number sum2(.. Number nums) { 
+    var result = 0
+    for (val num : nums) { 
+        result = result + num
+    }
+    return result
+}
+
+void printSum(Number a, Number b) { 
+    println(a + b)
+}
+
+println(sum(3.5, 5))
+println(sum2(1, 2, 3, 4, 5))
+printSum(1.5, 2.6)

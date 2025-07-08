@@ -1,0 +1,5 @@
+namespace test.types
+using clox.std.util.Date
+
+val date = Date(2025, 01, 31)
+println(date.toString())

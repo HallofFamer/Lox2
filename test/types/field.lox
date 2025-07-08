@@ -1,0 +1,51 @@
+namespace test.types
+
+class Vehicle { 
+    
+    class val String serialID = "ABCDEFG"
+    var Int year = 2025
+    var Int speed = 0
+
+    __init__(Int year, Int speed) { 
+        this.year = year
+        this.speed = speed
+    }
+
+    void drive(Int speed) { 
+	    this.speed = speed
+	}
+	
+	void accelerate(Int dSpeed) { 
+	    this.speed = this.speed + dSpeed
+	}
+}
+
+class Car extends Vehicle {
+    
+	val String brand
+	val model
+    var Int numPassengers = 0
+	
+	__init__(String brand, model, Int year){ 
+        super.__init__(year, 0)
+	    this.brand = brand
+		this.model = model
+	}
+
+    void acceptPassenger(Int numPassengers) { 
+        this.numPassengers = numPassengers
+    }
+
+    void dropOffPassengers() {
+        this.numPassengers = 0
+    }
+	
+    String toString() { 
+	    return "Car ${this.year} ${this.brand} ${this.model} carrying ${this.numPassengers} passengers is driving at speed ${this.speed} mph"
+	}
+}
+
+val car = Car("Mercedes", "GLC", 2024)
+car.drive(80)
+println(car.toString())
+println(Vehicle.serialID)

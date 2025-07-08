@@ -63,7 +63,7 @@ println(3.hypot(4))
 print("Computing factorial(5): ")
 println(5.factorial())
 
-var i = 1024 * 1024 + 125 * 25
+val i = 1024 * 1024 + 125 * 25
 println("Integer value in base 10: " + i.toString())
 println("Integer value in base 2: " + i.toBinary())
 println("Integer value in base 16: " + i.toHexadecimal())
