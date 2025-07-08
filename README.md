@@ -100,21 +100,21 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 
 ### Lox2 v2.4.0
 - Support for structural pattern matching using `match` keyword, remove `switch` statement as it has been superceded.
+- Enhanced Generics/parametric polymorphism with constraints on generic type parameters using `extends` or `with` keywords.
 - Object literal syntax similar to Javascript which can be good for configuration objects. 
-- Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
 - Foreign function interface(FFI) as a way to write Lox2 libraries in C and load in lox script.
 
 ### Lox2 v2.5.0
 - C# style property accessor syntax which provides a flexible way to access and modify the value of instance fields. 
 - Add new package `clox.ext.sql` which supports database connections and queries for mysql/mariadb, postgres, sqlite, etc.
-- Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body. 
+- Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
 - Implement a profiler which can identify the "Hotspots" of the program and how long they execute, prerequiste for future JIT. 
 
 ### Lox2 v2.6.0
 - Initial implementation of tracing JIT compiler that optimizes hot loops, only for x64 architecture. 
 - First class continuation with keyword `thisContext`, enabling manipulation of call stack in userland.
+- Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body.
 - Add new package `clox.ext.gui` which supports writing GUI applications using gtk binding for Lox2.
-- Optimization for property accessors which can inline simple one-line getters/setters.
 
 
 ## Example

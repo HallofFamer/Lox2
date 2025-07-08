@@ -74,7 +74,7 @@ CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* 
     if (callableType != NULL) {
         callableType->returnType = returnType;
         callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->attribute = callableTypeInitModifier();
+        callableType->attribute = callableTypeInitAttribute();
         if (callableType->paramTypes != NULL) TypeInfoArrayInit(callableType->paramTypes);
     }
     return callableType;
@@ -85,7 +85,7 @@ CallableTypeInfo* newCallableTypeInfoWithParams(int id, TypeCategory category, O
     if (callableType != NULL) {
         callableType->returnType = returnType;
         callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->attribute = callableTypeInitModifier();
+        callableType->attribute = callableTypeInitAttribute();
 
         if (callableType->paramTypes != NULL) {
             TypeInfoArrayInit(callableType->paramTypes);

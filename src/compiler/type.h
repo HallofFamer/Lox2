@@ -83,8 +83,8 @@ struct TypeTable {
     TypeEntry* entries;
 };
 
-static inline CallableTypeAttribute callableTypeInitModifier() {
-    CallableTypeAttribute attribute = {
+static inline CallableTypeAttribute callableTypeInitAttribute() {
+    return (CallableTypeAttribute) {
         .isAsync = false,
         .isClassMethod = false,
         .isGenerator = false,
@@ -94,7 +94,6 @@ static inline CallableTypeAttribute callableTypeInitModifier() {
         .isVariadic = false,
         .isVoid = false
     };
-    return attribute;
 }
 
 TypeInfo* newTypeInfo(int id, size_t size, TypeCategory category, ObjString* shortName, ObjString* fullName);
