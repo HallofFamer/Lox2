@@ -82,7 +82,7 @@ ObjClass* defineNativeClass(VM* vm, const char* name) {
     push(vm, OBJ_VAL(nativeClass));
 
     tableSet(vm, &vm->classes, nativeClass->fullName, OBJ_VAL(nativeClass));
-    tableSet(vm, &vm->currentNamespace->values, AS_STRING(vm->stack[0]), vm->stack[1]); 
+    tableSet(vm, &vm->currentNamespace->values, className, OBJ_VAL(nativeClass)); 
     pop(vm);
     return nativeClass;
 }
@@ -197,14 +197,12 @@ void defineNativeInterceptor(VM* vm, ObjClass* klass, InterceptorType type, int 
 
 ObjClass* defineNativeTrait(VM* vm, const char* name) {
     ObjString* traitName = newStringPerma(vm, name);
-    push(vm, OBJ_VAL(traitName));
     ObjClass* nativeTrait = createTrait(vm, traitName);
     nativeTrait->isNative = true;
     push(vm, OBJ_VAL(nativeTrait));
 
     tableSet(vm, &vm->classes, nativeTrait->fullName, OBJ_VAL(nativeTrait));
-    tableSet(vm, &vm->currentNamespace->values, AS_STRING(vm->stack[0]), vm->stack[1]);
-    pop(vm);
+    tableSet(vm, &vm->currentNamespace->values, traitName, OBJ_VAL(nativeTrait));
     pop(vm);
     typeTableInsertBehavior(vm->typetab, TYPE_CATEGORY_TRAIT, traitName, nativeTrait->fullName, NULL);
     return nativeTrait;
