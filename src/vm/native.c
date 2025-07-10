@@ -89,10 +89,9 @@ ObjClass* defineNativeClass(VM* vm, const char* name) {
 
 void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, NativeFunction function, ...) {
     ObjString* functionName = newStringPerma(vm, name);
-    push(vm, OBJ_VAL(functionName));
-    push(vm, OBJ_VAL(newNativeFunction(vm, functionName, arity, isAsync, function)));
-    tableSet(vm, &vm->rootNamespace->values, AS_STRING(vm->stack[0]), vm->stack[1]);
-    pop(vm);
+    ObjNativeFunction* nativeFunction = newNativeFunction(vm, functionName, arity, isAsync, function);
+    push(vm, OBJ_VAL(nativeFunction));
+    tableSet(vm, &vm->rootNamespace->values, functionName, OBJ_VAL(nativeFunction));
     pop(vm);
 
     SymbolItem* item = insertGlobalSymbolTable(vm, name, "Function");
@@ -117,6 +116,15 @@ void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type
     typeTableInsertField(behaviorType->fields, fieldName, type, isMutable, !IS_NIL(defaultValue));
     klass->defaultShapeID = createShapeFromParent(vm, klass->defaultShapeID, fieldName);
     valueArrayWrite(vm, &klass->defaultInstanceFields, defaultValue);
+
+    if (klass->behaviorType == BEHAVIOR_METACLASS) {
+        Value value;
+        tableGet(&vm->classes, subString(vm, klass->fullName, 0, klass->fullName->length - 7), &value);
+        klass = AS_CLASS(value);
+        PROCESS_WRITE_BARRIER((Obj*)klass, defaultValue);
+        valueArrayWrite(vm, &klass->fields, defaultValue);
+        idMapSet(vm, &klass->indexes, fieldName, klass->fields.count - 1);
+    }
 }
 
 void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bool isAsync, NativeMethod method, ...) {

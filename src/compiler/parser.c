@@ -366,13 +366,13 @@ static Token identifierToken(Parser* parser, const char* message) {
 }
 
 static Ast* and_(Parser* parser, Token token, Ast* left, bool canAssign) {
-    ParseRule* rule = getRule(previousToken(parser).type);
+    ParseRule* rule = getRule(previousTokenType(parser));
     Ast* right = parsePrecedence(parser, PREC_AND);
     return newAst(AST_EXPR_AND, token, 2, left, right);
 }
 
 static Ast* binary(Parser* parser, Token token, Ast* left, bool canAssign) {
-    ParseRule* rule = getRule(previousToken(parser).type);
+    ParseRule* rule = getRule(previousTokenType(parser));
     Ast* right = parsePrecedence(parser, (Precedence)(rule->precedence + 1));
     return newAst(AST_EXPR_BINARY, token, 2, left, right);
 }
@@ -404,7 +404,7 @@ static Ast* nil(Parser* parser, Token token, Ast* left, bool canAssign) {
 }
 
 static Ast* or_(Parser* parser, Token token, Ast* left, bool canAssign) {
-    ParseRule* rule = getRule(previousToken(parser).type);
+    ParseRule* rule = getRule(previousTokenType(parser));
     Ast* right = parsePrecedence(parser, PREC_OR);
     return newAst(AST_EXPR_OR, token, 2, left, right);
 }
@@ -880,7 +880,7 @@ ParseRule parseRules[] = {
 };
 
 static Ast* parsePrefix(Parser* parser, Precedence precedence, bool canAssign) {
-    ParsePrefixFn prefixRule = getRule(previousToken(parser).type)->prefix;
+    ParsePrefixFn prefixRule = getRule(previousTokenType(parser))->prefix;
     if (prefixRule == NULL) {
         parseErrorAtPrevious(parser, "Expect expression.");
         return NULL;
@@ -891,7 +891,7 @@ static Ast* parsePrefix(Parser* parser, Precedence precedence, bool canAssign) {
 static Ast* parseInfix(Parser* parser, Precedence precedence, Ast* left, bool canAssign) {
     while (precedence <= getRule(parser->current.type)->precedence) {
         advance(parser);
-        ParseInfixFn infixRule = getRule(previousToken(parser).type)->infix;
+        ParseInfixFn infixRule = getRule(previousTokenType(parser))->infix;
         left = infixRule(parser, previousToken(parser), left, canAssign);
     }
 
@@ -962,7 +962,7 @@ static Ast* forStatement(Parser* parser) {
     if (!match(parser, TOKEN_VAL) && !match(parser, TOKEN_VAR)) {
         parseErrorAtCurrent(parser, "Expect 'val' or 'var' keyword after '(' in for loop.");
     }
-    bool isMutable = (previousToken(parser).type == TOKEN_VAR);
+    bool isMutable = (previousTokenType(parser) == TOKEN_VAR);
     Ast* decl = emptyAst(AST_LIST_VAR, previousToken(parser));
 
     if (match(parser, TOKEN_LEFT_PAREN)) { 
