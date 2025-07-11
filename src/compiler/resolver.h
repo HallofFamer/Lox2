@@ -16,6 +16,7 @@ typedef struct {
     SymbolTable* currentSymtab;
     SymbolTable* globalSymtab;
     SymbolTable* rootSymtab;
+    ValueArray importedNamespaces;
     Token rootClass;
     Token thisVar;
     Token superVar;
