@@ -683,10 +683,10 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);
     if (!fieldType->isMutable) {
         if (receiver->kind == AST_EXPR_THIS && !typeChecker->currentFunction->isInitializer) {
-            typeError(typeChecker, "Cannot modify immutable instance field '%s' except in its own class initializer.", fieldName->chars);
+            typeError(typeChecker, "Cannot modify immutable field '%s' except in its own class initializer.", fieldName->chars);
         }
         else if (receiver->kind != AST_EXPR_THIS) {
-            typeError(typeChecker, "Cannot modify immutable instance field '%s'.", fieldName->chars);
+            typeError(typeChecker, "Cannot modify immutable field '%s'.", fieldName->chars);
         }
     }
     else if (!isSubtypeOfType(value->type, fieldType->declaredType)) {
