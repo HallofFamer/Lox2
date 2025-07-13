@@ -114,7 +114,10 @@ void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type
     ObjString* fieldName = newStringPerma(vm, name);
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     typeTableInsertField(behaviorType->fields, fieldName, type, isMutable, !IS_NIL(defaultValue));
-    klass->defaultShapeID = createShapeFromParent(vm, klass->defaultShapeID, fieldName);
+
+    if (klass->classType == OBJ_INSTANCE || klass->classType == OBJ_CLASS) {
+        klass->defaultShapeID = createShapeFromParent(vm, klass->defaultShapeID, fieldName);
+    }
     valueArrayWrite(vm, &klass->defaultInstanceFields, defaultValue);
 
     if (klass->behaviorType == BEHAVIOR_METACLASS) {
