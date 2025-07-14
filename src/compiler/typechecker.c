@@ -5,6 +5,7 @@
 
 #include "typechecker.h"
 #include "../common/os.h"
+#include "../vm/namespace.h"
 #include "../vm/native.h"
 #include "../vm/vm.h"
 
@@ -970,12 +971,15 @@ static void typeCheckUsingStatement(TypeChecker* typeChecker, Ast* ast) {
     }
 
     TypeInfo* classType = typeTableGet(typeChecker->vm->typetab, fullName);
-    if (classType == NULL) return;
     Ast* child = (astNumChild(ast) > 1) ? astGetChild(ast, 1) : astLastChild(_namespace);
     ObjString* shortName = copyStringPerma(typeChecker->vm, child->token.start, child->token.length);
 
-    if (classType->category == TYPE_CATEGORY_TRAIT) child->type = typeChecker->traitType;
-    else child->type = typeTableGet(typeChecker->vm->typetab, getMetaclassNameFromClass(typeChecker->vm, fullName));
+    if (classType != NULL) {
+        if (classType->category == TYPE_CATEGORY_TRAIT) child->type = typeChecker->traitType;
+        else child->type = typeTableGet(typeChecker->vm->typetab, getMetaclassNameFromClass(typeChecker->vm, fullName));
+    }
+    else if (isNativeNamespace(fullName)) child->type = typeChecker->namespaceType;
+
     SymbolItem* item = symbolTableLookup(child->symtab, shortName);
     if (item->type == NULL) item->type = child->type;
 }

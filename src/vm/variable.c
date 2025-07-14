@@ -177,8 +177,12 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
         }
         case OBJ_RANGE: {
             ObjRange* range = (ObjRange*)object;
-            if (index == 0) push(vm, INT_VAL(range->from));
-            else if (index == 1) push(vm, INT_VAL(range->to));
+            if (index == 0) {
+                int length = abs(range->to - range->from);
+                push(vm, INT_VAL(length));
+            }
+            else if (index == 1) push(vm, INT_VAL(range->from));
+            else if (index == 2) push(vm, INT_VAL(range->to));
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }
@@ -310,7 +314,11 @@ static bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
         }
         case OBJ_RANGE: {
             ObjRange* range = (ObjRange*)object;
-            if (matchVariableName(name, "from", 4)) push(vm, INT_VAL(range->from));
+            if (matchVariableName(name, "length", 6)) {
+                int length = abs(range->to - range->from);
+                push(vm, INT_VAL(length));
+            }
+            else if (matchVariableName(name, "from", 4)) push(vm, INT_VAL(range->from));
             else if (matchVariableName(name, "to", 2)) push(vm, INT_VAL(range->to));
             else return getAndPushGenericInstanceVariableByName(vm, object, name);
             return true;
@@ -593,8 +601,12 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         }
         case OBJ_RANGE: {
             ObjRange* range = (ObjRange*)object;
-            if (index == 0 && IS_INT(value)) range->from = AS_INT(value);
-            else if (index == 1 && IS_INT(value)) range->to = AS_INT(value);
+            if (index == 0) {
+                runtimeError(vm, "Cannot set property length on Object Range.");
+                exit(70);
+            }
+            if (index == 1 && IS_INT(value)) range->from = AS_INT(value);
+            else if (index == 2 && IS_INT(value)) range->to = AS_INT(value);
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
 
             push(vm, value);
@@ -756,7 +768,11 @@ static bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
         }
         case OBJ_RANGE: {
             ObjRange* range = (ObjRange*)object;
-            if (matchVariableName(name, "from", 4) && IS_INT(value)) range->from = AS_INT(value);
+            if (matchVariableName(name, "length", 6)) {
+                runtimeError(vm, "Cannot set property length on Object Range.");
+                exit(70);
+            }
+            else if (matchVariableName(name, "from", 4) && IS_INT(value)) range->from = AS_INT(value);
             else if (matchVariableName(name, "to", 4) && IS_INT(value)) range->to = AS_INT(value);
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
 
