@@ -117,7 +117,8 @@ void initResolver(VM* vm, Resolver* resolver, bool debugSymtab) {
     resolver->currentSymtab = NULL;
     resolver->globalSymtab = NULL;
     resolver->rootSymtab = NULL;
-    initValueArray(&resolver->importedNamespaces, GC_GENERATION_TYPE_PERMANENT);
+    initValueArray(&resolver->importedShortNames, GC_GENERATION_TYPE_PERMANENT);
+    initValueArray(&resolver->importedEnclosingNamespaces, GC_GENERATION_TYPE_PERMANENT);
 
     resolver->rootClass = syntheticToken("Object");
     resolver->thisVar = syntheticToken("this");
@@ -159,8 +160,8 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token) {
         type = typeTableGet(resolver->vm->typetab, fullName);
 
         if (type == NULL) {
-            for (int i = 0; i < resolver->importedNamespaces.count; i++) {
-                ObjString* _namespace = AS_STRING(resolver->importedNamespaces.values[i]);
+            for (int i = 0; i < resolver->importedEnclosingNamespaces.count; i++) {
+                ObjString* _namespace = AS_STRING(resolver->importedEnclosingNamespaces.values[i]);
                 fullName = concatenateString(resolver->vm, _namespace, shortName, ".");
                 type = typeTableGet(resolver->vm->typetab, fullName);
                 if (type != NULL) return type;
@@ -1018,7 +1019,7 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
     Ast* shortName = astLastChild(_namespace);
     ObjString* fullName = astCreateQualifiedName(resolver->vm, ast);
     ObjString* enclosingNamespace = subString(resolver->vm, fullName, 0, fullName->length - shortName->token.length - 2);
-    valueArrayWrite(resolver->vm, &resolver->importedNamespaces, OBJ_VAL(enclosingNamespace));
+    valueArrayWrite(resolver->vm, &resolver->importedEnclosingNamespaces, OBJ_VAL(enclosingNamespace));
     TypeInfo* type = NULL;
     
     if (!isNativeNamespace(fullName)) {
@@ -1038,11 +1039,12 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
         Ast* alias = astGetChild(ast, 1);
         alias->symtab = _namespace->symtab;
         insertSymbol(resolver, alias->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        valueArrayWrite(resolver->vm, &resolver->importedShortNames, OBJ_VAL(createSymbol(resolver, alias->token)));
     }
     else {
-        Ast* shortName = astLastChild(_namespace);
         shortName->symtab = _namespace->symtab;
         insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        valueArrayWrite(resolver->vm, &resolver->importedShortNames, OBJ_VAL(createSymbol(resolver, shortName->token)));
     }
 }
 
@@ -1291,7 +1293,11 @@ void resolve(Resolver* resolver, Ast* ast) {
     resolveAst(resolver, ast);
     endFunctionResolver(resolver);
 
-    freeValueArray(resolver->vm, &resolver->importedNamespaces);
+    for (int i = 0; i < resolver->importedEnclosingNamespaces.count; i++) {
+        ObjString* fullName = AS_STRING(resolver->importedEnclosingNamespaces.values[i]);
+        ObjString* shortName = AS_STRING(resolver->importedShortNames.values[i]);
+    }
+
     if (resolver->debugSymtab) {
         symbolTableOutput(resolver->rootSymtab);
         symbolTableOutput(resolver->vm->symtab);
