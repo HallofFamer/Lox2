@@ -62,11 +62,13 @@ static void endFunctionTypeChecker(TypeChecker* typeChecker) {
     typeChecker->currentFunction = typeChecker->currentFunction->enclosing;
 }
 
-void initTypeChecker(VM* vm, TypeChecker* typeChecker, bool debugTypetab) {
+void initTypeChecker(VM* vm, TypeChecker* typeChecker, ValueArray importedShortNames, ValueArray importedEnclosingNamespaces, bool debugTypetab) {
     typeChecker->vm = vm;
     typeChecker->currentNamespace = emptyString(vm);
     typeChecker->currentClass = NULL;
     typeChecker->currentFunction = NULL;
+    typeChecker->importedShortNames = importedShortNames;
+    typeChecker->importedEnclosingNamespaces = importedEnclosingNamespaces;
 
     typeChecker->objectType = getNativeType(vm, "Object");
     typeChecker->nilType = getNativeType(vm, "Nil");
@@ -338,6 +340,23 @@ static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableT
     else ast->type = callableType->returnType;
 }
 
+static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* classType) {
+    Ast* args = astGetChild(ast, 1);
+    char classDesc[UINT8_MAX];
+    ObjString* initializerName = newStringPerma(typeChecker->vm, "__init__");
+    TypeInfo* initializerType = typeTableMethodLookup(classType, initializerName);
+
+    if (initializerType != NULL) {
+        sprintf_s(classDesc, UINT8_MAX, "Class %s's initializer", classType->shortName->chars);
+        checkArguments(typeChecker, classDesc, args, AS_CALLABLE_TYPE(initializerType));
+    }
+    else if (astHasChild(args)) {
+        typeError(typeChecker, "Class %s's initializer expects to receive a total of 0 argument but gets %d.", classType->shortName->chars, astNumChild(args));
+    }
+    ast->type = classType;
+
+}
+
 static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
     Ast* callee = astGetChild(ast, 0);
     if (callee->type == NULL) return;
@@ -358,17 +377,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 
         TypeInfo* classType = getClassType(typeChecker, className, ast->symtab);
         if (classType == NULL) return;
-        ObjString* initializerName = newStringPerma(typeChecker->vm, "__init__");
-        TypeInfo* initializerType = typeTableMethodLookup(classType, initializerName);
-
-        if (initializerType != NULL) {
-            sprintf_s(calleeDesc, UINT8_MAX, "Class %s's initializer", name->chars);
-            checkArguments(typeChecker, calleeDesc, args, AS_CALLABLE_TYPE(initializerType));
-        }
-        else if (astHasChild(args)) {
-            typeError(typeChecker, "Class %s's initializer expects to receive a total of 0 argument but gets %d.", name->chars, astNumChild(args));
-        }
-        ast->type = classType;
+        inferAstTypeFromInitializer(typeChecker, ast, classType);
     }
 }
 
@@ -376,16 +385,28 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
     if (receiver->type == NULL) return;
     Ast* args = astGetChild(ast, 1);
-
     ObjString* methodName = createSymbol(typeChecker, ast->token);
     TypeInfo* baseType = typeTableMethodLookup(receiver->type, methodName);
-    if (baseType == NULL) return;
-    CallableTypeInfo* methodType = AS_CALLABLE_TYPE(baseType);
 
-    char methodDesc[UINT8_MAX];
-    sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", receiver->type->shortName->chars, methodName->chars);
-    checkArguments(typeChecker, methodDesc, args, methodType);
-    inferAstTypeFromReturn(typeChecker, ast, methodType);
+    if (baseType != NULL) {
+        CallableTypeInfo* methodType = AS_CALLABLE_TYPE(baseType);
+        char methodDesc[UINT8_MAX];
+        sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", receiver->type->shortName->chars, methodName->chars);
+        checkArguments(typeChecker, methodDesc, args, methodType);
+        inferAstTypeFromReturn(typeChecker, ast, methodType);
+    }
+    else if (receiver->type == typeChecker->namespaceType) {
+        for (int i = 0; i < typeChecker->importedShortNames.count; i++) {
+            ObjString* _namespace = concatenateString(typeChecker->vm, AS_STRING(typeChecker->importedEnclosingNamespaces.values[i]), AS_STRING(typeChecker->importedShortNames.values[i]), ".");
+            ObjString* fullName = concatenateString(typeChecker->vm, _namespace, methodName, ".");
+            TypeInfo* classType = typeTableGet(typeChecker->vm->typetab, fullName);
+            
+            if (classType != NULL) {
+                inferAstTypeFromInitializer(typeChecker, ast, classType);
+                return;
+            }
+        }
+    }
 }
 
 static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {

@@ -13,6 +13,8 @@ typedef struct {
     ObjString* currentNamespace;
     ClassTypeChecker* currentClass;
     FunctionTypeChecker* currentFunction;
+    ValueArray importedShortNames;
+    ValueArray importedEnclosingNamespaces;
 
     TypeInfo* objectType;
     TypeInfo* nilType;
@@ -30,7 +32,7 @@ typedef struct {
     bool hadError;
 } TypeChecker;
 
-void initTypeChecker(VM* vm, TypeChecker* typeChecker, bool debugTypetab);
+void initTypeChecker(VM* vm, TypeChecker* typeChecker, ValueArray importedShortNames, ValueArray importedEnclosingNamespaces, bool debugTypetab);
 void typeCheckAst(TypeChecker* typeChecker, Ast* ast);
 void typeCheckChild(TypeChecker* typeChecker, Ast* ast, int index);
 void typeCheck(TypeChecker* typeChecker, Ast* ast);
