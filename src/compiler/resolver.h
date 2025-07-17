@@ -8,6 +8,17 @@ typedef struct ClassResolver ClassResolver;
 typedef struct FunctionResolver FunctionResolver;
 
 typedef struct {
+    ObjString* shortName;
+    ObjString* fullName;
+} NameResolutionEntry;
+
+typedef struct {
+    int count;
+    int capacity;
+    NameResolutionEntry* entries;
+} NameResolutionTable;
+
+typedef struct {
     VM* vm;
     Token currentToken;
     ObjString* currentNamespace;
@@ -16,8 +27,7 @@ typedef struct {
     SymbolTable* currentSymtab;
     SymbolTable* globalSymtab;
     SymbolTable* rootSymtab;
-    ValueArray importedShortNames;
-    ValueArray importedEnclosingNamespaces;
+    NameResolutionTable* nameResolutionTable;
     Token rootClass;
     Token thisVar;
     Token superVar;
@@ -29,9 +39,13 @@ typedef struct {
     bool hadError;
 } Resolver;
 
+NameResolutionTable* newNameResolutionTable();
+void freeNameResolutionTable(NameResolutionTable* table);
+ObjString* nameResolutionTableGet(NameResolutionTable* table, ObjString* shortName);
+
 void initResolver(VM* vm, Resolver* resolver, bool debugSymtab);
 void resolveAst(Resolver* resolver, Ast* ast);
 void resolveChild(Resolver* resolver, Ast* ast, int index);
-void resolve(Resolver* resolver, Ast* ast);
+NameResolutionTable* resolve(Resolver* resolver, Ast* ast);
 
 #endif // !clox_resolver_h

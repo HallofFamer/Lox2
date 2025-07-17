@@ -59,6 +59,82 @@ static void semanticError(Resolver* resolver, const char* format, ...) {
     resolver->hadError = true;
 }
 
+NameResolutionTable* newNameResolutionTable() {
+    NameResolutionTable* table = (NameResolutionTable*)malloc(sizeof(NameResolutionTable));
+    if (table != NULL) {
+        table->count = 0;
+        table->capacity = 0;
+        table->entries = NULL;
+    }
+    return table;
+}
+
+void freeNameResolutionTable(NameResolutionTable* table) {
+    if (table != NULL) {
+        if (table->entries != NULL) free(table->entries);
+        free(table);
+    }
+}
+
+static NameResolutionEntry* findNameResolutionEntry(NameResolutionEntry* entries, int capacity, ObjString* shortName) {
+    uint32_t index = shortName->hash & (capacity - 1);
+    for (;;) {
+        NameResolutionEntry* entry = &entries[index];
+        if (entry->shortName == shortName || entry->shortName == NULL) {
+            return entry;
+        }
+        index = (index + 1) & (capacity - 1);
+    }
+}
+
+static void nameResolutionTableAdjustCapacity(NameResolutionTable* table, int capacity) {
+    int oldCapacity = table->capacity;
+    NameResolutionEntry* entries = (NameResolutionEntry*)malloc(sizeof(NameResolutionEntry) * capacity);
+    if (entries == NULL) exit(1);
+
+    for (int i = 0; i < capacity; i++) {
+        entries[i].shortName = NULL;
+        entries[i].fullName = NULL;
+    }
+
+    table->count = 0;
+    for (int i = 0; i < table->capacity; i++) {
+        NameResolutionEntry* entry = &table->entries[i];
+        if (entry->shortName == NULL) continue;
+
+        NameResolutionEntry* dest = findNameResolutionEntry(entries, capacity, entry->shortName);
+        dest->shortName = entry->shortName;
+        dest->fullName = entry->fullName;
+        table->count++;
+    }
+
+    free(table->entries);
+    table->capacity = capacity;
+    table->entries = entries;
+}
+
+ObjString* nameResolutionTableGet(NameResolutionTable* table, ObjString* shortName) {
+    if (table->count == 0) return NULL;
+    NameResolutionEntry* entry = findNameResolutionEntry(table->entries, table->capacity, shortName);
+    if (entry->shortName == NULL) return NULL;
+    return entry->fullName;
+}
+
+static bool nameResolutionTableSet(NameResolutionTable* table, ObjString* shortName, ObjString* fullName) {
+    if (table->count + 1 > table->capacity * TABLE_MAX_LOAD) {
+        int capacity = bufferGrowCapacity(table->capacity);
+        nameResolutionTableAdjustCapacity(table, capacity);
+    }
+
+    NameResolutionEntry* entry = findNameResolutionEntry(table->entries, table->capacity, shortName);
+    if (entry->shortName != NULL) return false;
+    table->count++;
+
+    entry->shortName = shortName;
+    entry->fullName = fullName;
+    return true;
+}
+
 static ResolverAttribute resolverInitModifier() {
     return (ResolverAttribute) {
         .isAsync = false,
@@ -117,8 +193,7 @@ void initResolver(VM* vm, Resolver* resolver, bool debugSymtab) {
     resolver->currentSymtab = NULL;
     resolver->globalSymtab = NULL;
     resolver->rootSymtab = NULL;
-    initValueArray(&resolver->importedShortNames, GC_GENERATION_TYPE_PERMANENT);
-    initValueArray(&resolver->importedEnclosingNamespaces, GC_GENERATION_TYPE_PERMANENT);
+    resolver->nameResolutionTable = newNameResolutionTable();
 
     resolver->rootClass = syntheticToken("Object");
     resolver->thisVar = syntheticToken("this");
@@ -160,15 +235,13 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token) {
         type = typeTableGet(resolver->vm->typetab, fullName);
 
         if (type == NULL) {
-            for (int i = 0; i < resolver->importedEnclosingNamespaces.count; i++) {
-                ObjString* _namespace = AS_STRING(resolver->importedEnclosingNamespaces.values[i]);
-                fullName = concatenateString(resolver->vm, _namespace, shortName, ".");
-                type = typeTableGet(resolver->vm->typetab, fullName);
-                if (type != NULL) return type;
-            }
+            fullName = nameResolutionTableGet(resolver->nameResolutionTable, shortName);
+            if(fullName != NULL) type = typeTableGet(resolver->vm->typetab, fullName);
 
-            fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
-            type = typeTableGet(resolver->vm->typetab, fullName);
+            if (type == NULL) {
+                fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
+                type = typeTableGet(resolver->vm->typetab, fullName);
+            }
         }
     }
     return type;
@@ -1018,8 +1091,6 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
 
     Ast* shortName = astLastChild(_namespace);
     ObjString* fullName = astCreateQualifiedName(resolver->vm, ast);
-    ObjString* enclosingNamespace = subString(resolver->vm, fullName, 0, fullName->length - shortName->token.length - 2);
-    valueArrayWrite(resolver->vm, &resolver->importedEnclosingNamespaces, OBJ_VAL(enclosingNamespace));
     TypeInfo* type = NULL;
     
     if (!isNativeNamespace(fullName)) {
@@ -1039,12 +1110,12 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
         Ast* alias = astGetChild(ast, 1);
         alias->symtab = _namespace->symtab;
         insertSymbol(resolver, alias->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
-        valueArrayWrite(resolver->vm, &resolver->importedShortNames, OBJ_VAL(createSymbol(resolver, alias->token)));
+        nameResolutionTableSet(resolver->nameResolutionTable, createSymbol(resolver, alias->token), fullName);
     }
     else {
         shortName->symtab = _namespace->symtab;
         insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
-        valueArrayWrite(resolver->vm, &resolver->importedShortNames, OBJ_VAL(createSymbol(resolver, shortName->token)));
+        nameResolutionTableSet(resolver->nameResolutionTable, createSymbol(resolver, shortName->token), fullName);
     }
 }
 
@@ -1280,7 +1351,7 @@ void resolveChild(Resolver* resolver, Ast* ast, int index) {
     }
 }
 
-void resolve(Resolver* resolver, Ast* ast) {
+NameResolutionTable* resolve(Resolver* resolver, Ast* ast) {
     FunctionResolver functionResolver;
     initFunctionResolver(resolver, &functionResolver, syntheticToken("script"), 0);
     int symtabIndex = nextSymbolTableIndex(resolver);
@@ -1293,13 +1364,9 @@ void resolve(Resolver* resolver, Ast* ast) {
     resolveAst(resolver, ast);
     endFunctionResolver(resolver);
 
-    for (int i = 0; i < resolver->importedEnclosingNamespaces.count; i++) {
-        ObjString* fullName = AS_STRING(resolver->importedEnclosingNamespaces.values[i]);
-        ObjString* shortName = AS_STRING(resolver->importedShortNames.values[i]);
-    }
-
     if (resolver->debugSymtab) {
         symbolTableOutput(resolver->rootSymtab);
         symbolTableOutput(resolver->vm->symtab);
     }
+    return resolver->nameResolutionTable;
 }
