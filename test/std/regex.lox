@@ -1,11 +1,11 @@
 namespace test.std
 using clox.std.util.Regex
 
-var regex = Regex("[Hh]ello [Ww]orld[!]?")
+val regex = Regex("[Hh]ello [Ww]orld[!]?")
 print("Creating regular expression pattern: ")
 println(regex.toString())
 
-var text = "ahem.. 'hello world!' .."
+val text = "ahem.. 'hello world!' .."
 print("Creating text: ")
 println(text)
 print("Text matches pattern: ")

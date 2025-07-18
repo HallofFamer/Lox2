@@ -1,12 +1,12 @@
 namespace test.std
 /*
-var obj = Object()
+val obj = Object()
 /* more comments */
 println(obj.toString())
 */
 
 println("Testing nil...")
-//var undefined = Nil()
+//val undefined = Nil()
 print("Class name for nil: ")
 println(nil.getClassName())
 print("Convert nil to string: ")
@@ -16,7 +16,7 @@ println(nil.hashCode())
 println("")
 
 println("Testing bool...")
-//var bool = Bool()
+//val bool = Bool()
 print("Class name for true: ")
 println(true.getClassName())
 print("Class name for false: ")
@@ -31,7 +31,7 @@ println(false.hashCode())
 println("")
 
 println("Testing number...")
-//var num = Number()
+//val num = Number()
 print("Class name for int 1: ")
 println(1.getClassName())
 print("Class name for float 3.5: ")

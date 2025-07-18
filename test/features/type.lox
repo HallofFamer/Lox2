@@ -9,7 +9,7 @@ Number sum2(.. Number nums) {
     for (val num : nums) { 
         result = result + num
     }
-    return result 
+    return result
 }
 
 void printSum(Number a, Number b) { 
