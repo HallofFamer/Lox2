@@ -727,6 +727,9 @@ void registerIOPackage(VM* vm) {
 
     bindSuperclass(vm, vm->fileClass, vm->objectClass);
     vm->fileClass->classType = OBJ_FILE;
+    DEF_FIELD(vm->fileClass, name, String, true, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(vm->fileClass, mode, String, true, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(vm->fileClass, isOpen, Bool, false, FALSE_VAL);
     DEF_INTERCEPTOR(vm->fileClass, File, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.io.File), PARAM_TYPE(String));
     DEF_METHOD(vm->fileClass, File, create, 0, RETURN_TYPE(Bool));
     DEF_METHOD_ASYNC(vm->fileClass, File, createAsync, 0, RETURN_TYPE(clox.std.util.Promise));
@@ -762,6 +765,7 @@ void registerIOPackage(VM* vm) {
 
     bindSuperclass(vm, ioStreamClass, vm->objectClass);
     bindTrait(vm, ioStreamClass, closableTrait);
+    DEF_FIELD(ioStreamClass, file, clox.std.io.File, false, NIL_VAL);
     DEF_INTERCEPTOR(ioStreamClass, IOStream, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.io.IOStream), PARAM_TYPE(Object));
     DEF_METHOD(ioStreamClass, IOStream, close, 0, RETURN_TYPE(Bool));
     DEF_METHOD_ASYNC(ioStreamClass, IOStream, closeAsync, 0, RETURN_TYPE(clox.std.util.Promise));

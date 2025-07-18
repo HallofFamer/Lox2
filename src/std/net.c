@@ -821,6 +821,13 @@ void registerNetPackage(VM* vm) {
     ObjClass* httpClientClass = defineNativeClass(vm, "HTTPClient");
 
     bindSuperclass(vm, urlClass, vm->objectClass);
+    DEF_FIELD(urlClass, scheme, String, false, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(urlClass, host, String, false, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(urlClass, port, Int, false, INT_VAL(0));
+    DEF_FIELD(urlClass, path, String, false, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(urlClass, query, String, false, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(urlClass, fragment, String, false, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(urlClass, raw, String, false, OBJ_VAL(emptyString(vm)));
     DEF_INTERCEPTOR(urlClass, URL, INTERCEPTOR_INIT, __init__, 6, RETURN_TYPE(clox.std.net.URL), PARAM_TYPE(String), PARAM_TYPE(String), PARAM_TYPE(Int), PARAM_TYPE(String), PARAM_TYPE(String), PARAM_TYPE(String));
     DEF_METHOD(urlClass, URL, isAbsolute, 0, RETURN_TYPE(Bool));
     DEF_METHOD(urlClass, URL, isRelative, 0, RETURN_TYPE(Bool));
@@ -833,12 +840,15 @@ void registerNetPackage(VM* vm) {
     DEF_METHOD(urlMetaclass, URLClass, parse, 1, RETURN_TYPE(clox.std.net.URL), PARAM_TYPE(String));
 
     bindSuperclass(vm, domainClass, vm->objectClass);
+    DEF_FIELD(domainClass, name, String, true, OBJ_VAL(emptyString(vm)));
     DEF_INTERCEPTOR(domainClass, Domain, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.net.Domain), PARAM_TYPE(String));
     DEF_METHOD(domainClass, Domain, getIPAddresses, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD_ASYNC(domainClass, Domain, getIPAddressesAsync, 0, RETURN_TYPE(clox.std.util.Promise));
     DEF_METHOD(domainClass, Domain, toString, 0, RETURN_TYPE(String));
 
     bindSuperclass(vm, ipAddressClass, vm->objectClass);
+    DEF_FIELD(ipAddressClass, address, String, true, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(ipAddressClass, version, Int, true, INT_VAL(-1));
     DEF_INTERCEPTOR(ipAddressClass, IPAddress, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.net.IPAddress), PARAM_TYPE(String));
     DEF_METHOD(ipAddressClass, IPAddress, getDomain, 0, RETURN_TYPE(clox.std.net.Domain));
     DEF_METHOD_ASYNC(ipAddressClass, IPAddress, getDomainAsync, 0, RETURN_TYPE(clox.std.util.Promise));
@@ -848,6 +858,9 @@ void registerNetPackage(VM* vm) {
     DEF_METHOD(ipAddressClass, IPAddress, toString, 0, RETURN_TYPE(String));
 
     bindSuperclass(vm, socketAddressClass, vm->objectClass);
+    DEF_FIELD(socketAddressClass, address, String, true, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(socketAddressClass, family, Int, true, INT_VAL(AF_UNSPEC));
+    DEF_FIELD(socketAddressClass, port, Int, true, INT_VAL(0));
     DEF_INTERCEPTOR(socketAddressClass, SocketAddress, INTERCEPTOR_INIT, __init__, 3, RETURN_TYPE(clox.std.net.URL), PARAM_TYPE(String), PARAM_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(socketAddressClass, SocketAddress, ipAddress, 0, RETURN_TYPE(clox.std.net.IPAddress));
     DEF_METHOD(socketAddressClass, SocketAddress, toString, 0, RETURN_TYPE(String));
@@ -855,71 +868,89 @@ void registerNetPackage(VM* vm) {
     ObjClass* closableTrait = getNativeClass(vm, "clox.std.io.TClosable");
     bindSuperclass(vm, socketClass, vm->objectClass);
     bindTrait(vm, socketClass, closableTrait);
+    DEF_FIELD(socketClass, addressFamily, Int, false, INT_VAL(AF_UNSPEC));
+    DEF_FIELD(socketClass, socketType, Int, false, INT_VAL(SOCK_STREAM));
+    DEF_FIELD(socketClass, protocolType, Int, false, INT_VAL(IPPROTO_TCP));
+    DEF_FIELD(socketClass, descriptor, Int, false, INT_VAL(INVALID_SOCKET));
     DEF_INTERCEPTOR(socketClass, Socket, INTERCEPTOR_INIT, __init__, 3, RETURN_TYPE(clox.std.net.Socket), PARAM_TYPE(Int), PARAM_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(socketClass, Socket, close, 0, RETURN_TYPE(void));
     DEF_METHOD(socketClass, Socket, receive, 0, RETURN_TYPE(String));
     DEF_METHOD(socketClass, Socket, send, 1, RETURN_TYPE(void), PARAM_TYPE(String));
     DEF_METHOD(socketClass, Socket, toString, 0, RETURN_TYPE(String));
 
-    setClassProperty(vm, socketClass, "afUNSPEC", INT_VAL(AF_UNSPEC));
-    setClassProperty(vm, socketClass, "afUNIX", INT_VAL(AF_UNIX));
-    setClassProperty(vm, socketClass, "afINET", INT_VAL(AF_INET));
-    setClassProperty(vm, socketClass, "afIPX", INT_VAL(AF_IPX));
-    setClassProperty(vm, socketClass, "afDECnet", INT_VAL(AF_DECnet));
-    setClassProperty(vm, socketClass, "afAPPLETALK", INT_VAL(AF_APPLETALK));
-    setClassProperty(vm, socketClass, "afINET6", INT_VAL(AF_INET6));
-    setClassProperty(vm, socketClass, "sockSTREAM", INT_VAL(SOCK_STREAM));
-    setClassProperty(vm, socketClass, "sockDGRAM", INT_VAL(SOCK_DGRAM));
-    setClassProperty(vm, socketClass, "sockRAW", INT_VAL(SOCK_RAW));
-    setClassProperty(vm, socketClass, "sockRDM", INT_VAL(SOCK_RDM));
-    setClassProperty(vm, socketClass, "sockSEQPACKET", INT_VAL(SOCK_SEQPACKET));
-    setClassProperty(vm, socketClass, "protoIP", INT_VAL(IPPROTO_IP));
-    setClassProperty(vm, socketClass, "protoICMP", INT_VAL(IPPROTO_ICMP));
-    setClassProperty(vm, socketClass, "protoTCP", INT_VAL(IPPROTO_TCP));
-    setClassProperty(vm, socketClass, "protoUDP", INT_VAL(IPPROTO_UDP));
-    setClassProperty(vm, socketClass, "protoICMPV6", INT_VAL(IPPROTO_ICMPV6));
-    setClassProperty(vm, socketClass, "protoRAW", INT_VAL(IPPROTO_RAW));
+    ObjClass* socketMetaclass = socketClass->obj.klass;
+    DEF_FIELD(socketMetaclass, afUNSPEC, Int, false, INT_VAL(AF_UNSPEC));
+    DEF_FIELD(socketMetaclass, afUNIX, Int, false, INT_VAL(AF_UNIX));
+    DEF_FIELD(socketMetaclass, afINET, Int, false, INT_VAL(AF_INET));
+    DEF_FIELD(socketMetaclass, afIPX, Int, false, INT_VAL(AF_IPX));
+    DEF_FIELD(socketMetaclass, afDECnet, Int, false, INT_VAL(AF_DECnet));
+    DEF_FIELD(socketMetaclass, afAPPLETALK, Int, false, INT_VAL(AF_APPLETALK));
+    DEF_FIELD(socketMetaclass, afINET6, Int, false, INT_VAL(AF_INET6));
+    DEF_FIELD(socketMetaclass, sockSTREAM, Int, false, INT_VAL(SOCK_STREAM));
+    DEF_FIELD(socketMetaclass, sockDGRAM, Int, false, INT_VAL(SOCK_DGRAM));
+    DEF_FIELD(socketMetaclass, sockRAW, Int, false, INT_VAL(SOCK_RAW));
+    DEF_FIELD(socketMetaclass, sockRDM, Int, false, INT_VAL(SOCK_RDM));
+    DEF_FIELD(socketMetaclass, ockSEQPACKET, Int, false, INT_VAL(SOCK_SEQPACKET));
+    DEF_FIELD(socketMetaclass, protoIP, Int, false, INT_VAL(IPPROTO_IP));
+    DEF_FIELD(socketMetaclass, protoICMP, Int, false, INT_VAL(IPPROTO_ICMP));
+    DEF_FIELD(socketMetaclass, protoTCP, Int, false, INT_VAL(IPPROTO_TCP));
+    DEF_FIELD(socketMetaclass, protoUDP, Int, false, INT_VAL(IPPROTO_UDP));
+    DEF_FIELD(socketMetaclass, protoICMPV6, Int, false, INT_VAL(IPPROTO_ICMPV6));
+    DEF_FIELD(socketMetaclass, protoRAW, Int, false, INT_VAL(IPPROTO_RAW));
 
     bindSuperclass(vm, socketClientClass, socketClass);
+    DEF_FIELD(socketClientClass, socketAddress, clox.std.net.SocketAddress, false, NIL_VAL);
     DEF_METHOD(socketClientClass, SocketClient, connect, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.net.SocketAddress));
 
     bindSuperclass(vm, socketServerClass, socketClass);
+    DEF_FIELD(socketServerClass, socketAddress, clox.std.net.SocketAddress, false, NIL_VAL);
     DEF_METHOD(socketServerClass, SocketServer, accept, 0, RETURN_TYPE(void));
     DEF_METHOD(socketServerClass, SocketServer, bind, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.net.SocketAddress));
     DEF_METHOD(socketServerClass, SocketServer, listen, 0, RETURN_TYPE(void));
 
     bindSuperclass(vm, httpRequestClass, vm->objectClass);
+    DEF_FIELD(httpRequestClass, url, Object, true, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(httpRequestClass, method, Int, true, INT_VAL(HTTP_GET));
+    DEF_FIELD(httpRequestClass, headers, clox.std.collection.Dictionary, true, OBJ_VAL(newDictionary(vm)));
+    DEF_FIELD(httpRequestClass, data, clox.std.collection.Dictionary, true, OBJ_VAL(newDictionary(vm)));
     DEF_INTERCEPTOR(httpRequestClass, HTTPRequest, INTERCEPTOR_INIT, __init__, 4, RETURN_TYPE(clox.std.net.HTTPRequest), PARAM_TYPE(Object), PARAM_TYPE(Int), PARAM_TYPE(clox.std.collection.Dictionary), PARAM_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(httpRequestClass, HTTPRequest, toString, 0, RETURN_TYPE(String));
 
-    setClassProperty(vm, httpRequestClass, "httpHEAD", INT_VAL(HTTP_HEAD));
-    setClassProperty(vm, httpRequestClass, "httpGET", INT_VAL(HTTP_GET));
-    setClassProperty(vm, httpRequestClass, "httpPOST", INT_VAL(HTTP_POST));
-    setClassProperty(vm, httpRequestClass, "httpPUT", INT_VAL(HTTP_PUT));
-    setClassProperty(vm, httpRequestClass, "httpDELETE", INT_VAL(HTTP_DELETE));
-    setClassProperty(vm, httpRequestClass, "httpPATCH", INT_VAL(HTTP_PATCH));
-    setClassProperty(vm, httpRequestClass, "httpOPTIONS", INT_VAL(HTTP_OPTIONS));
-    setClassProperty(vm, httpRequestClass, "httpTRACE", INT_VAL(HTTP_TRACE));
-    setClassProperty(vm, httpRequestClass, "httpCONNECT", INT_VAL(HTTP_CONNECT));
-    setClassProperty(vm, httpRequestClass, "httpQUERY", INT_VAL(HTTP_QUERY));
+    ObjClass* httpRequestMetaclass = httpRequestClass->obj.klass;
+    DEF_FIELD(httpRequestMetaclass, httpHEAD, Int, false, INT_VAL(HTTP_HEAD));
+    DEF_FIELD(httpRequestMetaclass, httpGET, Int, false, INT_VAL(HTTP_GET));
+    DEF_FIELD(httpRequestMetaclass, httpPOST, Int, false, INT_VAL(HTTP_POST));
+    DEF_FIELD(httpRequestMetaclass, httpPUT, Int, false, INT_VAL(HTTP_PUT));
+    DEF_FIELD(httpRequestMetaclass, httpDELETE, Int, false, INT_VAL(HTTP_DELETE));
+    DEF_FIELD(httpRequestMetaclass, httpPATCH, Int, false, INT_VAL(HTTP_PATCH));
+    DEF_FIELD(httpRequestMetaclass, httpOPTIONS, Int, false, INT_VAL(HTTP_OPTIONS));
+    DEF_FIELD(httpRequestMetaclass, httpTRACE, Int, false, INT_VAL(HTTP_TRACE));
+    DEF_FIELD(httpRequestMetaclass, httpCONNECT, Int, false, INT_VAL(HTTP_CONNECT));
+    DEF_FIELD(httpRequestMetaclass, httpQUERY, Int, false, INT_VAL(HTTP_QUERY));
 
     bindSuperclass(vm, httpResponseClass, vm->objectClass);
+    DEF_FIELD(httpResponseClass, url, Object, true, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(httpResponseClass, status, Int, true, INT_VAL(0));
+    DEF_FIELD(httpResponseClass, headers, clox.std.collection.Dictionary, true, OBJ_VAL(newDictionary(vm)));
+    DEF_FIELD(httpResponseClass, contentType, String, true, OBJ_VAL(emptyString(vm)));
     DEF_INTERCEPTOR(httpResponseClass, HTTPResponse, INTERCEPTOR_INIT, __init__, 4, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(String), PARAM_TYPE(Int), PARAM_TYPE(clox.std.collection.Dictionary), PARAM_TYPE(String));
     DEF_METHOD(httpResponseClass, HTTPResponse, toString, 0, RETURN_TYPE(String));
 
-    setClassProperty(vm, httpResponseClass, "statusOK", INT_VAL(200));
-    setClassProperty(vm, httpResponseClass, "statusFound", INT_VAL(302));
-    setClassProperty(vm, httpResponseClass, "statusBadRequest", INT_VAL(400));
-    setClassProperty(vm, httpResponseClass, "statusUnauthorized", INT_VAL(401));
-    setClassProperty(vm, httpResponseClass, "statusForbidden", INT_VAL(403));
-    setClassProperty(vm, httpResponseClass, "statusNotFound", INT_VAL(404));
-    setClassProperty(vm, httpResponseClass, "statusMethodNotAllowed", INT_VAL(405));
-    setClassProperty(vm, httpResponseClass, "statusInternalServerError", INT_VAL(500));
-    setClassProperty(vm, httpResponseClass, "statusBadGateway", INT_VAL(502));
-    setClassProperty(vm, httpResponseClass, "statusServiceUnavailable", INT_VAL(503));
+    ObjClass* httpResponseMetaclass = httpResponseClass->obj.klass;
+    DEF_FIELD(httpResponseMetaclass, statusOK, Int, false, INT_VAL(200));
+    DEF_FIELD(httpResponseMetaclass, statusFound, Int, false, INT_VAL(302));
+    DEF_FIELD(httpResponseMetaclass, statusBadRequest, Int, false, INT_VAL(400));
+    DEF_FIELD(httpResponseMetaclass, statusUnauthorized, Int, false, INT_VAL(401));
+    DEF_FIELD(httpResponseMetaclass, statusForbidden, Int, false, INT_VAL(403));
+    DEF_FIELD(httpResponseMetaclass, statusNotFound, Int, false, INT_VAL(404));
+    DEF_FIELD(httpResponseMetaclass, statusMethodNotAllowed, Int, false, INT_VAL(405));
+    DEF_FIELD(httpResponseMetaclass, statusInternalServerError, Int, false, INT_VAL(500));
+    DEF_FIELD(httpResponseMetaclass, statusBadGateway, Int, false, INT_VAL(502));
+    DEF_FIELD(httpResponseMetaclass, statusServiceUnavailable, Int, false, INT_VAL(503));
 
     bindSuperclass(vm, httpClientClass, vm->objectClass);
     bindTrait(vm, httpClientClass, closableTrait);
+    DEF_FIELD(httpClientClass, metadata, Object, false, NIL_VAL);
     DEF_INTERCEPTOR(httpClientClass, HTTPClient, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.net.HTTPClient));
     DEF_METHOD(httpClientClass, HTTPClient, close, 0, RETURN_TYPE(void));
     DEF_METHOD(httpClientClass, HTTPClient, delete, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object));

@@ -1208,10 +1208,10 @@ LOX_METHOD(Entry, toString) {
 LOX_METHOD(LinkedList, __init__) {
     ASSERT_ARG_COUNT("LinkedList::__init__()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
+    setObjProperty(vm, self, "length", INT_VAL(0));
     setObjProperty(vm, self, "first", NIL_VAL);
     setObjProperty(vm, self, "last", NIL_VAL);
     setObjProperty(vm, self, "current", NIL_VAL);
-    setObjProperty(vm, self, "length", INT_VAL(0));
     RETURN_OBJ(self);
 }
 
@@ -1491,10 +1491,10 @@ LOX_METHOD(Node, toString) {
 LOX_METHOD(Queue, __init__) {
     ASSERT_ARG_COUNT("Queue::__init__()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
+    setObjProperty(vm, self, "length", INT_VAL(0));
     setObjProperty(vm, self, "first", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
     setObjProperty(vm, self, "last", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
     setObjProperty(vm, self, "current", NIL_VAL);
-    setObjProperty(vm, self, "length", INT_VAL(0));
     RETURN_OBJ(receiver);
 }
 
@@ -1922,9 +1922,9 @@ LOX_METHOD(Set, toString) {
 LOX_METHOD(Stack, __init__) {
     ASSERT_ARG_COUNT("Stack::__init__()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
+    setObjProperty(vm, self, "length", INT_VAL(0));
     setObjProperty(vm, self, "first", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
     setObjProperty(vm, self, "current", NIL_VAL);
-    setObjProperty(vm, self, "length", INT_VAL(0));
     RETURN_OBJ(receiver);
 }
 
@@ -2087,6 +2087,7 @@ void registerCollectionPackage(VM* vm) {
 
     bindSuperclass(vm, collectionClass, vm->objectClass);
     bindTrait(vm, collectionClass, enumerableTrait);
+    DEF_FIELD(collectionClass, length, Int, false, INT_VAL(0));
     DEF_INTERCEPTOR(collectionClass, Collection, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Collection));
     DEF_METHOD(collectionClass, Collection, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(collectionClass, Collection, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
@@ -2140,6 +2141,9 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(arrayMetaclass, ArrayClass, fromElements, -1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE(Object));
 
     bindSuperclass(vm, linkedListClass, listClass);
+    DEF_FIELD(linkedListClass, first, clox.std.collection.Node, true, NIL_VAL);
+    DEF_FIELD(linkedListClass, last, clox.std.collection.Node, true, NIL_VAL);
+    DEF_FIELD(linkedListClass, current, clox.std.collection.Node, true, NIL_VAL);
     DEF_INTERCEPTOR(linkedListClass, LinkedList, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.LinkedList));
     DEF_METHOD(linkedListClass, LinkedList, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, addAt, 2, RETURN_TYPE(Object), PARAM_TYPE(Int), PARAM_TYPE(Object));
@@ -2167,6 +2171,9 @@ void registerCollectionPackage(VM* vm) {
 
     bindSuperclass(vm, vm->nodeClass, vm->objectClass);
     vm->nodeClass->classType = OBJ_NODE;
+    DEF_FIELD(vm->nodeClass, element, Object, true, NIL_VAL);
+    DEF_FIELD(vm->nodeClass, prev, clox.std.collection.Node, true, NIL_VAL);
+    DEF_FIELD(vm->nodeClass, next, clox.std.collection.Node, true, NIL_VAL);
     DEF_INTERCEPTOR(vm->nodeClass, Node, INTERCEPTOR_INIT, __init__, 3, RETURN_TYPE(clox.std.collection.Node), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Node), PARAM_TYPE(clox.std.collection.Node));
     DEF_METHOD(vm->nodeClass, Node, clone, 0, RETURN_TYPE(clox.std.collection.Node));
     DEF_METHOD(vm->nodeClass, Node, element, 0, RETURN_TYPE(Object));
@@ -2206,6 +2213,8 @@ void registerCollectionPackage(VM* vm) {
 
     bindSuperclass(vm, vm->entryClass, vm->objectClass);
     vm->entryClass->classType = OBJ_ENTRY;
+    DEF_FIELD(vm->entryClass, key, Object, true, NIL_VAL);
+    DEF_FIELD(vm->entryClass, value, Object, true, NIL_VAL);
     DEF_INTERCEPTOR(vm->entryClass, Entry, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(clox.std.collection.Entry), PARAM_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->entryClass, Entry, clone, 0, RETURN_TYPE(clox.std.collection.Entry));
     DEF_METHOD(vm->entryClass, Entry, getKey, 0, RETURN_TYPE(Object));
@@ -2214,6 +2223,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->entryClass, Entry, toString, 0, RETURN_TYPE(String));
 
     bindSuperclass(vm, setClass, collectionClass);
+    DEF_FIELD(setClass, dict, clox.std.collection.Dictionary, false, OBJ_VAL(newDictionary(vm)));
     DEF_INTERCEPTOR(setClass, Set, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Set));
     DEF_METHOD(setClass, Set, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(setClass, Set, clear, 0, RETURN_TYPE(void));
@@ -2230,6 +2240,8 @@ void registerCollectionPackage(VM* vm) {
 
     bindSuperclass(vm, vm->rangeClass, listClass);
     vm->rangeClass->classType = OBJ_RANGE;
+    DEF_FIELD(vm->rangeClass, from, Int, true, INT_VAL(0));
+    DEF_FIELD(vm->rangeClass, to, Int, true, INT_VAL(0));
     DEF_INTERCEPTOR(vm->rangeClass, Range, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(clox.std.collection.Range), PARAM_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(vm->rangeClass, Range, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
@@ -2248,6 +2260,8 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->rangeClass, Range, toString, 0, RETURN_TYPE(String));
 
     bindSuperclass(vm, stackClass, collectionClass);
+    DEF_FIELD(stackClass, first, clox.std.collection.Node, true, NIL_VAL);
+    DEF_FIELD(stackClass, current, clox.std.collection.Node, true, NIL_VAL);
     DEF_INTERCEPTOR(stackClass, Stack, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Stack));
     DEF_METHOD(stackClass, Stack, clear, 0, RETURN_TYPE(void));
     DEF_METHOD(stackClass, Stack, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
@@ -2264,6 +2278,9 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(stackClass, Stack, toString, 0, RETURN_TYPE(String));
 
     bindSuperclass(vm, queueClass, collectionClass);
+    DEF_FIELD(queueClass, first, clox.std.collection.Node, true, NIL_VAL);
+    DEF_FIELD(queueClass, last, clox.std.collection.Node, true, NIL_VAL);
+    DEF_FIELD(queueClass, current, clox.std.collection.Node, true, NIL_VAL);
     DEF_INTERCEPTOR(queueClass, Queue, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Queue));
     DEF_METHOD(queueClass, Queue, clear, 0, RETURN_TYPE(void));
     DEF_METHOD(queueClass, Queue, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));

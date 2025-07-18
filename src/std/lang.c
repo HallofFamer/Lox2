@@ -1893,6 +1893,9 @@ void registerLangPackage(VM* vm) {
     bindSuperclass(vm, vm->methodClass, vm->objectClass);
     vm->methodClass->classType = OBJ_METHOD;
     DEF_INTERCEPTOR(vm->methodClass, Method, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Method));
+    DEF_FIELD(vm->methodClass, name, String, false, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(vm->methodClass, arity, Int, false, INT_VAL(0));
+    DEF_FIELD(vm->methodClass, behavior, Behavior, false, NIL_VAL);
     DEF_METHOD(vm->methodClass, Method, arity, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->methodClass, Method, behavior, 0, RETURN_TYPE(Behavior));
     DEF_METHOD(vm->methodClass, Method, bind, 1, RETURN_TYPE(Object), PARAM_TYPE(Object));
@@ -2004,8 +2007,8 @@ void registerLangPackage(VM* vm) {
     insertGlobalSymbolTable(vm, "Number", "Number class");
 
     ObjClass* numberMetaclass = vm->numberClass->obj.klass;
-    setClassProperty(vm, vm->numberClass, "infinity", NUMBER_VAL(INFINITY));
-    setClassProperty(vm, vm->numberClass, "pi", NUMBER_VAL(3.14159265358979323846264338327950288));
+    DEF_FIELD(numberMetaclass, infinity, Number, false, NUMBER_VAL(INFINITY));
+    DEF_FIELD(numberMetaclass, pi, Number, false, NUMBER_VAL(3.14159265358979323846264338327950288));
     DEF_METHOD(numberMetaclass, NumberClass, parse, 1, RETURN_TYPE(Number), PARAM_TYPE(Object));
 
     bindSuperclass(vm, vm->intClass, vm->numberClass);
@@ -2034,8 +2037,8 @@ void registerLangPackage(VM* vm) {
     insertGlobalSymbolTable(vm, "Int", "Int class");
 
     ObjClass* intMetaclass = vm->intClass->obj.klass;
-    setClassProperty(vm, vm->intClass, "max", INT_VAL(INT32_MAX));
-    setClassProperty(vm, vm->intClass, "min", INT_VAL(INT32_MIN));
+    DEF_FIELD(intMetaclass, max, Int, false, INT_VAL(INT32_MAX));
+    DEF_FIELD(intMetaclass, min, Int, false, INT_VAL(INT32_MIN));
     DEF_METHOD(intMetaclass, IntClass, parse, 1, RETURN_TYPE(Int), PARAM_TYPE(Object));
 
     bindSuperclass(vm, vm->floatClass, vm->numberClass);
@@ -2045,13 +2048,14 @@ void registerLangPackage(VM* vm) {
     insertGlobalSymbolTable(vm, "Float", "Float class");
 
     ObjClass* floatMetaclass = vm->floatClass->obj.klass;
-    setClassProperty(vm, vm->floatClass, "max", NUMBER_VAL(DBL_MAX));
-    setClassProperty(vm, vm->floatClass, "min", NUMBER_VAL(DBL_MIN));
+    DEF_FIELD(floatMetaclass, max, Number, false, NUMBER_VAL(DBL_MAX));
+    DEF_FIELD(floatMetaclass, min, Number, true, NUMBER_VAL(DBL_MIN));
     DEF_METHOD(floatMetaclass, FloatClass, parse, 1, RETURN_TYPE(Float), PARAM_TYPE(Object));
 
     bindSuperclass(vm, vm->stringClass, vm->objectClass);
     vm->stringClass->classType = OBJ_STRING;
     DEF_INTERCEPTOR(vm->stringClass, String, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(String), PARAM_TYPE(String));
+    DEF_FIELD(vm->stringClass, length, Int, false, INT_VAL(0));
     DEF_METHOD(vm->stringClass, String, capitalize, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->stringClass, String, clone, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->stringClass, String, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
@@ -2096,6 +2100,8 @@ void registerLangPackage(VM* vm) {
     bindTrait(vm, vm->functionClass, callableTrait);
     vm->functionClass->classType = OBJ_CLOSURE;
     DEF_INTERCEPTOR(vm->functionClass, Function, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Function));
+    DEF_FIELD(vm->functionClass, name, String, true, OBJ_VAL(emptyString(vm)));
+    DEF_FIELD(vm->functionClass, arity, Int, true, INT_VAL(0));
     DEF_METHOD(vm->functionClass, Function, arity, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->functionClass, Function, call, -1, RETURN_TYPE(Object));
     DEF_METHOD(vm->functionClass, Function, call0, 0, RETURN_TYPE(Object));
@@ -2116,6 +2122,8 @@ void registerLangPackage(VM* vm) {
     bindTrait(vm, vm->boundMethodClass, callableTrait);
     vm->boundMethodClass->classType = OBJ_BOUND_METHOD;
     DEF_INTERCEPTOR(vm->boundMethodClass, BoundMethod, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(BoundMethod), PARAM_TYPE(Object), PARAM_TYPE(Object));
+    DEF_FIELD(vm->boundMethodClass, receiver, Object, true, NIL_VAL);
+    DEF_FIELD(vm->boundMethodClass, method, Method, true, NIL_VAL);
     DEF_METHOD(vm->boundMethodClass, BoundMethod, arity, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->boundMethodClass, BoundMethod, clone, 0, RETURN_TYPE(BoundMethod));
     DEF_METHOD(vm->boundMethodClass, BoundMethod, isAsync, 0, RETURN_TYPE(Bool));
@@ -2130,6 +2138,9 @@ void registerLangPackage(VM* vm) {
 
     bindSuperclass(vm, vm->generatorClass, vm->objectClass);
     vm->generatorClass->classType = OBJ_GENERATOR;
+    DEF_FIELD(vm->generatorClass, state, Int, true, INT_VAL(GENERATOR_START));
+    DEF_FIELD(vm->generatorClass, value, Object, true, NIL_VAL);
+    DEF_FIELD(vm->generatorClass, outer, Generator, true, NIL_VAL);
     DEF_INTERCEPTOR(vm->generatorClass, Generator, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(Generator), PARAM_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->generatorClass, Generator, getReceiver, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->generatorClass, Generator, isFinished, 0, RETURN_TYPE(Bool));
@@ -2147,16 +2158,17 @@ void registerLangPackage(VM* vm) {
     insertGlobalSymbolTable(vm, "Generator", "Generator class");
 
     ObjClass* generatorMetaclass = vm->generatorClass->obj.klass;
-    setClassProperty(vm, vm->generatorClass, "stateStart", INT_VAL(GENERATOR_START));
-    setClassProperty(vm, vm->generatorClass, "stateYield", INT_VAL(GENERATOR_YIELD));
-    setClassProperty(vm, vm->generatorClass, "stateResume", INT_VAL(GENERATOR_RESUME));
-    setClassProperty(vm, vm->generatorClass, "stateReturn", INT_VAL(GENERATOR_RETURN));
-    setClassProperty(vm, vm->generatorClass, "stateThrow", INT_VAL(GENERATOR_THROW));
-    setClassProperty(vm, vm->generatorClass, "stateError", INT_VAL(GENERATOR_ERROR));
+    DEF_FIELD(generatorMetaclass, stateStart, Int, false, INT_VAL(GENERATOR_START));
+    DEF_FIELD(generatorMetaclass, stateYield, Int, false, INT_VAL(GENERATOR_YIELD));
+    DEF_FIELD(generatorMetaclass, stateResume, Int, false, INT_VAL(GENERATOR_RESUME));
+    DEF_FIELD(generatorMetaclass, stateReturn, Int, false, INT_VAL(GENERATOR_RETURN));
+    DEF_FIELD(generatorMetaclass, stateThrow, Int, false, INT_VAL(GENERATOR_THROW));
+    DEF_FIELD(generatorMetaclass, stateError, Int, false, INT_VAL(GENERATOR_ERROR));
     DEF_METHOD(generatorMetaclass, GeneratorClass, run, 2, RETURN_TYPE(void), PARAM_TYPE(TCallable), PARAM_TYPE(Object));
 
     bindSuperclass(vm, vm->exceptionClass, vm->objectClass);
     vm->exceptionClass->classType = OBJ_EXCEPTION;
+    DEF_FIELD(vm->exceptionClass, message, String, true, OBJ_VAL(emptyString(vm)));
     DEF_INTERCEPTOR(vm->exceptionClass, Exception, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Exception), PARAM_TYPE(String));
     DEF_METHOD(vm->exceptionClass, Exception, message, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->exceptionClass, Exception, toString, 0, RETURN_TYPE(String));

@@ -886,6 +886,9 @@ void registerUtilPackage(VM* vm) {
 
     bindSuperclass(vm, dateClass, vm->objectClass);
     bindTrait(vm, dateClass, comparableTrait);
+    DEF_FIELD(dateClass, year, Int, false, INT_VAL(1970));
+    DEF_FIELD(dateClass, month, Int, false, INT_VAL(1));
+    DEF_FIELD(dateClass, day, Int, false, INT_VAL(1));
     DEF_INTERCEPTOR(dateClass, Date, INTERCEPTOR_INIT, __init__, 3, RETURN_TYPE(clox.std.util.Date), PARAM_TYPE(Int), PARAM_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(dateClass, Date, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
     DEF_METHOD(dateClass, Date, diff, 1, RETURN_TYPE(Number), PARAM_TYPE(clox.std.util.Date));
@@ -899,12 +902,15 @@ void registerUtilPackage(VM* vm) {
     DEF_OPERATOR(dateClass, Date, -, __subtract__, 1, RETURN_TYPE(clox.std.util.Date), PARAM_TYPE(clox.std.util.Duration));
 
     ObjClass* dateMetaclass = dateClass->obj.klass;
-    setClassProperty(vm, dateClass, "now", OBJ_VAL(dateObjNow(vm, dateClass)));
+    DEF_FIELD(dateMetaclass, now, clox.std.util.Date, false, OBJ_VAL(dateObjNow(vm, dateClass)));
     DEF_METHOD(dateMetaclass, DateClass, fromTimestamp, 1, RETURN_TYPE(clox.std.util.Date), PARAM_TYPE(Number));
     DEF_METHOD(dateMetaclass, DateClass, parse, 1, RETURN_TYPE(clox.std.util.Date), PARAM_TYPE(String));
 
     bindSuperclass(vm, dateTimeClass, dateClass);
     bindTrait(vm, dateTimeClass, comparableTrait);
+    DEF_FIELD(dateTimeClass, hour, Int, false, INT_VAL(0));
+    DEF_FIELD(dateTimeClass, minute, Int, false, INT_VAL(0));
+    DEF_FIELD(dateTimeClass, second, Int, false, INT_VAL(0));
     DEF_INTERCEPTOR(dateTimeClass, DateTime, INTERCEPTOR_INIT, __init__, 6, RETURN_TYPE(clox.std.util.DateTime), PARAM_TYPE(Int), PARAM_TYPE(Int), PARAM_TYPE(Int), PARAM_TYPE(Int), PARAM_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(dateTimeClass, DateTime, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
     DEF_METHOD(dateTimeClass, DateTime, diff, 1, RETURN_TYPE(Number), PARAM_TYPE(clox.std.util.Date));
@@ -924,6 +930,10 @@ void registerUtilPackage(VM* vm) {
 
     bindSuperclass(vm, durationClass, vm->objectClass);
     bindTrait(vm, durationClass, comparableTrait);
+    DEF_FIELD(durationClass, days, Int, false, INT_VAL(0));
+    DEF_FIELD(durationClass, hours, Int, false, INT_VAL(0));
+    DEF_FIELD(durationClass, minutes, Int, false, INT_VAL(0));
+    DEF_FIELD(durationClass, seconds, Int, false, INT_VAL(0));
     DEF_INTERCEPTOR(durationClass, Duration, INTERCEPTOR_INIT, __init__, 4, RETURN_TYPE(clox.std.util.Duration), PARAM_TYPE(Int), PARAM_TYPE(Int), PARAM_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(durationClass, Duration, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
     DEF_METHOD(durationClass, Duration, getTotalSeconds, 0, RETURN_TYPE(Int));
@@ -942,6 +952,9 @@ void registerUtilPackage(VM* vm) {
 
     bindSuperclass(vm, vm->promiseClass, vm->objectClass);
     vm->promiseClass->classType = OBJ_PROMISE;
+    DEF_FIELD(vm->promiseClass, state, Int, false, INT_VAL(0));
+    DEF_FIELD(vm->promiseClass, value, Object, false, NIL_VAL);
+    DEF_FIELD(vm->promiseClass, id, Int, true, INT_VAL(0));
     DEF_INTERCEPTOR(vm->promiseClass, Promise, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(TCallable));
     DEF_METHOD(vm->promiseClass, Promise, catch, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(TCallable));
     DEF_METHOD(vm->promiseClass, Promise, catchAll, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(TCallable));
@@ -956,15 +969,16 @@ void registerUtilPackage(VM* vm) {
     DEF_METHOD(vm->promiseClass, Promise, thenFulfill, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object));
 
     ObjClass* promiseMetaclass = vm->promiseClass->obj.klass;
-    setClassProperty(vm, vm->promiseClass, "statePending", INT_VAL(PROMISE_PENDING));
-    setClassProperty(vm, vm->promiseClass, "stateFulfilled", INT_VAL(PROMISE_FULFILLED));
-    setClassProperty(vm, vm->promiseClass, "stateRejected", INT_VAL(PROMISE_REJECTED));
+    DEF_FIELD(promiseMetaclass, statePending, Int, false, INT_VAL(PROMISE_PENDING));
+    DEF_FIELD(promiseMetaclass, stateFulfilled, Int, false, INT_VAL(PROMISE_FULFILLED));
+    DEF_FIELD(promiseMetaclass, stateRejected, Int, false, INT_VAL(PROMISE_REJECTED));
     DEF_METHOD(promiseMetaclass, PromiseClass, all, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(clox.std.collection.Array));
     DEF_METHOD(promiseMetaclass, PromiseClass, fulfill, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object));
     DEF_METHOD(promiseMetaclass, PromiseClass, race, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(clox.std.collection.Array));
     DEF_METHOD(promiseMetaclass, PromiseClass, reject, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Exception));
 
     bindSuperclass(vm, randomClass, vm->objectClass);
+    DEF_FIELD(randomClass, seed, Int, true, INT_VAL(0));
     DEF_INTERCEPTOR(randomClass, Random, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.util.Random));
     DEF_METHOD(randomClass, Random, getSeed, 0, RETURN_TYPE(Int));
     DEF_METHOD(randomClass, Random, nextBool, 0, RETURN_TYPE(Bool));
@@ -974,6 +988,7 @@ void registerUtilPackage(VM* vm) {
     DEF_METHOD(randomClass, Random, setSeed, 1, RETURN_TYPE(void), PARAM_TYPE(Int));
 
     bindSuperclass(vm, regexClass, vm->objectClass);
+    DEF_FIELD(regexClass, pattern, String, false, OBJ_VAL(emptyString(vm)));
     DEF_INTERCEPTOR(regexClass, Regex, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.util.Regex), PARAM_TYPE(String));
     DEF_METHOD(regexClass, Regex, match, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
     DEF_METHOD(regexClass, Regex, replace, 2, RETURN_TYPE(String), PARAM_TYPE(String), PARAM_TYPE(String));
@@ -981,6 +996,8 @@ void registerUtilPackage(VM* vm) {
 
     bindSuperclass(vm, vm->timerClass, vm->objectClass);
     vm->timerClass->classType = OBJ_TIMER;
+    DEF_FIELD(vm->timerClass, id, Int, false, INT_VAL(0));
+    DEF_FIELD(vm->timerClass, isRunning, Bool, false, FALSE_VAL);
     DEF_INTERCEPTOR(vm->timerClass, Timer, INTERCEPTOR_INIT, __init__, 3, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE(TCallable), PARAM_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(vm->timerClass, Timer, clear, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->timerClass, Timer, isRunning, 0, RETURN_TYPE(Bool));
@@ -992,12 +1009,13 @@ void registerUtilPackage(VM* vm) {
     DEF_METHOD(timerMetaclass, TimerClass, timeout, 2, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE(TCallable), PARAM_TYPE(Int));
 
     bindSuperclass(vm, uuidClass, vm->objectClass);
+    DEF_FIELD(uuidClass, buffer, String, false, OBJ_VAL(emptyString(vm)));
     DEF_INTERCEPTOR(uuidClass, UUID, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.util.UUID));
     DEF_METHOD(uuidClass, UUID, toString, 0, RETURN_TYPE(String));
 
     ObjClass* uuidMetaclass = uuidClass->obj.klass;
-    setClassProperty(vm, uuidClass, "length", INT_VAL(UUID4_LEN));
-    setClassProperty(vm, uuidClass, "version", INT_VAL(4));
+    DEF_FIELD(uuidMetaclass, length, Int, false, INT_VAL(UUID4_LEN));
+    DEF_FIELD(uuidMetaclass, version, Int, false, INT_VAL(4));
     DEF_METHOD(uuidMetaclass, UUIDClass, generate, 0, RETURN_TYPE(String));
     DEF_METHOD(uuidMetaclass, UUIDClass, isUUID, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
     DEF_METHOD(uuidMetaclass, UUIDClass, parse, 1, RETURN_TYPE(clox.std.util.UUID), PARAM_TYPE(String));
