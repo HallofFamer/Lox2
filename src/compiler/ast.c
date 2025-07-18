@@ -334,6 +334,20 @@ static void astOutputExprTrait(Ast* ast, int indentLevel) {
     astOutputChild(ast, indentLevel + 1, 1);
 }
 
+static void astOutputExprType(Ast* ast, int indentLevel) {
+    astOutputIndent(indentLevel);
+    if (ast->attribute.isFunction) {
+        printf("type \n");
+        astOutputChild(ast, indentLevel + 1, 0);
+        astOutputChild(ast, indentLevel + 1, 1);
+    }
+    else {
+        char* typeName = tokenToCString(ast->token);
+        printf("type %s\n", typeName);
+        free(typeName);
+    }
+}
+
 static void astOutputExprUnary(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     char* op = tokenToCString(ast->token);
@@ -743,6 +757,9 @@ void astOutput(Ast* ast, int indentLevel) {
                     break;
                 case AST_EXPR_TRAIT:
                     astOutputExprTrait(ast, indentLevel);
+                    break;
+                case AST_EXPR_TYPE:
+                    astOutputExprType(ast, indentLevel);
                     break;
                 case AST_EXPR_UNARY:
                     astOutputExprUnary(ast, indentLevel);

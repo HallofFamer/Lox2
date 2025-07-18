@@ -17,7 +17,7 @@ LOX_FUNCTION(assert) {
 
 LOX_FUNCTION(clock) {
     ASSERT_ARG_COUNT("clock()", 0);
-    RETURN_NUMBER(currentTimeInSec());
+    RETURN_NUMBER((double)clock() / CLOCKS_PER_SEC);
 }
 
 LOX_FUNCTION(error){

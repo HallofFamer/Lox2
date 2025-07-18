@@ -93,6 +93,15 @@ static void advance(Parser* parser) {
     }
 }
 
+static void backtrack(Parser* parser) {
+    if (parser->index > 0) {
+        parser->current = parser->tokens->elements[--parser->index];
+        if (parser->current.type == TOKEN_NEW_LINE) {
+            parser->current = parser->tokens->elements[--parser->index];
+        }
+    }
+}
+
 static void consume(Parser* parser, TokenSymbol type, const char* message) {
     if (parser->current.type == type) {
         advance(parser);
@@ -120,7 +129,11 @@ static bool checkNext(Parser* parser, TokenSymbol type) {
     return nextTokenType(parser) == type;
 }
 
-static bool check2(Parser* parser, TokenSymbol type) {
+static bool checkEither(Parser* parser, TokenSymbol type1, TokenSymbol type2) {
+    return check(parser, type1) || check(parser, type2);
+}
+
+static bool checkBoth(Parser* parser, TokenSymbol type) {
     return check(parser, type) && checkNext(parser, type);
 }
 
@@ -304,10 +317,12 @@ static void synchronize(Parser* parser) {
 }
 
 static Ast* expression(Parser* parser);
+static Ast* variable(Parser* parser, Token token, bool canAssign);
 static Ast* statement(Parser* parser);
 static Ast* block(Parser* parser);
 static Ast* function(Parser* parser, bool isAsync, bool isLambda, bool isVoid);
 static Ast* declaration(Parser* parser);
+static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType);
 static ParseRule* getRule(TokenSymbol type);
 static Ast* parsePrecedence(Parser* parser, Precedence precedence);
 
@@ -553,23 +568,61 @@ static Ast* lambda(Parser* parser, Token token, bool canAssign) {
     return function(parser, false, true, false);
 }
 
+static Ast* behaviorType(Parser* parser, const char* message) {
+    consume(parser, TOKEN_IDENTIFIER, message);
+    return variable(parser, previousToken(parser), false);
+}
+
+static Ast* functionType(Parser* parser, const char* message) {
+    consume(parser, TOKEN_IDENTIFIER, message);
+    Ast* returnType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+    consume(parser, TOKEN_FUN, "Expect 'fun' keyword after return type declaration.");
+    consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after 'fun' keyword.");
+
+    Ast* paramTypes = emptyAst(AST_LIST_EXPR, previousToken(parser));
+    Ast* paramType = NULL;
+    int arity = 0;
+
+    do {
+        arity++;
+        if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
+        if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+            paramType = functionType(parser, "Expect function type.");
+            paramType->attribute.isFunction = true;
+        }
+        else paramType = behaviorType(parser, "Expect param type.");
+        astAppendChild(paramTypes, paramType);
+    } while (match(parser, TOKEN_COMMA));
+
+    consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after param types.");
+    Ast* type = newAst(AST_EXPR_TYPE, previousToken(parser), 2, returnType, paramTypes);
+    type->attribute.isFunction = true;
+    return type;
+}
+
+static Ast* type_(Parser* parser, const char* message) {
+    if (checkBoth(parser, TOKEN_IDENTIFIER)) return behaviorType(parser, message);
+    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return functionType(parser, message);
+    else return NULL;
+}
+
 static Ast* variable(Parser* parser, Token token, bool canAssign) {
     if (canAssign && match(parser, TOKEN_EQUAL)) {
         Ast* expr = expression(parser);
         return newAst(AST_EXPR_ASSIGN, token, 1, expr);
     }
+    else if (check(parser, TOKEN_FUN) && checkNext(parser, TOKEN_LEFT_PAREN)) {
+        backtrack(parser);
+        return funDeclaration(parser, false, true);
+        //Ast* type = functionType(parser, "Expect return type for function type declaration.");
+        //return type;
+    }
     return emptyAst(AST_EXPR_VARIABLE, token);
-}
-
-static Ast* type_(Parser* parser, const char* message) {
-    consume(parser, TOKEN_IDENTIFIER, message);
-    return variable(parser, previousToken(parser), false);
 }
 
 static Ast* parameter(Parser* parser, const char* message) {
     bool isMutable = match(parser, TOKEN_VAR);
-    Ast* type = NULL;
-    if (check2(parser, TOKEN_IDENTIFIER)) type = type_(parser, "Expect type declaration.");
+    Ast* type = type_(parser, "Expect type declaration.");
     consume(parser, TOKEN_IDENTIFIER, message);
 
     Ast* param = emptyAst(AST_EXPR_PARAM, previousToken(parser));
@@ -644,9 +697,9 @@ static Ast* fields(Parser* parser, Token* name) {
         advance(parser);
 
         Ast* fieldType = NULL;
-        if (check2(parser, TOKEN_IDENTIFIER)) {
+        if (checkBoth(parser, TOKEN_IDENTIFIER)) {
             hasFieldType = true;
-            fieldType = type_(parser, "Expect field type.");
+            fieldType = behaviorType(parser, "Expect field type.");
         }
 
         Token fieldName = identifierToken(parser, "Expect field name.");
@@ -679,9 +732,9 @@ static Ast* methods(Parser* parser, Token* name) {
         if (match(parser, TOKEN_ASYNC)) isAsync = true;
         if (match(parser, TOKEN_CLASS)) isClass = true;
         if (match(parser, TOKEN_VOID)) isVoid = true;
-        if (check2(parser, TOKEN_IDENTIFIER) || (check(parser, TOKEN_IDENTIFIER) && tokenIsOperator(parser->tokens->elements[parser->index]))) {
+        if (checkBoth(parser, TOKEN_IDENTIFIER) || (check(parser, TOKEN_IDENTIFIER) && tokenIsOperator(parser->tokens->elements[parser->index]))) {
             hasReturnType = true;
-            returnType = type_(parser, "Expect method return type.");
+            returnType = behaviorType(parser, "Expect method return type.");
         }
 
         Token methodName = identifierToken(parser, "Expect method name.");
@@ -1289,7 +1342,7 @@ static Ast* declaration(Parser* parser) {
     else if (check(parser, TOKEN_VOID) && checkNext(parser, TOKEN_IDENTIFIER)) {
         return funDeclaration(parser, false, false);
     }
-    else if (check2(parser, TOKEN_IDENTIFIER)) {
+    else if (checkBoth(parser, TOKEN_IDENTIFIER)) {
         return funDeclaration(parser, false, true);
     }
     else if (match(parser, TOKEN_NAMESPACE)) {

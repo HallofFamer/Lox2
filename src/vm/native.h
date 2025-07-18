@@ -57,8 +57,4 @@ SymbolItem* insertGlobalSymbolTable(VM* vm, const char* symbolName, const char* 
 void loadSourceFile(VM* vm, const char* filePath);
 void registerNativeFunctions(VM* vm);
 
-static inline double currentTimeInSec() {
-    return (double)clock() / CLOCKS_PER_SEC;
-}
-
 #endif // !clox_native_h

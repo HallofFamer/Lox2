@@ -1917,7 +1917,7 @@ void registerLangPackage(VM* vm) {
 
     bindSuperclass(vm, vm->namespaceClass, vm->objectClass);
     vm->namespaceClass->classType = OBJ_NAMESPACE;
-    DEF_INTERCEPTOR(vm->namespaceClass, Namespace, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Namespace));
+    DEF_INTERCEPTOR(vm->namespaceClass, Namespace, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Namespace), PARAM_TYPE(String), PARAM_TYPE(Namespace));
     DEF_METHOD(vm->namespaceClass, Namespace, clone, 0, RETURN_TYPE(Namespace));
     DEF_METHOD(vm->namespaceClass, Namespace, enclosing, 0, RETURN_TYPE(Namespace));
     DEF_METHOD(vm->namespaceClass, Namespace, fullName, 0, RETURN_TYPE(String));
@@ -1926,7 +1926,7 @@ void registerLangPackage(VM* vm) {
     bindNamespaceClass(vm);
 
     bindSuperclass(vm, vm->traitClass, behaviorClass);
-    DEF_INTERCEPTOR(vm->traitClass, Trait, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(Trait), PARAM_TYPE(Object), PARAM_TYPE(Object));
+    DEF_INTERCEPTOR(vm->traitClass, Trait, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(Trait), PARAM_TYPE(String), PARAM_TYPE(Object));
     DEF_METHOD(vm->traitClass, Trait, getClass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->traitClass, Trait, getClassName, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->traitClass, Trait, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
@@ -1952,7 +1952,7 @@ void registerLangPackage(VM* vm) {
     insertGlobalSymbolTable(vm, "Nil", "Nil class");
 
     bindSuperclass(vm, vm->boolClass, vm->objectClass);
-    DEF_INTERCEPTOR(vm->boolClass, Bool, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_INTERCEPTOR(vm->boolClass, Bool, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Bool));
     DEF_METHOD(vm->boolClass, Bool, clone, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->boolClass, Bool, objectID, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->boolClass, Bool, toString, 0, RETURN_TYPE(String));

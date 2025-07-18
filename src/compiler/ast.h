@@ -44,6 +44,7 @@ typedef enum {
     AST_EXPR_SUPER_INVOKE,
     AST_EXPR_THIS,
     AST_EXPR_TRAIT,
+    AST_EXPR_TYPE,
     AST_EXPR_UNARY,
     AST_EXPR_VARIABLE,
     AST_EXPR_YIELD,
@@ -84,6 +85,7 @@ typedef enum {
 typedef struct {
     bool isAsync;
     bool isClass;
+    bool isFunction;
     bool isInitializer;
     bool isLambda;
     bool isMutable;
@@ -110,6 +112,7 @@ static inline AstAttribute astInitAttribute() {
     return (AstAttribute) {
         .isAsync = false,
         .isClass = false,
+        .isFunction = false,
         .isInitializer = false,
         .isLambda = false,
         .isMutable = false,
