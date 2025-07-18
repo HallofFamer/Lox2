@@ -62,13 +62,12 @@ static void endFunctionTypeChecker(TypeChecker* typeChecker) {
     typeChecker->currentFunction = typeChecker->currentFunction->enclosing;
 }
 
-void initTypeChecker(VM* vm, TypeChecker* typeChecker, ValueArray importedShortNames, ValueArray importedEnclosingNamespaces, bool debugTypetab) {
+void initTypeChecker(VM* vm, TypeChecker* typeChecker, NameTable* nametab, bool debugTypetab) {
     typeChecker->vm = vm;
     typeChecker->currentNamespace = emptyString(vm);
     typeChecker->currentClass = NULL;
     typeChecker->currentFunction = NULL;
-    typeChecker->importedShortNames = importedShortNames;
-    typeChecker->importedEnclosingNamespaces = importedEnclosingNamespaces;
+    typeChecker->nametab = nametab;
 
     typeChecker->objectType = getNativeType(vm, "Object");
     typeChecker->nilType = getNativeType(vm, "Nil");
@@ -374,7 +373,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         SymbolItem* item = symbolTableGet(ast->symtab, name);
         if (item == NULL) return;
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);
-
+     
         TypeInfo* classType = getClassType(typeChecker, className, ast->symtab);
         if (classType == NULL) return;
         inferAstTypeFromInitializer(typeChecker, ast, classType);
@@ -396,15 +395,14 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
         inferAstTypeFromReturn(typeChecker, ast, methodType);
     }
     else if (receiver->type == typeChecker->namespaceType) {
-        for (int i = 0; i < typeChecker->importedShortNames.count; i++) {
-            ObjString* _namespace = concatenateString(typeChecker->vm, AS_STRING(typeChecker->importedEnclosingNamespaces.values[i]), AS_STRING(typeChecker->importedShortNames.values[i]), ".");
-            ObjString* fullName = concatenateString(typeChecker->vm, _namespace, methodName, ".");
-            TypeInfo* classType = typeTableGet(typeChecker->vm->typetab, fullName);
-            
-            if (classType != NULL) {
-                inferAstTypeFromInitializer(typeChecker, ast, classType);
-                return;
-            }
+        ObjString* _namespace = nameTableGet(typeChecker->nametab, createSymbol(typeChecker, receiver->token));
+        if (_namespace == NULL) return;
+        ObjString* fullName = concatenateString(typeChecker->vm, _namespace, methodName, ".");
+
+        TypeInfo* classType = typeTableGet(typeChecker->vm->typetab, fullName);
+        if (classType != NULL) {
+            inferAstTypeFromInitializer(typeChecker, ast, classType);
+            return;
         }
     }
 }

@@ -1389,11 +1389,11 @@ ObjFunction* compile(VM* vm, const char* source) {
 
     Resolver resolver;
     initResolver(vm, &resolver, vm->config.debugSymtab);
-    resolve(&resolver, ast);
+    NameTable* nametab = resolve(&resolver, ast);
     if (resolver.hadError) return NULL;
 
     TypeChecker typeChecker;
-    initTypeChecker(vm, &typeChecker, vm->config.debugTypetab);
+    initTypeChecker(vm, &typeChecker, nametab, vm->config.debugTypetab);
     typeCheck(&typeChecker, ast);
     if (typeChecker.hadError) return NULL;
 
@@ -1405,5 +1405,6 @@ ObjFunction* compile(VM* vm, const char* source) {
 
     freeTokenStream(tokens);
     freeAst(ast, true);
+    freeNameTable(nametab);
     return function;
 }

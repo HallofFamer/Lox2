@@ -3,6 +3,7 @@
 #define clox_typechecker_h
 
 #include "ast.h"
+#include "resolver.h"
 
 typedef struct ClassTypeChecker ClassTypeChecker;
 typedef struct FunctionTypeChecker FunctionTypeChecker;
@@ -13,8 +14,7 @@ typedef struct {
     ObjString* currentNamespace;
     ClassTypeChecker* currentClass;
     FunctionTypeChecker* currentFunction;
-    ValueArray importedShortNames;
-    ValueArray importedEnclosingNamespaces;
+    NameTable* nametab;
 
     TypeInfo* objectType;
     TypeInfo* nilType;
@@ -32,7 +32,7 @@ typedef struct {
     bool hadError;
 } TypeChecker;
 
-void initTypeChecker(VM* vm, TypeChecker* typeChecker, ValueArray importedShortNames, ValueArray importedEnclosingNamespaces, bool debugTypetab);
+void initTypeChecker(VM* vm, TypeChecker* typeChecker, NameTable* nametab, bool debugTypetab);
 void typeCheckAst(TypeChecker* typeChecker, Ast* ast);
 void typeCheckChild(TypeChecker* typeChecker, Ast* ast, int index);
 void typeCheck(TypeChecker* typeChecker, Ast* ast);
