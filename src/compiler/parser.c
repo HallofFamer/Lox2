@@ -606,6 +606,24 @@ static Ast* type_(Parser* parser, const char* message) {
     else return NULL;
 }
 
+static bool tryParseFunctionType(Parser* parser) {
+    int index = parser->index;
+    do {
+        advance(parser);
+        if (currentTokenType(parser) != TOKEN_IDENTIFIER || nextTokenType(parser) == TOKEN_IDENTIFIER) {
+            parser->index = index;
+            return false;
+        }
+    } while (match(parser, TOKEN_COMMA));
+
+    advance(parser);
+    if (currentTokenType(parser) == TOKEN_RIGHT_PAREN && nextTokenType(parser) == TOKEN_LEFT_BRACKET) {
+        parser->index = index;
+        return false;
+    }
+    return true;
+}
+
 static Ast* variable(Parser* parser, Token token, bool canAssign) {
     if (canAssign && match(parser, TOKEN_EQUAL)) {
         Ast* expr = expression(parser);
@@ -614,8 +632,6 @@ static Ast* variable(Parser* parser, Token token, bool canAssign) {
     else if (check(parser, TOKEN_FUN) && checkNext(parser, TOKEN_LEFT_PAREN)) {
         backtrack(parser);
         return funDeclaration(parser, false, true);
-        //Ast* type = functionType(parser, "Expect return type for function type declaration.");
-        //return type;
     }
     return emptyAst(AST_EXPR_VARIABLE, token);
 }
@@ -1341,6 +1357,12 @@ static Ast* declaration(Parser* parser) {
     }
     else if (check(parser, TOKEN_VOID) && checkNext(parser, TOKEN_IDENTIFIER)) {
         return funDeclaration(parser, false, false);
+    }
+    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+        advance(parser);
+        advance(parser);
+        bool hasReturnType = tryParseFunctionType(parser);
+        return funDeclaration(parser, false, hasReturnType);
     }
     else if (checkBoth(parser, TOKEN_IDENTIFIER)) {
         return funDeclaration(parser, false, true);

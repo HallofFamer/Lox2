@@ -171,7 +171,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token) {
     return type;
 }
 
-static void setFunctionTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
+static void setCallableTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
     callableType->attribute.isAsync = ast->attribute.isAsync;
     callableType->attribute.isClassMethod = ast->attribute.isClass;
     callableType->attribute.isGenerator = false;
@@ -1173,7 +1173,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
         }
 
         CallableTypeInfo* methodType = typeTableInsertCallable(_class->methods, TYPE_CATEGORY_METHOD, name, NULL);
-        setFunctionTypeModifier(ast, methodType);
+        setCallableTypeModifier(ast, methodType);
         if (astNumChild(ast) > 2) {
             Ast* returnType = astGetChild(ast, 2);
             methodType->returnType = getTypeForSymbol(resolver, returnType->token);
