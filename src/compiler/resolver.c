@@ -200,10 +200,8 @@ static SymbolItem* findThis(Resolver* resolver) {
 
     if (item == NULL) {
         ObjString* className = getSymbolFullName(resolver, resolver->currentClass->name);
-        if (resolver->currentFunction->symtab->scope == SYMBOL_SCOPE_METHOD) {
-            item = newSymbolItem(resolver->thisVar, SYMBOL_CATEGORY_LOCAL, SYMBOL_STATE_ACCESSED, false);
-        }
-        else item = newSymbolItem(resolver->thisVar, SYMBOL_CATEGORY_UPVALUE, SYMBOL_STATE_ACCESSED, false);
+        SymbolCategory category = (resolver->currentFunction->symtab->scope == SYMBOL_SCOPE_METHOD) ? SYMBOL_CATEGORY_LOCAL : SYMBOL_CATEGORY_UPVALUE;
+        item = newSymbolItem(resolver->thisVar, category, SYMBOL_STATE_ACCESSED, false);
 
         if (resolver->currentFunction->attribute.isClassMethod) {
             ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, className);

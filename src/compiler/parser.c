@@ -102,6 +102,12 @@ static void backtrack(Parser* parser) {
     }
 }
 
+static bool resetIndex(Parser* parser, int index, Token current, bool value) {
+    parser->index = index;
+    parser->current = current;
+    return value;
+}
+
 static void consume(Parser* parser, TokenSymbol type, const char* message) {
     if (parser->current.type == type) {
         advance(parser);
@@ -573,7 +579,7 @@ static Ast* behaviorType(Parser* parser, const char* message) {
     return variable(parser, previousToken(parser), false);
 }
 
-static Ast* functionType(Parser* parser, const char* message) {
+static Ast* callableType(Parser* parser, const char* message) {
     consume(parser, TOKEN_IDENTIFIER, message);
     Ast* returnType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
     consume(parser, TOKEN_FUN, "Expect 'fun' keyword after return type declaration.");
@@ -587,7 +593,7 @@ static Ast* functionType(Parser* parser, const char* message) {
         arity++;
         if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
         if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
-            paramType = functionType(parser, "Expect function type.");
+            paramType = callableType(parser, "Expect function type.");
             paramType->attribute.isFunction = true;
         }
         else paramType = behaviorType(parser, "Expect param type.");
@@ -602,26 +608,28 @@ static Ast* functionType(Parser* parser, const char* message) {
 
 static Ast* type_(Parser* parser, const char* message) {
     if (checkBoth(parser, TOKEN_IDENTIFIER)) return behaviorType(parser, message);
-    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return functionType(parser, message);
+    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return callableType(parser, message);
     else return NULL;
 }
 
-static bool tryParseFunctionType(Parser* parser) {
+static bool checkCallableReturnType(Parser* parser) {
     int index = parser->index;
+    Token current = parser->current;
+    advance(parser);
+    advance(parser);
+
     do {
         advance(parser);
         if (currentTokenType(parser) != TOKEN_IDENTIFIER || nextTokenType(parser) == TOKEN_IDENTIFIER) {
-            parser->index = index;
-            return false;
+            return resetIndex(parser, index, current, false);
         }
     } while (match(parser, TOKEN_COMMA));
 
     advance(parser);
     if (currentTokenType(parser) == TOKEN_RIGHT_PAREN && nextTokenType(parser) == TOKEN_LEFT_BRACKET) {
-        parser->index = index;
-        return false;
+        return resetIndex(parser, index, current, false);
     }
-    return true;
+    return resetIndex(parser, index, current, true);
 }
 
 static Ast* variable(Parser* parser, Token token, bool canAssign) {
@@ -1264,6 +1272,14 @@ static Ast* statement(Parser* parser) {
     }
 }
 
+static bool matchClassDeclaration(Parser* parser) {
+    if (check(parser, TOKEN_CLASS) && checkNext(parser, TOKEN_IDENTIFIER)) {
+        advance(parser);
+        return true;
+    }
+    return false;
+}
+
 static Ast* classDeclaration(Parser* parser) {
     consume(parser, TOKEN_IDENTIFIER, "Expect class name.");
     Token name = previousToken(parser);
@@ -1277,6 +1293,68 @@ static Ast* classDeclaration(Parser* parser) {
     return newAst(AST_DECL_CLASS, name, 1, _class);
 }
 
+static bool matchAsyncFunDeclaration(Parser* parser, bool* hasReturnType) {
+    if (check(parser, TOKEN_FUN)) {
+        advance(parser);
+        *hasReturnType = false;
+        return true;
+    }
+    else if (check(parser, TOKEN_VOID)) {
+        *hasReturnType = false;
+        return true;
+    }
+    else if (check(parser, TOKEN_IDENTIFIER)) {
+        *hasReturnType = true;
+        return true;
+    }
+    else return false;
+}
+
+static bool matchHigherOrderFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
+    int index = parser->index;
+    Token current = parser->current;
+    advance(parser);
+    advance(parser);
+
+    do {
+        advance(parser);
+        if (currentTokenType(parser) != TOKEN_IDENTIFIER || nextTokenType(parser) == TOKEN_IDENTIFIER) {
+            return resetIndex(parser, index, current, false);
+        }
+    } while (match(parser, TOKEN_COMMA));
+
+    advance(parser);
+    if (currentTokenType(parser) == TOKEN_RIGHT_PAREN && nextTokenType(parser) == TOKEN_LEFT_BRACKET) {
+        return resetIndex(parser, index, current, false);
+    }
+
+    *hasReturnType = true;
+    return resetIndex(parser, index, current, true);
+}
+
+static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
+    if (check(parser, TOKEN_ASYNC)) {
+        advance(parser);
+        *isAsync = true;
+        return matchAsyncFunDeclaration(parser, hasReturnType);
+    }
+    else if (checkEither(parser, TOKEN_FUN, TOKEN_VOID) && checkNext(parser, TOKEN_IDENTIFIER)) {
+        *isAsync = false;
+        *hasReturnType = false;
+        return true;
+    }
+    else if (checkBoth(parser, TOKEN_IDENTIFIER)) {
+        *isAsync = false;
+        *hasReturnType = true;
+        return true;
+    }
+    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+        *isAsync = false;
+        return matchHigherOrderFunDeclaration(parser, isAsync, hasReturnType);
+    }
+    else return false;
+}
+
 static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     bool isVoid = match(parser, TOKEN_VOID);
     Ast* returnType = hasReturnType ? type_(parser, "Expect function return type.") : NULL;
@@ -1288,6 +1366,10 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     ast->attribute.isVoid = isVoid;
     if (returnType != NULL) astAppendChild(ast, returnType);
     return ast;
+}
+
+static bool matchNamespaceDeclaration(Parser* parser) {
+    return match(parser, TOKEN_NAMESPACE);
 }
 
 static Ast* namespaceDeclaration(Parser* parser) {
@@ -1307,6 +1389,14 @@ static Ast* namespaceDeclaration(Parser* parser) {
     return newAst(AST_DECL_NAMESPACE, token, 1, _namespace);
 }
 
+static bool matchTraitDeclaration(Parser* parser) {
+    if (check(parser, TOKEN_TRAIT) && checkNext(parser, TOKEN_IDENTIFIER)) {
+        advance(parser);
+        return true;
+    }
+    return false;
+}
+
 static Ast* traitDeclaration(Parser* parser) {
     consume(parser, TOKEN_IDENTIFIER, "Expect trait name.");
     Token name = previousToken(parser);
@@ -1316,6 +1406,18 @@ static Ast* traitDeclaration(Parser* parser) {
     consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after trait body.");
     Ast* trait = newAst(AST_EXPR_TRAIT, name, 2, traitList, methodList);
     return newAst(AST_DECL_TRAIT, name, 1, trait);
+}
+
+static bool matchVarDeclaration(Parser* parser, bool* isMutable) {
+    if (match(parser, TOKEN_VAL)) {
+        *isMutable = false;
+        return true;
+    }
+    else if (match(parser, TOKEN_VAR)) {
+        *isMutable = true;
+        return true;
+    }
+    return false;
 }
 
 static Ast* varDeclaration(Parser* parser, bool isMutable) {
@@ -1334,51 +1436,27 @@ static Ast* varDeclaration(Parser* parser, bool isMutable) {
 }
 
 static Ast* declaration(Parser* parser) {
-    if (check(parser, TOKEN_ASYNC) && checkNext(parser, TOKEN_FUN)) {
-        advance(parser);
-        advance(parser);
-        return funDeclaration(parser, true, false);
-    }
-    else if (check(parser, TOKEN_ASYNC) && checkNext(parser, TOKEN_VOID)) {
-        advance(parser);
-        return funDeclaration(parser, true, false);
-    }
-    else if (check(parser, TOKEN_ASYNC) && checkNext(parser, TOKEN_IDENTIFIER)) {
-        advance(parser);
-        return funDeclaration(parser, true, true);
-    }
-    else if (check(parser, TOKEN_CLASS) && checkNext(parser, TOKEN_IDENTIFIER)) {
-        advance(parser);
+    bool isAsync = false;
+    bool hasReturnType = false;
+    bool isMutable = false;
+
+    if (matchClassDeclaration(parser)) {
         return classDeclaration(parser);
     }
-    else if ((check(parser, TOKEN_FUN) && checkNext(parser, TOKEN_IDENTIFIER))) {
-        advance(parser);
-        return funDeclaration(parser, false, false);
-    }
-    else if (check(parser, TOKEN_VOID) && checkNext(parser, TOKEN_IDENTIFIER)) {
-        return funDeclaration(parser, false, false);
-    }
     else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
-        advance(parser);
-        advance(parser);
-        bool hasReturnType = tryParseFunctionType(parser);
-        return funDeclaration(parser, false, hasReturnType);
+        return checkCallableReturnType(parser) ? funDeclaration(parser, false, true) : statement(parser);
     }
-    else if (checkBoth(parser, TOKEN_IDENTIFIER)) {
+    else if (matchFunDeclaration(parser, &isAsync, &hasReturnType)) {
         return funDeclaration(parser, false, true);
     }
-    else if (match(parser, TOKEN_NAMESPACE)) {
+    else if (matchNamespaceDeclaration(parser)) {
         return namespaceDeclaration(parser);
     }
-    else if (check(parser, TOKEN_TRAIT) && checkNext(parser, TOKEN_IDENTIFIER)) {
-        advance(parser);
+    else if (matchTraitDeclaration(parser)) {
         return traitDeclaration(parser);
     }
-    else if (match(parser, TOKEN_VAL)) {
-        return varDeclaration(parser, false);
-    }
-    else if (match(parser, TOKEN_VAR)) {
-        return varDeclaration(parser, true);
+    else if (matchVarDeclaration(parser, &isMutable)) {
+        return varDeclaration(parser, isMutable);
     }
     else {
         return statement(parser);
