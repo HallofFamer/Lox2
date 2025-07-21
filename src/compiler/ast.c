@@ -563,9 +563,12 @@ static void astOutputDeclFun(Ast* ast, int indentLevel) {
 
     if (astNumChild(ast) > 1) {
         Ast* returnType = astGetChild(ast, 1);
-        char* returnTypeName = tokenToCString(returnType->token);
-        printf("(%s)", returnTypeName);
-        free(returnTypeName);
+        if (astNumChild(returnType) == 0) {
+            char* returnTypeName = tokenToCString(returnType->token);
+            printf("(%s)", returnTypeName);
+            free(returnTypeName);
+        }
+        else printf("(TCallable)");
     }
 
     printf("\n");
