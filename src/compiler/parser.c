@@ -30,11 +30,11 @@ typedef struct {
 } ParseRule;
 
 static Token currentToken(Parser* parser) {
-    return parser->tokens->elements[parser->index];
+    return parser->current;
 }
 
 static TokenSymbol currentTokenType(Parser* parser) {
-    return currentToken(parser).type;
+    return parser->current.type;
 }
 
 static Token previousToken(Parser* parser) {

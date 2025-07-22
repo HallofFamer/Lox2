@@ -903,7 +903,7 @@ LOX_METHOD(Method, __init__) {
     ASSERT_ARG_COUNT("Method::__init__(behavior, name, closure)", 3);
     ASSERT_ARG_TYPE("Method::__init__(behavior, name, closure)", 0, Class);
     ASSERT_ARG_TYPE("Method::__init__(behavior, name, closure)", 1, String);
-    ASSERT_ARG_TYPE("Method::__init__(behavior, name, closure)", 2, Closure);
+    ASSERT_ARG_TYPE("Method::__init__(behavior, name, closure)", 2, Callable);
 
     ObjMethod* self = AS_METHOD(receiver);
     ObjClass* behavior = AS_CLASS(args[0]);
