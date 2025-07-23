@@ -112,6 +112,16 @@ FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType,
     return fieldType;
 }
 
+MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer) {
+    MethodTypeInfo* methodType = (MethodTypeInfo*)newTypeInfo(id, sizeof(MethodTypeInfo), TYPE_CATEGORY_METHOD, name, name);
+    if (methodType != NULL) {
+        methodType->declaredType = newCallableTypeInfo(id, TYPE_CATEGORY_METHOD, name, returnType);
+        methodType->isClass = isClass;
+        methodType->isInitializer = isInitializer;
+    }
+    return methodType;
+}
+
 void freeTypeInfo(TypeInfo* type) {
     if (type == NULL) return;
     if (IS_BEHAVIOR_TYPE(type)) {
@@ -129,6 +139,12 @@ void freeTypeInfo(TypeInfo* type) {
     else if (IS_FIELD_TYPE(type)) {
         FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);
         free(fieldType);
+    }
+    else if (IS_METHOD_TYPE(type)) {
+        MethodTypeInfo* methodType = AS_METHOD_TYPE(type);
+        if (methodType->declaredType->paramTypes != NULL) TypeInfoArrayFree(methodType->declaredType->paramTypes);
+        free(methodType->declaredType);
+        free(methodType);
     }
     else {
         free(type);
@@ -265,6 +281,13 @@ FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInf
     return fieldType;
 }
 
+MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer) {
+    int id = typetab->count + 1;
+    MethodTypeInfo* methodType = newMethodTypeInfo(id, name, returnType, isClass, isInitializer);
+    typeTableSet(typetab, name, (TypeInfo*)methodType);
+    return methodType;
+}
+
 static void typeTableOutputCategory(TypeCategory category) {
     switch (category) {
         case TYPE_CATEGORY_CLASS:
@@ -304,23 +327,23 @@ static void typeTableOutputFields(TypeTable* fields) {
     }
 }
 
-static void typeTableOutputMethod(TypeTable* methods) {
+static void typeTableOutputMethods(TypeTable* methods) {
     printf("    methods:\n");
     for (int i = 0; i < methods->capacity; i++) {
         TypeEntry* entry = &methods->entries[i];
         if (entry != NULL && entry->key != NULL) {
-            CallableTypeInfo* method = AS_CALLABLE_TYPE(entry->value);
-            printf("      %s", method->attribute.isAsync ? "async " : "");
+            MethodTypeInfo* method = AS_METHOD_TYPE(entry->value);
+            printf("      %s", method->declaredType->attribute.isAsync ? "async " : "");
 
-            if (method->returnType == NULL) printf("dynamic ");
-            else if (method->attribute.isVoid) printf("void ");
-            else printf("%s ", method->returnType->shortName->chars);
+            if (method->declaredType->returnType == NULL) printf("dynamic ");
+            else if (method->declaredType->attribute.isVoid) printf("void ");
+            else printf("%s ", method->declaredType->returnType->shortName->chars);
             printf("%s(", entry->key->chars);
 
-            if (method->paramTypes->count > 0) {
-                printf("%s", (method->paramTypes->elements[0] == NULL) ? "dynamic" : method->paramTypes->elements[0]->shortName->chars);
-                for (int i = 1; i < method->paramTypes->count; i++) {
-                    printf(", %s", (method->paramTypes->elements[i] == NULL) ? "dynamic" : method->paramTypes->elements[i]->shortName->chars);
+            if (method->declaredType->paramTypes->count > 0) {
+                printf("%s", (method->declaredType->paramTypes->elements[0] == NULL) ? "dynamic" : method->declaredType->paramTypes->elements[0]->shortName->chars);
+                for (int i = 1; i < method->declaredType->paramTypes->count; i++) {
+                    printf(", %s", (method->declaredType->paramTypes->elements[i] == NULL) ? "dynamic" : method->declaredType->paramTypes->elements[i]->shortName->chars);
                 }
             }
             printf(")\n");
@@ -346,7 +369,7 @@ static void typeTableOutputBehavior(BehaviorTypeInfo* behavior) {
     }
 
     if (behavior->methods != NULL && behavior->methods->count > 0) {
-        typeTableOutputMethod(behavior->methods);
+        typeTableOutputMethods(behavior->methods);
     }
 }
 
