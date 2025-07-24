@@ -141,19 +141,22 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     va_start(args, method);
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     TypeInfo* returnType = va_arg(args, TypeInfo*);
-    CallableTypeInfo* methodType = newCallableTypeInfo(behaviorType->methods->count + 1, TYPE_CATEGORY_METHOD, methodName, returnType);
-    methodType->attribute.isAsync = isAsync;
-    methodType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
+    
+    bool isClass = (klass->behaviorType == BEHAVIOR_METACLASS);
+    bool isInitializer = (strcmp(name, "__init__") == 0);
+    MethodTypeInfo* methodType = newMethodTypeInfo(behaviorType->methods->count + 1, methodName, returnType, isClass, isInitializer);
+    methodType->declaredType->attribute.isAsync = isAsync;
+    methodType->declaredType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
     if (arity < 0) {
-        methodType->attribute.isVariadic = true;
+        methodType->declaredType->attribute.isVariadic = true;
         TypeInfo* paramType = va_arg(args, TypeInfo*);
-        TypeInfoArrayAdd(methodType->paramTypes, paramType);
+        TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
     }
     else {
         for (int i = 0; i < arity; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
-            TypeInfoArrayAdd(methodType->paramTypes, paramType);
+            TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
         }
     }
 

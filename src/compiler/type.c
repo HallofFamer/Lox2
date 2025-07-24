@@ -115,7 +115,7 @@ FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType,
 MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer) {
     MethodTypeInfo* methodType = (MethodTypeInfo*)newTypeInfo(id, sizeof(MethodTypeInfo), TYPE_CATEGORY_METHOD, name, name);
     if (methodType != NULL) {
-        methodType->declaredType = newCallableTypeInfo(id, TYPE_CATEGORY_METHOD, name, returnType);
+        methodType->declaredType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, name, returnType);
         methodType->isClass = isClass;
         methodType->isInitializer = isInitializer;
     }
