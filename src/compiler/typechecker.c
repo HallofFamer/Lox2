@@ -184,11 +184,11 @@ static void checkInheritingSuperclass(TypeChecker* typeChecker, TypeInfo* superc
     for (int i = 0; i < superclassType->methods->capacity; i++) {
         TypeEntry* methodEntry = &superclassType->methods->entries[i];
         if (methodEntry == NULL || methodEntry->key == NULL) continue;
-        CallableTypeInfo* methodType = AS_CALLABLE_TYPE(methodEntry->value);
+        MethodTypeInfo* methodType = AS_METHOD_TYPE(methodEntry->value);
 
         TypeInfo* subclassMethodType = typeTableGet(typeChecker->currentClass->type->methods, methodEntry->key);
         if (subclassMethodType != NULL && subclassMethodType->shortName != typeChecker->vm->initString) {
-            checkMethodSignatures(typeChecker, AS_CALLABLE_TYPE(subclassMethodType), methodType);
+            checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, methodType->declaredType);
         }
     }
 
@@ -211,16 +211,16 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
             for (int j = 0; j < traitType->methods->capacity; j++) {
                 TypeEntry* methodEntry = &traitType->methods->entries[i];
                 if (methodEntry == NULL || methodEntry->key == NULL) continue;
-                CallableTypeInfo* methodType = AS_CALLABLE_TYPE(methodEntry->value);
+                MethodTypeInfo* methodType = AS_METHOD_TYPE(methodEntry->value);
 
                 TypeInfo* subclassMethodType = typeTableGet(typeChecker->currentClass->type->methods, methodEntry->key);
                 if (subclassMethodType != NULL && subclassMethodType->shortName != typeChecker->vm->initString) {
-                    checkMethodSignatures(typeChecker, AS_CALLABLE_TYPE(subclassMethodType), methodType);
+                    checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, methodType->declaredType);
                 }
 
                 TypeInfo* superclassMethodType = typeTableGet(superclassType->methods, methodEntry->key);
                 if (superclassMethodType != NULL && superclassMethodType->shortName != typeChecker->vm->initString) {
-                    checkMethodSignatures(typeChecker, methodType, AS_CALLABLE_TYPE(superclassMethodType));
+                    checkMethodSignatures(typeChecker, methodType->declaredType, AS_METHOD_TYPE(superclassMethodType)->declaredType);
                 }
             }
         }
@@ -266,15 +266,15 @@ static void inferAstTypeFromBinaryOperator(TypeChecker* typeChecker, Ast* ast, S
     TypeInfo* baseType = typeTableMethodLookup(receiver->type, methodName);
     if (baseType == NULL) return;
 
-    CallableTypeInfo* methodType = AS_CALLABLE_TYPE(baseType);
-    if (methodType->paramTypes->count == 0) return;
-    TypeInfo* paramType = methodType->paramTypes->elements[0];
+    MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
+    if (methodType->declaredType->paramTypes->count == 0) return;
+    TypeInfo* paramType = methodType->declaredType->paramTypes->elements[0];
 
     if (!isSubtypeOfType(arg->type, paramType)) {
         typeError(typeChecker, "Method %s::%s expects argument 0 to be an instance of %s but gets %s.",
             receiver->type->shortName->chars, methodName->chars, paramType->shortName->chars, arg->type->shortName->chars);
     }
-    ast->type = methodType->returnType;
+    ast->type = methodType->declaredType->returnType;
 }
 
 static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolItem* item) {
@@ -347,7 +347,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
 
     if (initializerType != NULL) {
         sprintf_s(classDesc, UINT8_MAX, "Class %s's initializer", classType->shortName->chars);
-        checkArguments(typeChecker, classDesc, args, AS_CALLABLE_TYPE(initializerType));
+        checkArguments(typeChecker, classDesc, args, AS_METHOD_TYPE(initializerType)->declaredType);
     }
     else if (astHasChild(args)) {
         typeError(typeChecker, "Class %s's initializer expects to receive a total of 0 argument but gets %d.", classType->shortName->chars, astNumChild(args));
@@ -388,11 +388,11 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
     TypeInfo* baseType = typeTableMethodLookup(receiver->type, methodName);
 
     if (baseType != NULL) {
-        CallableTypeInfo* methodType = AS_CALLABLE_TYPE(baseType);
+        MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
         char methodDesc[UINT8_MAX];
         sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", receiver->type->shortName->chars, methodName->chars);
-        checkArguments(typeChecker, methodDesc, args, methodType);
-        inferAstTypeFromReturn(typeChecker, ast, methodType);
+        checkArguments(typeChecker, methodDesc, args, methodType->declaredType);
+        inferAstTypeFromReturn(typeChecker, ast, methodType->declaredType);
     }
     else if (receiver->type == typeChecker->namespaceType) {
         ObjString* _namespace = nameTableGet(typeChecker->nametab, createSymbol(typeChecker, receiver->token));
@@ -415,12 +415,12 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
     ObjString* methodName = createSymbol(typeChecker, ast->token);
     TypeInfo* baseType = typeTableMethodLookup(superType, methodName);
     if (baseType == NULL) return;
-    CallableTypeInfo* methodType = AS_CALLABLE_TYPE(baseType);
+    MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
 
     char methodDesc[UINT8_MAX];
     sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", superType->shortName->chars, methodName->chars);
-    checkArguments(typeChecker, methodDesc, args, methodType);
-    inferAstTypeFromReturn(typeChecker, ast, methodType);
+    checkArguments(typeChecker, methodDesc, args, methodType->declaredType);
+    inferAstTypeFromReturn(typeChecker, ast, methodType->declaredType);
 }
 
 static void inferAstTypeFromSubscriptGet(TypeChecker* typeChecker, Ast* ast) {
@@ -443,15 +443,15 @@ static void inferAstTypeFromSubscriptGet(TypeChecker* typeChecker, Ast* ast) {
     else {
         TypeInfo* baseType = typeTableMethodLookup(receiver->type, newStringPerma(typeChecker->vm, "[]"));
         if (baseType == NULL) return;
-        CallableTypeInfo* methodType = AS_CALLABLE_TYPE(baseType);
-        if (methodType->paramTypes->count == 0) return;
-        TypeInfo* paramType = methodType->paramTypes->elements[0];
+        MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
+        if (methodType->declaredType->paramTypes->count == 0) return;
+        TypeInfo* paramType = methodType->declaredType->paramTypes->elements[0];
 
         if (!isSubtypeOfType(index->type, paramType)) {
             typeError(typeChecker, "Method %s::[] expects argument 0 to be an instance of %s but gets %s.",
                 receiver->type->shortName->chars, paramType->shortName->chars, index->type->shortName->chars);
         }
-        inferAstTypeFromReturn(typeChecker, ast, methodType);
+        inferAstTypeFromReturn(typeChecker, ast, methodType->declaredType);
     }
 }
 
@@ -476,10 +476,10 @@ static void inferAstTypeFromSubscriptSet(TypeChecker* typeChecker, Ast* ast) {
     else {
         TypeInfo* baseType = typeTableMethodLookup(receiver->type, newStringPerma(typeChecker->vm, "[]="));
         if (baseType == NULL) return;
-        CallableTypeInfo* methodType = AS_CALLABLE_TYPE(baseType);
-        if (methodType->paramTypes->count == 0) return;
-        TypeInfo* paramType = methodType->paramTypes->elements[0];
-        TypeInfo* paramType2 = methodType->paramTypes->elements[1];
+        MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
+        if (methodType->declaredType->paramTypes->count == 0) return;
+        TypeInfo* paramType = methodType->declaredType->paramTypes->elements[0];
+        TypeInfo* paramType2 = methodType->declaredType->paramTypes->elements[1];
 
         if (!isSubtypeOfType(index->type, paramType)) {
             typeError(typeChecker, "Method %s::[]= expects argument 0 to be an instance of %s but gets %s.",
@@ -489,7 +489,7 @@ static void inferAstTypeFromSubscriptSet(TypeChecker* typeChecker, Ast* ast) {
             typeError(typeChecker, "Method %s::[]= expects argument 1 to be an instance of %s but gets %s.",
                 receiver->type->shortName->chars, paramType2->shortName->chars, value->type->shortName->chars);
         }
-        inferAstTypeFromReturn(typeChecker, ast, methodType);
+        inferAstTypeFromReturn(typeChecker, ast, methodType->declaredType);
     }
 }
 
@@ -1131,8 +1131,8 @@ static void typeCheckMethodDeclaration(TypeChecker* typeChecker, Ast* ast) {
         }
         else classType = typeChecker->currentClass->type;
 
-        CallableTypeInfo* methodType = AS_CALLABLE_TYPE(typeTableGet(classType->methods, name));
-        function(typeChecker, ast, methodType, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
+        MethodTypeInfo* methodType = AS_METHOD_TYPE(typeTableGet(classType->methods, name));
+        function(typeChecker, ast, methodType->declaredType, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
     }
 }
 

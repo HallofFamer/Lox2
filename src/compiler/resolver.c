@@ -433,10 +433,10 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
                 BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(baseType);
 
                 ObjString* methodName = createSymbol(resolver, resolver->currentFunction->name);
-                CallableTypeInfo* methodType = AS_CALLABLE_TYPE(typeTableGet(behaviorType->methods, methodName));        
-                if (methodType != NULL && methodType->paramTypes != NULL) {
-                    TypeInfoArrayAdd(methodType->paramTypes, ast->type);
-                    if (ast->attribute.isVariadic) methodType->attribute.isVariadic = true;
+                MethodTypeInfo* methodType = AS_METHOD_TYPE(typeTableGet(behaviorType->methods, methodName));        
+                if (methodType != NULL && methodType->declaredType->paramTypes != NULL) {
+                    TypeInfoArrayAdd(methodType->declaredType->paramTypes, ast->type);
+                    if (ast->attribute.isVariadic) methodType->declaredType->attribute.isVariadic = true;
                 }
             }
             break;
@@ -1170,11 +1170,11 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
             _class = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, _class->baseType.fullName)));
         }
 
-        CallableTypeInfo* methodType = typeTableInsertCallable(_class->methods, TYPE_CATEGORY_METHOD, name, NULL);
-        setCallableTypeModifier(ast, methodType);
+        MethodTypeInfo* methodType = typeTableInsertMethod(_class->methods, name, NULL, ast->attribute.isClass, ast->attribute.isInitializer);
+        setCallableTypeModifier(ast, methodType->declaredType);
         if (astNumChild(ast) > 2) {
             Ast* returnType = astGetChild(ast, 2);
-            methodType->returnType = getTypeForSymbol(resolver, returnType->token);
+            methodType->declaredType->returnType = getTypeForSymbol(resolver, returnType->token);
         }
     }
 
