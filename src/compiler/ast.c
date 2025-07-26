@@ -62,6 +62,10 @@ void freeAst(Ast* ast, bool freeChildren) {
     if (astOwnsSymbolTable(ast)) {
         freeSymbolTable(ast->symtab);
     }
+
+    if (ast->type != NULL && IS_CALLABLE_TYPE(ast->type)) {
+        freeTypeInfo(ast->type);
+    }
     free(ast);
 }
 
@@ -117,6 +121,21 @@ ObjString* astCreateQualifiedName(VM* vm, Ast* ast) {
         length += identifier->token.length + 1;
     }
     return copyStringPerma(vm, start, length);
+}
+
+void astDeriveType(Ast* ast, TypeInfo* type) {
+    if (type == NULL || IS_BEHAVIOR_TYPE(type)) {
+        ast->type = type;
+    }
+    else if (IS_CALLABLE_TYPE(type)) {
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
+        CallableTypeInfo* callableType2 = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, type->shortName, callableType->returnType);
+        for (int i = 0; i < callableType->paramTypes->count; i++) {
+            TypeInfo* paramType = callableType->paramTypes->elements[i];
+            TypeInfoArrayAdd(callableType2->paramTypes, paramType);
+        }
+        ast->type = (TypeInfo*)callableType2;
+    }
 }
 
 static void astOutputIndent(int indentLevel) {
