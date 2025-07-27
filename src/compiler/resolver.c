@@ -410,7 +410,7 @@ static void insertLiteralType(Resolver* resolver, Ast* ast, const char* name) {
 static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     Ast* child = hasType ? astGetChild(ast, 0) : NULL;
     if (child != NULL) {
-        ast->type = getTypeForSymbol(resolver, child->token);
+        astDeriveType(ast, getTypeForSymbol(resolver, child->token));
     }
 
     switch (resolver->currentFunction->symtab->scope) {

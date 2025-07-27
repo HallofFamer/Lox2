@@ -229,7 +229,7 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
 
 static void inferAstTypeFromChild(Ast* ast, int childIndex, SymbolItem* item) {
     Ast* child = astGetChild(ast, childIndex);
-    ast->type = child->type;
+    astDeriveType(ast, child->type);
     if (item != NULL) item->type = ast->type;
 }
 
@@ -274,7 +274,7 @@ static void inferAstTypeFromBinaryOperator(TypeChecker* typeChecker, Ast* ast, S
         typeError(typeChecker, "Method %s::%s expects argument 0 to be an instance of %s but gets %s.",
             receiver->type->shortName->chars, methodName->chars, paramType->shortName->chars, arg->type->shortName->chars);
     }
-    ast->type = methodType->declaredType->returnType;
+    astDeriveType(ast, methodType->declaredType->returnType);
 }
 
 static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolItem* item) {
@@ -336,7 +336,7 @@ static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableT
     if (callableType->returnType->category == TYPE_CATEGORY_VOID) {
         ast->type = typeChecker->voidType;
     }
-    else ast->type = callableType->returnType;
+    else astDeriveType(ast, callableType->returnType);
 }
 
 static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* classType) {
@@ -353,7 +353,6 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
         typeError(typeChecker, "Class %s's initializer expects to receive a total of 0 argument but gets %d.", classType->shortName->chars, astNumChild(args));
     }
     ast->type = classType;
-
 }
 
 static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
@@ -685,7 +684,7 @@ static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
     ObjString* fieldName = createSymbol(typeChecker, ast->token);
     TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
-    if (fieldType != NULL) ast->type = AS_FIELD_TYPE(fieldType)->declaredType;
+    if (fieldType != NULL) astDeriveType(ast, AS_FIELD_TYPE(fieldType)->declaredType);
 }
 
 static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
@@ -769,7 +768,7 @@ static void typeCheckUnary(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckVariable(TypeChecker* typeChecker, Ast* ast) {
     ObjString* name = createSymbol(typeChecker, ast->token);
     SymbolItem* item = symbolTableLookup(ast->symtab, name);
-    ast->type = item->type;
+    astDeriveType(ast, item->type);
 }
 
 static void typeCheckYield(TypeChecker* typeChecker, Ast* ast) {
@@ -1113,7 +1112,7 @@ static void typeCheckFunDeclaration(TypeChecker* typeChecker, Ast* ast) {
     SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
     defineAstType(typeChecker, ast, "Function", item);
     Ast* function = astGetChild(ast, 0);
-    function->type = ast->type;
+    astDeriveType(function, ast->type);
     typeCheckChild(typeChecker, ast, 0);
 }
 
@@ -1148,7 +1147,7 @@ static void typeCheckTraitDeclaration(TypeChecker* typeChecker, Ast* ast) {
     SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
     defineAstType(typeChecker, ast, "Trait", item);
     Ast* trait = astGetChild(ast, 0);
-    trait->type = ast->type;
+    astDeriveType(trait, ast->type);
     typeCheckChild(typeChecker, ast, 0);
 }
 
