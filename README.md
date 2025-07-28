@@ -81,9 +81,9 @@ Below are the features planned for future versions of Lox2, the list is subject 
 For a list of implemented features, please see [CHANGELOG.md](https://github.com/HallofFamer/Lox2/blob/master/notes/CHANGELOG.md).
 
 ### Lox2 v2.1.0(next version)
-- Extend parser with infinite lookahead, allowing qualified names to be used for function/method signature, class/trait declaration and catch statement.
+- Extend parser with infinite lookahead and backtrack, allowing parsing context sensitive grammar for Lox2.
 - Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be typed. 
-- Allow declaration of object properties outside of class initializer, which also enables optional static typing.
+- Allow declaration of object fields outside of class initializer, which also enables optional static typing and default values.
 - Redesign of Iterator/Enumerator API for ease of use and implementation of iterable types.
 
 ### Lox2 v2.2.0

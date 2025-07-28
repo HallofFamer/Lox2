@@ -408,9 +408,10 @@ static void insertLiteralType(Resolver* resolver, Ast* ast, const char* name) {
 }
 
 static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
-    Ast* child = hasType ? astGetChild(ast, 0) : NULL;
-    if (child != NULL) {
-        astDeriveType(ast, getTypeForSymbol(resolver, child->token));
+    if (hasType) {
+        resolveChild(resolver, ast, 0);
+        Ast* paramType = astGetChild(ast, 0);
+        astDeriveType(ast, paramType->type);
     }
 
     switch (resolver->currentFunction->symtab->scope) {
@@ -1169,12 +1170,10 @@ static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
     ObjString* name = createSymbol(resolver, item->token);
     CallableTypeInfo* functionType = typeTableInsertCallable(resolver->vm->typetab, TYPE_CATEGORY_FUNCTION, name, NULL);
 
-    if (astNumChild(ast) > 1) {
-        Ast* returnType = astGetChild(ast, 1);
-        functionType->returnType = getTypeForSymbol(resolver, returnType->token);
-    }
-
     resolveChild(resolver, ast, 0);
+    Ast* function = astGetChild(ast, 0);
+    Ast* returnType = astGetChild(function, 0);
+    if (returnType->token.length > 0) functionType->returnType = getTypeForSymbol(resolver, returnType->token);
     item->state = SYMBOL_STATE_ACCESSED;
 }
 

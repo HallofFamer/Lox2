@@ -5,8 +5,8 @@
 #include "../vm/value.h"
 
 typedef struct {
-    ObjString* shortName;
-    ObjString* fullName;
+    ObjString* key;
+    ObjString* value;
 } NameEntry;
 
 typedef struct {
@@ -17,7 +17,7 @@ typedef struct {
 
 NameTable* newNameTable();
 void freeNameTable(NameTable* table);
-ObjString* nameTableGet(NameTable* table, ObjString* shortName);
-bool nameTableSet(NameTable* table, ObjString* shortName, ObjString* fullName);
+ObjString* nameTableGet(NameTable* table, ObjString* key);
+bool nameTableSet(NameTable* table, ObjString* key, ObjString* value);
 
 #endif // !clox_name_h

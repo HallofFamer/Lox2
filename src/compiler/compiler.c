@@ -537,8 +537,8 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
     initCompiler(enclosing->vm, &compiler, enclosing, type, &ast->token, isAsync, enclosing->debugCode);
     beginScope(&compiler);
 
-    parameters(&compiler, astGetChild(ast, 0));
-    block(&compiler, astGetChild(ast, 1));
+    parameters(&compiler, astGetChild(ast, 1));
+    block(&compiler, astGetChild(ast, 2));
     ObjFunction* function = endCompiler(&compiler);
     emitBytes(enclosing, OP_CLOSURE, makeIdentifier(enclosing, OBJ_VAL(function)));
 

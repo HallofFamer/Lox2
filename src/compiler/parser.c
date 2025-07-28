@@ -1342,7 +1342,6 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     Ast* body = function(parser, returnType, isAsync, false, isVoid);
 
     Ast* ast = newAst(AST_DECL_FUN, name, 1, body);
-    astAppendChild(ast, returnType);
     ast->attribute.isVoid = isVoid;
     return ast;
 }

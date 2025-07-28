@@ -23,11 +23,11 @@ void freeNameTable(NameTable* table) {
     }
 }
 
-static NameEntry* findNameEntry(NameEntry* entries, int capacity, ObjString* shortName) {
-    uint32_t index = shortName->hash & (capacity - 1);
+static NameEntry* findNameEntry(NameEntry* entries, int capacity, ObjString* key) {
+    uint32_t index = key->hash & (capacity - 1);
     for (;;) {
         NameEntry* entry = &entries[index];
-        if (entry->shortName == shortName || entry->shortName == NULL) {
+        if (entry->key == key || entry->key == NULL) {
             return entry;
         }
         index = (index + 1) & (capacity - 1);
@@ -40,18 +40,18 @@ static void nameTableAdjustCapacity(NameTable* table, int capacity) {
     if (entries == NULL) exit(1);
 
     for (int i = 0; i < capacity; i++) {
-        entries[i].shortName = NULL;
-        entries[i].fullName = NULL;
+        entries[i].key = NULL;
+        entries[i].value = NULL;
     }
 
     table->count = 0;
     for (int i = 0; i < table->capacity; i++) {
         NameEntry* entry = &table->entries[i];
-        if (entry->shortName == NULL) continue;
+        if (entry->key == NULL) continue;
 
-        NameEntry* dest = findNameEntry(entries, capacity, entry->shortName);
-        dest->shortName = entry->shortName;
-        dest->fullName = entry->fullName;
+        NameEntry* dest = findNameEntry(entries, capacity, entry->key);
+        dest->key = entry->key;
+        dest->value = entry->value;
         table->count++;
     }
 
@@ -60,24 +60,24 @@ static void nameTableAdjustCapacity(NameTable* table, int capacity) {
     table->entries = entries;
 }
 
-ObjString* nameTableGet(NameTable* table, ObjString* shortName) {
+ObjString* nameTableGet(NameTable* table, ObjString* key) {
     if (table->count == 0) return NULL;
-    NameEntry* entry = findNameEntry(table->entries, table->capacity, shortName);
-    if (entry->shortName == NULL) return NULL;
-    return entry->fullName;
+    NameEntry* entry = findNameEntry(table->entries, table->capacity, key);
+    if (entry->key == NULL) return NULL;
+    return entry->value;
 }
 
-bool nameTableSet(NameTable* table, ObjString* shortName, ObjString* fullName) {
+bool nameTableSet(NameTable* table, ObjString* key, ObjString* value) {
     if (table->count + 1 > table->capacity * TABLE_MAX_LOAD) {
         int capacity = bufferGrowCapacity(table->capacity);
         nameTableAdjustCapacity(table, capacity);
     }
 
-    NameEntry* entry = findNameEntry(table->entries, table->capacity, shortName);
-    if (entry->shortName != NULL) return false;
+    NameEntry* entry = findNameEntry(table->entries, table->capacity, key);
+    if (entry->key != NULL) return false;
     table->count++;
 
-    entry->shortName = shortName;
-    entry->fullName = fullName;
+    entry->key = key;
+    entry->value = value;
     return true;
 }

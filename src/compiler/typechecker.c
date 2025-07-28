@@ -761,6 +761,25 @@ static void typeCheckTrait(TypeChecker* typeChecker, Ast* ast) {
     behavior(typeChecker, BEHAVIOR_TRAIT, ast);
 }
 
+static void typeCheckType(TypeChecker* typeChecker, Ast* ast) {
+    if (ast->attribute.isFunction) {
+        typeCheckChild(typeChecker, ast, 0);
+        typeCheckChild(typeChecker, ast, 1);
+        Ast* returnType = astGetChild(ast, 0);
+        CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(typeChecker->vm), returnType->type);
+
+        Ast* paramTypes = astGetChild(ast, 1);
+        for (int i = 0; i < paramTypes->children->count; i++) {
+            Ast* paramType = paramTypes->children->elements[i];
+            TypeInfoArrayAdd(callableType->paramTypes, paramType->type);
+        }
+        ast->type = (TypeInfo*)callableType;
+    }
+    else {
+        ast->type = getClassType(typeChecker, createSymbol(typeChecker, ast->token), ast->symtab);
+    }
+}
+
 static void typeCheckUnary(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     inferAstTypeFromUnary(typeChecker, ast, NULL);
@@ -847,6 +866,9 @@ static void typeCheckExpression(TypeChecker* typeChecker, Ast* ast) {
             break;
         case AST_EXPR_TRAIT:
             typeCheckTrait(typeChecker, ast);
+            break;
+        case AST_EXPR_TYPE:
+            typeCheckType(typeChecker, ast);
             break;
         case AST_EXPR_UNARY:
             typeCheckUnary(typeChecker, ast);
