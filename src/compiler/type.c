@@ -415,7 +415,19 @@ void typeTableOutput(TypeTable* typetab) {
 
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (type == NULL || type2 == NULL) return true;
-    return (type->id == type2->id);
+    else if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return (type->id == type2->id);
+    else if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
+        CallableTypeInfo* callableType2 = AS_CALLABLE_TYPE(type2);
+        if (!isEqualType(callableType->returnType, callableType2->returnType)) return false;
+        if (callableType->paramTypes->count != callableType2->paramTypes->count) return false;
+
+        for (int i = 0; i < callableType->paramTypes->count; i++) {
+            if (!isEqualType(callableType->paramTypes->elements[i], callableType2->paramTypes->elements[i])) return false;
+        }
+        return true;
+    }
+    else return false;
 }
 
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {

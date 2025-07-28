@@ -506,6 +506,7 @@ static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calle
 
     typeCheckChild(typeChecker, ast, 0);
     typeCheckChild(typeChecker, ast, 1);
+    typeCheckChild(typeChecker, ast, 2);
     endFunctionTypeChecker(typeChecker);
 }
 

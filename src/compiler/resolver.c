@@ -486,11 +486,15 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
 
     SymbolScope scope = (ast->kind == AST_DECL_METHOD) ? SYMBOL_SCOPE_METHOD : SYMBOL_SCOPE_FUNCTION;
     beginScope(resolver, ast, scope);
-    Ast* params = astGetChild(ast, 0);
-    params->symtab = ast->symtab;
-    parameters(resolver, params);
+    Ast* returnType = astGetChild(ast, 0);
+    returnType->symtab = ast->symtab;
+    resolveChild(resolver, ast, 0);
 
-    Ast* blk = astGetChild(ast, 1);
+    Ast* params = astGetChild(ast, 1);
+    params->symtab = ast->symtab;
+    resolveChild(resolver, ast, 1);
+
+    Ast* blk = astGetChild(ast, 2);
     blk->symtab = ast->symtab;
     block(resolver, blk);
     endScope(resolver);
@@ -742,6 +746,17 @@ static void resolveTrait(Resolver* resolver, Ast* ast) {
     behavior(resolver, BEHAVIOR_TRAIT, ast);
 }
 
+static void resolveType(Resolver* resolver, Ast* ast) {
+    if (ast->attribute.isFunction) {
+        resolveChild(resolver, ast, 0);
+        resolveChild(resolver, ast, 1);
+    }
+    else {
+        TypeInfo* type = getTypeForSymbol(resolver, ast->token);
+        astDeriveType(ast, type);
+    }
+}
+
 static void resolveUnary(Resolver* resolver, Ast* ast) {
     resolveChild(resolver, ast, 0);
 }
@@ -843,6 +858,9 @@ static void resolveExpression(Resolver* resolver, Ast* ast) {
             break;
         case AST_EXPR_TRAIT:
             resolveTrait(resolver, ast);
+            break;
+        case AST_EXPR_TYPE:
+            resolveType(resolver, ast);
             break;
         case AST_EXPR_UNARY:
             resolveUnary(resolver, ast);

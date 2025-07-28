@@ -217,6 +217,7 @@ static void astOutputExprFunction(Ast* ast, int indentLevel) {
     printf("function\n");
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
+    astOutputChild(ast, indentLevel + 1, 2);
 }
 
 static void astOutputExprGrouping(Ast* ast, int indentLevel) {
@@ -356,13 +357,13 @@ static void astOutputExprTrait(Ast* ast, int indentLevel) {
 static void astOutputExprType(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     if (ast->attribute.isFunction) {
-        printf("type \n");
+        printf("type fun()\n");
         astOutputChild(ast, indentLevel + 1, 0);
         astOutputChild(ast, indentLevel + 1, 1);
     }
     else {
         char* typeName = tokenToCString(ast->token);
-        printf("type %s\n", typeName);
+        printf("type %s\n", ast->token.length > 0 ? typeName : "dynamic");
         free(typeName);
     }
 }
