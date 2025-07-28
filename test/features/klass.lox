@@ -43,7 +43,7 @@ Point.origin = Point(0, 0)
 
 val p = Point(1, 2)
 println("Create point object p: " + p.toString())
-var p2 = Point(4, 6)
+val p2 = Point(4, 6)
 println("Creating point object p2: " + p2.toString())
 print("Distance between p and p2 is: ")
 println(p.distance(p2))

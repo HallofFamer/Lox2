@@ -1,12 +1,12 @@
 namespace test.features
 using clox.std.collection.Dictionary
 
-var dict = Dictionary()
+val dict = Dictionary()
 print("Creating empty dictionary: ")
 println(dict)
 print("Dictionary is empty: ")
 println(dict.isEmpty())
-var dict2 = ["US": "United States", "CA": "Canada", "EU": "Europe", "JP": "Japan", "RU": "Russia"]
+val dict2 = ["US": "United States", "CA": "Canada", "EU": "Europe", "JP": "Japan", "RU": "Russia"]
 print("Creating a dictionary using literals: ")
 println(dict2)
 print("The two dictionaries are equal: ")
@@ -45,5 +45,5 @@ println(dict.toString())
 println("")
 
 print("Testing dictionary with non-string keys: ")
-var dict3 = [2: 3.5, true: nil, false: "Hello World"]
+val dict3 = [2: 3.5, true: nil, false: "Hello World"]
 println(dict3)

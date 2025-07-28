@@ -1,6 +1,6 @@
 namespace test.std
 
-var str = "Hello World"
+val str = "Hello World"
 print("printing string 'Hello World': ")
 println(str)
 print("Class of string is: ")
@@ -41,5 +41,5 @@ print("'Hello World' to lower case: ")
 println("Hello World".toLowercase())
 
 print("Splitting string 'Hello My Friend': ")
-var str2 = "Hello My Friend"
+val str2 = "Hello My Friend"
 println(str2.split(" "))

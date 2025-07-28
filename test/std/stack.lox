@@ -1,7 +1,7 @@
 namespace test.std
 using clox.std.collection.Stack
 
-var stack = Stack()
+val stack = Stack()
 println("Testing class Stack...")
 println("Class for stack object: " + stack.getClassName())
 print("Stack is currently empty: ")
