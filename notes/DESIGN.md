@@ -27,6 +27,3 @@ I am well aware of the controversy surrounding async/await as well as its shortc
 
 ## What are the reasons to switch to the `extends` keyword?
 The original Lox2 implementation uses `<` sign, but trait are implemented using `with` keyword, which feels a little odd and inconsistent(Robert Nystrom did mention he would not want to introduce another keyword near the end of the book). More importantly, this decision simplifies future work on parsing Generics which will use angle bracket syntax.
-
-## Why type annotations only work for function/method parameter/return types?
-As the way it stands now, Lox2 does not have field/property declaration so it is not possible to assign types to instance variables. For local variables, I am firmly against explicit type declarations, and prefer type inference all the time. This leaves function/method declaration to be the only viable spot where type annotations may be specified.

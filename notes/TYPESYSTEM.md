@@ -69,13 +69,6 @@ void fun()
 ```
 At use site, an anonymous function or lambda expressions will have their param/return type inferred unless it comes from typed function/method param, return type or field type. 
 
-## Qualified Names as Types
-Another new feature for type system coming to Lox 2.1 is that programmers may use qualified names in type annotations. This was not possible in the initial release of Lox2 due to the limitation of the parser, but will no longer be a hindrance in Lox2.1+. This allows the following program to parse and compile successfully:
-```
-clox.std.util.Promise fetchAsync(clox.std.net.URL url) {}
-```
-Oh the other hand, the resolver and type checker will be able to deduce types for AST with qualified names. The expression `clox.std.collection.LinkedList()` will have type LinkedList assigned to the node, instead of dynamic. 
-
 ## Generic Types
 Lox 2.2 will introduce generic types which enables parametric polymorphism, and will be immensely useful for collection types, promises, etc. The syntax is similar to most mainstream languages, with type parameters enclosed inside a pair of angle brackets, ie. `GenericType<T1, T2, …>`. Again this adds complexity to the parser, but it is the most familiar syntax for most developers and Lox2’s lack of shift operators makes this complexity somewhat manageable. Generic types may be defined at both the class/trait level and function/method level. 
 ```

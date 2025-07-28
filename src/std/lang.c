@@ -1840,7 +1840,7 @@ void registerLangPackage(VM* vm) {
 
     inheritSuperclass(vm, behaviorClass, vm->objectClass);
     behaviorClass->classType = OBJ_CLASS;
-    DEF_INTERCEPTOR(behaviorClass, Behavior, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(Behavior), PARAM_TYPE(Object), PARAM_TYPE(Object));
+    DEF_INTERCEPTOR(behaviorClass, Behavior, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Behavior));
     DEF_METHOD(behaviorClass, Behavior, clone, 0, RETURN_TYPE(Behavior));
     DEF_METHOD(behaviorClass, Behavior, getMethod, 1, RETURN_TYPE(Method), PARAM_TYPE(String));
     DEF_METHOD(behaviorClass, Behavior, hasMethod, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
@@ -1958,7 +1958,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->boolClass, Bool, toString, 0, RETURN_TYPE(String));
     insertGlobalSymbolTable(vm, "Bool", "Bool class");
 
-    DEF_METHOD(comparableTrait, TComparable, compareTo, 1, RETURN_TYPE(Object), PARAM_TYPE(TComparable));
+    DEF_METHOD(comparableTrait, TComparable, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
     DEF_METHOD(comparableTrait, TComparable, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(comparableTrait, TComparable, ==, __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(comparableTrait, TComparable, >, __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));

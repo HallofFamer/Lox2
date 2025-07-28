@@ -766,7 +766,7 @@ static void typeCheckType(TypeChecker* typeChecker, Ast* ast) {
         typeCheckChild(typeChecker, ast, 0);
         typeCheckChild(typeChecker, ast, 1);
         Ast* returnType = astGetChild(ast, 0);
-        CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(typeChecker->vm), returnType->type);
+        CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, newStringPerma(typeChecker->vm, "TCallable"), returnType->type);
 
         Ast* paramTypes = astGetChild(ast, 1);
         for (int i = 0; i < paramTypes->children->count; i++) {
