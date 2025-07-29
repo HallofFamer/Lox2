@@ -765,6 +765,15 @@ static void resolveType(Resolver* resolver, Ast* ast) {
     if (ast->attribute.isFunction) {
         resolveChild(resolver, ast, 0);
         resolveChild(resolver, ast, 1);
+        Ast* returnType = astGetChild(ast, 0);
+        CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, newStringPerma(resolver->vm, "TCallable"), returnType->type);
+
+        Ast* paramTypes = astGetChild(ast, 1);
+        for (int i = 0; i < paramTypes->children->count; i++) {
+            Ast* paramType = paramTypes->children->elements[i];
+            TypeInfoArrayAdd(callableType->paramTypes, paramType->type);
+        }
+        ast->type = (TypeInfo*)callableType;
     }
     else {
         TypeInfo* type = getTypeForSymbol(resolver, ast->token);
@@ -1166,8 +1175,14 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
     if (ast->attribute.isClass) classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
     ObjString* name = createSymbol(resolver, ast->token);
-    TypeInfo* fieldType = ast->attribute.isTyped ? getTypeForSymbol(resolver, astGetChild(ast, 0)->token) : NULL;
-    typeTableInsertField(classType->fields, name, fieldType, ast->attribute.isMutable, hasInitializer);
+
+    TypeInfo* fieldTypeInfo = NULL;
+    if (ast->attribute.isTyped) {
+        resolveChild(resolver, ast, 0);
+        Ast* fieldType = astGetChild(ast, 0);
+        fieldTypeInfo = fieldType->type;
+    }
+    typeTableInsertField(classType->fields, name, fieldTypeInfo, ast->attribute.isMutable, hasInitializer);
 
     if (classType->superclassType != NULL) {
         BehaviorTypeInfo* superclass = AS_BEHAVIOR_TYPE(classType->superclassType);

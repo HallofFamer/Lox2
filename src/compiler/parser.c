@@ -706,6 +706,10 @@ static Ast* fields(Parser* parser, Token* name) {
             hasFieldType = true;
             fieldType = behaviorType(parser, "Expect field type.");
         }
+        else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+            hasFieldType = true;
+            fieldType = callableType(parser, "Expect field type");
+        }
 
         Token fieldName = identifierToken(parser, "Expect field name.");
         Ast* initializer = NULL;
