@@ -744,9 +744,13 @@ static Ast* methods(Parser* parser, Token* name) {
 
         if (checkBoth(parser, TOKEN_IDENTIFIER) || (check(parser, TOKEN_IDENTIFIER) && tokenIsOperator(parser->tokens->elements[parser->index]))) {
             hasReturnType = true;
-            returnType = type_(parser, "Expect method return type.");
+            returnType = behaviorType(parser, "Expect method return type.");
         }
-        if (returnType == NULL) returnType = emptyAst(AST_EXPR_TYPE, emptyToken());
+        else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+            hasReturnType = true;
+            returnType = callableType(parser, "Expect method return type.");
+        }
+        else returnType = emptyAst(AST_EXPR_TYPE, emptyToken());
 
         Token methodName = identifierToken(parser, "Expect method name.");
         if (previousToken(parser).length == 8 && memcmp(previousToken(parser).start, "__init__", 8) == 0) {

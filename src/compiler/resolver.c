@@ -411,21 +411,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     if (hasType) {
         resolveChild(resolver, ast, 0);
         Ast* paramType = astGetChild(ast, 0);
-        if (paramType->attribute.isFunction) {
-            Ast* returnType = astGetChild(paramType, 0);
-            CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, newStringPerma(resolver->vm, "TCallable"), returnType->type);
-
-            Ast* paramTypes = astGetChild(paramType, 1);
-            for (int i = 0; i < paramTypes->children->count; i++) {
-                Ast* paramType = paramTypes->children->elements[i];
-                TypeInfoArrayAdd(callableType->paramTypes, paramType->type);
-            }
-            paramType->type = (TypeInfo*)callableType;
-            astDeriveType(ast, paramType->type);
-        }
-        else {
-            ast->type = getTypeForSymbol(resolver, ast->token);
-        }
+        astDeriveType(ast, paramType->type);
     }
 
     switch (resolver->currentFunction->symtab->scope) {
