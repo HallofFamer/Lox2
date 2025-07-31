@@ -447,6 +447,26 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     }
 }
 
+static void insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isLambda, bool isVariadic, bool isVoid) {
+    Ast* returnType = astGetChild(ast, 0);
+    ObjString* returnTypeName = createSymbol(resolver, returnType->token);
+    CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, newStringPerma(resolver->vm, "TCallable"), returnType->type);
+    
+    if (callableType != NULL) {
+        callableType->attribute.isAsync = isAsync;
+        callableType->attribute.isLambda = isLambda;
+        callableType->attribute.isVariadic = isVariadic;
+        callableType->attribute.isVoid = isVoid;
+
+        Ast* paramTypes = astGetChild(ast, 1);
+        for (int i = 0; i < paramTypes->children->count; i++) {
+            Ast* paramType = paramTypes->children->elements[i];
+            TypeInfoArrayAdd(callableType->paramTypes, paramType->type);
+        }
+        ast->type = (TypeInfo*)callableType;
+    }
+}
+
 static SymbolItem* getVariable(Resolver* resolver, Ast* ast) {
     ObjString* symbol = createSymbol(resolver, ast->token);
     SymbolItem* item = findLocal(resolver, ast);
@@ -494,6 +514,8 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     Ast* params = astGetChild(ast, 1);
     params->symtab = ast->symtab;
     resolveChild(resolver, ast, 1);
+    insertCallableType(resolver, ast, functionResolver.attribute.isAsync, functionResolver.attribute.isLambda, 
+        functionResolver.attribute.isVariadic, functionResolver.attribute.isVoid);
 
     Ast* blk = astGetChild(ast, 2);
     blk->symtab = ast->symtab;
@@ -762,8 +784,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         ast->type = (TypeInfo*)callableType;
     }
     else {
-        TypeInfo* type = getTypeForSymbol(resolver, ast->token);
-        ast->type = type;
+        ast->type = getTypeForSymbol(resolver, ast->token);
     }
 }
 
