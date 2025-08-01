@@ -621,7 +621,6 @@ static void typeCheckDictionary(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckFunction(TypeChecker* typeChecker, Ast* ast) {
-    ObjString* name = copyStringPerma(typeChecker->vm, ast->token.start, ast->token.length);
     function(typeChecker, ast, NULL, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
 }
 
