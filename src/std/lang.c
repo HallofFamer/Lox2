@@ -1976,7 +1976,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->numberClass, Number, cbrt, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, ceil, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, clone, 0, RETURN_TYPE(Number));
-    DEF_METHOD(vm->numberClass, Number, compareTo, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
+    DEF_METHOD(vm->numberClass, Number, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
     DEF_METHOD(vm->numberClass, Number, cos, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, exp, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, floor, 0, RETURN_TYPE(Number));

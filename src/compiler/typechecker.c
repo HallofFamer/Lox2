@@ -134,10 +134,10 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
 
         for (int i = 0; i < callableType->paramTypes->count; i++) {
             TypeInfo* paramType = callableType->paramTypes->elements[i];
-            TypeInfo* argType = ast->children->elements[i]->type;
-            if (!isSubtypeOfType(argType, paramType)) {
+            Ast* arg = ast->children->elements[i];
+            if (!isSubtypeOfType(arg->type, paramType)) {
                 typeError(typeChecker, "%s expects argument %d to be an instance of %s but gets %s.", 
-                    calleeDesc, i + 1, paramType->shortName->chars, argType->shortName->chars);
+                    calleeDesc, i + 1, paramType->shortName->chars, arg->type->shortName->chars);
             }
         }
     }
