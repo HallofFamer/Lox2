@@ -112,6 +112,8 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
+static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer);
+
 static void defineAstType(TypeChecker* typeChecker, Ast* ast, const char* name, SymbolItem* item) {
     ObjString* typeName = newStringPerma(typeChecker->vm, name);
     ast->type = getNativeType(typeChecker->vm, name);
@@ -138,6 +140,25 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
             if (!isSubtypeOfType(arg->type, paramType)) {
                 typeError(typeChecker, "%s expects argument %d to be an instance of %s but gets %s.", 
                     calleeDesc, i + 1, paramType->shortName->chars, arg->type->shortName->chars);
+            }
+            else if (IS_CALLABLE_TYPE(paramType) && arg->kind == AST_EXPR_FUNCTION) {
+                if (arg->type == NULL) astDeriveType(arg, paramType);
+                else {
+                    if (IS_CALLABLE_TYPE(arg->type)) free(arg->type);
+                    CallableTypeInfo* callableType = AS_CALLABLE_TYPE(paramType);
+                    astDeriveType(arg, paramType);
+
+                    Ast* argReturnType = astGetChild(arg, 0);
+                    if (argReturnType->type == NULL) astDeriveType(argReturnType, callableType->returnType);
+                    Ast* argParamTypes = astGetChild(arg, 1);
+                    for (int j = 0; j < argParamTypes->children->count; j++) {
+                        Ast* argParamType = argParamTypes->children->elements[j];
+                        if (argParamType->type == NULL) {
+                            astDeriveType(argParamType, callableType->paramTypes->elements[j]);
+                        }
+                    }
+                }
+                function(typeChecker, arg, callableType, callableType->attribute.isAsync, false, false);
             }
         }
     }
@@ -621,7 +642,9 @@ static void typeCheckDictionary(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckFunction(TypeChecker* typeChecker, Ast* ast) {
-    function(typeChecker, ast, NULL, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
+    if (ast->parent != NULL && ast->parent->kind == AST_DECL_FUN) {
+        function(typeChecker, ast, NULL, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
+    }
 }
 
 static void typeCheckGrouping(TypeChecker* typeChecker, Ast* ast) {
