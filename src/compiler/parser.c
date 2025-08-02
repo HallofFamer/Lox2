@@ -582,10 +582,13 @@ static Ast* behaviorType(Parser* parser, const char* message) {
 static Ast* callableType(Parser* parser, const char* message) {
     consume(parser, TOKEN_IDENTIFIER, message);
     Ast* returnType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+    if (returnType->token.type == TOKEN_VOID) {
+        returnType->attribute.isVoid = true;
+    }
+    
     consume(parser, TOKEN_FUN, "Expect 'fun' keyword after return type declaration.");
     Token token = previousToken(parser);
     consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after 'fun' keyword.");
-
     Ast* paramTypes = emptyAst(AST_LIST_EXPR, previousToken(parser));
     Ast* paramType = NULL;
     int arity = 0;

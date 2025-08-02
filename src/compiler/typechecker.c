@@ -733,6 +733,22 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     else if (!isSubtypeOfType(value->type, fieldType->declaredType)) {
         typeError(typeChecker, "Assignment to field %s expects type %s but gets %s.", fieldName->chars, fieldType->declaredType->shortName->chars, value->type->shortName->chars);
     }
+    else if (fieldType->declaredType != NULL && value->type != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
+        if (IS_CALLABLE_TYPE(value->type)) free(value->type);
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(fieldType->declaredType);
+        astDeriveType(value, fieldType->declaredType);
+
+        Ast* returnType = astGetChild(value, 0);
+        if (returnType->type == NULL) astDeriveType(returnType, callableType->returnType);
+        Ast* paramTypes = astGetChild(value, 1);
+        for (int j = 0; j < paramTypes->children->count; j++) {
+            Ast* paramType = paramTypes->children->elements[j];
+            if (paramType->type == NULL) {
+                astDeriveType(paramType, callableType->paramTypes->elements[j]);
+            }
+        }
+        function(typeChecker, value, callableType, callableType->attribute.isAsync, false, false);
+    }
     defineAstType(typeChecker, ast, "Nil", NULL);
 }
 
