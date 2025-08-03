@@ -126,6 +126,21 @@ static bool hasAstType(TypeChecker* typeChecker, Ast* ast, const char* name) {
     return isSubtypeOfType(ast->type, type);
 }
 
+static void checkFunction(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* callableType) {
+    if (IS_CALLABLE_TYPE(ast->type)) free(ast->type);
+    astDeriveType(ast, (TypeInfo*)callableType);
+    Ast* returnType = astGetChild(ast, 0);
+    if (returnType->type == NULL) astDeriveType(returnType, callableType->returnType);
+    Ast* paramTypes = astGetChild(ast, 1);
+
+    for (int i = 0; i < paramTypes->children->count; i++) {
+        Ast* paramType = paramTypes->children->elements[i];
+        if (paramType->type == NULL) {
+            astDeriveType(paramType, callableType->paramTypes->elements[i]);
+        }
+    }
+}
+
 static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast* ast, CallableTypeInfo* callableType) {
     if (!callableType->attribute.isVariadic) {
         if (callableType->paramTypes->count != ast->children->count) {
@@ -142,23 +157,10 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
                     calleeDesc, i + 1, paramType->shortName->chars, arg->type->shortName->chars);
             }
             else if (IS_CALLABLE_TYPE(paramType) && arg->kind == AST_EXPR_FUNCTION) {
+                CallableTypeInfo* paramCallableType = AS_CALLABLE_TYPE(paramType);
                 if (arg->type == NULL) astDeriveType(arg, paramType);
-                else {
-                    if (IS_CALLABLE_TYPE(arg->type)) free(arg->type);
-                    CallableTypeInfo* callableType = AS_CALLABLE_TYPE(paramType);
-                    astDeriveType(arg, paramType);
-
-                    Ast* argReturnType = astGetChild(arg, 0);
-                    if (argReturnType->type == NULL) astDeriveType(argReturnType, callableType->returnType);
-                    Ast* argParamTypes = astGetChild(arg, 1);
-                    for (int j = 0; j < argParamTypes->children->count; j++) {
-                        Ast* argParamType = argParamTypes->children->elements[j];
-                        if (argParamType->type == NULL) {
-                            astDeriveType(argParamType, callableType->paramTypes->elements[j]);
-                        }
-                    }
-                }
-                function(typeChecker, arg, callableType, callableType->attribute.isAsync, false, false);
+                else checkFunction(typeChecker, arg, paramCallableType);
+                function(typeChecker, arg, paramCallableType, paramCallableType->attribute.isAsync, false, false);
             }
         }
     }
@@ -734,19 +736,8 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
         typeError(typeChecker, "Assignment to field %s expects type %s but gets %s.", fieldName->chars, fieldType->declaredType->shortName->chars, value->type->shortName->chars);
     }
     else if (fieldType->declaredType != NULL && value->type != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
-        if (IS_CALLABLE_TYPE(value->type)) free(value->type);
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(fieldType->declaredType);
-        astDeriveType(value, fieldType->declaredType);
-
-        Ast* returnType = astGetChild(value, 0);
-        if (returnType->type == NULL) astDeriveType(returnType, callableType->returnType);
-        Ast* paramTypes = astGetChild(value, 1);
-        for (int j = 0; j < paramTypes->children->count; j++) {
-            Ast* paramType = paramTypes->children->elements[j];
-            if (paramType->type == NULL) {
-                astDeriveType(paramType, callableType->paramTypes->elements[j]);
-            }
-        }
+        checkFunction(typeChecker, value, AS_CALLABLE_TYPE(fieldType->declaredType));
         function(typeChecker, value, callableType, callableType->attribute.isAsync, false, false);
     }
     defineAstType(typeChecker, ast, "Nil", NULL);

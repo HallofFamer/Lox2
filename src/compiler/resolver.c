@@ -817,9 +817,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         resolveChild(resolver, ast, 1);
         insertCallableType(resolver, ast, false, false, ast->attribute.isVariadic, ast->attribute.isVoid);
     }
-    else {
-        ast->type = getTypeForSymbol(resolver, ast->token);
-    }
+    else ast->type = getTypeForSymbol(resolver, ast->token);
 }
 
 static void resolveUnary(Resolver* resolver, Ast* ast) {
