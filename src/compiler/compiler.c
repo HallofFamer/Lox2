@@ -1376,35 +1376,51 @@ void compileChild(Compiler* compiler, Ast* ast, int index) {
     }
 }
 
+static void freeResources(TokenStream* tokens, Ast* ast, NameTable* nametab) {
+    if (tokens != NULL) freeTokenStream(tokens);
+    if (ast != NULL) freeAst(ast, true);
+    if (nametab != NULL) freeNameTable(nametab);
+}
+
 ObjFunction* compile(VM* vm, const char* source) {
     Lexer lexer;
     initLexer(&lexer, source, vm->config.debugToken);
     TokenStream* tokens = lex(&lexer);
-    if (lexer.hadError) return NULL;
+    if (lexer.hadError) {
+        freeResources(tokens, NULL, NULL);
+        return NULL;
+    }
 
     Parser parser;
     initParser(&parser, tokens, vm->config.debugAst);
     Ast* ast = parse(&parser);
-    if (parser.hadError) return NULL;
+    if (parser.hadError) {
+        freeResources(tokens, ast, NULL);
+        return NULL;
+    }
 
     Resolver resolver;
     initResolver(vm, &resolver, vm->config.debugSymtab);
     NameTable* nametab = resolve(&resolver, ast);
-    if (resolver.hadError) return NULL;
+    if (resolver.hadError) {
+        freeResources(tokens, ast, nametab);
+        return NULL;
+    }
 
     TypeChecker typeChecker;
     initTypeChecker(vm, &typeChecker, nametab, vm->config.debugTypetab);
     typeCheck(&typeChecker, ast);
-    if (typeChecker.hadError) return NULL;
+    if (typeChecker.hadError) {
+        freeResources(tokens, ast, nametab);
+        return NULL;
+    }
 
     Compiler compiler;
     initCompiler(vm, &compiler, NULL, COMPILE_TYPE_SCRIPT, NULL, false, vm->config.debugCode);
     compileAst(&compiler, ast);
     ObjFunction* function = endCompiler(&compiler);
-    if (compiler.hadError) return NULL;
 
-    freeTokenStream(tokens);
-    freeAst(ast, true);
-    freeNameTable(nametab);
+    freeResources(tokens, ast, nametab);
+    if (compiler.hadError) return NULL;
     return function;
 }

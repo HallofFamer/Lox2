@@ -951,15 +951,10 @@ static void typeCheckRequireStatement(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
-    TypeInfo* actualType = NULL;
     TypeInfo* expectedType = (typeChecker->currentFunction->type != NULL) ? typeChecker->currentFunction->type->returnType : NULL;
-    if (expectedType == NULL) return;
-
-    if (astHasChild(ast)) {
-        typeCheckChild(typeChecker, ast, 0);
-        actualType = astGetChild(ast, 0)->type;
-    }
-    else actualType = typeChecker->nilType;
+    if (expectedType == NULL || !astHasChild(ast)) return;
+    Ast* returnType = astGetChild(ast, 0);
+    TypeInfo* actualType = returnType->type;
 
     if (!isSubtypeOfType(actualType, expectedType)) {
         char calleeDesc[UINT8_MAX];
