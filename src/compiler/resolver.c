@@ -210,17 +210,19 @@ static SymbolItem* findThis(Resolver* resolver) {
     return item;
 }
 
-static void insertMetaclassType(Resolver* resolver, ObjString* classShortName, ObjString* classFullName) {
+static BehaviorTypeInfo* insertMetaclassType(Resolver* resolver, ObjString* classShortName, ObjString* classFullName) {
     ObjString* metaclassShortName = getMetaclassNameFromClass(resolver->vm, classShortName);
     ObjString* metaclassFullName = getMetaclassNameFromClass(resolver->vm, classFullName);
-    typeTableInsertBehavior(resolver->vm->typetab, TYPE_CATEGORY_CLASS, metaclassShortName, metaclassFullName, NULL);
+    return typeTableInsertBehavior(resolver->vm->typetab, TYPE_CATEGORY_CLASS, metaclassShortName, metaclassFullName, NULL);
 }
 
 static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, TypeCategory category) {
     ObjString* shortName = createSymbol(resolver, item->token);
     ObjString* fullName = getSymbolFullName(resolver, item->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
-    if (category == TYPE_CATEGORY_CLASS) insertMetaclassType(resolver, shortName, fullName);
+    if (category == TYPE_CATEGORY_CLASS) item->type = insertMetaclassType(resolver, shortName, fullName);
+    else if (category == TYPE_CATEGORY_METACLASS) item->type = getNativeType(resolver->vm, "Metaclass");
+    else if (category == TYPE_CATEGORY_TRAIT) item->type = getNativeType(resolver->vm, "Trait");
     return item;
 }
 
@@ -1095,6 +1097,7 @@ static void resolveStatement(Resolver* resolver, Ast* ast) {
 
 static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
+    item->type = getNativeType(resolver->vm, "Class");
     insertBehaviorType(resolver, item, TYPE_CATEGORY_CLASS);
     resolveChild(resolver, ast, 0);
     item->state = SYMBOL_STATE_ACCESSED;
@@ -1102,6 +1105,7 @@ static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
 
 static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
+    item->type = getNativeType(resolver->vm, "Function");
     ObjString* name = createSymbol(resolver, item->token);
     CallableTypeInfo* functionType = typeTableInsertCallable(resolver->vm->typetab, TYPE_CATEGORY_FUNCTION, name, NULL);
 
@@ -1152,6 +1156,7 @@ static void resolveNamespaceDeclaration(Resolver* resolver, Ast* ast) {
 
 static void resolveTraitDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
+    item->type = getNativeType(resolver->vm, "Trait");
     insertBehaviorType(resolver, item, TYPE_CATEGORY_TRAIT);
     resolveChild(resolver, ast, 0);
     item->state = SYMBOL_STATE_ACCESSED;

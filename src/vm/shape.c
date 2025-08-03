@@ -71,7 +71,7 @@ static void createDefaultShapes(VM* vm) {
     int shapeIDID = createShapeFromParent(vm, shapeIDValue, newStringPerma(vm, "id"));
     defaultShapeIDs[OBJ_PROMISE] = shapeIDID;
 
-    int shapeIDFrom = createShapeFromParent(vm, 0, newStringPerma(vm, "from"));
+    int shapeIDFrom = createShapeFromParent(vm, shapeIDLength, newStringPerma(vm, "from"));
     int shapeIDRange = createShapeFromParent(vm, shapeIDFrom, newStringPerma(vm, "to"));
     defaultShapeIDs[OBJ_RANGE] = shapeIDRange;
 

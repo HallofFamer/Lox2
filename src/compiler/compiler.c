@@ -1365,24 +1365,33 @@ ObjFunction* compile(VM* vm, const char* source) {
     Parser parser;
     initParser(&parser, &lexer, vm->config.debugAst);
     Ast* ast = parse(&parser);
-    if (parser.hadError) return NULL;
+    if (parser.hadError) {
+        freeAst(ast, true);
+        return NULL;
+    }
 
     Resolver resolver;
     initResolver(vm, &resolver, vm->config.debugSymtab);
     resolve(&resolver, ast);
-    if (resolver.hadError) return NULL;
+    if (resolver.hadError) {
+        freeAst(ast, true);
+        return NULL;
+    }
 
     TypeChecker typeChecker;
     initTypeChecker(vm, &typeChecker, vm->config.debugTypetab);
     typeCheck(&typeChecker, ast);
-    if (typeChecker.hadError) return NULL;
+    if (typeChecker.hadError) {
+        freeAst(ast, true);
+        return NULL;
+    }
 
     Compiler compiler;
     initCompiler(vm, &compiler, NULL, COMPILE_TYPE_SCRIPT, NULL, false, vm->config.debugCode);
     compileAst(&compiler, ast);
     ObjFunction* function = endCompiler(&compiler);
-    if (compiler.hadError) return NULL;
 
     freeAst(ast, true);
+    if (compiler.hadError) return NULL;
     return function;
 }

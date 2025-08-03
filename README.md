@@ -81,9 +81,9 @@ Below are the features planned for future versions of Lox2, the list is subject 
 For a list of implemented features, please see [CHANGELOG.md](https://github.com/HallofFamer/Lox2/blob/master/notes/CHANGELOG.md).
 
 ### Lox2 v2.1.0(next version)
-- Extend parser with infinite lookahead, allowing qualified names to be used for function/method signature, class/trait declaration and catch statement.
+- Extend parser with infinite lookahead and backtrack, allowing parsing context sensitive grammar for Lox2.
 - Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be typed. 
-- Allow declaration of object properties outside of class initializer, which also enables optional static typing.
+- Allow declaration of object fields outside of class initializer, which also enables optional static typing and default values.
 - Redesign of Iterator/Enumerator API for ease of use and implementation of iterable types.
 
 ### Lox2 v2.2.0
@@ -100,21 +100,21 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 
 ### Lox2 v2.4.0
 - Support for structural pattern matching using `match` keyword, remove `switch` statement as it has been superceded.
+- Enhanced Generics/parametric polymorphism with constraints on generic type parameters using `extends` or `with` keywords.
 - Object literal syntax similar to Javascript which can be good for configuration objects. 
-- Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
 - Foreign function interface(FFI) as a way to write Lox2 libraries in C and load in lox script.
 
 ### Lox2 v2.5.0
 - C# style property accessor syntax which provides a flexible way to access and modify the value of instance fields. 
 - Add new package `clox.ext.sql` which supports database connections and queries for mysql/mariadb, postgres, sqlite, etc.
-- Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body. 
+- Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
 - Implement a profiler which can identify the "Hotspots" of the program and how long they execute, prerequiste for future JIT. 
 
 ### Lox2 v2.6.0
 - Initial implementation of tracing JIT compiler that optimizes hot loops, only for x64 architecture. 
 - First class continuation with keyword `thisContext`, enabling manipulation of call stack in userland.
+- Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body.
 - Add new package `clox.ext.gui` which supports writing GUI applications using gtk binding for Lox2.
-- Optimization for property accessors which can inline simple one-line getters/setters.
 
 
 ## Example
@@ -136,7 +136,7 @@ println("Content: ${response.content}")
 
 #### Windows(with git, cmake and vcpkg, need to replace [$VCPKG_PATH] with installation path of vcpkg)
 ```
-git clone -b v2.0.2 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 cmake -DCMAKE_TOOLCHAIN_FILE:STRING="[$VCPKG_PATH]/scripts/buildsystems/vcpkg.cmake" -S . -B ./build
 cmake --build ./build --config Release
@@ -145,7 +145,7 @@ cmake --build ./build --config Release
 
 #### Linux(with git, cmake, curl and libuv, need to install one of the libcurl4-dev and libuv1.dev packages)
 ```
-git clone -b v2.0.2 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 mkdir build
 cmake -S . -B ./build
@@ -155,13 +155,13 @@ cmake --build ./build --config Release
 
 #### Docker(linux, need to replace [$LinuxDockerfile] by actual docker file name, ie. UbuntuDockerfile)
 ```
-git clone -b v2.0.2 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 docker build -t lox2:linux -f Docker/[$LinuxDockerfile] .
-docker run -w /Lox2-2.0.2/Lox2 -i -t lox2:linux
+docker run -w /Lox2-2.0.3/Lox2 -i -t lox2:linux
 ```
 
-Note: It is recommended to clone from the latest stable release branch("v2.0.1" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
+Note: It is recommended to clone from the latest stable release branch("v2.0.3" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
 
 
 ## Credits & Special Thanks

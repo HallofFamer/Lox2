@@ -903,7 +903,7 @@ LOX_METHOD(Method, __init__) {
     ASSERT_ARG_COUNT("Method::__init__(behavior, name, closure)", 3);
     ASSERT_ARG_TYPE("Method::__init__(behavior, name, closure)", 0, Class);
     ASSERT_ARG_TYPE("Method::__init__(behavior, name, closure)", 1, String);
-    ASSERT_ARG_TYPE("Method::__init__(behavior, name, closure)", 2, Closure);
+    ASSERT_ARG_TYPE("Method::__init__(behavior, name, closure)", 2, Callable);
 
     ObjMethod* self = AS_METHOD(receiver);
     ObjClass* behavior = AS_CLASS(args[0]);
@@ -1840,7 +1840,7 @@ void registerLangPackage(VM* vm) {
 
     inheritSuperclass(vm, behaviorClass, vm->objectClass);
     behaviorClass->classType = OBJ_CLASS;
-    DEF_INTERCEPTOR(behaviorClass, Behavior, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(Behavior), PARAM_TYPE(Object), PARAM_TYPE(Object));
+    DEF_INTERCEPTOR(behaviorClass, Behavior, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Behavior));
     DEF_METHOD(behaviorClass, Behavior, clone, 0, RETURN_TYPE(Behavior));
     DEF_METHOD(behaviorClass, Behavior, getMethod, 1, RETURN_TYPE(Method), PARAM_TYPE(String));
     DEF_METHOD(behaviorClass, Behavior, hasMethod, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
@@ -1914,7 +1914,7 @@ void registerLangPackage(VM* vm) {
 
     bindSuperclass(vm, vm->namespaceClass, vm->objectClass);
     vm->namespaceClass->classType = OBJ_NAMESPACE;
-    DEF_INTERCEPTOR(vm->namespaceClass, Namespace, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Namespace));
+    DEF_INTERCEPTOR(vm->namespaceClass, Namespace, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Namespace), PARAM_TYPE(String), PARAM_TYPE(Namespace));
     DEF_METHOD(vm->namespaceClass, Namespace, clone, 0, RETURN_TYPE(Namespace));
     DEF_METHOD(vm->namespaceClass, Namespace, enclosing, 0, RETURN_TYPE(Namespace));
     DEF_METHOD(vm->namespaceClass, Namespace, fullName, 0, RETURN_TYPE(String));
@@ -1923,7 +1923,7 @@ void registerLangPackage(VM* vm) {
     bindNamespaceClass(vm);
 
     bindSuperclass(vm, vm->traitClass, behaviorClass);
-    DEF_INTERCEPTOR(vm->traitClass, Trait, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(Trait), PARAM_TYPE(Object), PARAM_TYPE(Object));
+    DEF_INTERCEPTOR(vm->traitClass, Trait, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(Trait), PARAM_TYPE(String), PARAM_TYPE(Object));
     DEF_METHOD(vm->traitClass, Trait, getClass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->traitClass, Trait, getClassName, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->traitClass, Trait, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
@@ -1959,7 +1959,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->boolClass, Bool, toString, 0, RETURN_TYPE(String));
     insertGlobalSymbolTable(vm, "Bool", classType);
 
-    DEF_METHOD(comparableTrait, TComparable, compareTo, 1, RETURN_TYPE(Object), PARAM_TYPE(TComparable));
+    DEF_METHOD(comparableTrait, TComparable, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
     DEF_METHOD(comparableTrait, TComparable, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(comparableTrait, TComparable, ==, __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(comparableTrait, TComparable, >, __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
@@ -1977,7 +1977,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->numberClass, Number, cbrt, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, ceil, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, clone, 0, RETURN_TYPE(Number));
-    DEF_METHOD(vm->numberClass, Number, compareTo, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
+    DEF_METHOD(vm->numberClass, Number, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
     DEF_METHOD(vm->numberClass, Number, cos, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, exp, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, floor, 0, RETURN_TYPE(Number));
