@@ -220,7 +220,7 @@ static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, Type
     ObjString* shortName = createSymbol(resolver, item->token);
     ObjString* fullName = getSymbolFullName(resolver, item->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
-    if (category == TYPE_CATEGORY_CLASS) item->type = insertMetaclassType(resolver, shortName, fullName);
+    if (category == TYPE_CATEGORY_CLASS) item->type = (TypeInfo*)insertMetaclassType(resolver, shortName, fullName);
     else if (category == TYPE_CATEGORY_METACLASS) item->type = getNativeType(resolver->vm, "Metaclass");
     else if (category == TYPE_CATEGORY_TRAIT) item->type = getNativeType(resolver->vm, "Trait");
     return item;
