@@ -1235,14 +1235,22 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
 static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     item->type = getNativeType(resolver->vm, "Function");
+    item->state = SYMBOL_STATE_ACCESSED;
     ObjString* name = createSymbol(resolver, item->token);
+    
     CallableTypeInfo* functionType = typeTableInsertCallable(resolver->vm->typetab, TYPE_CATEGORY_FUNCTION, name, NULL);
-
     resolveChild(resolver, ast, 0);
     Ast* function = astGetChild(ast, 0);
     Ast* returnType = astGetChild(function, 0);
-    if (returnType->token.length > 0) functionType->returnType = getTypeForSymbol(resolver, returnType->token);
-    item->state = SYMBOL_STATE_ACCESSED;
+
+    if (function->type != NULL && IS_CALLABLE_TYPE(function->type)) {
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(function->type);
+        CallableTypeInfo* functionType = typeTableInsertCallable(resolver->vm->typetab, TYPE_CATEGORY_FUNCTION, name, callableType->returnType);
+        for (int i = 0; i < callableType->paramTypes->count; i++) {
+            TypeInfo* paramType = callableType->paramTypes->elements[i];
+            TypeInfoArrayAdd(functionType->paramTypes, paramType);
+        }
+    }
 }
 
 static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {

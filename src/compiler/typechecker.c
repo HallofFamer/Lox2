@@ -126,7 +126,7 @@ static bool hasAstType(TypeChecker* typeChecker, Ast* ast, const char* name) {
     return isSubtypeOfType(ast->type, type);
 }
 
-static void checkFunction(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* callableType) {
+static void deriveCallableType(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* callableType) {
     if (IS_CALLABLE_TYPE(ast->type)) free(ast->type);
     astDeriveType(ast, (TypeInfo*)callableType);
     Ast* returnType = astGetChild(ast, 0);
@@ -159,7 +159,7 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
             else if (IS_CALLABLE_TYPE(paramType) && arg->kind == AST_EXPR_FUNCTION) {
                 CallableTypeInfo* paramCallableType = AS_CALLABLE_TYPE(paramType);
                 if (arg->type == NULL) astDeriveType(arg, paramType);
-                else checkFunction(typeChecker, arg, paramCallableType);
+                else deriveCallableType(typeChecker, arg, paramCallableType);
                 function(typeChecker, arg, paramCallableType, paramCallableType->attribute.isAsync, false, false);
             }
         }
@@ -523,6 +523,7 @@ static void block(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer) {
+    if (calleeType == NULL) calleeType = AS_CALLABLE_TYPE(ast->type);
     FunctionTypeChecker functionTypeChecker;
     initFunctionTypeChecker(typeChecker, &functionTypeChecker, ast->token, calleeType, isAsync, isClass, isInitializer);
     functionTypeChecker.symtab = ast->symtab;
@@ -737,7 +738,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     }
     else if (fieldType->declaredType != NULL && value->type != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(fieldType->declaredType);
-        checkFunction(typeChecker, value, AS_CALLABLE_TYPE(fieldType->declaredType));
+        deriveCallableType(typeChecker, value, AS_CALLABLE_TYPE(fieldType->declaredType));
         function(typeChecker, value, callableType, callableType->attribute.isAsync, false, false);
     }
     defineAstType(typeChecker, ast, "Nil", NULL);
@@ -953,8 +954,8 @@ static void typeCheckRequireStatement(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
     TypeInfo* expectedType = (typeChecker->currentFunction->type != NULL) ? typeChecker->currentFunction->type->returnType : NULL;
     if (expectedType == NULL || !astHasChild(ast)) return;
-    Ast* returnType = astGetChild(ast, 0);
-    TypeInfo* actualType = returnType->type;
+    Ast* returnValue = astGetChild(ast, 0);
+    TypeInfo* actualType = returnValue->type;
 
     if (!isSubtypeOfType(actualType, expectedType)) {
         char calleeDesc[UINT8_MAX];
@@ -970,6 +971,11 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
 
         typeError(typeChecker, "%s expects return value to be an instance of %s but gets %s.", 
             calleeDesc, expectedType->shortName->chars, actualType->shortName->chars);
+    }
+    else if (IS_CALLABLE_TYPE(expectedType) && returnValue->kind == AST_EXPR_FUNCTION) {
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(expectedType);
+        deriveCallableType(typeChecker, returnValue, callableType);
+        function(typeChecker, returnValue, callableType, callableType->attribute.isAsync, false, false);
     }
 }
 
@@ -1136,7 +1142,6 @@ static void typeCheckFunDeclaration(TypeChecker* typeChecker, Ast* ast) {
     SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
     defineAstType(typeChecker, ast, "Function", item);
     Ast* function = astGetChild(ast, 0);
-    astDeriveType(function, ast->type);
     typeCheckChild(typeChecker, ast, 0);
 }
 
