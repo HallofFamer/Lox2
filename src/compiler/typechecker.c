@@ -387,6 +387,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 
     if (isSubtypeOfType(callee->type, typeChecker->functionType)) {
         CallableTypeInfo* functionType = AS_CALLABLE_TYPE(typeTableGet(typeChecker->vm->typetab, name));
+        if (functionType == NULL) return;
         sprintf_s(calleeDesc, UINT8_MAX, "Function %s", name->chars);
         checkArguments(typeChecker, calleeDesc, args, functionType);
         inferAstTypeFromReturn(typeChecker, ast, functionType);
@@ -781,7 +782,7 @@ static void typeCheckThis(TypeChecker* typeChecker, Ast* ast) {
             ast->type = typeTableGet(typeChecker->vm->typetab, metaclassName);
         }
         else {
-            ast->type = &typeChecker->currentClass->type->baseType;
+            ast->type = (TypeInfo*)typeChecker->currentClass->type;
         }
     }
 }
