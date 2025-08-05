@@ -41,8 +41,8 @@
 
 #define RETURN_TYPE(type) getNativeType(vm, #type)
 #define PARAM_TYPE(type) getNativeType(vm, #type)
-#define PARAM_TYPE_CALLABLE(returnType) newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType)
-#define PARAM_TYPE_CALLABLE_N(returnType, numParams, ...) newCallableTypeInfoWithParams(-1, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
+#define PARAM_TYPE_CALLABLE(returnType) (TypeInfo*)newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType)
+#define PARAM_TYPE_CALLABLE_N(returnType, numParams, ...) (TypeInfo*)newCallableTypeInfoWithParams(-1, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
 
 ObjClass* defineNativeClass(VM* vm, const char* name);
 void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, NativeFunction function, ...);
