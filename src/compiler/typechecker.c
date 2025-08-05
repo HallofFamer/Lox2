@@ -386,8 +386,9 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
     char calleeDesc[UINT8_MAX];
 
     if (isSubtypeOfType(callee->type, typeChecker->functionType)) {
-        CallableTypeInfo* functionType = AS_CALLABLE_TYPE(typeTableGet(typeChecker->vm->typetab, name));
-        if (functionType == NULL) return;
+        SymbolItem* item = symbolTableLookup(ast->symtab, name);
+        if (item == NULL || item->type == NULL || !IS_CALLABLE_TYPE(item->type)) return;
+        CallableTypeInfo* functionType = AS_CALLABLE_TYPE(item->type);
         sprintf_s(calleeDesc, UINT8_MAX, "Function %s", name->chars);
         checkArguments(typeChecker, calleeDesc, args, functionType);
         inferAstTypeFromReturn(typeChecker, ast, functionType);
@@ -1140,8 +1141,7 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckFunDeclaration(TypeChecker* typeChecker, Ast* ast) {
-    SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
-    defineAstType(typeChecker, ast, "Function", item);
+    defineAstType(typeChecker, ast, "Function", NULL);
     Ast* function = astGetChild(ast, 0);
     typeCheckChild(typeChecker, ast, 0);
 }
