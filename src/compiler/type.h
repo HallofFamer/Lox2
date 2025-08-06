@@ -114,6 +114,8 @@ CallableTypeInfo* newCallableTypeInfoWithParams(int id, TypeCategory category, O
 FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer);
 void freeTypeInfo(TypeInfo* type);
+void freeCallableTypes(TypeInfoArray* callableTypes);
+
 TypeTable* newTypeTable(int id);
 void freeTypeTable(TypeTable* typeTable);
 TypeInfo* typeTableGet(TypeTable* typetab, ObjString* key);

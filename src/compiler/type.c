@@ -151,6 +151,15 @@ void freeTypeInfo(TypeInfo* type) {
     }
 }
 
+void freeCallableTypes(TypeInfoArray* freeCallableTypes) {
+    for (int i = 0; i < freeCallableTypes->count; i++) {
+        TypeInfo* type = freeCallableTypes->elements[i];
+        if (type != NULL) {
+            freeTypeInfo(type);
+        }
+    }
+}
+
 TypeTable* newTypeTable(int id) {
     TypeTable* typetab = (TypeTable*)malloc(sizeof(TypeTable));
     if (typetab != NULL) {
@@ -432,7 +441,9 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
-    if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false;
+    if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && memcmp(type2->shortName->chars, "Function", 8) == 0) return true;
+    if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false; 
+    if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
     BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type);
     BehaviorTypeInfo* supertype = AS_BEHAVIOR_TYPE(type2);
 
