@@ -450,7 +450,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
 static ObjString* createCallableTypeName(Resolver* resolver, Ast* ast) {
     Ast* returnType = astGetChild(ast, 0);
     ObjString* returnTypeName = returnType->attribute.isFunction ? createCallableTypeName(resolver, returnType) : createSymbol(resolver, returnType->token);
-    char* callableName = bufferNewCString(UINT8_MAX);
+    char* callableName = bufferNewCString(UINT16_MAX);
     size_t length = 0;
 
     if (returnTypeName->length > 0) {

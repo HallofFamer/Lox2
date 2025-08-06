@@ -397,7 +397,6 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         SymbolItem* item = symbolTableGet(ast->symtab, name);
         if (item == NULL) return;
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);
-     
         TypeInfo* classType = getClassType(typeChecker, className, ast->symtab);
         if (classType == NULL) return;
         inferAstTypeFromInitializer(typeChecker, ast, classType);
@@ -426,7 +425,6 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
         TypeInfo* classType = typeTableGet(typeChecker->vm->typetab, fullName);
         if (classType != NULL) {
             inferAstTypeFromInitializer(typeChecker, ast, classType);
-            return;
         }
     }
 }
@@ -1177,7 +1175,7 @@ static void typeCheckTraitDeclaration(TypeChecker* typeChecker, Ast* ast) {
     SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
     defineAstType(typeChecker, ast, "Trait", item);
     Ast* trait = astGetChild(ast, 0);
-    astDeriveType(trait, ast->type);
+    trait->type = ast->type;
     typeCheckChild(typeChecker, ast, 0);
 }
 
