@@ -149,8 +149,9 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
     return takeStringPerma(resolver->vm, fullName, length);
 }
 
-static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token) {
+static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass) {
     ObjString* shortName = createSymbol(resolver, token);
+    if (isMetaclass) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
     TypeInfo* type = typeTableGet(resolver->vm->typetab, shortName);
     ObjString* fullName = NULL;
 
@@ -231,8 +232,8 @@ static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, Type
 }
 
 static void bindSuperclassType(Resolver* resolver, Token currentClass, Token superclass) {
-    BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass));
-    TypeInfo* superclassType = getTypeForSymbol(resolver, superclass);
+    BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false));
+    TypeInfo* superclassType = getTypeForSymbol(resolver, superclass, false);
     if (superclassType == NULL) return;
     currentClassType->superclassType = superclassType;
 
@@ -426,7 +427,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
         }
         case SYMBOL_SCOPE_METHOD: {
             if (!resolver->currentClass->isAnonymous) {
-                TypeInfo* baseType = getTypeForSymbol(resolver, resolver->currentClass->name);
+                TypeInfo* baseType = getTypeForSymbol(resolver, resolver->currentClass->name, false);
                 if (resolver->currentFunction->attribute.isClassMethod) {
                     ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, baseType->fullName);
                     baseType = typeTableGet(resolver->vm->typetab, metaclassName);
@@ -492,7 +493,7 @@ static ObjString* createCallableTypeName(Resolver* resolver, Ast* ast) {
 
 static void insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isLambda, bool isVariadic, bool isVoid) {
     Ast* returnType = astGetChild(ast, 0);
-    CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, createCallableTypeName(resolver, ast), returnType->type);
+    CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
     
     if (callableType != NULL) {
         callableType->attribute.isAsync = isAsync;
@@ -506,6 +507,10 @@ static void insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool 
             TypeInfoArrayAdd(callableType->paramTypes, paramType->type);
         }
         ast->type = (TypeInfo*)callableType;
+        
+        ObjString* callableTypeName = createCallableTypeName(callableType);
+        ast->type->shortName = callableTypeName;
+        ast->type->fullName = ast->type->shortName;
     }
 }
 
@@ -816,7 +821,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         resolveChild(resolver, ast, 1);
         insertCallableType(resolver, ast, false, false, ast->attribute.isVariadic, ast->attribute.isVoid);
     }
-    else ast->type = getTypeForSymbol(resolver, ast->token);
+    else ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
 }
 
 static void resolveUnary(Resolver* resolver, Ast* ast) {
@@ -1210,7 +1215,7 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
     }
 
     bool hasInitializer = (ast->attribute.isTyped && numChild == 2) || (!ast->attribute.isTyped && numChild == 1);
-    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
+    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false));
     if (ast->attribute.isClass) classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
     ObjString* name = createSymbol(resolver, ast->token);
 
@@ -1256,7 +1261,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
     ObjString* name = createSymbol(resolver, item->token);
 
     if (!resolver->currentClass->isAnonymous) {
-        BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name));
+        BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false));
         if (ast->attribute.isClass) {
             _class = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, _class->baseType.fullName)));
         }
@@ -1265,7 +1270,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
         setCallableTypeModifier(ast, methodType->declaredType);
         if (astNumChild(ast) > 2) {
             Ast* returnType = astGetChild(ast, 2);
-            methodType->declaredType->returnType = getTypeForSymbol(resolver, returnType->token);
+            methodType->declaredType->returnType = getTypeForSymbol(resolver, returnType->token, returnType->attribute.isClass);
         }
     }
 

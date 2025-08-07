@@ -87,6 +87,52 @@ ObjClass* defineNativeClass(VM* vm, const char* name) {
     return nativeClass;
 }
 
+static char* createFunctionTypeName(CallableTypeInfo* callableTypeInfo) {
+    char* callableName = bufferNewCString(UINT16_MAX);
+    size_t length = 0;
+
+    if (callableTypeInfo->returnType != NULL) {
+        char* returnTypeName = IS_CALLABLE_TYPE(callableTypeInfo->returnType) ? createFunctionTypeName(AS_CALLABLE_TYPE(callableTypeInfo->returnType)) : callableTypeInfo->returnType->shortName->chars;
+        size_t returnTypeLength = strlen(returnTypeName);
+        memcpy(callableName, returnTypeName, returnTypeLength);
+        length += returnTypeLength;
+        if (IS_CALLABLE_TYPE(callableTypeInfo->returnType)) free(returnTypeName);
+    }
+    else {
+        memcpy(callableName, "dynamic", 7);
+        length += 7;
+    }
+
+    memcpy(callableName + length, " fun(", 5);
+    length += 5;
+    if (callableTypeInfo->attribute.isVariadic) {
+        memcpy(callableName + length, "...", 3);
+        length += 3;
+    }
+
+    for (int i = 0; i < callableTypeInfo->paramTypes->count; i++) {
+        TypeInfo* paramType = callableTypeInfo->paramTypes->elements[i];
+        if (i > 0) {
+            callableName[length++] = ',';
+            callableName[length++] = ' ';
+        }
+        if (paramType != NULL) {
+            char* paramTypeName = IS_CALLABLE_TYPE(paramType) ? createFunctionTypeName(AS_CALLABLE_TYPE(paramType)) : paramType->shortName->chars;
+            size_t paramTypeLength = strlen(paramTypeName);
+            memcpy(callableName + length, paramTypeName, paramTypeLength);
+            length += paramTypeLength;
+            if (IS_CALLABLE_TYPE(paramType)) free(paramTypeName);
+        }
+        else {
+            memcpy(callableName + length, "dynamic", 7);
+            length += 7;
+        }
+    }
+    callableName[length++] = ')';
+    callableName[length] = '\0';
+    return callableName;
+}
+
 void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, NativeFunction function, ...) {
     ObjString* functionName = newStringPerma(vm, name);
     ObjNativeFunction* nativeFunction = newNativeFunction(vm, functionName, arity, isAsync, function);
@@ -94,7 +140,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
     tableSet(vm, &vm->rootNamespace->values, functionName, OBJ_VAL(nativeFunction));
     pop(vm);
 
-    SymbolItem* item = insertGlobalSymbolTable(vm, name, "Function");
+    SymbolItem* item = insertGlobalSymbolTable(vm, name, NULL);
     va_list args;
     va_start(args, function);
     TypeInfo* returnType = va_arg(args, TypeInfo*);
@@ -106,7 +152,12 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
         TypeInfo* paramType = va_arg(args, TypeInfo*);
         TypeInfoArrayAdd(functionType->paramTypes, paramType);
     }
-    typeTableSet(vm->typetab, functionName, (TypeInfo*)functionType);
+    
+    char* functionTypeName = createFunctionTypeName(functionType);
+    item->type = (TypeInfo*)functionType;
+    item->type->shortName = takeStringPerma(vm, functionTypeName, (int)strlen(functionTypeName));
+    item->type->fullName = item->type->shortName;
+    TypeInfoArrayAdd(vm->callableTypes, item->type);
     va_end(args);
 }
 
