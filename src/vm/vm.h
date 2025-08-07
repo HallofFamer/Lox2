@@ -103,6 +103,7 @@ struct VM {
     int numSymtabs;
     SymbolTable* symtab;
     TypeTable* typetab;
+    TypeInfoArray* callableTypes;
     Compiler* compiler;
     GC* gc;
 

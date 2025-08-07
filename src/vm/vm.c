@@ -165,10 +165,12 @@ void initVM(VM* vm) {
     vm->numSymtabs = 0;
     vm->symtab = newSymbolTable(vm->numSymtabs++, NULL, SYMBOL_SCOPE_GLOBAL, -1);
     vm->typetab = newTypeTable(0);
+    vm->callableTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+    TypeInfoArrayInit(vm->callableTypes);
+
     vm->initString = NULL;
     vm->voidString = NULL;
     vm->gc = newGC(vm);
-
     vm->behaviorCount = 0;
     vm->namespaceCount = 0;
     vm->moduleCount = 1;
@@ -208,6 +210,7 @@ void freeVM(VM* vm) {
     vm->runningGenerator = NULL;
 
     freeSymbolTable(vm->symtab);
+    freeCallableTypes(vm->callableTypes);
     freeTypeTable(vm->typetab);
     freeObjects(vm);
     freeGC(vm);
