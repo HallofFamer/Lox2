@@ -45,7 +45,7 @@ void initClass(VM* vm, ObjClass* klass, ObjString* name, ObjClass* metaclass, Be
 ObjClass* createClass(VM* vm, ObjString* name, ObjClass* metaclass, BehaviorType behaviorType) {
     ObjClass* klass = ALLOCATE_CLASS(metaclass);
     initClass(vm, klass, name, metaclass, behaviorType);
-    typeTableInsertBehavior(vm->typetab, TYPE_CATEGORY_CLASS, klass->name, klass->fullName, NULL);
+    typeTableInsertBehavior(vm->behaviorTypetab, TYPE_CATEGORY_CLASS, klass->name, klass->fullName, NULL);
     return klass;
 }
 
@@ -134,12 +134,12 @@ bool isClassImplementingTrait(ObjClass* klass, ObjClass* trait) {
 }
 
 static void inheritTraits(VM* vm, ObjClass* subclass, ObjClass* superclass) {
-    BehaviorTypeInfo* subclassType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, subclass->fullName));
+    BehaviorTypeInfo* subclassType = AS_BEHAVIOR_TYPE(typeTableGet(vm->behaviorTypetab, subclass->fullName));
     for (int i = 0; i < superclass->traits.count; i++) {        
         valueArrayWrite(vm, &subclass->traits, superclass->traits.values[i]);
         if (subclass->isNative) {
             ObjClass* trait = AS_CLASS(superclass->traits.values[i]);
-            TypeInfo* traitType = typeTableGet(vm->typetab, trait->fullName);
+            TypeInfo* traitType = typeTableGet(vm->behaviorTypetab, trait->fullName);
             TypeInfoArrayAdd(subclassType->traitTypes, traitType);
         }
     }
@@ -160,8 +160,8 @@ void inheritSuperclass(VM* vm, ObjClass* subclass, ObjClass* superclass) {
     }
 
     if (subclass->isNative) {
-        BehaviorTypeInfo* subclassType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, subclass->fullName));
-        TypeInfo* superclassType = typeTableGet(vm->typetab, superclass->fullName);
+        BehaviorTypeInfo* subclassType = AS_BEHAVIOR_TYPE(typeTableGet(vm->behaviorTypetab, subclass->fullName));
+        TypeInfo* superclassType = typeTableGet(vm->behaviorTypetab, superclass->fullName);
         subclassType->superclassType = superclassType;
         typeTableAddAll(AS_BEHAVIOR_TYPE(superclassType)->fields, subclassType->fields);
     }

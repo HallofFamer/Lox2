@@ -152,20 +152,20 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass) {
     ObjString* shortName = createSymbol(resolver, token);
     if (isMetaclass) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
-    TypeInfo* type = typeTableGet(resolver->vm->typetab, shortName);
+    TypeInfo* type = typeTableGet(resolver->vm->behaviorTypetab, shortName);
     ObjString* fullName = NULL;
 
     if (type == NULL) {
         fullName = concatenateString(resolver->vm, resolver->currentNamespace, shortName, ".");
-        type = typeTableGet(resolver->vm->typetab, fullName);
+        type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
 
         if (type == NULL) {
             fullName = nameTableGet(resolver->nametab, shortName);
-            if(fullName != NULL) type = typeTableGet(resolver->vm->typetab, fullName);
+            if(fullName != NULL) type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
 
             if (type == NULL) {
                 fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
-                type = typeTableGet(resolver->vm->typetab, fullName);
+                type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
             }
         }
     }
@@ -206,9 +206,9 @@ static SymbolItem* findThis(Resolver* resolver) {
 
         if (resolver->currentFunction->attribute.isClassMethod) {
             ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, className);
-            item->type = typeTableGet(resolver->vm->typetab, metaclassName);
+            item->type = typeTableGet(resolver->vm->behaviorTypetab, metaclassName);
         }
-        else item->type = typeTableGet(resolver->vm->typetab, className);
+        else item->type = typeTableGet(resolver->vm->behaviorTypetab, className);
         symbolTableSet(resolver->currentSymtab, symbol, item);
     }
 
@@ -218,13 +218,13 @@ static SymbolItem* findThis(Resolver* resolver) {
 static BehaviorTypeInfo* insertMetaclassType(Resolver* resolver, ObjString* classShortName, ObjString* classFullName) {
     ObjString* metaclassShortName = getMetaclassNameFromClass(resolver->vm, classShortName);
     ObjString* metaclassFullName = getMetaclassNameFromClass(resolver->vm, classFullName);
-    return typeTableInsertBehavior(resolver->vm->typetab, TYPE_CATEGORY_CLASS, metaclassShortName, metaclassFullName, NULL);
+    return typeTableInsertBehavior(resolver->vm->behaviorTypetab, TYPE_CATEGORY_CLASS, metaclassShortName, metaclassFullName, NULL);
 }
 
 static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, TypeCategory category) {
     ObjString* shortName = createSymbol(resolver, item->token);
     ObjString* fullName = getSymbolFullName(resolver, item->token);
-    BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
+    BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->behaviorTypetab, category, shortName, fullName, NULL);
     if (category == TYPE_CATEGORY_CLASS) item->type = (TypeInfo*)insertMetaclassType(resolver, shortName, fullName);
     else if (category == TYPE_CATEGORY_METACLASS) item->type = getNativeType(resolver->vm, "Metaclass");
     else if (category == TYPE_CATEGORY_TRAIT) item->type = getNativeType(resolver->vm, "Trait");
@@ -237,8 +237,8 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Token sup
     if (superclassType == NULL) return;
     currentClassType->superclassType = superclassType;
 
-    BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
-    TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassType->fullName));
+    BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->behaviorTypetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
+    TypeInfo* superMetaclassType = typeTableGet(resolver->vm->behaviorTypetab, getMetaclassNameFromClass(resolver->vm, superclassType->fullName));
     currentMetaclassType->superclassType = superMetaclassType;
     typeTableAddAll(AS_BEHAVIOR_TYPE(superclassType)->fields, currentClassType->fields);
 }
@@ -418,7 +418,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     switch (resolver->currentFunction->symtab->scope) {
         case SYMBOL_SCOPE_FUNCTION: {
             ObjString* functionName = createSymbol(resolver, resolver->currentFunction->name);
-            CallableTypeInfo* functionType = AS_CALLABLE_TYPE(typeTableGet(resolver->vm->typetab, functionName));  
+            CallableTypeInfo* functionType = AS_CALLABLE_TYPE(typeTableGet(resolver->vm->behaviorTypetab, functionName));  
             if (functionType != NULL && functionType->paramTypes != NULL) {
                 TypeInfoArrayAdd(functionType->paramTypes, ast->type);
                 if (ast->attribute.isVariadic) functionType->attribute.isVariadic = true;
@@ -430,7 +430,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
                 TypeInfo* baseType = getTypeForSymbol(resolver, resolver->currentClass->name, false);
                 if (resolver->currentFunction->attribute.isClassMethod) {
                     ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, baseType->fullName);
-                    baseType = typeTableGet(resolver->vm->typetab, metaclassName);
+                    baseType = typeTableGet(resolver->vm->behaviorTypetab, metaclassName);
                 }
                 BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(baseType);
 
@@ -1175,7 +1175,7 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
 
     bool hasInitializer = (ast->attribute.isTyped && numChild == 2) || (!ast->attribute.isTyped && numChild == 1);
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false));
-    if (ast->attribute.isClass) classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
+    if (ast->attribute.isClass) classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->behaviorTypetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
     ObjString* name = createSymbol(resolver, ast->token);
 
     TypeInfo* fieldTypeInfo = NULL;
@@ -1206,7 +1206,7 @@ static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
 
     if (function->type != NULL && IS_CALLABLE_TYPE(function->type)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(function->type);
-        CallableTypeInfo* functionType = typeTableInsertCallable(resolver->vm->typetab, TYPE_CATEGORY_FUNCTION, name, callableType->returnType);
+        CallableTypeInfo* functionType = typeTableInsertCallable(resolver->vm->behaviorTypetab, TYPE_CATEGORY_FUNCTION, name, callableType->returnType);
         for (int i = 0; i < callableType->paramTypes->count; i++) {
             TypeInfo* paramType = callableType->paramTypes->elements[i];
             TypeInfoArrayAdd(functionType->paramTypes, paramType);
@@ -1222,7 +1222,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
     if (!resolver->currentClass->isAnonymous) {
         BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false));
         if (ast->attribute.isClass) {
-            _class = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, _class->baseType.fullName)));
+            _class = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->behaviorTypetab, getMetaclassNameFromClass(resolver->vm, _class->baseType.fullName)));
         }
 
         MethodTypeInfo* methodType = typeTableInsertMethod(_class->methods, name, NULL, ast->attribute.isClass, ast->attribute.isInitializer);

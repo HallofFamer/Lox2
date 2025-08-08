@@ -91,20 +91,20 @@ static ObjString* createSymbol(TypeChecker* typeChecker, Token token) {
 
 static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, SymbolTable* symtab) {
     if (shortName == NULL) return NULL;
-    TypeInfo* type = typeTableGet(typeChecker->vm->typetab, shortName);
+    TypeInfo* type = typeTableGet(typeChecker->vm->behaviorTypetab, shortName);
 
     if (type == NULL) {
         ObjString* fullName = concatenateString(typeChecker->vm, typeChecker->currentNamespace, shortName, ".");
-        type = typeTableGet(typeChecker->vm->typetab, fullName);
+        type = typeTableGet(typeChecker->vm->behaviorTypetab, fullName);
 
         if (type == NULL) {
             fullName = concatenateString(typeChecker->vm, typeChecker->vm->langNamespace->fullName, shortName, ".");
-            type = typeTableGet(typeChecker->vm->typetab, fullName);
+            type = typeTableGet(typeChecker->vm->behaviorTypetab, fullName);
 
             if (type == NULL) {
                 SymbolItem* item = symbolTableLookup(symtab, shortName);
                 if (item != NULL && item->type != NULL) {
-                    type = typeTableGet(typeChecker->vm->typetab, getClassNameFromMetaclass(typeChecker->vm, item->type->fullName));
+                    type = typeTableGet(typeChecker->vm->behaviorTypetab, getClassNameFromMetaclass(typeChecker->vm, item->type->fullName));
                 }
             }
         }
@@ -123,7 +123,7 @@ static void defineAstType(TypeChecker* typeChecker, Ast* ast, const char* name, 
 static bool hasAstType(TypeChecker* typeChecker, Ast* ast, const char* name) {
     if (ast->type == NULL || ast->type->id == typeChecker->objectType->id) return true;
     ObjString* typeName = newStringPerma(typeChecker->vm, name);
-    TypeInfo* type = typeTableGet(typeChecker->vm->typetab, typeName);
+    TypeInfo* type = typeTableGet(typeChecker->vm->behaviorTypetab, typeName);
     return isSubtypeOfType(ast->type, type);
 }
 
@@ -422,7 +422,7 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
         if (_namespace == NULL) return;
         ObjString* fullName = concatenateString(typeChecker->vm, _namespace, methodName, ".");
 
-        TypeInfo* classType = typeTableGet(typeChecker->vm->typetab, fullName);
+        TypeInfo* classType = typeTableGet(typeChecker->vm->behaviorTypetab, fullName);
         if (classType != NULL) {
             inferAstTypeFromInitializer(typeChecker, ast, classType);
         }
@@ -538,7 +538,7 @@ static void behavior(TypeChecker* typeChecker, BehaviorType type, Ast* ast) {
     ClassTypeChecker classTypeChecker;
     ObjString* shortName = copyStringPerma(typeChecker->vm, ast->token.start, ast->token.length);
     ObjString* fullName = getClassFullName(typeChecker->vm, shortName, typeChecker->currentNamespace);
-    TypeInfo* behaviorType = typeTableGet(typeChecker->vm->typetab, fullName);
+    TypeInfo* behaviorType = typeTableGet(typeChecker->vm->behaviorTypetab, fullName);
 
     bool isAnonymous = (shortName->length == 1 && shortName->chars[0] == '@');
     initClassTypeChecker(typeChecker, &classTypeChecker, ast->token, behaviorType == NULL ? NULL : AS_BEHAVIOR_TYPE(behaviorType), isAnonymous);
@@ -778,7 +778,7 @@ static void typeCheckThis(TypeChecker* typeChecker, Ast* ast) {
         if (typeChecker->currentFunction->isClass) {
             ObjString* className = getClassFullName(typeChecker->vm, createSymbol(typeChecker, typeChecker->currentClass->name), typeChecker->currentNamespace);
             ObjString* metaclassName = getMetaclassNameFromClass(typeChecker->vm, className);
-            ast->type = typeTableGet(typeChecker->vm->typetab, metaclassName);
+            ast->type = typeTableGet(typeChecker->vm->behaviorTypetab, metaclassName);
         }
         else {
             ast->type = (TypeInfo*)typeChecker->currentClass->type;
@@ -1018,13 +1018,13 @@ static void typeCheckUsingStatement(TypeChecker* typeChecker, Ast* ast) {
         subNamespace->type = typeChecker->namespaceType;
     }
 
-    TypeInfo* classType = typeTableGet(typeChecker->vm->typetab, fullName);
+    TypeInfo* classType = typeTableGet(typeChecker->vm->behaviorTypetab, fullName);
     Ast* child = (astNumChild(ast) > 1) ? astGetChild(ast, 1) : astLastChild(_namespace);
     ObjString* shortName = copyStringPerma(typeChecker->vm, child->token.start, child->token.length);
 
     if (classType != NULL) {
         if (classType->category == TYPE_CATEGORY_TRAIT) child->type = typeChecker->traitType;
-        else child->type = typeTableGet(typeChecker->vm->typetab, getMetaclassNameFromClass(typeChecker->vm, fullName));
+        else child->type = typeTableGet(typeChecker->vm->behaviorTypetab, getMetaclassNameFromClass(typeChecker->vm, fullName));
     }
     else if (isNativeNamespace(fullName)) child->type = typeChecker->namespaceType;
 
@@ -1154,7 +1154,7 @@ static void typeCheckMethodDeclaration(TypeChecker* typeChecker, Ast* ast) {
         if (ast->attribute.isClass) {
             ObjString* className = getClassFullName(typeChecker->vm, createSymbol(typeChecker, typeChecker->currentClass->name), typeChecker->currentNamespace);
             ObjString* metaclassName = getMetaclassNameFromClass(typeChecker->vm, className);
-            classType = AS_BEHAVIOR_TYPE(typeTableGet(typeChecker->vm->typetab, metaclassName));
+            classType = AS_BEHAVIOR_TYPE(typeTableGet(typeChecker->vm->behaviorTypetab, metaclassName));
         }
         else classType = typeChecker->currentClass->type;
 
@@ -1251,6 +1251,6 @@ void typeCheck(TypeChecker* typeChecker, Ast* ast) {
 
     endFunctionTypeChecker(typeChecker);
     if (typeChecker->debugTypetab) {
-        typeTableOutput(typeChecker->vm->typetab);
+        typeTableOutput(typeChecker->vm->behaviorTypetab);
     }
 }

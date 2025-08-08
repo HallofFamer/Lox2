@@ -1776,7 +1776,7 @@ static ObjClass* defineSpecialClass(VM* vm, const char* name, BehaviorType behav
     tableSet(vm, &vm->rootNamespace->values, AS_STRING(vm->stack[0]), vm->stack[1]);
     pop(vm);
     pop(vm);
-    typeTableInsertBehavior(vm->typetab, TYPE_CATEGORY_CLASS, className, nativeClass->fullName, NULL);
+    typeTableInsertBehavior(vm->behaviorTypetab, TYPE_CATEGORY_CLASS, className, nativeClass->fullName, NULL);
     return nativeClass;
 }
 
