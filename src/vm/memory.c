@@ -92,6 +92,7 @@ void freeGC(VM* vm) {
 static GCRememberedEntry* findRememberedSetEntry(GCRememberedEntry* entries, int capacity, Obj* object) {
     uint32_t hash = hashObject(object);
     uint32_t index = (uint32_t)hash & ((uint32_t)capacity - 1);
+
     for (;;) {
         GCRememberedEntry* entry = &entries[index];
         if (entry->object == NULL || entry->object == object) {
@@ -151,8 +152,7 @@ static bool rememberedSetPutObject(VM* vm, GCRememberedSet* remSet, Obj* object)
 }
 
 void addToRememberedSet(VM* vm, Obj* object, GCGenerationType generation) {
-    GCRememberedSet* remSet = &vm->gc->generations[generation]->remSet;
-    rememberedSetPutObject(vm, remSet, object);
+    rememberedSetPutObject(vm, &vm->gc->generations[generation]->remSet, object);
 }
 
 void markObject(VM* vm, Obj* object, GCGenerationType generation) {

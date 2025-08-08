@@ -502,9 +502,13 @@ void printObject(Value value) {
             printf("<native method %s::%s>", nativeMethod->klass->name->chars, nativeMethod->name->chars);
             break;
         }
-        case OBJ_NODE:
-            printf("<node>");
+        case OBJ_NODE: {
+            ObjNode* node = AS_NODE(value);
+            printf("<node(");
+            printValue(node->element);
+            printf(")>");
             break;
+        }
         case OBJ_PROMISE:
             printf("<promise: %d>", AS_PROMISE(value)->id);
             break;

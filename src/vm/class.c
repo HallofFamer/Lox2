@@ -251,7 +251,7 @@ void bindTraits(VM* vm, int numTraits, ObjClass* klass, ...) {
 Value getClassProperty(VM* vm, ObjClass* klass, char* name) {
     int index;
     if (!idMapGet(&klass->indexes, newStringPerma(vm, name), &index)) {
-        runtimeError(vm, "Class property %s does not exist for class %s", name, klass->fullName->chars);
+        runtimeError(vm, "Class field %s does not exist for class %s", name, klass->fullName->chars);
         return NIL_VAL;
     }
     return klass->fields.values[index];
@@ -261,6 +261,7 @@ void setClassProperty(VM* vm, ObjClass* klass, char* name, Value value) {
     PROCESS_WRITE_BARRIER((Obj*)klass, value);
     ObjString* propertyName = newStringPerma(vm, name);
     int index;
+
     if (!idMapGet(&klass->indexes, propertyName, &index)) {
         index = klass->fields.count;
         valueArrayWrite(vm, &klass->fields, value);

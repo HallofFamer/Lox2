@@ -87,52 +87,6 @@ ObjClass* defineNativeClass(VM* vm, const char* name) {
     return nativeClass;
 }
 
-static char* createFunctionTypeName(CallableTypeInfo* callableTypeInfo) {
-    char* callableName = bufferNewCString(UINT16_MAX);
-    size_t length = 0;
-
-    if (callableTypeInfo->returnType != NULL) {
-        char* returnTypeName = IS_CALLABLE_TYPE(callableTypeInfo->returnType) ? createFunctionTypeName(AS_CALLABLE_TYPE(callableTypeInfo->returnType)) : callableTypeInfo->returnType->shortName->chars;
-        size_t returnTypeLength = strlen(returnTypeName);
-        memcpy(callableName, returnTypeName, returnTypeLength);
-        length += returnTypeLength;
-        if (IS_CALLABLE_TYPE(callableTypeInfo->returnType)) free(returnTypeName);
-    }
-    else {
-        memcpy(callableName, "dynamic", 7);
-        length += 7;
-    }
-
-    memcpy(callableName + length, " fun(", 5);
-    length += 5;
-    if (callableTypeInfo->attribute.isVariadic) {
-        memcpy(callableName + length, "...", 3);
-        length += 3;
-    }
-
-    for (int i = 0; i < callableTypeInfo->paramTypes->count; i++) {
-        TypeInfo* paramType = callableTypeInfo->paramTypes->elements[i];
-        if (i > 0) {
-            callableName[length++] = ',';
-            callableName[length++] = ' ';
-        }
-        if (paramType != NULL) {
-            char* paramTypeName = IS_CALLABLE_TYPE(paramType) ? createFunctionTypeName(AS_CALLABLE_TYPE(paramType)) : paramType->shortName->chars;
-            size_t paramTypeLength = strlen(paramTypeName);
-            memcpy(callableName + length, paramTypeName, paramTypeLength);
-            length += paramTypeLength;
-            if (IS_CALLABLE_TYPE(paramType)) free(paramTypeName);
-        }
-        else {
-            memcpy(callableName + length, "dynamic", 7);
-            length += 7;
-        }
-    }
-    callableName[length++] = ')';
-    callableName[length] = '\0';
-    return callableName;
-}
-
 void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, NativeFunction function, ...) {
     ObjString* functionName = newStringPerma(vm, name);
     ObjNativeFunction* nativeFunction = newNativeFunction(vm, functionName, arity, isAsync, function);
@@ -153,7 +107,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
         TypeInfoArrayAdd(functionType->paramTypes, paramType);
     }
     
-    char* functionTypeName = createFunctionTypeName(functionType);
+    char* functionTypeName = createCallableTypeName(functionType);
     item->type = (TypeInfo*)functionType;
     item->type->shortName = takeStringPerma(vm, functionTypeName, (int)strlen(functionTypeName));
     item->type->fullName = item->type->shortName;
@@ -164,7 +118,10 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
 void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type, bool isMutable, Value defaultValue) {
     ObjString* fieldName = newStringPerma(vm, name);
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
-    typeTableInsertField(behaviorType->fields, fieldName, type, isMutable, !IS_NIL(defaultValue));
+    FieldTypeInfo* fieldType = typeTableInsertField(behaviorType->fields, fieldName, type, isMutable, !IS_NIL(defaultValue));
+    if (fieldType->declaredType != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
+        TypeInfoArrayAdd(vm->callableTypes, fieldType->declaredType);
+    }
 
     if (klass->classType == OBJ_INSTANCE || klass->classType == OBJ_CLASS) {
         klass->defaultShapeID = createShapeFromParent(vm, klass->defaultShapeID, fieldName);
@@ -192,6 +149,7 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     va_start(args, method);
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     TypeInfo* returnType = va_arg(args, TypeInfo*);
+    if (IS_CALLABLE_TYPE(returnType)) TypeInfoArrayAdd(vm->callableTypes, returnType);
     
     bool isClass = (klass->behaviorType == BEHAVIOR_METACLASS);
     bool isInitializer = (strcmp(name, "__init__") == 0);
@@ -203,15 +161,20 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
         methodType->declaredType->attribute.isVariadic = true;
         TypeInfo* paramType = va_arg(args, TypeInfo*);
         TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
+        if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->callableTypes, paramType);
     }
     else {
         for (int i = 0; i < arity; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
             TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
+            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->callableTypes, paramType);
         }
     }
 
     typeTableSet(behaviorType->methods, methodName, (TypeInfo*)methodType);
+    if (methodType->declaredType != NULL) {
+        TypeInfoArrayAdd(vm->callableTypes, (TypeInfo*)methodType->declaredType);
+    }
     va_end(args);
 }
 

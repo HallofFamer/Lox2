@@ -50,7 +50,7 @@ Value usingNamespace(VM* vm, uint8_t namespaceDepth) {
 }
 
 bool isNativeNamespace(ObjString* fullName) {
-    return fullName->length < 4 ? false : memcmp("clox", fullName->chars, 4) == 0;
+    return fullName->length < 5 ? false : memcmp("clox.", fullName->chars, 5) == 0;
 }
 
 bool sourceFileExists(ObjString* filePath) {
@@ -87,6 +87,7 @@ ObjString* locateSourceFileFromFullName(VM* vm, ObjString* fullName) {
     int length = fullName->length + 4;
     char* heapChars = bufferNewCString((size_t)length + 1);
     int offset = 0;
+
     while (offset < fullName->length) {
         char currentChar = fullName->chars[offset];
         heapChars[offset] = (currentChar == '.') ? '/' : currentChar;
