@@ -1376,7 +1376,7 @@ void compileChild(Compiler* compiler, Ast* ast, int index) {
     }
 }
 
-static void freeResources(TokenStream* tokens, Ast* ast, NameTable* nametab) {
+static void freeCompilerIR(TokenStream* tokens, Ast* ast, NameTable* nametab) {
     if (tokens != NULL) freeTokenStream(tokens);
     if (ast != NULL) freeAst(ast, true);
     if (nametab != NULL) freeNameTable(nametab);
@@ -1387,7 +1387,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     initLexer(&lexer, source, vm->config.debugToken);
     TokenStream* tokens = lex(&lexer);
     if (lexer.hadError) {
-        freeResources(tokens, NULL, NULL);
+        freeCompilerIR(tokens, NULL, NULL);
         return NULL;
     }
 
@@ -1395,7 +1395,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     initParser(&parser, tokens, vm->config.debugAst);
     Ast* ast = parse(&parser);
     if (parser.hadError) {
-        freeResources(tokens, ast, NULL);
+        freeCompilerIR(tokens, ast, NULL);
         return NULL;
     }
 
@@ -1403,7 +1403,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     initResolver(vm, &resolver, vm->config.debugSymtab);
     NameTable* nametab = resolve(&resolver, ast);
     if (resolver.hadError) {
-        freeResources(tokens, ast, nametab);
+        freeCompilerIR(tokens, ast, nametab);
         return NULL;
     }
 
@@ -1411,7 +1411,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     initTypeChecker(vm, &typeChecker, nametab, vm->config.debugTypetab);
     typeCheck(&typeChecker, ast);
     if (typeChecker.hadError) {
-        freeResources(tokens, ast, nametab);
+        freeCompilerIR(tokens, ast, nametab);
         return NULL;
     }
 
@@ -1420,7 +1420,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     compileAst(&compiler, ast);
     ObjFunction* function = endCompiler(&compiler);
 
-    freeResources(tokens, ast, nametab);
+    freeCompilerIR(tokens, ast, nametab);
     if (compiler.hadError) return NULL;
     return function;
 }

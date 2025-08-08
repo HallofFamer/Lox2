@@ -610,9 +610,19 @@ static Ast* callableType(Parser* parser, const char* message) {
     return type;
 }
 
+static Ast* metaclassType(Parser* parser, const char* message) {
+    consume(parser, TOKEN_IDENTIFIER, message);
+    Token token = previousToken(parser);
+    consume(parser, TOKEN_CLASS, "Expect 'class' keyword after metaclass type declaration.");
+    Ast* type = emptyAst(AST_EXPR_TYPE, token);
+    type->attribute.isClass = true;
+    return type;
+}
+
 static Ast* type_(Parser* parser, const char* message) {
     if (checkBoth(parser, TOKEN_IDENTIFIER)) return behaviorType(parser, message);
     else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return callableType(parser, message);
+    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) return metaclassType(parser, message);
     else return emptyAst(AST_EXPR_TYPE, emptyToken());
 }
 
@@ -711,7 +721,11 @@ static Ast* fields(Parser* parser, Token* name) {
         }
         else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
             hasFieldType = true;
-            fieldType = callableType(parser, "Expect field type");
+            fieldType = callableType(parser, "Expect callable field type");
+        }
+        else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
+            hasFieldType = true;
+            fieldType = metaclassType(parser, "Expect metaclass field type.");
         }
 
         Token fieldName = identifierToken(parser, "Expect field name.");

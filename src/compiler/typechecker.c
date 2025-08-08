@@ -121,22 +121,22 @@ static void defineAstType(TypeChecker* typeChecker, Ast* ast, const char* name, 
 }
 
 static bool hasAstType(TypeChecker* typeChecker, Ast* ast, const char* name) {
+    if (ast->type == NULL || ast->type->id == typeChecker->objectType->id) return true;
     ObjString* typeName = newStringPerma(typeChecker->vm, name);
     TypeInfo* type = typeTableGet(typeChecker->vm->typetab, typeName);
     return isSubtypeOfType(ast->type, type);
 }
 
 static void deriveCallableType(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* callableType) {
-    if (IS_CALLABLE_TYPE(ast->type)) free(ast->type);
-    astDeriveType(ast, (TypeInfo*)callableType);
+    ast->type = (TypeInfo*)callableType;
     Ast* returnType = astGetChild(ast, 0);
-    if (returnType->type == NULL) astDeriveType(returnType, callableType->returnType);
+    if (returnType->type == NULL) returnType->type = callableType->returnType;
     Ast* paramTypes = astGetChild(ast, 1);
 
     for (int i = 0; i < paramTypes->children->count; i++) {
         Ast* paramType = paramTypes->children->elements[i];
         if (paramType->type == NULL) {
-            astDeriveType(paramType, callableType->paramTypes->elements[i]);
+            paramType->type = callableType->paramTypes->elements[i];
         }
     }
 }
@@ -158,7 +158,7 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
             }
             else if (IS_CALLABLE_TYPE(paramType) && arg->kind == AST_EXPR_FUNCTION) {
                 CallableTypeInfo* paramCallableType = AS_CALLABLE_TYPE(paramType);
-                if (arg->type == NULL) astDeriveType(arg, paramType);
+                if (arg->type == NULL) arg->type = paramType;
                 else deriveCallableType(typeChecker, arg, paramCallableType);
                 function(typeChecker, arg, paramCallableType, paramCallableType->attribute.isAsync, false, false);
             }
@@ -252,7 +252,7 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
 
 static void inferAstTypeFromChild(Ast* ast, int childIndex, SymbolItem* item) {
     Ast* child = astGetChild(ast, childIndex);
-    astDeriveType(ast, child->type);
+    ast->type = child->type;
     if (item != NULL) item->type = ast->type;
 }
 
@@ -297,7 +297,7 @@ static void inferAstTypeFromBinaryOperator(TypeChecker* typeChecker, Ast* ast, S
         typeError(typeChecker, "Method %s::%s expects argument 0 to be an instance of %s but gets %s.",
             receiver->type->shortName->chars, methodName->chars, paramType->shortName->chars, arg->type->shortName->chars);
     }
-    astDeriveType(ast, methodType->declaredType->returnType);
+    ast->type = methodType->declaredType->returnType;
 }
 
 static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolItem* item) {
@@ -359,7 +359,7 @@ static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableT
     if (callableType->returnType->category == TYPE_CATEGORY_VOID) {
         ast->type = typeChecker->voidType;
     }
-    else astDeriveType(ast, callableType->returnType);
+    else ast->type = callableType->returnType;
 }
 
 static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* classType) {
@@ -709,7 +709,7 @@ static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
     ObjString* fieldName = createSymbol(typeChecker, ast->token);
     TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
-    if (fieldType != NULL) astDeriveType(ast, AS_FIELD_TYPE(fieldType)->declaredType);
+    if (fieldType != NULL) ast->type = AS_FIELD_TYPE(fieldType)->declaredType;
 }
 
 static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
@@ -798,7 +798,7 @@ static void typeCheckUnary(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckVariable(TypeChecker* typeChecker, Ast* ast) {
     ObjString* name = createSymbol(typeChecker, ast->token);
     SymbolItem* item = symbolTableLookup(ast->symtab, name);
-    astDeriveType(ast, item->type);
+    ast->type = item->type;
 }
 
 static void typeCheckYield(TypeChecker* typeChecker, Ast* ast) {

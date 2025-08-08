@@ -412,7 +412,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     if (hasType) {
         resolveChild(resolver, ast, 0);
         Ast* paramType = astGetChild(ast, 0);
-        astDeriveType(ast, paramType->type);
+        ast->type = paramType->type;
     }
 
     switch (resolver->currentFunction->symtab->scope) {
@@ -448,50 +448,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     }
 }
 
-static ObjString* createCallableTypeName(Resolver* resolver, Ast* ast) {
-    Ast* returnType = astGetChild(ast, 0);
-    ObjString* returnTypeName = returnType->attribute.isFunction ? createCallableTypeName(resolver, returnType) : createSymbol(resolver, returnType->token);
-    char* callableName = bufferNewCString(UINT16_MAX);
-    size_t length = 0;
-
-    if (returnTypeName->length > 0) {
-        memcpy(callableName, returnTypeName->chars, returnTypeName->length);
-        length += returnTypeName->length;
-    }
-    else {
-        memcpy(callableName, "dynamic", 7);
-        length += 7;
-    }
-
-    memcpy(callableName + length, " fun(", 5);
-    length += 5;
-    if (ast->attribute.isVariadic) {
-        memcpy(callableName + length, "...", 3);
-        length += 3;
-    }
-
-    Ast* paramTypes = astGetChild(ast, 1);
-    for (int i = 0; i < paramTypes->children->count; i++) {
-        Ast* paramType = paramTypes->children->elements[i];
-        if (i > 0) {
-            callableName[length++] = ',';
-            callableName[length++] = ' ';
-        }
-        if (paramType->type != NULL) {
-            memcpy(callableName + length, paramType->type->shortName->chars, paramType->type->shortName->length);
-            length += paramType->type->shortName->length;
-        }
-        else {
-            memcpy(callableName + length, "dynamic", 7);
-            length += 7;
-        }
-    }
-    callableName[length++] = ')';
-    callableName[length] = '\0';
-    return takeStringPerma(resolver->vm, callableName, (int)length);
-}
-
-static void insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isLambda, bool isVariadic, bool isVoid) {
+static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isLambda, bool isVariadic, bool isVoid) {
     Ast* returnType = astGetChild(ast, 0);
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
     
@@ -508,10 +465,12 @@ static void insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool 
         }
         ast->type = (TypeInfo*)callableType;
         
-        ObjString* callableTypeName = createCallableTypeName(callableType);
-        ast->type->shortName = callableTypeName;
+        char* callableTypeName = createCallableTypeName(callableType);
+        ast->type->shortName = takeStringPerma(resolver->vm, callableTypeName, (int)strlen(callableTypeName));
         ast->type->fullName = ast->type->shortName;
+        TypeInfoArrayAdd(resolver->vm->callableTypes, ast->type);
     }
+    return callableType;
 }
 
 static SymbolItem* getVariable(Resolver* resolver, Ast* ast) {

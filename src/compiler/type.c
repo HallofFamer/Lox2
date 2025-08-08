@@ -136,19 +136,55 @@ void freeTypeInfo(TypeInfo* type) {
         if (callableType->paramTypes != NULL) TypeInfoArrayFree(callableType->paramTypes);
         free(callableType);
     }
-    else if (IS_FIELD_TYPE(type)) {
-        FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);
-        free(fieldType);
-    }
-    else if (IS_METHOD_TYPE(type)) {
-        MethodTypeInfo* methodType = AS_METHOD_TYPE(type);
-        if (methodType->declaredType->paramTypes != NULL) TypeInfoArrayFree(methodType->declaredType->paramTypes);
-        free(methodType->declaredType);
-        free(methodType);
-    }
     else {
         free(type);
     }
+}
+
+char* createCallableTypeName(CallableTypeInfo* callableType) {
+    char* callableName = bufferNewCString(UINT16_MAX);
+    size_t length = 0;
+
+    if (callableType->returnType != NULL) {
+        char* returnTypeName = IS_CALLABLE_TYPE(callableType->returnType) ? createCallableTypeName(AS_CALLABLE_TYPE(callableType->returnType)) : callableType->returnType->shortName->chars;
+        size_t returnTypeLength = strlen(returnTypeName);
+        memcpy(callableName, returnTypeName, returnTypeLength);
+        length += returnTypeLength;
+        if (IS_CALLABLE_TYPE(callableType->returnType)) free(returnTypeName);
+    }
+    else {
+        memcpy(callableName, "dynamic", 7);
+        length += 7;
+    }
+
+    memcpy(callableName + length, " fun(", 5);
+    length += 5;
+    if (callableType->attribute.isVariadic) {
+        memcpy(callableName + length, "...", 3);
+        length += 3;
+    }
+
+    for (int i = 0; i < callableType->paramTypes->count; i++) {
+        TypeInfo* paramType = callableType->paramTypes->elements[i];
+        if (i > 0) {
+            callableName[length++] = ',';
+            callableName[length++] = ' ';
+        }
+        if (paramType != NULL) {
+            char* paramTypeName = IS_CALLABLE_TYPE(paramType) ? createCallableTypeName(AS_CALLABLE_TYPE(paramType)) : paramType->shortName->chars;
+            size_t paramTypeLength = strlen(paramTypeName);
+            memcpy(callableName + length, paramTypeName, paramTypeLength);
+            length += paramTypeLength;
+            if (IS_CALLABLE_TYPE(paramType)) free(paramTypeName);
+        }
+        else {
+            memcpy(callableName + length, "dynamic", 7);
+            length += 7;
+        }
+    }
+    callableName[length++] = ')';
+    callableName[length] = '\0';
+    return callableName;
 }
 
 void freeCallableTypes(TypeInfoArray* freeCallableTypes) {
@@ -441,7 +477,7 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
-    if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && memcmp(type2->shortName->chars, "Function", 8) == 0) return true;
+    if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (memcmp(type2->shortName->chars, "Function", 8) == 0 || memcmp(type2->shortName->chars, "TCallable", 9) == 0)) return true;
     if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false; 
     if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
     BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type);
