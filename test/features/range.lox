@@ -1,6 +1,6 @@
 namespace test.features
 
-var range = 0..4
+val range = 0..4
 println("Creating an instance of Range class: (" + range.from().toString() + ".." +range.to().toString() + ")")
 print("Length of Range: ")
 println(range.length())

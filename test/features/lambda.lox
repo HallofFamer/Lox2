@@ -1,6 +1,6 @@
 namespace test.features
 
-var square = fun(a){ 
+val square = fun(a){ 
     return a * a
 }
 print("Using anonymous function for square(2): ")
@@ -14,12 +14,12 @@ println(square.arity())
 print("Name of anonymous function: ")
 println(square.name())
 
-var calculate = fun(n, operation){ 
+val calculate = fun(n, operation){ 
     return operation(n)
 }
 print("Higher order function multiply(2, 3): ")
 println(calculate(2, fun(a){ return a * 3 }))
-var curry = fun(x){
+val curry = fun(x){
     return fun(y){
         return x * y
     }
@@ -27,7 +27,7 @@ var curry = fun(x){
 print("Curried Higher order function multiply(2)(3): ")
 println(curry(2)(3))
 
-var pow = fun(x, y) {
+val pow = fun(x, y) {
     return x.pow(y)
 }
 print("Call function dynamically using pow.call(2, 3): ")
@@ -49,9 +49,9 @@ print("Function sum is variadic: ")
 println(sum.isVariadic())
 println("")
 
-var lambda0 = { 5; }
-var lambda1 = {|x| x * 2; }
-var lambda2 = {
+val lambda0 = { 5; }
+val lambda1 = {|x| x * 2; }
+val lambda2 = {
     |x, y|
     var z = x.pow(y)
     z = x + 2

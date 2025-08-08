@@ -7,19 +7,20 @@ print("Instance of class Brioche: ")
 println(Brioche())
 
 class Pair { 
-    equals(pair){ 
+
+    equals(pair) { 
         return (this.first == pair.first) and (this.second == pair.second)
     }    
 }
 
-var pair = Pair()
+val pair = Pair()
 pair.first = 1
 pair.second = 2
 print("Adding the pairs: ")
 println(pair.first + pair.second)
 println("")
 
-var object = Object()
+val object = Object()
 print("Printing object: ")
 println(object)
 print("Object is equal to 'Hello World': ")
@@ -36,7 +37,7 @@ print("Converting object to string: ")
 println(object.toString())
 println("")
 
-var pair2 = pair.clone()
+val pair2 = pair.clone()
 print("Clone of pair and adding the fields: ")
 println(pair2.first + pair2.second)
 print("Compare pairs with equality operator: ")

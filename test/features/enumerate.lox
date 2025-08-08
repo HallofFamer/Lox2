@@ -35,7 +35,7 @@ println("")
 
 val dict = ["US": "United States", "CA": "Canada", "EU": "Europe", "JP": "Japan", "RU": "Russia"]
 println("Enumerating a dictionary of countries: ")
-dict.each({|key, value| println("Key: " + key + ", Value: " + value.toString()) })
+dict.each({|key, value| println("Key: " + key.toString() + ", Value: " + value.toString()) })
 println("Select countries with length 6: ")
 val dict2 = dict.select({|key, value| value.length() == 6 })
 println(dict2)

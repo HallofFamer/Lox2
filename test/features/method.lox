@@ -7,7 +7,7 @@ class Scone {
 }
 
 print("Acquiring method object for: ")
-var method = Scone.getMethod("topping")
+val method = Scone.getMethod("topping")
 println(method.name())
 print("Arity of method is: ")
 println(method.arity())
@@ -19,17 +19,16 @@ print("Method is variadic: ")
 println(method.isVariadic())
 println("")
 
-var scone = Scone()
+val scone = Scone()
 println("Bound method to receiver: ")
-var boundMethod = method.bind(scone)
+val boundMethod = method.bind(scone)
 println(boundMethod.toString())
 println("Invoking bound method: ")
 boundMethod("berries", "cream")
 println("")
 
 println("Getting method dict from Object: ")
-var methods = Object.methods()
-//println("")
-for(var (name, method) : methods){
+val methods = Object.methods()
+for(val (name, method) : methods){
    println("Method " + method.behavior().name() + "::" + name + ", arity: " + method.arity().toString())
 }
