@@ -55,7 +55,7 @@ class Device {
 Here the type annotations are used to declare types for instance and class fields. If type annotations are omitted, they default to dynamic. However, if initializer is specified for an immutable field, it can deduce the type from the initializer similar to how it works for local variables. In the above case, the field batteryLife is inferred to have type Int instead of Dynamic, and class field serialID has its type inferred to be String. 
 
 ## Metaclass Types
-As classes themselves are objects, they can be assigned to variables, passed to functions/methods as arguments and returned as values. This implies need to allow type annotations for metaclass types, which will be added in Lox 2.1. The syntax is `(MetaclassType class)`, note the enclosing parenthesis is mandatory. For instance the below code allows returning class Date instead of instance of Date. 
+As classes themselves are objects, they can be assigned to variables, passed to functions/methods as arguments and returned as values. This implies need to allow type annotations for metaclass types, which will be added in Lox 2.1. The syntax is `(MetaclassType class)`, note the enclosing parenthesis is mandatory. For instance the below code allows returning class UserFactory instead of instance of UserFactory. 
 ```
 (UserFactory class) getUserFactory() {}
 ```
@@ -77,8 +77,20 @@ void registerDependency<TInterface,TImplentation>() {}
 ```
 At use site, generic parameters need to be substituted by concrete types. Lox2’s generics are reified and it is possible to inspect the type parameter at runtime. 
 
+## Type Alias
+Another planned feature for Lox 2.2 is type alias, which uses keyword `type` similar to typescript. Type alias will come in handy when declaring complex generic and function types. Once created they can be substituted where the actual types are used. 
+```
+type IDMap = Dictionary<String, ID<Int>>
+ID<Int> getID(IDMap map, String key) {}
+```
+Type alias can also be generic, the below type alias creates a predicate with type parameter T:
+```
+type Predicate<T> = Bool fun(T)
+```
+Type alias are similar to classes and traits, that their declaration creates an entry in the shared/global values in the VM. This means they can be imported with the `using` statement to use in a different source file. 
+
 ## Variance
-Lox 2.2 will refine the subtyping rules for function types to allow function return types to be covariant. This means `Int fun(String)` is a subtype of `Number fun(String)`. 
+Lox 2.3 will refine the subtyping rules for function types to allow function return types to be covariant. This means `Int fun(String)` is a subtype of `Number fun(String)`. 
 The same subtyping rules is allowed when a method in subclass overrides one from inherited superclass or implemented traits. The below code example is a valid Lox2 program:
 ```
 class Animal {}
@@ -94,24 +106,6 @@ class DogShelter extends AnimalShelter {
 // Will be valid in Lox 2.2+
 ```
 The same subtyping rules will not work for param types, as type theory dictates that param types are contravariant. As contravariance is confusing and rarely useful in practice, Lox2 does not support contravariant param types. 
-
-## Type Alias
-Another planned feature for Lox 2.2 is type alias, which uses keyword `type` similar to typescript. Type alias will come in handy when declaring complex generic and function types. Once created they can be substituted where the actual types are used. 
-```
-type IDMap = Dictionary<String, ID<Int>>
-ID<Int> getID(IDMap map, String key) {}
-```
-Type alias can also be generic, the below type alias creates a predicate with type parameter T:
-```
-type Predicate<T> = Bool fun(T)
-```
-Type alias are similar to classes and traits, that their declaration creates an entry in the shared/global values in the VM. This means they can be imported with the `using` statement to use in a different source file. 
-
-## Bounded Generics
-Lox 2.3 will add constraints to the basic generics supported in Lox 2.2, which will work in similar way as Java. The syntax will be `GenericType<T extends S>`, which restricts type parameter T to be a subtype of S. For instance, the below example creates a repository of type parameter that must be a subclass of Entity. 
-```
-class Repository<T extends Entity> {} 
-```
 
 ## Union Types
 Another key feature to be introduced in Lox 2.3 is union types, which works similar to Typescript. A union type consists of several types separated with pipe operator `|` , the syntax looks like `T1 | T2 | T3`. Below are common use cases for Union Types.
@@ -144,7 +138,25 @@ setAge(nil)
 ```
 This aligns with the nil safety standard as seen in Typescript and Kotlin. A dedicated syntax for Nullable types may be introduced later, ie. `T?`. But it is not a priority at the moment. 
 
+## Bounded Generics
+Lox 2.4 will add constraints to the basic generics supported in Lox 2.2, which will work in similar way as Java. The syntax will be `GenericType<T extends S>`, which restricts type parameter T to be a subtype of S. For instance, the below example creates a repository of type parameter that must be a subclass of Entity. 
+```
+class Repository<T extends Entity> {} 
+```
+
+## This Types
+Lox 2.4 will also introduce this types, which allows a class to refer to itself in field types, method return/param types. This is useful for fluent APIs and method chaining. This types may be declared with syntax `this class`. Below is an example of how this can be used:
+```
+class UserBuilder {
+    this class setName(String name) {}
+    this class setAge(Int age) {}
+    User build() {}
+}
+
+val user = UserBuilder().setName("Alice").setAge(30).build()
+```
+
 ## Further Enhancements
-Lox 2.4 and beyond may continue to improve the type system, and this note will be updated to reflect this. With this being said, Lox2  is meant to be an education language for building industrial/production graded compilers/interpreters, but not for research in academia. 
+Lox 2.5 and beyond may continue to improve the type system, and this note will be updated to reflect this. With this being said, Lox2  is meant to be an education language for building industrial/production graded compilers/interpreters, but not for research in academia. 
 
 For this reason, the type system is expected to be expressive and yet simple enough to understand. There is no plan to add complicated type level programming features such as Higher Kinded Types and Dependent Types to the language. 

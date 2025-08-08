@@ -1,11 +1,16 @@
 # Change Log
 
-### Lox2 v2.0.2(current version)
+### Lox2 v2.0.3(current version)
+- Add instance field `length` to class `Range` in package `clox.std.collection`, it now behaves correctly like a collection subclass.
+- Fix potential memory leak issue that AST is not properly freed when parser, resolver or typechecker fails with error.
+- Fix incorrect param types for initializer methods of `Behavior`, `Namespace` and `Trait`, as well as return types for methods in Comparable trait and Number class.
+
+### Lox2 v2.0.2(last version)
 - Fix buffer.h to include header for <stdlib.h>, which used to prevent Lox2 from compiling on certain platforms.
 - Fix CMakeLists.txt to find package libuv correctly on windows with vcpkg installation. 
 - Modify docker files to fetch latest stable version of Lox2 instead of from main branch directly.
 
-### Lox2 v2.0.1(last version)
+### Lox2 v2.0.1
 - Fix incorrect return types for some Int and String methods.
 - Add optimization for string interpolation to not emit OP_INVOKE instructions for toString method if expression is confirmed to have type String.
 - Disallow 'yield' keyword in async functions/methods. 

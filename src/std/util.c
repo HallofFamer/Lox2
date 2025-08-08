@@ -955,7 +955,7 @@ void registerUtilPackage(VM* vm) {
     DEF_FIELD(vm->promiseClass, state, Int, false, INT_VAL(0));
     DEF_FIELD(vm->promiseClass, value, Object, false, NIL_VAL);
     DEF_FIELD(vm->promiseClass, id, Int, true, INT_VAL(0));
-    DEF_INTERCEPTOR(vm->promiseClass, Promise, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(TCallable));
+    DEF_INTERCEPTOR(vm->promiseClass, Promise, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(TCallable), PARAM_TYPE(TCallable)));
     DEF_METHOD(vm->promiseClass, Promise, catch, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(TCallable));
     DEF_METHOD(vm->promiseClass, Promise, catchAll, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(TCallable));
     DEF_METHOD(vm->promiseClass, Promise, finally, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(TCallable));
@@ -1005,8 +1005,8 @@ void registerUtilPackage(VM* vm) {
     DEF_METHOD(vm->timerClass, Timer, toString, 0, RETURN_TYPE(String));
 
     ObjClass* timerMetaclass = vm->timerClass->obj.klass;
-    DEF_METHOD(timerMetaclass, TimerClass, interval, 2, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE(TCallable), PARAM_TYPE(Int));
-    DEF_METHOD(timerMetaclass, TimerClass, timeout, 2, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE(TCallable), PARAM_TYPE(Int));
+    DEF_METHOD(timerMetaclass, TimerClass, interval, 2, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE_CALLABLE(RETURN_TYPE(void)), PARAM_TYPE(Int));
+    DEF_METHOD(timerMetaclass, TimerClass, timeout, 2, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE_CALLABLE(RETURN_TYPE(void)), PARAM_TYPE(Int));
 
     bindSuperclass(vm, uuidClass, vm->objectClass);
     DEF_FIELD(uuidClass, buffer, String, false, OBJ_VAL(emptyString(vm)));
