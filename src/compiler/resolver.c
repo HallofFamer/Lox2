@@ -1081,7 +1081,9 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
     else {
         shortName->symtab = _namespace->symtab;
         insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
-        nameTableSet(resolver->nametab, createSymbol(resolver, shortName->token), fullName);
+        ObjString* className = createSymbol(resolver, shortName->token);
+        nameTableSet(resolver->nametab, className, fullName);
+        nameTableSet(resolver->nametab, getMetaclassNameFromClass(resolver->vm, className), getMetaclassNameFromClass(resolver->vm, fullName));
     }
 }
 

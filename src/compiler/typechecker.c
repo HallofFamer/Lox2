@@ -68,6 +68,8 @@ void initTypeChecker(VM* vm, TypeChecker* typeChecker, NameTable* nametab, bool 
     typeChecker->currentClass = NULL;
     typeChecker->currentFunction = NULL;
     typeChecker->nametab = nametab;
+    typeChecker->debugTypetab = debugTypetab;
+    typeChecker->hadError = false;
 
     typeChecker->objectType = getNativeType(vm, "Object");
     typeChecker->nilType = getNativeType(vm, "Nil");
@@ -80,9 +82,6 @@ void initTypeChecker(VM* vm, TypeChecker* typeChecker, NameTable* nametab, bool 
     typeChecker->namespaceType = getNativeType(vm, "Namespace");
     typeChecker->traitType = getNativeType(vm, "Trait");
     typeChecker->voidType = getNativeType(vm, "void");
-
-    typeChecker->debugTypetab = debugTypetab;
-    typeChecker->hadError = false;
 }
 
 static ObjString* createSymbol(TypeChecker* typeChecker, Token token) {
@@ -636,6 +635,7 @@ static void typeCheckDictionary(TypeChecker* typeChecker, Ast* ast) {
     uint8_t entryCount = 0;
     Ast* keys = astGetChild(ast, 0);
     Ast* values = astGetChild(ast, 1);
+
     while (entryCount < keys->children->count) {
         typeCheckChild(typeChecker, keys, entryCount);
         typeCheckChild(typeChecker, values, entryCount);
