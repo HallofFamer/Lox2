@@ -1356,6 +1356,11 @@ static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnTy
         *isAsync = false;
         return matchHigherOrderFunDeclaration(parser, isAsync, hasReturnType);
     }
+    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
+        *isAsync = false;
+        *hasReturnType = true;
+        return true;
+    }
     else return false;
 }
 
@@ -1447,7 +1452,7 @@ static Ast* declaration(Parser* parser) {
         return classDeclaration(parser);
     }
     else if (matchFunDeclaration(parser, &isAsync, &hasReturnType)) {
-        return funDeclaration(parser, false, true);
+        return funDeclaration(parser, isAsync, hasReturnType);
     }
     else if (matchNamespaceDeclaration(parser)) {
         return namespaceDeclaration(parser);

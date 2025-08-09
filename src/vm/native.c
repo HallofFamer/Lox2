@@ -98,7 +98,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
     va_list args;
     va_start(args, function);
     TypeInfo* returnType = va_arg(args, TypeInfo*);
-    CallableTypeInfo* functionType = newCallableTypeInfo(vm->behaviorTypetab->count + 1, TYPE_CATEGORY_FUNCTION, functionName, returnType);
+    CallableTypeInfo* functionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, functionName, returnType);
     functionType->attribute.isAsync = isAsync;
     functionType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
