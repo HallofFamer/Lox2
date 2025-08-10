@@ -767,6 +767,10 @@ static Ast* methods(Parser* parser, Token* name) {
             hasReturnType = true;
             returnType = callableType(parser, "Expect method return type.");
         }
+        else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
+            hasReturnType = true;
+            returnType = metaclassType(parser, "Expect method return type.");
+        }
         else returnType = emptyAst(AST_EXPR_TYPE, emptyToken());
 
         Token methodName = identifierToken(parser, "Expect method name.");

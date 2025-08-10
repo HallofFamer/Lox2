@@ -265,7 +265,7 @@ ObjClass* getNativeClass(VM* vm, const char* fullName) {
 }
 
 TypeInfo* getNativeType(VM* vm, const char* name) {
-    if (name == NULL || memcmp(name, "dynamic", 7) == 0) return NULL;
+    if (name == NULL || strcmp(name, "dynamic") == 0) return NULL;
     ObjString* shortName = newStringPerma(vm, name);
     ObjString* fullName = NULL;
     TypeInfo* type = typeTableGet(vm->behaviorTypetab, shortName);
