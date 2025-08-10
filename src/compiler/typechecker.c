@@ -351,9 +351,7 @@ static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolIte
 }
 
 static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* callableType) {
-    if (callableType == NULL || callableType->returnType == NULL) {
-        return;
-    }
+    if (callableType == NULL || callableType->returnType == NULL) return;
 
     if (callableType->returnType->category == TYPE_CATEGORY_VOID) {
         ast->type = typeChecker->voidType;
@@ -780,9 +778,7 @@ static void typeCheckThis(TypeChecker* typeChecker, Ast* ast) {
             ObjString* metaclassName = getMetaclassNameFromClass(typeChecker->vm, className);
             ast->type = typeTableGet(typeChecker->vm->behaviorTypetab, metaclassName);
         }
-        else {
-            ast->type = (TypeInfo*)typeChecker->currentClass->type;
-        }
+        else ast->type = (TypeInfo*)typeChecker->currentClass->type;
     }
 }
 
@@ -965,9 +961,7 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
             ObjString* className = createSymbol(typeChecker, typeChecker->currentClass->name);
             sprintf_s(calleeDesc, UINT8_MAX, "Method %s::%s", className->chars, calleeName->chars);
         }
-        else {
-            sprintf_s(calleeDesc, UINT8_MAX, "Function %s", calleeName->chars);
-        }
+        else sprintf_s(calleeDesc, UINT8_MAX, "Function %s", calleeName->chars);
 
         typeError(typeChecker, "%s expects return value to be an instance of %s but gets %s.", 
             calleeDesc, expectedType->shortName->chars, actualType->shortName->chars);

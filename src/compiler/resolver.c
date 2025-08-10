@@ -151,6 +151,7 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
 
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass) {
     ObjString* shortName = createSymbol(resolver, token);
+    ObjString* originalName = shortName;
     if (isMetaclass) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
     TypeInfo* type = typeTableGet(resolver->vm->behaviorTypetab, shortName);
     ObjString* fullName = NULL;
@@ -160,8 +161,11 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
         type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
 
         if (type == NULL) {
-            fullName = nameTableGet(resolver->nametab, shortName);
-            if(fullName != NULL) type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
+            fullName = nameTableGet(resolver->nametab, originalName);
+            if (fullName != NULL) {
+                if(isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
+                type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
+            }
 
             if (type == NULL) {
                 fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
@@ -1081,9 +1085,7 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
     else {
         shortName->symtab = _namespace->symtab;
         insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
-        ObjString* className = createSymbol(resolver, shortName->token);
-        nameTableSet(resolver->nametab, className, fullName);
-        nameTableSet(resolver->nametab, getMetaclassNameFromClass(resolver->vm, className), getMetaclassNameFromClass(resolver->vm, fullName));
+        nameTableSet(resolver->nametab, createSymbol(resolver, shortName->token), fullName);
     }
 }
 
