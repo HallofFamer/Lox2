@@ -1076,6 +1076,12 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
         }
     }
 
+    if (type == NULL) {
+        ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, fullName);
+        type = typeTableGet(resolver->vm->behaviorTypetab, metaclassName);
+        if (type == NULL) type = getNativeType(resolver->vm, "Namespace");
+    }
+
     if (astNumChild(ast) > 1) {
         Ast* alias = astGetChild(ast, 1);
         alias->symtab = _namespace->symtab;
