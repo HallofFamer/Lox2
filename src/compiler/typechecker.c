@@ -950,6 +950,7 @@ static void typeCheckRequireStatement(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
     TypeInfo* expectedType = (typeChecker->currentFunction->type != NULL) ? typeChecker->currentFunction->type->returnType : NULL;
     if (expectedType == NULL || !astHasChild(ast)) return;
+    typeCheckChild(typeChecker, ast, 0);
     Ast* returnValue = astGetChild(ast, 0);
     TypeInfo* actualType = returnValue->type;
 

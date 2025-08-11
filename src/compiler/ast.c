@@ -344,7 +344,7 @@ static void astOutputExprType(Ast* ast, int indentLevel) {
     }
     else {
         char* typeName = tokenToCString(ast->token);
-        printf("type %s\n", ast->token.length > 0 ? typeName : "dynamic");
+        printf("type %s%s\n", ast->token.length > 0 ? typeName : "dynamic", ast->attribute.isClass ? " class": "");
         free(typeName);
     }
 }
