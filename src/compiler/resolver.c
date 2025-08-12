@@ -1228,6 +1228,8 @@ static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
 static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     ObjString* name = createSymbol(resolver, item->token);
+    function(resolver, ast, false, ast->attribute.isAsync);
+    item->state = SYMBOL_STATE_ACCESSED;
 
     if (!resolver->currentClass->isAnonymous) {
         BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false));
@@ -1237,14 +1239,9 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
 
         MethodTypeInfo* methodType = typeTableInsertMethod(_class->methods, name, NULL, ast->attribute.isClass, ast->attribute.isInitializer);
         setCallableTypeModifier(ast, methodType->declaredType);
-        if (astNumChild(ast) > 2) {
-            Ast* returnType = astGetChild(ast, 2);
-            methodType->declaredType->returnType = getTypeForSymbol(resolver, returnType->token, returnType->attribute.isClass);
-        }
+        free(methodType->declaredType);
+        methodType->declaredType = AS_CALLABLE_TYPE(ast->type);
     }
-
-    function(resolver, ast, false, ast->attribute.isAsync);
-    item->state = SYMBOL_STATE_ACCESSED;
 }
 
 static void resolveNamespaceDeclaration(Resolver* resolver, Ast* ast) {

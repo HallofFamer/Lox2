@@ -950,7 +950,6 @@ static void typeCheckRequireStatement(TypeChecker* typeChecker, Ast* ast) {
 
 static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
     TypeInfo* expectedType = (typeChecker->currentFunction->type != NULL) ? typeChecker->currentFunction->type->returnType : NULL;
-    printf("Expected return type for function/method %s: %s\n", tokenToCString(typeChecker->currentFunction->name), expectedType != NULL ? expectedType->shortName->chars : "dynamic");
     if (expectedType == NULL || !astHasChild(ast)) return;
     typeCheckChild(typeChecker, ast, 0);
     Ast* returnValue = astGetChild(ast, 0);
@@ -1156,7 +1155,6 @@ static void typeCheckMethodDeclaration(TypeChecker* typeChecker, Ast* ast) {
         else classType = typeChecker->currentClass->type;
 
         MethodTypeInfo* methodType = AS_METHOD_TYPE(typeTableGet(classType->methods, name));
-        printf("method return type: %s\n", methodType->declaredType->returnType == NULL ? "dynamic" : methodType->declaredType->returnType->shortName->chars);
         function(typeChecker, ast, methodType->declaredType, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
     }
 }
