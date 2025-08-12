@@ -477,7 +477,7 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
-    if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (memcmp(type2->shortName->chars, "Function", 8) == 0 || memcmp(type2->shortName->chars, "TCallable", 9) == 0)) return true;
+    if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (strcmp(type2->shortName->chars, "Function") == 0 || strcmp(type2->shortName->chars, "TCallable") == 0)) return true;
     if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false; 
     if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
     BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type);
