@@ -28,6 +28,7 @@ Obj* allocateObject(VM* vm, size_t size, ObjType type, ObjClass* klass, GCGenera
 
 ObjArray* newArray(VM* vm) {
     ObjArray* array = ALLOCATE_OBJ(ObjArray, OBJ_ARRAY, vm->arrayClass);
+    array->position = -1;
     initValueArray(&array->elements, array->obj.generation);
     return array;
 }
@@ -88,6 +89,7 @@ ObjDictionary* newDictionary(VM* vm) {
     ObjDictionary* dict = ALLOCATE_OBJ(ObjDictionary, OBJ_DICTIONARY, vm->dictionaryClass);
     dict->count = 0;
     dict->capacity = 0;
+    dict->position = -1;
     dict->entries = NULL;
     return dict;
 }
@@ -280,6 +282,7 @@ ObjRange* newRange(VM* vm, int from, int to) {
     ObjRange* range = ALLOCATE_OBJ(ObjRange, OBJ_RANGE, vm->rangeClass);
     range->from = from;
     range->to = to;
+    range->position = -1;
     return range;
 }
 
