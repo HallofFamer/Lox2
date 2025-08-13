@@ -1689,6 +1689,14 @@ LOX_METHOD(TComparable, __less__) {
     }
 }
 
+LOX_METHOD(TEnumerable, next) {
+    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
+}
+
+LOX_METHOD(TEnumerable, nextValue) {
+    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
+}
+
 LOX_METHOD(Trait, __init__) {
     ASSERT_ARG_COUNT("Trait::__init__(name, traits)", 2);
     ASSERT_ARG_TYPE("Trait::__init__(name, traits)", 0, String);
@@ -1817,6 +1825,7 @@ void registerLangPackage(VM* vm) {
     vm->numberClass = defineNativeClass(vm, "Number");
     vm->intClass = defineNativeClass(vm, "Int");
     vm->floatClass = defineNativeClass(vm, "Float");
+    ObjClass* enumerableTrait = defineNativeTrait(vm, "TEnumerable");
     vm->stringClass = defineNativeClass(vm, "String");
     ObjClass* callableTrait = defineNativeTrait(vm, "TCallable");
     vm->functionClass = defineNativeClass(vm, "Function");
@@ -2052,7 +2061,11 @@ void registerLangPackage(VM* vm) {
     DEF_FIELD(floatMetaclass, min, Number, true, NUMBER_VAL(DBL_MIN));
     DEF_METHOD(floatMetaclass, FloatClass, parse, 1, RETURN_TYPE(Float), PARAM_TYPE(Object));
 
+    DEF_METHOD(enumerableTrait, TEnumerable, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
+    DEF_METHOD(enumerableTrait, TEnumerable, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
+
     bindSuperclass(vm, vm->stringClass, vm->objectClass);
+    bindTrait(vm, vm->stringClass, enumerableTrait);
     vm->stringClass->classType = OBJ_STRING;
     DEF_INTERCEPTOR(vm->stringClass, String, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(String), PARAM_TYPE(String));
     DEF_FIELD(vm->stringClass, length, Int, false, INT_VAL(0));

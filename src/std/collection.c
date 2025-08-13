@@ -2057,19 +2057,11 @@ LOX_METHOD(Stack, toString) {
     RETURN_OBJ(linkToString(vm, self));
 }
 
-LOX_METHOD(TEnumerable, next) {
-    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
-}
-
-LOX_METHOD(TEnumerable, nextValue) {
-    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
-}
-
 void registerCollectionPackage(VM* vm) {
     ObjNamespace* collectionNamespace = defineNativeNamespace(vm, "collection", vm->stdNamespace);
     vm->currentNamespace = collectionNamespace;
 
-    ObjClass* enumerableTrait = defineNativeTrait(vm, "TEnumerable");
+    ObjClass* enumerableTrait = getNativeClass(vm, "clox.std.lang.TEnumerable");
     ObjClass* collectionClass = defineNativeClass(vm, "Collection");
     ObjClass* listClass = defineNativeClass(vm, "List");
     vm->arrayClass = defineNativeClass(vm, "Array");
@@ -2081,9 +2073,6 @@ void registerCollectionPackage(VM* vm) {
     vm->rangeClass = defineNativeClass(vm, "Range");
     ObjClass* stackClass = defineNativeClass(vm, "Stack");
     ObjClass* queueClass = defineNativeClass(vm, "Queue");
-
-    DEF_METHOD(enumerableTrait, TEnumerable, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(enumerableTrait, TEnumerable, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
 
     bindSuperclass(vm, collectionClass, vm->objectClass);
     bindTrait(vm, collectionClass, enumerableTrait);
