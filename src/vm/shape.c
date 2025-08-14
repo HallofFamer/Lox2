@@ -21,7 +21,8 @@ static void initRootShape(Shape* shape) {
 
 static void createDefaultShapes(VM* vm) {
     int shapeIDLength = createShapeFromParent(vm, 0, newStringPerma(vm, "length"));
-    defaultShapeIDs[OBJ_ARRAY] = shapeIDLength;
+    int shapeIDPosition = createShapeFromParent(vm, shapeIDLength, newStringPerma(vm, "position"));
+    defaultShapeIDs[OBJ_ARRAY] = shapeIDPosition;
 
     int shapeIDReceiver = createShapeFromParent(vm, 0, newStringPerma(vm, "receiver"));
     int shapeIDBoundMethod = createShapeFromParent(vm, shapeIDReceiver, newStringPerma(vm, "method"));
@@ -33,7 +34,7 @@ static void createDefaultShapes(VM* vm) {
     int shapeIDClosure = createShapeFromParent(vm, shapeIDName, newStringPerma(vm, "arity"));
     defaultShapeIDs[OBJ_CLOSURE] = shapeIDClosure;
 
-    defaultShapeIDs[OBJ_DICTIONARY] = shapeIDLength;
+    defaultShapeIDs[OBJ_DICTIONARY] = shapeIDPosition;
 
     int shapeIDKey = createShapeFromParent(vm, 0, newStringPerma(vm, "key"));
     int shapeIDEntry = createShapeFromParent(vm, shapeIDKey, newStringPerma(vm, "value"));
@@ -71,7 +72,7 @@ static void createDefaultShapes(VM* vm) {
     int shapeIDID = createShapeFromParent(vm, shapeIDValue, newStringPerma(vm, "id"));
     defaultShapeIDs[OBJ_PROMISE] = shapeIDID;
 
-    int shapeIDFrom = createShapeFromParent(vm, shapeIDLength, newStringPerma(vm, "from"));
+    int shapeIDFrom = createShapeFromParent(vm, shapeIDPosition, newStringPerma(vm, "from"));
     int shapeIDRange = createShapeFromParent(vm, shapeIDFrom, newStringPerma(vm, "to"));
     defaultShapeIDs[OBJ_RANGE] = shapeIDRange;
 
