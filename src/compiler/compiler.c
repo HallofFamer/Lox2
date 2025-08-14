@@ -1054,20 +1054,20 @@ static void compileForStatement(Compiler* compiler, Ast* ast) {
     LoopCompiler innerLoop;
     initLoopCompiler(compiler, &innerLoop);
     getLocal(compiler, collectionSlot);
-    getLocal(compiler, indexSlot);
+    invokeMethod(compiler, 0, "moveNext", 8);
 
-    invokeMethod(compiler, 1, "next", 4);
+    compiler->currentLoop->exitJump = emitJump(compiler, OP_JUMP_IF_FALSE);
+    emitByte(compiler, OP_POP);
+    getLocal(compiler, collectionSlot);
+    invokeMethod(compiler, 0, "currentIndex", 12);
     setLocal(compiler, indexSlot);
     emitByte(compiler, OP_POP);
-    compiler->currentLoop->exitJump = emitJump(compiler, OP_JUMP_IF_EMPTY);
-
-    getLocal(compiler, collectionSlot);
-    getLocal(compiler, indexSlot);
-    invokeMethod(compiler, 1, "nextValue", 9);
 
     beginScope(compiler);
     int valueSlot = addLocal(compiler, valueToken);
     markInitialized(compiler, false);
+    getLocal(compiler, collectionSlot);
+    invokeMethod(compiler, 0, "currentValue", 12);
     setLocal(compiler, valueSlot);
     compileChild(compiler, ast, 2);
     endScope(compiler);
@@ -1075,7 +1075,10 @@ static void compileForStatement(Compiler* compiler, Ast* ast) {
     emitLoop(compiler);
     patchJump(compiler, compiler->currentLoop->exitJump);
     endLoopCompiler(compiler);
+
     emitByte(compiler, OP_POP);
+    emitByte(compiler, OP_POP);
+    invokeMethod(compiler, 0, "reset", 5);
     emitByte(compiler, OP_POP);
 
     compiler->localCount -= 2;

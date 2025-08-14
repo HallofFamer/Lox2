@@ -459,6 +459,19 @@ LOX_METHOD(Array, contains) {
     RETURN_BOOL(valueArrayFirstIndex(vm, &AS_ARRAY(receiver)->elements, args[0]) != -1);
 }
 
+LOX_METHOD(Array, currentIndex) {
+    ASSERT_ARG_COUNT("Array::currentIndex()", 0);
+    ObjArray* self = AS_ARRAY(receiver);
+    RETURN_INT(self->position);
+}
+
+LOX_METHOD(Array, currentValue) {
+    ASSERT_ARG_COUNT("Array::currentValue()", 0);
+    ObjArray* self = AS_ARRAY(receiver);
+    if (self->position < 0 || self->position >= self->elements.count) RETURN_NIL;
+    RETURN_VAL(self->elements.values[self->position]);
+}
+
 LOX_METHOD(Array, detect) {
     ASSERT_ARG_COUNT("Array::detect(closure)", 1);
     ASSERT_ARG_TCALLABLE("Array::detect(closure)", 0);
@@ -544,6 +557,11 @@ LOX_METHOD(Array, isEmpty) {
     RETURN_BOOL(AS_ARRAY(receiver)->elements.count == 0);
 }
 
+LOX_METHOD(Array, iterator) {
+    ASSERT_ARG_COUNT("Array::iterator()", 0);
+    RETURN_OBJ(receiver);
+}
+
 LOX_METHOD(Array, lastIndexOf) {
     ASSERT_ARG_COUNT("Array::lastIndexOf(element)", 1);
     ObjArray* self = AS_ARRAY(receiver);
@@ -556,27 +574,12 @@ LOX_METHOD(Array, length) {
     RETURN_INT(AS_ARRAY(receiver)->elements.count);
 }
 
-LOX_METHOD(Array, next) {
-    ASSERT_ARG_COUNT("Array::next(index)", 1);
+LOX_METHOD(Array, moveNext) {
+    ASSERT_ARG_COUNT("Array::moveNext()", 0);
     ObjArray* self = AS_ARRAY(receiver);
-    if (IS_NIL(args[0])) {
-        if (self->elements.count == 0) RETURN_FALSE;
-        RETURN_INT(0);
-    }
-
-    ASSERT_ARG_TYPE("Array::next(index)", 0, Int);
-    int index = AS_INT(args[0]);
-    if (index < 0 || index < self->elements.count - 1) RETURN_INT(index + 1);
-    RETURN_NIL;
-}
-
-LOX_METHOD(Array, nextValue) {
-    ASSERT_ARG_COUNT("Array::nextValue(index)", 1);
-    ASSERT_ARG_TYPE("Array::nextValue(index)", 0, Int);
-    ObjArray* self = AS_ARRAY(receiver);
-    int index = AS_INT(args[0]);
-    if (index > -1 && index < self->elements.count) RETURN_VAL(self->elements.values[index]);
-    RETURN_NIL;
+    if (self->elements.count == 0 || self->position >= self->elements.count) RETURN_FALSE;
+    self->position++;
+    RETURN_TRUE;
 }
 
 LOX_METHOD(Array, putAt) {
@@ -620,6 +623,13 @@ LOX_METHOD(Array, removeAt) {
     ASSERT_INDEX_WITHIN_BOUNDS("Array::removeAt(index)", AS_INT(args[0]), 0, self->elements.count - 1, 0);
     Value element = valueArrayDelete(vm, &self->elements, index);
     RETURN_VAL(element);
+}
+
+LOX_METHOD(Array, reset) {
+    ASSERT_ARG_COUNT("Array::reset()", 0);
+    ObjArray* self = AS_ARRAY(receiver);
+    self->position = -1;
+    RETURN_NIL;
 }
 
 LOX_METHOD(Array, select) {
@@ -895,6 +905,20 @@ LOX_METHOD(Dictionary, containsValue) {
     RETURN_BOOL(dictContainsValue(AS_DICTIONARY(receiver), args[0]));
 }
 
+LOX_METHOD(Dictionary, currentIndex) {
+    ASSERT_ARG_COUNT("Dictionary::currentIndex()", 0);
+    ObjDictionary* self = AS_DICTIONARY(receiver);
+    ObjEntry* entry = &self->entries[self->position];
+    RETURN_VAL(entry->key);
+}
+
+LOX_METHOD(Dictionary, currentValue) {
+    ASSERT_ARG_COUNT("Dictionary::currentValue()", 0);
+    ObjDictionary* self = AS_DICTIONARY(receiver);
+    ObjEntry* entry = &self->entries[self->position];
+    RETURN_VAL(entry->value);
+}
+
 LOX_METHOD(Dictionary, detect) {
     ASSERT_ARG_COUNT("Dictionary::detect(closure)", 1);
     ASSERT_ARG_TCALLABLE("Dictionary::detect(closure)", 0);
@@ -997,6 +1021,11 @@ LOX_METHOD(Dictionary, isEmpty) {
     RETURN_BOOL(AS_DICTIONARY(receiver)->count == 0);
 }
 
+LOX_METHOD(Dictionary, iterator) {
+    ASSERT_ARG_COUNT("Dictionary::iterator()", 0);
+    RETURN_OBJ(receiver);
+}
+
 LOX_METHOD(Dictionary, keySet) {
     ASSERT_ARG_COUNT("Dictionary::keySet()", 0);
     ObjDictionary* self = AS_DICTIONARY(receiver);
@@ -1019,30 +1048,20 @@ LOX_METHOD(Dictionary, length) {
     RETURN_INT(AS_DICTIONARY(receiver)->count);
 }
 
-LOX_METHOD(Dictionary, next) {
-    ASSERT_ARG_COUNT("Dictionary::next(index)", 1);
+LOX_METHOD(Dictionary, moveNext) {
+    ASSERT_ARG_COUNT("Dictionary::moveNext()", 0);
     ObjDictionary* self = AS_DICTIONARY(receiver);
-    if (self->count == 0) RETURN_NIL;
+    if (self->count == 0 || self->position >= self->capacity) RETURN_FALSE;
 
-    int index = 0;
-    if (!IS_NIL(args[0])) {
-        Value key = args[0];
-        index = dictFindIndex(self, key);
-        if (index < 0 || index >= self->capacity) RETURN_NIL;
-        index++;
+    ObjEntry* entry = &self->entries[++self->position];
+    while (entry == NULL || IS_UNDEFINED(entry->key)) {
+        self->position++;
+        if (self->position >= self->capacity) {
+            RETURN_FALSE;
+        }
+        entry = &self->entries[self->position];
     }
-
-    for (; index < self->capacity; index++) {
-        if (!IS_UNDEFINED(self->entries[index].key)) RETURN_VAL(self->entries[index].key);
-    }
-    RETURN_NIL;
-}
-
-LOX_METHOD(Dictionary, nextValue) {
-    ASSERT_ARG_COUNT("Dictionary::nextValue(key)", 1);
-    ObjDictionary* self = AS_DICTIONARY(receiver);
-    int index = dictFindIndex(self, args[0]);
-    RETURN_VAL(self->entries[index].value);
+    RETURN_TRUE;
 }
 
 LOX_METHOD(Dictionary, putAll) {
@@ -1089,6 +1108,13 @@ LOX_METHOD(Dictionary, removeAt) {
     if (!keyExists) RETURN_NIL;
     dictDelete(self, key);
     RETURN_VAL(value);
+}
+
+LOX_METHOD(Dictionary, reset) {
+    ASSERT_ARG_COUNT("Dictionary::reset()", 0);
+    ObjDictionary* self = AS_DICTIONARY(receiver);
+    self->position = -1;
+    RETURN_NIL;
 }
 
 LOX_METHOD(Dictionary, select) {
@@ -1681,6 +1707,21 @@ LOX_METHOD(Range, contains) {
     else RETURN_BOOL(element >= self->to && element <= self->from);
 }
 
+LOX_METHOD(Range, currentIndex) {
+    ASSERT_ARG_COUNT("Range::currentIndex()", 0);
+    ObjRange* self = AS_RANGE(receiver);
+    RETURN_INT(self->position);
+}
+
+LOX_METHOD(Range, currentValue) {
+    ASSERT_ARG_COUNT("Range::currentValue()", 0);
+    ObjRange* self = AS_RANGE(receiver);
+    if (self->position < 0 || self->position >= abs(self->to - self->from) + 1) RETURN_NIL;
+    int step = (self->from < self->to) ? self->position : -self->position;
+    if (self->position < abs(self->to - self->from) + 1) RETURN_INT(self->from + step);
+    RETURN_NIL;
+}
+
 LOX_METHOD(Range, from) {
     ASSERT_ARG_COUNT("Range::from()", 0);
     ObjRange* self = AS_RANGE(receiver);
@@ -1699,6 +1740,11 @@ LOX_METHOD(Range, getAt) {
     RETURN_INT(self->from + index);
 }
 
+LOX_METHOD(Range, iterator) {
+    ASSERT_ARG_COUNT("Range::iterator()", 0);
+    RETURN_OBJ(receiver);
+}
+
 LOX_METHOD(Range, length) {
     ASSERT_ARG_COUNT("Range::length()", 0);
     ObjRange* self = AS_RANGE(receiver);
@@ -1715,6 +1761,14 @@ LOX_METHOD(Range, min) {
     ASSERT_ARG_COUNT("Range::min()", 0);
     ObjRange* self = AS_RANGE(receiver);
     RETURN_INT((self->from < self->to) ? self->from : self->to);
+}
+
+LOX_METHOD(Range, moveNext) {
+    ASSERT_ARG_COUNT("Range::moveNext()", 0);
+    ObjRange* self = AS_RANGE(receiver);
+    if (self->position >= abs(self->to - self->from)) RETURN_FALSE;
+    self->position++;
+    RETURN_TRUE;
 }
 
 LOX_METHOD(Range, next) {
@@ -1739,6 +1793,13 @@ LOX_METHOD(Range, nextValue) {
 
     int step = (self->from < self->to) ? index : -index;
     if (index > -1 && index < abs(self->to - self->from) + 1) RETURN_INT(self->from + step);
+    RETURN_NIL;
+}
+
+LOX_METHOD(Range, reset) {
+    ASSERT_ARG_COUNT("Range::reset()", 0);
+    ObjRange* self = AS_RANGE(receiver);
+    self->position = -1;
     RETURN_NIL;
 }
 
@@ -2077,6 +2138,7 @@ void registerCollectionPackage(VM* vm) {
     bindSuperclass(vm, collectionClass, vm->objectClass);
     bindTrait(vm, collectionClass, enumerableTrait);
     DEF_FIELD(collectionClass, length, Int, false, INT_VAL(0));
+    DEF_FIELD(collectionClass, position, Int, true, INT_VAL(0));
     DEF_INTERCEPTOR(collectionClass, Collection, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Collection));
     DEF_METHOD(collectionClass, Collection, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(collectionClass, Collection, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
@@ -2103,6 +2165,8 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->arrayClass, Array, clone, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->arrayClass, Array, collect, 1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Object), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->arrayClass, Array, currentIndex, 0, RETURN_TYPE(Int));
+    DEF_METHOD(vm->arrayClass, Array, currentValue, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, detect, 1, RETURN_TYPE(Object), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Bool), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, each, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, eachIndex, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Int), PARAM_TYPE(Object)));
@@ -2112,14 +2176,15 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->arrayClass, Array, indexOf, 1, RETURN_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, insertAt, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, isEmpty, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->arrayClass, Array, iterator, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->arrayClass, Array, lastIndexOf, 1, RETURN_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, length, 0, RETURN_TYPE(Int));
-    DEF_METHOD(vm->arrayClass, Array, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(vm->arrayClass, Array, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
+    DEF_METHOD(vm->arrayClass, Array, moveNext, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->arrayClass, Array, putAt, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, reject, 1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Bool), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, remove, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, removeAt, 1, RETURN_TYPE(Bool), PARAM_TYPE(Int));
+    DEF_METHOD(vm->arrayClass, Array, reset, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->arrayClass, Array, select, 1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Bool), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, slice, 2, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(vm->arrayClass, Array, toString, 0, RETURN_TYPE(String));
@@ -2178,6 +2243,8 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->dictionaryClass, Dictionary, collect, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, containsKey, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, containsValue, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, currentIndex, 0, RETURN_TYPE(Object));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, currentValue, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, detect, 1, RETURN_TYPE(Object), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, each, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, eachKey, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 1, PARAM_TYPE(Object)));
@@ -2186,14 +2253,15 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->dictionaryClass, Dictionary, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, getAt, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
     DEF_METHOD(vm->dictionaryClass, Dictionary, isEmpty, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, iterator, 0, RETURN_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(vm->dictionaryClass, Dictionary, length, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->dictionaryClass, Dictionary, keySet, 0, RETURN_TYPE(clox.std.collection.Set));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, moveNext, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->dictionaryClass, Dictionary, putAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(vm->dictionaryClass, Dictionary, putAt, 2, RETURN_TYPE(void), PARAM_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, reject, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, removeAt, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, reset, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->dictionaryClass, Dictionary, select, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->dictionaryClass, Dictionary, valueSet, 0, RETURN_TYPE(clox.std.collection.Set));
@@ -2236,13 +2304,18 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->rangeClass, Range, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
     DEF_METHOD(vm->rangeClass, Range, clone, 0, RETURN_TYPE(clox.std.collection.Range));
     DEF_METHOD(vm->rangeClass, Range, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->rangeClass, Range, currentIndex, 0, RETURN_TYPE(Int));
+    DEF_METHOD(vm->rangeClass, Range, currentValue, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->rangeClass, Range, from, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, getAt, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
+    DEF_METHOD(vm->rangeClass, Range, iterator, 0, RETURN_TYPE(clox.std.collection.Range));
     DEF_METHOD(vm->rangeClass, Range, length, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, max, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, min, 0, RETURN_TYPE(Int));
+    DEF_METHOD(vm->rangeClass, Range, moveNext, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->rangeClass, Range, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
+    DEF_METHOD(vm->rangeClass, Range, reset, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->rangeClass, Range, step, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 1, PARAM_TYPE(Int)));
     DEF_METHOD(vm->rangeClass, Range, to, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
