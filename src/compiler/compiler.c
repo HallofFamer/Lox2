@@ -1045,7 +1045,9 @@ static void compileForStatement(Compiler* compiler, Ast* ast) {
         compileError(compiler, "for loop can only contain up to 252 variables.");
     }
 
-    int collectionSlot = addLocal(compiler, syntheticToken("collection "));
+    int iteratorSlot = addLocal(compiler, syntheticToken("iterator "));
+    invokeMethod(compiler, 0, "iterator", 8);
+    setLocal(compiler, iteratorSlot);
     emitByte(compiler, OP_NIL);
     int indexSlot = addLocal(compiler, indexToken);
     markInitialized(compiler, true);
@@ -1053,12 +1055,12 @@ static void compileForStatement(Compiler* compiler, Ast* ast) {
     LoopCompiler* outerLoop = compiler->currentLoop;
     LoopCompiler innerLoop;
     initLoopCompiler(compiler, &innerLoop);
-    getLocal(compiler, collectionSlot);
+    getLocal(compiler, iteratorSlot);
     invokeMethod(compiler, 0, "moveNext", 8);
 
     compiler->currentLoop->exitJump = emitJump(compiler, OP_JUMP_IF_FALSE);
     emitByte(compiler, OP_POP);
-    getLocal(compiler, collectionSlot);
+    getLocal(compiler, iteratorSlot);
     invokeMethod(compiler, 0, "currentIndex", 12);
     setLocal(compiler, indexSlot);
     emitByte(compiler, OP_POP);
@@ -1066,7 +1068,7 @@ static void compileForStatement(Compiler* compiler, Ast* ast) {
     beginScope(compiler);
     int valueSlot = addLocal(compiler, valueToken);
     markInitialized(compiler, false);
-    getLocal(compiler, collectionSlot);
+    getLocal(compiler, iteratorSlot);
     invokeMethod(compiler, 0, "currentValue", 12);
     setLocal(compiler, valueSlot);
     compileChild(compiler, ast, 2);
