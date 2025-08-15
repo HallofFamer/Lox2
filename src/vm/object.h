@@ -38,6 +38,7 @@
 #define IS_GENERATOR(value)         isObjType(value, OBJ_GENERATOR)
 #define IS_INSTANCE(value)          isObjType(value, OBJ_INSTANCE)
 #define IS_INT_INSTANCE(arg)        (IS_INT(arg) || (IS_VALUE_INSTANCE(arg) && IS_INT(AS_VALUE_INSTANCE(arg)->value))) 
+#define IS_ITERATOR(value)          isObjType(value, OBJ_ITERATOR)
 #define IS_METHOD(value)            isObjType(value, OBJ_METHOD)
 #define IS_MODULE(value)            isObjType(value, OBJ_MODULE)
 #define IS_NAMESPACE(value)         isObjType(value, OBJ_NAMESPACE)
@@ -69,6 +70,7 @@
 #define AS_GENERATOR(value)         ((ObjGenerator*)AS_OBJ(value))
 #define AS_INSTANCE(value)          ((ObjInstance*)AS_OBJ(value))
 #define AS_INT_INSTANCE(arg)        (IS_INT(arg) ? AS_INT(arg) : AS_INT(AS_VALUE_INSTANCE(arg)->value))
+#define AS_ITERATOR(value)          ((ObjIterator*)AS_OBJ(value))
 #define AS_METHOD(value)            ((ObjMethod*)AS_OBJ(value))
 #define AS_MODULE(value)            ((ObjModule*)AS_OBJ(value))
 #define AS_NAMESPACE(value)         ((ObjNamespace*)AS_OBJ(value))
@@ -101,6 +103,7 @@ typedef enum {
     OBJ_FUNCTION,
     OBJ_GENERATOR,
     OBJ_INSTANCE,
+    OBJ_ITERATOR,
     OBJ_METHOD,
     OBJ_MODULE,
     OBJ_NAMESPACE,
@@ -260,6 +263,13 @@ struct ObjGenerator {
 
 typedef struct {
     Obj obj;
+    Value iterable;
+    int position;
+    Value value;
+} ObjIterator;
+
+typedef struct {
+    Obj obj;
     uv_timer_t* timer;
     int id;
     bool isRunning;
@@ -359,6 +369,7 @@ ObjFrame* newFrame(VM* vm, CallFrame* callFrame);
 ObjFunction* newFunction(VM* vm, ObjString* name, bool isAsync);
 ObjGenerator* newGenerator(VM* vm, ObjFrame* frame, ObjGenerator* outer);
 ObjInstance* newInstance(VM* vm, ObjClass* klass);
+ObjIterator* newIterator(VM* vm, Value iterable, ObjClass* klass);
 ObjMethod* newMethod(VM* vm, ObjClass* behavior, ObjClosure* closure);
 ObjModule* newModule(VM* vm, ObjString* path);
 void initNamespace(VM* vm, ObjNamespace* namespace, ObjString* shortName, ObjNamespace* enclosing);

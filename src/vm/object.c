@@ -176,6 +176,14 @@ ObjInstance* newInstance(VM* vm, ObjClass* klass) {
     return instance;
 }
 
+ObjIterator* newIterator(VM* vm, Value iterable, ObjClass* klass) {
+    ObjIterator* iterator = ALLOCATE_OBJ(ObjIterator, OBJ_ITERATOR, klass);
+    iterator->iterable = iterable;
+    iterator->position = -1;
+    iterator->value = NIL_VAL;
+    return iterator;
+}
+
 ObjMethod* newMethod(VM* vm, ObjClass* behavior, ObjClosure* closure) {
     ObjMethod* method = ALLOCATE_OBJ_GEN(ObjMethod, OBJ_METHOD, vm->methodClass, GC_GENERATION_TYPE_PERMANENT);
     method->behavior = behavior;
