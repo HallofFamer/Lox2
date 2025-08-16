@@ -233,6 +233,13 @@ void implementTraits(VM* vm, ObjClass* klass, ValueArray* traits) {
 void bindTrait(VM* vm, ObjClass* klass, ObjClass* trait) {
     tableAddAll(vm, &trait->methods, &klass->methods);
     valueArrayWrite(vm, &klass->traits, OBJ_VAL(trait));
+    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(vm->behaviorTypetab, klass->fullName));
+
+    if (klass->isNative) {
+        TypeInfo* traitType = typeTableGet(vm->behaviorTypetab, trait->fullName);
+        TypeInfoArrayAdd(classType->traitTypes, traitType);
+    }
+
     for (int i = 0; i < trait->traits.count; i++) {
         valueArrayWrite(vm, &klass->traits, trait->traits.values[i]);
     }

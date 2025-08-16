@@ -853,6 +853,34 @@ LOX_METHOD(IntClass, parse) {
     RETURN_INT(intValue);
 }
 
+LOX_METHOD(Iterator, __init__) {
+    ASSERT_ARG_COUNT("Iterator::__init__(iterable)", 1);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->iterable = args[0];
+    self->position = -1;
+    RETURN_OBJ(self);
+}
+
+LOX_METHOD(Iterator, currentIndex) {
+    ASSERT_ARG_COUNT("Iterator::currentIndex()", 0);
+    RETURN_INT(AS_ITERATOR(receiver)->position);
+}
+
+LOX_METHOD(Iterator, currentValue) {
+    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
+}
+
+LOX_METHOD(Iterator, moveNext) {
+    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
+}
+
+LOX_METHOD(Iterator, reset) {
+    ASSERT_ARG_COUNT("Iterator::reset()", 0);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->position = -1;
+    RETURN_NIL;
+}
+
 LOX_METHOD(Metaclass, getClass) {
     ASSERT_ARG_COUNT("Metaclass::getClass()", 0);
     RETURN_OBJ(vm->metaclassClass);
@@ -1464,6 +1492,12 @@ LOX_METHOD(String, indexOf) {
     RETURN_INT(searchString(vm, haystack, needle, 0));
 }
 
+LOX_METHOD(String, iterator) {
+    ASSERT_ARG_COUNT("String::iterator()", 0);
+    ObjString* self = AS_STRING(receiver);
+    RETURN_OBJ(newIterator(vm, receiver, getNativeClass(vm, "clox.std.lang.StringIterator")));
+}
+
 LOX_METHOD(String, length) {
     ASSERT_ARG_COUNT("String::length()", 0);
     RETURN_INT(AS_STRING(receiver)->length);
@@ -1625,6 +1659,36 @@ LOX_METHOD(StringClass, fromCodePoint) {
     RETURN_OBJ(utf8StringFromCodePoint(vm, AS_INT(args[0])));
 }
 
+LOX_METHOD(StringIterator, __init__) {
+    ASSERT_ARG_COUNT("StringIterator::__init__(string)", 1);
+    ASSERT_ARG_TYPE("StringIterator::__init__(string)", 0, String);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->iterable = args[0];
+    self->position = -1;
+    RETURN_OBJ(self);
+}
+
+LOX_METHOD(StringIterator, currentValue) {
+    ASSERT_ARG_COUNT("StringIterator::currentValue()", 0);
+    ObjIterator* iterator = AS_ITERATOR(receiver);
+    ObjString* string = AS_STRING(iterator->iterable);
+    if (iterator->position >= 0 && iterator->position < string->length) {
+        RETURN_OBJ(utf8CodePointAtIndex(vm, string->chars, iterator->position));
+    }
+    RETURN_NIL;
+}
+
+LOX_METHOD(StringIterator, moveNext) {
+    ASSERT_ARG_COUNT("StringIterator::moveNext()", 0);
+    ObjIterator* iterator = AS_ITERATOR(receiver);
+    ObjString* string = AS_STRING(iterator->iterable);
+    if (iterator->position < string->length - 1) {
+        iterator->position += utf8CodePointOffset(vm, string->chars, iterator->position);
+        RETURN_TRUE;
+    }
+    RETURN_FALSE;
+}
+
 LOX_METHOD(TCallable, arity) {
     THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
 }
@@ -1689,11 +1753,23 @@ LOX_METHOD(TComparable, __less__) {
     }
 }
 
-LOX_METHOD(TEnumerable, next) {
+LOX_METHOD(TEnumerable, iterator) {
     THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
 }
 
-LOX_METHOD(TEnumerable, nextValue) {
+LOX_METHOD(TIterator, currentIndex) {
+    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
+}
+
+LOX_METHOD(TIterator, currentValue) {
+    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
+}
+
+LOX_METHOD(TIterator, moveNext) {
+    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
+}
+
+LOX_METHOD(TIterator, reset) {
     THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
 }
 
@@ -1826,7 +1902,10 @@ void registerLangPackage(VM* vm) {
     vm->intClass = defineNativeClass(vm, "Int");
     vm->floatClass = defineNativeClass(vm, "Float");
     ObjClass* enumerableTrait = defineNativeTrait(vm, "TEnumerable");
+    ObjClass* iteratorTrait = defineNativeTrait(vm, "TIterator");
+    ObjClass* iteratorClass = defineNativeClass(vm, "Iterator");
     vm->stringClass = defineNativeClass(vm, "String");
+    ObjClass* stringIteratorClass = defineNativeClass(vm, "StringIterator");
     ObjClass* callableTrait = defineNativeTrait(vm, "TCallable");
     vm->functionClass = defineNativeClass(vm, "Function");
     vm->boundMethodClass = defineNativeClass(vm, "BoundMethod");
@@ -2061,8 +2140,25 @@ void registerLangPackage(VM* vm) {
     DEF_FIELD(floatMetaclass, min, Number, true, NUMBER_VAL(DBL_MIN));
     DEF_METHOD(floatMetaclass, FloatClass, parse, 1, RETURN_TYPE(Float), PARAM_TYPE(Object));
 
-    DEF_METHOD(enumerableTrait, TEnumerable, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(enumerableTrait, TEnumerable, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
+    DEF_METHOD(enumerableTrait, TEnumerable, iterator, 1, RETURN_TYPE(Iterator));
+    insertGlobalSymbolTable(vm, "TEnumerable", "Trait");
+
+    DEF_METHOD(iteratorTrait, TIterator, currentIndex, 0, RETURN_TYPE(Object));
+    DEF_METHOD(iteratorTrait, TIterator, currentValue, 0, RETURN_TYPE(Object));
+    DEF_METHOD(iteratorTrait, TIterator, moveNext, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(iteratorTrait, TIterator, reset, 0, RETURN_TYPE(void));
+    insertGlobalSymbolTable(vm, "TIterator", "Trait");
+
+    bindSuperclass(vm, iteratorClass, vm->objectClass);
+    iteratorClass->classType = OBJ_ITERATOR;
+    DEF_INTERCEPTOR(iteratorClass, Iterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Iterator), PARAM_TYPE(TEnumerable));
+    DEF_FIELD(iteratorClass, iterable, TEnumerable, false, NIL_VAL);
+    DEF_FIELD(iteratorClass, position, Int, false, INT_VAL(-1));
+    DEF_METHOD(iteratorClass, Iterator, currentIndex, 0, RETURN_TYPE(Object));
+    DEF_METHOD(iteratorClass, Iterator, currentValue, 0, RETURN_TYPE(Object));
+    DEF_METHOD(iteratorClass, Iterator, moveNext, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(iteratorClass, Iterator, reset, 0, RETURN_TYPE(void));
+    insertGlobalSymbolTable(vm, "Iterator", "Iterator class");
 
     bindSuperclass(vm, vm->stringClass, vm->objectClass);
     bindTrait(vm, vm->stringClass, enumerableTrait);
@@ -2078,9 +2174,8 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->stringClass, String, getByte, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(vm->stringClass, String, getCodePoint, 1, RETURN_TYPE(String), PARAM_TYPE(Int));
     DEF_METHOD(vm->stringClass, String, indexOf, 1, RETURN_TYPE(Int), PARAM_TYPE(String));
+    DEF_METHOD(vm->stringClass, String, iterator, 0, RETURN_TYPE(StringIterator));
     DEF_METHOD(vm->stringClass, String, length, 0, RETURN_TYPE(Int));
-    DEF_METHOD(vm->stringClass, String, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(vm->stringClass, String, nextValue, 1, RETURN_TYPE(String), PARAM_TYPE(Int));
     DEF_METHOD(vm->stringClass, String, replace, 2, RETURN_TYPE(String), PARAM_TYPE(String), PARAM_TYPE(String));
     DEF_METHOD(vm->stringClass, String, reverse, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->stringClass, String, split, 1, RETURN_TYPE(Object), PARAM_TYPE(String));
@@ -2100,6 +2195,12 @@ void registerLangPackage(VM* vm) {
     ObjClass* stringMetaclass = vm->stringClass->obj.klass;
     DEF_METHOD(stringMetaclass, StringClass, fromByte, 1, RETURN_TYPE(String), PARAM_TYPE(Object));
     DEF_METHOD(stringMetaclass, StringClass, fromCodePoint, 1, RETURN_TYPE(String), PARAM_TYPE(Object));
+
+    bindSuperclass(vm, stringIteratorClass, iteratorClass);
+    DEF_INTERCEPTOR(stringIteratorClass, StringIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(StringIterator), PARAM_TYPE(Object));
+    DEF_METHOD(stringIteratorClass, StringIterator, currentValue, 0, RETURN_TYPE(String));
+    DEF_METHOD(stringIteratorClass, StringIterator, moveNext, 0, RETURN_TYPE(Bool));
+    insertGlobalSymbolTable(vm, "StringIterator", "StringIterator class");
 
     DEF_METHOD(callableTrait, TCallable, arity, 0, RETURN_TYPE(Int));
     DEF_METHOD(callableTrait, TCallable, isAsync, 0, RETURN_TYPE(Bool));
