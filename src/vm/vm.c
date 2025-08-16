@@ -329,6 +329,7 @@ static Value createObject(VM* vm, ObjClass* klass, int argCount) {
         case OBJ_FILE: return OBJ_VAL(newFile(vm, NULL));
         case OBJ_GENERATOR: return OBJ_VAL(newGenerator(vm, NULL, NULL));
         case OBJ_INSTANCE: return OBJ_VAL(newInstance(vm, klass));
+        case OBJ_ITERATOR: return OBJ_VAL(newIterator(vm, NIL_VAL, klass));
         case OBJ_METHOD: return OBJ_VAL(newMethod(vm, NULL, NULL));
         case OBJ_NAMESPACE: return OBJ_VAL(ALLOCATE_NAMESPACE(klass));
         case OBJ_NODE: return OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL));

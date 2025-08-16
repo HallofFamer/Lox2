@@ -247,6 +247,8 @@ static size_t sizeOfObject(Obj* object) {
             ObjInstance* instance = (ObjInstance*)object;
             return sizeof(ObjInstance) + sizeof(Value) * instance->fields.capacity;
         }
+        case OBJ_ITERATOR: 
+            return sizeof(ObjIterator);
         case OBJ_METHOD: 
             return sizeof(ObjMethod);
         case OBJ_MODULE: {
@@ -382,6 +384,11 @@ static void blackenObject(VM* vm, Obj* object, GCGenerationType generation) {
             ObjInstance* instance = (ObjInstance*)object;
             markObject(vm, (Obj*)object->klass, generation);
             markArray(vm, &instance->fields, generation);
+            break;
+        }
+        case OBJ_ITERATOR: {
+            ObjIterator* iterator = (ObjIterator*)object;
+            markValue(vm, iterator->iterable, generation);
             break;
         }
         case OBJ_METHOD: {
@@ -549,6 +556,10 @@ static void freeObject(VM* vm, Obj* object) {
             ObjInstance* instance = (ObjInstance*)object;
             freeValueArray(vm, &instance->fields);
             FREE(ObjInstance, object, object->generation);
+            break;
+        }
+        case OBJ_ITERATOR: {
+            FREE(ObjIterator, object, object->generation);
             break;
         }
         case OBJ_METHOD: {
