@@ -153,6 +153,13 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }
+        case OBJ_ITERATOR: {
+            ObjIterator* iterator = (ObjIterator*)object;
+            if (index == 0) push(vm, iterator->iterable);
+            else if (index == 1) push(vm, INT_VAL(iterator->position));
+            else if (index == 2) push(vm, iterator->value);
+            else getAndPushGenericInstanceVariableByIndex(vm, object, index);
+        }
         case OBJ_METHOD: {
             ObjMethod* method = (ObjMethod*)object;
             if (index == 0) push(vm, OBJ_VAL(method->closure->function->name));
@@ -292,6 +299,13 @@ static bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
             else if (matchVariableName(name, "outer", 5)) push(vm, generator->outer != NULL ? OBJ_VAL(generator->outer) : NIL_VAL);
             else return getAndPushGenericInstanceVariableByName(vm, object, name);
             return true;
+        }
+        case OBJ_ITERATOR: {
+            ObjIterator* iterator = (ObjIterator*)object;
+            if (matchVariableName(name, "iterable", 8)) push(vm, iterator->iterable);
+            else if (matchVariableName(name, "position", 8)) push(vm, INT_VAL(iterator->position));
+            else if (matchVariableName(name, "value", 5)) push(vm, iterator->value);
+            else return getAndPushGenericInstanceVariableByName(vm, object, name);
         }
         case OBJ_METHOD: {
             ObjMethod* method = (ObjMethod*)object;
@@ -588,6 +602,20 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
             push(vm, value);
             return true;
         }
+        case OBJ_ITERATOR: {
+            ObjIterator* iterator = (ObjIterator*)object;
+            if (index == 0) {
+                runtimeError(vm, "Cannot set property iterable on Object Iterator.");
+                exit(70);
+            }
+            else if (index == 1 && IS_INT(value)) iterator->position = AS_INT(value);
+            else if (index == 2) {
+                iterator->value = value;
+                push(vm, value);
+                return true;
+            }
+            else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
+        }
         case OBJ_METHOD: {
             ObjMethod* method = (ObjMethod*)object;
             if (index <= 2) {
@@ -759,6 +787,20 @@ static bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
 
             push(vm, value);
             return true;
+        }
+        case OBJ_ITERATOR: {
+            ObjIterator* iterator = (ObjIterator*)object;
+            if (matchVariableName(name, "iterable", 8)) {
+                runtimeError(vm, "Cannot set property iterable on Object Iterator.");
+                exit(70);
+            }
+            else if (matchVariableName(name, "position", 8) && IS_INT(value)) iterator->position = AS_INT(value);
+            else if (matchVariableName(name, "value", 5)) {
+                iterator->value = value;
+                push(vm, value);
+                return true;
+            }
+            else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
         }
         case OBJ_GENERATOR: {
             ObjGenerator* generator = (ObjGenerator*)object;

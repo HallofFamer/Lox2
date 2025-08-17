@@ -56,6 +56,11 @@ static void createDefaultShapes(VM* vm) {
     defaultShapeIDs[OBJ_GENERATOR] = shapeIDOuter;
     defaultShapeIDs[OBJ_INSTANCE] = 0;
 
+    int shapeIDIterable = createShapeFromParent(vm, 0, newStringPerma(vm, "iterable"));
+    int shapeIDPosition2 = createShapeFromParent(vm, shapeIDIterable, newStringPerma(vm, "position"));
+    int shapeIDValue2 = createShapeFromParent(vm, shapeIDPosition2, newStringPerma(vm, "value"));
+    defaultShapeIDs[OBJ_ITERATOR] = shapeIDValue2;
+
     int shapeIDMethod = createShapeFromParent(vm, shapeIDClosure, newStringPerma(vm, "behavior"));
     defaultShapeIDs[OBJ_METHOD] = shapeIDMethod;
 
