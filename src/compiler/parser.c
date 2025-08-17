@@ -639,9 +639,9 @@ static Ast* variable(Parser* parser, Token token, bool canAssign) {
     return emptyAst(AST_EXPR_VARIABLE, token);
 }
 
-static Ast* parameter(Parser* parser, const char* message) {
+static Ast* parameter(Parser* parser, bool isLambda, const char* message) {
     bool isMutable = match(parser, TOKEN_VAR);
-    Ast* type = type_(parser, "Expect type declaration.");
+    Ast* type = isLambda ? emptyAst(AST_EXPR_TYPE, emptyToken()) : type_(parser, "Expect type declaration.");
     consume(parser, TOKEN_IDENTIFIER, message);
 
     Ast* param = newAst(AST_EXPR_PARAM, previousToken(parser), 1, type);
@@ -649,13 +649,13 @@ static Ast* parameter(Parser* parser, const char* message) {
     return param;
 }
 
-static Ast* parameterList(Parser* parser, Token token) {
+static Ast* parameterList(Parser* parser, bool isLambda, Token token) {
     Ast* params = emptyAst(AST_LIST_VAR, token);
     int arity = 0;
 
     if (match(parser, TOKEN_RIGHT_PAREN)) return params;
     if (match(parser, TOKEN_DOT_DOT)) {
-        Ast* param = parameter(parser, "Expect variadic parameter name.");
+        Ast* param = parameter(parser, isLambda, "Expect variadic parameter name.");
         param->attribute.isVariadic = true;
         astAppendChild(params, param);
         if (match(parser, TOKEN_COMMA)) parseErrorAtPrevious(parser, "Cannot have more parameters following variadic parameter.");
@@ -665,7 +665,7 @@ static Ast* parameterList(Parser* parser, Token token) {
     do {
         arity++;
         if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 parameters.");
-        Ast* param = parameter(parser, "Expect parameter name");
+        Ast* param = parameter(parser, isLambda, "Expect parameter name");
         astAppendChild(params, param);
     } while (match(parser, TOKEN_COMMA));
     return params;
@@ -674,7 +674,7 @@ static Ast* parameterList(Parser* parser, Token token) {
 static Ast* functionParameters(Parser* parser) {
     Token token = previousToken(parser);
     consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after function keyword/name.");
-    Ast* params = check(parser, TOKEN_RIGHT_PAREN) ? emptyAst(AST_LIST_VAR, token) : parameterList(parser, token);
+    Ast* params = check(parser, TOKEN_RIGHT_PAREN) ? emptyAst(AST_LIST_VAR, token) : parameterList(parser, false, token);
     consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
     consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before function body.");
     return params;
@@ -683,7 +683,7 @@ static Ast* functionParameters(Parser* parser) {
 static Ast* lambdaParameters(Parser* parser) {
     Token token = previousToken(parser);
     if (!match(parser, TOKEN_PIPE)) return emptyAst(AST_LIST_VAR, token);
-    Ast* params = parameterList(parser, token);
+    Ast* params = parameterList(parser, true, token);
     consume(parser, TOKEN_PIPE, "Expect '|' after lambda parameters.");
     return params;
 }
