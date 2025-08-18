@@ -45,6 +45,8 @@ https://github.com/munificent/craftinginterpreters
 - Introduction of `async` and `await` keywords, which allows C#/JS style of concurrency.
 - Optional static typing support for function/method parameters and return values, types only exist at compile time and are erased at runtime. 
 - Semicolon inference as well as basic type inference for immutable local/global variables. 
+- Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be type inferred. 
+- Allow declaration of object instance/class fields outside of class initializer, which also enables optional static typing and default values.
 - Customized Runtime configuration for Lox2 using lox2.ini.
 - Allow loading lox source files in lox script and another lox source file with `require` keyword.
 - Cross-platform build with Cmake and package manager with vcpkg.
@@ -52,7 +54,7 @@ https://github.com/munificent/craftinginterpreters
 ### Enhanced or Removed Features
 - VM is no longer a global variable, allowing Lox2 VM to be embedded in other host applications.
 - Multi-pass compiler with abstract syntax tree, semantic analyzer(resolver), symbol table, type checker, and generation of bytecode by walking AST. 
-- Parser is extended with look-ahead capability, with field next storing the next token. 
+- Extend parser with infinite lookahead and backtrack, allowing parsing context sensitive grammar for Lox2.
 - Print statement removed, use native function `print` and `println` instead.
 - Initializer method is renamed from `init` to `__init__` as an interceptor method.
 - Separated integer values(`Int`) and floating point(`Float`) values from `Number`.
@@ -79,12 +81,6 @@ At this moment only the web version is available, though in Lox2 v2.1.0 onwards,
 Below are the features planned for future versions of Lox2, the list is subject to change but it gives a basic idea of the future directions of this project. 
 
 For a list of implemented features, please see [CHANGELOG.md](https://github.com/HallofFamer/Lox2/blob/master/notes/CHANGELOG.md).
-
-### Lox2 v2.1.0(next version)
-- Extend parser with infinite lookahead and backtrack, allowing parsing context sensitive grammar for Lox2.
-- Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be typed. 
-- Allow declaration of object fields outside of class initializer, which also enables optional static typing and default values.
-- Redesign of Iterator/Enumerator API for ease of use and implementation of iterable types.
 
 ### Lox2 v2.2.0
 - Enhanced type system with basic support for generics/parametric polymorphism.
@@ -136,7 +132,7 @@ println("Content: ${response.content}")
 
 #### Windows(with git, cmake and vcpkg, need to replace [$VCPKG_PATH] with installation path of vcpkg)
 ```
-git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.1.0 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 cmake -DCMAKE_TOOLCHAIN_FILE:STRING="[$VCPKG_PATH]/scripts/buildsystems/vcpkg.cmake" -S . -B ./build
 cmake --build ./build --config Release
@@ -145,7 +141,7 @@ cmake --build ./build --config Release
 
 #### Linux(with git, cmake, curl and libuv, need to install one of the libcurl4-dev and libuv1.dev packages)
 ```
-git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.1.0 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 mkdir build
 cmake -S . -B ./build
@@ -155,10 +151,10 @@ cmake --build ./build --config Release
 
 #### Docker(linux, need to replace [$LinuxDockerfile] by actual docker file name, ie. UbuntuDockerfile)
 ```
-git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.1.0 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 docker build -t lox2:linux -f Docker/[$LinuxDockerfile] .
-docker run -w /Lox2-2.0.3/Lox2 -i -t lox2:linux
+docker run -w /Lox2-2.1.0/Lox2 -i -t lox2:linux
 ```
 
 Note: It is recommended to clone from the latest stable release branch("v2.0.3" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
