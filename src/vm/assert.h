@@ -53,15 +53,15 @@
         if (IS_STRING(message)) RETURN_PROMISE_EX(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
     } while (false)
 
-#define ASSERT_ARG_TEnumerable(method, index) \
+#define ASSERT_ARG_TITERABLE(method, index) \
     do { \
-        Value message = assertArgIsEnumerable(vm, method, args, index); \
+        Value message = assertArgIsIterable(vm, method, args, index); \
         if (IS_STRING(message)) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
     } while (false)
 
-#define ASSERT_ARG_TEnumerable_ASYNC(method, index) \
+#define ASSERT_ARG_TITERABLE_ASYNC(method, index) \
     do { \
-        Value message = assertArgIsEnumerable(vm, method, args, index); \
+        Value message = assertArgIsIterable(vm, method, args, index); \
         if (IS_STRING(message)) RETURN_PROMISE_EX(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
     } while (false)
 
@@ -99,12 +99,13 @@ Value assertArgIsClass(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsClosure(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsDictionary(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsEntry(VM* vm, const char* method, Value* args, int index);
-Value assertArgIsEnumerable(VM * vm, const char* method, Value * args, int index);
+Value assertArgIsIterable(VM * vm, const char* method, Value * args, int index);
 Value assertArgIsException(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsFile(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsFloat(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsGenerator(VM * vm, const char* method, Value * args, int index);
 Value assertArgIsInt(VM* vm, const char* method, Value* args, int index);
+Value assertArgIsIterator(VM * vm, const char* method, Value * args, int index);
 Value assertArgIsMethod(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsNamespace(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsNil(VM * vm, const char* method, Value * args, int index);

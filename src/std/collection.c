@@ -459,19 +459,6 @@ LOX_METHOD(Array, contains) {
     RETURN_BOOL(valueArrayFirstIndex(vm, &AS_ARRAY(receiver)->elements, args[0]) != -1);
 }
 
-LOX_METHOD(Array, currentIndex) {
-    ASSERT_ARG_COUNT("Array::currentIndex()", 0);
-    ObjArray* self = AS_ARRAY(receiver);
-    RETURN_INT(self->position);
-}
-
-LOX_METHOD(Array, currentValue) {
-    ASSERT_ARG_COUNT("Array::currentValue()", 0);
-    ObjArray* self = AS_ARRAY(receiver);
-    if (self->position < 0 || self->position >= self->elements.count) RETURN_NIL;
-    RETURN_VAL(self->elements.values[self->position]);
-}
-
 LOX_METHOD(Array, detect) {
     ASSERT_ARG_COUNT("Array::detect(closure)", 1);
     ASSERT_ARG_TCALLABLE("Array::detect(closure)", 0);
@@ -559,7 +546,7 @@ LOX_METHOD(Array, isEmpty) {
 
 LOX_METHOD(Array, iterator) {
     ASSERT_ARG_COUNT("Array::iterator()", 0);
-    RETURN_OBJ(receiver);
+    RETURN_OBJ(newIterator(vm, receiver, getNativeClass(vm, "clox.std.collection.ArrayIterator")));
 }
 
 LOX_METHOD(Array, lastIndexOf) {
@@ -572,14 +559,6 @@ LOX_METHOD(Array, lastIndexOf) {
 LOX_METHOD(Array, length) {
     ASSERT_ARG_COUNT("Array::length()", 0);
     RETURN_INT(AS_ARRAY(receiver)->elements.count);
-}
-
-LOX_METHOD(Array, moveNext) {
-    ASSERT_ARG_COUNT("Array::moveNext()", 0);
-    ObjArray* self = AS_ARRAY(receiver);
-    if (self->elements.count == 0 || self->position >= self->elements.count) RETURN_FALSE;
-    self->position++;
-    RETURN_TRUE;
 }
 
 LOX_METHOD(Array, putAt) {
@@ -623,13 +602,6 @@ LOX_METHOD(Array, removeAt) {
     ASSERT_INDEX_WITHIN_BOUNDS("Array::removeAt(index)", AS_INT(args[0]), 0, self->elements.count - 1, 0);
     Value element = valueArrayDelete(vm, &self->elements, index);
     RETURN_VAL(element);
-}
-
-LOX_METHOD(Array, reset) {
-    ASSERT_ARG_COUNT("Array::reset()", 0);
-    ObjArray* self = AS_ARRAY(receiver);
-    self->position = -1;
-    RETURN_NIL;
 }
 
 LOX_METHOD(Array, select) {
@@ -695,6 +667,24 @@ LOX_METHOD(ArrayClass, fromElements) {
     RETURN_OBJ(array);
 }
 
+LOX_METHOD(ArrayIterator, __init__) {
+    ASSERT_ARG_COUNT("ArrayIterator::__init__(iterable)", 1);
+    ASSERT_ARG_TYPE("ArrayIterator::__init__(iterable)", 0, Array);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->iterable = args[0];
+    self->position = -1;
+    RETURN_OBJ(self);
+}
+
+LOX_METHOD(ArrayIterator, moveNext) {
+    ASSERT_ARG_COUNT("ArrayIterator::moveNext()", 0);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    ObjArray* array = AS_ARRAY(self->iterable);
+    if (array->elements.count == 0 || self->position >= array->elements.count - 1) RETURN_FALSE;
+    self->value = array->elements.values[++self->position];
+    RETURN_TRUE;
+}
+
 LOX_METHOD(Collection, __init__) {
     THROW_EXCEPTION(clox.std.lang.UnsupportedOperationException, "Cannot instantiate from class Collection.");
 }
@@ -708,14 +698,17 @@ LOX_METHOD(Collection, addAll) {
     ASSERT_ARG_INSTANCE_OF("Collection::addAll(collection)", 0, clox.std.collection.Collection);
     Value collection = args[0];
     Value addMethod = getObjMethod(vm, receiver, "add");
-    Value nextMethod = getObjMethod(vm, collection, "next");
-    Value nextValueMethod = getObjMethod(vm, collection, "nextValue");
-    Value index = callReentrantMethod(vm, collection, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
 
-    while (index != NIL_VAL) {
-        Value element = callReentrantMethod(vm, collection, nextValueMethod, index);
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value element = callReentrantMethod(vm, iterator, currentValueMethod);
         callReentrantMethod(vm, receiver, addMethod, element);
-        index = callReentrantMethod(vm, collection, nextMethod, index);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_NIL;
 }
@@ -725,17 +718,20 @@ LOX_METHOD(Collection, collect) {
     ASSERT_ARG_TCALLABLE("Collection::collect(closure)", 0);
     Value closure = args[0];
     Value addMethod = getObjMethod(vm, receiver, "add");
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value index = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
 
     Value collected = newCollection(vm, getObjClass(vm, receiver));
     push(vm, collected);
-    while (index != NIL_VAL) {
-        Value element = callReentrantMethod(vm, receiver, nextValueMethod, index);
+    while (AS_BOOL(hasNext)) {
+        Value element = callReentrantMethod(vm, iterator, currentValueMethod);
         Value result = callReentrantMethod(vm, receiver, closure, element);
         callReentrantMethod(vm, collected, addMethod, result);
-        index = callReentrantMethod(vm, receiver, nextMethod, index);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     pop(vm);
     RETURN_OBJ(collected);
@@ -745,15 +741,18 @@ LOX_METHOD(Collection, detect) {
     ASSERT_ARG_COUNT("Collection::detect(closure)", 1);
     ASSERT_ARG_TCALLABLE("Collection::detect(closure)", 0);
     Value closure = args[0];
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value index = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
 
-    while (index != NIL_VAL) {
-        Value element = callReentrantMethod(vm, receiver, nextValueMethod, index);
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value element = callReentrantMethod(vm, iterator, currentValueMethod);
         Value result = callReentrantMethod(vm, receiver, closure, element);
         if (!isFalsey(result)) RETURN_VAL(element);
-        index = callReentrantMethod(vm, receiver, nextMethod, index);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_NIL;
 }
@@ -762,34 +761,41 @@ LOX_METHOD(Collection, each) {
     ASSERT_ARG_COUNT("Collection::each(closure)", 1);
     ASSERT_ARG_TCALLABLE("Collection::each(closure)", 0);
     Value closure = args[0];
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value index = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
 
-    while (index != NIL_VAL) {
-        Value element = callReentrantMethod(vm, receiver, nextValueMethod, index);
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value element = callReentrantMethod(vm, iterator, currentValueMethod);
         Value result = callReentrantMethod(vm, receiver, closure, element);
-        index = callReentrantMethod(vm, receiver, nextMethod, index);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_NIL;
 }
 
 LOX_METHOD(Collection, isEmpty) {
     ASSERT_ARG_COUNT("Collection::isEmpty()", 1);
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value index = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
-    RETURN_BOOL(index == NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+    RETURN_VAL(hasNext);
 }
 
 LOX_METHOD(Collection, length) {
     ASSERT_ARG_COUNT("Collection::length()", 1);
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value index = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     
     int length = 0;
-    while (index != NIL_VAL) {
-        index = callReentrantMethod(vm, receiver, nextMethod, index);
+    while (AS_BOOL(hasNext)) {
         length++;
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_INT(length);
 }
@@ -799,17 +805,20 @@ LOX_METHOD(Collection, reject) {
     ASSERT_ARG_TCALLABLE("Collection::reject(closure)", 0);
     Value closure = args[0];
     Value addMethod = getObjMethod(vm, receiver, "add");
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value index = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
 
     Value rejected = newCollection(vm, getObjClass(vm, receiver));
     push(vm, rejected);
-    while (index != NIL_VAL) {
-        Value element = callReentrantMethod(vm, receiver, nextValueMethod, index);
+    while (AS_BOOL(hasNext)) {
+        Value element = callReentrantMethod(vm, iterator, currentValueMethod);
         Value result = callReentrantMethod(vm, receiver, closure, element);
         if(isFalsey(result)) callReentrantMethod(vm, rejected, addMethod, element);
-        index = callReentrantMethod(vm, receiver, nextMethod, index);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     pop(vm);
     RETURN_OBJ(rejected);
@@ -820,17 +829,20 @@ LOX_METHOD(Collection, select) {
     ASSERT_ARG_TCALLABLE("Collection::select(closure)", 0);
     Value closure = args[0];
     Value addMethod = getObjMethod(vm, receiver, "add");
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value index = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
 
     Value selected = newCollection(vm, getObjClass(vm, receiver));
     push(vm, selected);
-    while (index != NIL_VAL) {
-        Value element = callReentrantMethod(vm, receiver, nextValueMethod, index);
+    while (AS_BOOL(hasNext)) {
+        Value element = callReentrantMethod(vm, iterator, currentValueMethod);
         Value result = callReentrantMethod(vm, receiver, closure, element);
         if (!isFalsey(result)) callReentrantMethod(vm, selected, addMethod, element);
-        index = callReentrantMethod(vm, receiver, nextMethod, index);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     pop(vm);
     RETURN_OBJ(selected);
@@ -839,16 +851,19 @@ LOX_METHOD(Collection, select) {
 LOX_METHOD(Collection, toArray) {
     ASSERT_ARG_COUNT("Collection::toArray()", 0);
     Value addMethod = getObjMethod(vm, receiver, "add");
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value index = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
 
     ObjArray* array = newArray(vm);
     push(vm, OBJ_VAL(array));
-    while (index != NIL_VAL) {
-        Value element = callReentrantMethod(vm, receiver, nextValueMethod, index);
+    while (AS_BOOL(hasNext)) {
+        Value element = callReentrantMethod(vm, iterator, currentValueMethod);
         valueArrayWrite(vm, &array->elements, element);
-        index = callReentrantMethod(vm, receiver, nextMethod, index);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     pop(vm);
     RETURN_OBJ(array);
@@ -879,17 +894,22 @@ LOX_METHOD(Dictionary, collect) {
     ASSERT_ARG_TCALLABLE("Dictionary::collect(closure)", 0);
     ObjDictionary* self = AS_DICTIONARY(receiver);
     Value closure = args[0];
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value key = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+    Value currentIndexMethod = getObjMethod(vm, iterator, "currentIndex");
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
 
     ObjDictionary* collected = newDictionary(vm);
     push(vm, OBJ_VAL(collected));
-    while (key != NIL_VAL) {
-        Value value = callReentrantMethod(vm, receiver, nextValueMethod, key);
+    while (AS_BOOL(hasNext)) {
+        Value key = callReentrantMethod(vm, iterator, currentIndexMethod);
+        Value value = callReentrantMethod(vm, iterator, currentValueMethod);
         Value result = callReentrantMethod(vm, receiver, closure, key, value);
         dictSet(vm, collected, key, result);
-        key = callReentrantMethod(vm, receiver, nextMethod, key);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     pop(vm);
     RETURN_OBJ(collected);
@@ -905,34 +925,25 @@ LOX_METHOD(Dictionary, containsValue) {
     RETURN_BOOL(dictContainsValue(AS_DICTIONARY(receiver), args[0]));
 }
 
-LOX_METHOD(Dictionary, currentIndex) {
-    ASSERT_ARG_COUNT("Dictionary::currentIndex()", 0);
-    ObjDictionary* self = AS_DICTIONARY(receiver);
-    ObjEntry* entry = &self->entries[self->position];
-    RETURN_VAL(entry->key);
-}
-
-LOX_METHOD(Dictionary, currentValue) {
-    ASSERT_ARG_COUNT("Dictionary::currentValue()", 0);
-    ObjDictionary* self = AS_DICTIONARY(receiver);
-    ObjEntry* entry = &self->entries[self->position];
-    RETURN_VAL(entry->value);
-}
-
 LOX_METHOD(Dictionary, detect) {
     ASSERT_ARG_COUNT("Dictionary::detect(closure)", 1);
     ASSERT_ARG_TCALLABLE("Dictionary::detect(closure)", 0);
     ObjDictionary* self = AS_DICTIONARY(receiver);
     Value closure = args[0];
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value key = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
 
-    while (key != NIL_VAL) {
-        Value value = callReentrantMethod(vm, receiver, nextValueMethod, key);
+    Value currentIndexMethod = getObjMethod(vm, iterator, "currentIndex");
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value key = callReentrantMethod(vm, iterator, currentIndexMethod);
+        Value value = callReentrantMethod(vm, iterator, currentValueMethod);
         Value result = callReentrantMethod(vm, receiver, closure, key, value);
         if (!isFalsey(result)) RETURN_VAL(value);
-        key = callReentrantMethod(vm, receiver, nextMethod, key);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_NIL;
 }
@@ -941,14 +952,19 @@ LOX_METHOD(Dictionary, each) {
     ASSERT_ARG_COUNT("Dictionary::each(closure)", 1);
     ASSERT_ARG_TCALLABLE("Dictionary::each(closure)", 0);
     Value closure = args[0];
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value key = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
 
-    while (key != NIL_VAL) {
-        Value value = callReentrantMethod(vm, receiver, nextValueMethod, key);
+    Value currentIndexMethod = getObjMethod(vm, iterator, "currentIndex");
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value key = callReentrantMethod(vm, iterator, currentIndexMethod);
+        Value value = callReentrantMethod(vm, iterator, currentValueMethod);
         callReentrantMethod(vm, receiver, closure, key, value);
-        key = callReentrantMethod(vm, receiver, nextMethod, key);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_NIL;
 }
@@ -957,14 +973,17 @@ LOX_METHOD(Dictionary, eachKey) {
     ASSERT_ARG_COUNT("Dictionary::each(closure)", 1);
     ASSERT_ARG_TCALLABLE("Dictionary::each(closure)", 0);
     Value closure = args[0];
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value key = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
 
-    while (key != NIL_VAL) {
-        callReentrantMethod(vm, receiver, nextValueMethod, key);
+    Value currentIndexMethod = getObjMethod(vm, iterator, "currentIndex");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value key = callReentrantMethod(vm, iterator, currentIndexMethod);
         callReentrantMethod(vm, receiver, closure, key);
-        key = callReentrantMethod(vm, receiver, nextMethod, key);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_NIL;
 }
@@ -973,14 +992,17 @@ LOX_METHOD(Dictionary, eachValue) {
     ASSERT_ARG_COUNT("Dictionary::each(closure)", 1);
     ASSERT_ARG_TCALLABLE("Dictionary::each(closure)", 0);
     Value closure = args[0];
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value key = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
 
-    while (key != NIL_VAL) {
-        Value value = callReentrantMethod(vm, receiver, nextValueMethod, key);
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value value = callReentrantMethod(vm, receiver, currentValueMethod);
         callReentrantMethod(vm, receiver, closure, value);
-        key = callReentrantMethod(vm, receiver, nextMethod, key);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_NIL;
 }
@@ -1023,7 +1045,7 @@ LOX_METHOD(Dictionary, isEmpty) {
 
 LOX_METHOD(Dictionary, iterator) {
     ASSERT_ARG_COUNT("Dictionary::iterator()", 0);
-    RETURN_OBJ(receiver);
+    RETURN_OBJ(newIterator(vm, receiver, getNativeClass(vm, "clox.std.collection.DictionaryIterator")));
 }
 
 LOX_METHOD(Dictionary, keySet) {
@@ -1048,22 +1070,6 @@ LOX_METHOD(Dictionary, length) {
     RETURN_INT(AS_DICTIONARY(receiver)->count);
 }
 
-LOX_METHOD(Dictionary, moveNext) {
-    ASSERT_ARG_COUNT("Dictionary::moveNext()", 0);
-    ObjDictionary* self = AS_DICTIONARY(receiver);
-    if (self->count == 0 || self->position >= self->capacity) RETURN_FALSE;
-
-    ObjEntry* entry = &self->entries[++self->position];
-    while (entry == NULL || IS_UNDEFINED(entry->key)) {
-        self->position++;
-        if (self->position >= self->capacity) {
-            RETURN_FALSE;
-        }
-        entry = &self->entries[self->position];
-    }
-    RETURN_TRUE;
-}
-
 LOX_METHOD(Dictionary, putAll) {
     ASSERT_ARG_COUNT("Dictionary::putAll(dictionary)", 1);
     ASSERT_ARG_TYPE("Dictionary::putAll(dictionary)", 0, Dictionary);
@@ -1082,17 +1088,22 @@ LOX_METHOD(Dictionary, reject) {
     ASSERT_ARG_TCALLABLE("Dictionary::reject(closure)", 0);
     ObjDictionary* self = AS_DICTIONARY(receiver);
     Value closure = args[0];
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value key = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+    Value currentIndexMethod = getObjMethod(vm, iterator, "currentIndex");
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
 
     ObjDictionary* rejected = newDictionary(vm);
     push(vm, OBJ_VAL(rejected));
-    while (key != NIL_VAL) {
-        Value value = callReentrantMethod(vm, receiver, nextValueMethod, key);
+    while (AS_BOOL(hasNext)) {
+        Value key = callReentrantMethod(vm, iterator, currentIndexMethod);
+        Value value = callReentrantMethod(vm, iterator, currentValueMethod);
         Value result = callReentrantMethod(vm, receiver, closure, key, value);
         if (isFalsey(result)) dictSet(vm, rejected, key, value);
-        key = callReentrantMethod(vm, receiver, nextMethod, key);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     pop(vm);
     RETURN_OBJ(rejected);
@@ -1110,29 +1121,27 @@ LOX_METHOD(Dictionary, removeAt) {
     RETURN_VAL(value);
 }
 
-LOX_METHOD(Dictionary, reset) {
-    ASSERT_ARG_COUNT("Dictionary::reset()", 0);
-    ObjDictionary* self = AS_DICTIONARY(receiver);
-    self->position = -1;
-    RETURN_NIL;
-}
-
 LOX_METHOD(Dictionary, select) {
     ASSERT_ARG_COUNT("Dictionary::select(closure)", 1);
     ASSERT_ARG_TCALLABLE("Dictionary::select(closure)", 0);
     ObjDictionary* self = AS_DICTIONARY(receiver);
     Value closure = args[0];
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
-    Value key = callReentrantMethod(vm, receiver, nextMethod, NIL_VAL);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+    Value currentIndexMethod = getObjMethod(vm, iterator, "currentIndex");
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
 
     ObjDictionary* selected = newDictionary(vm);
     push(vm, OBJ_VAL(selected));
-    while (key != NIL_VAL) {
-        Value value = callReentrantMethod(vm, receiver, nextValueMethod, key);
+    while (AS_BOOL(hasNext)) {
+        Value key = callReentrantMethod(vm, iterator, currentIndexMethod);
+        Value value = callReentrantMethod(vm, iterator, currentValueMethod);
         Value result = callReentrantMethod(vm, receiver, closure, key, value);
         if (!isFalsey(result)) dictSet(vm, selected, key, value);
-        key = callReentrantMethod(vm, receiver, nextMethod, key);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     pop(vm);
     RETURN_OBJ(selected);
@@ -1172,6 +1181,41 @@ LOX_METHOD(Dictionary, __setSubscript__) {
     ASSERT_ARG_COUNT("Dictionary::[]=(key, value)", 2);
     if (!IS_NIL(args[0])) dictSet(vm, AS_DICTIONARY(receiver), args[0], args[1]);
     RETURN_OBJ(receiver);
+}
+
+LOX_METHOD(DictionaryIterator, __init__) {
+    ASSERT_ARG_COUNT("DictionaryIterator::__init__(iterable)", 1);
+    ASSERT_ARG_TYPE("DictionaryIterator::__init__(iterable)", 0, Dictionary);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->iterable = args[0];
+    self->position = -1;
+    RETURN_OBJ(self);
+}
+
+LOX_METHOD(DictionaryIterator, currentIndex) {
+    ASSERT_ARG_COUNT("DictionaryIterator::currentIndex()", 0);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    ObjDictionary* dict = AS_DICTIONARY(self->iterable);
+    ObjEntry* entry = &dict->entries[self->position];
+    RETURN_VAL(entry->key);
+}
+
+LOX_METHOD(DictionaryIterator, moveNext) {
+    ASSERT_ARG_COUNT("DictionaryIterator::moveNext()", 0);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    ObjDictionary* dict = AS_DICTIONARY(self->iterable);
+    if (dict->count == 0 || self->position >= dict->capacity - 1) RETURN_FALSE;
+
+    ObjEntry* entry = &dict->entries[++self->position];
+    while (entry == NULL || IS_UNDEFINED(entry->key)) {
+        self->position++;
+        if (self->position >= dict->capacity) {
+            RETURN_FALSE;
+        }
+        entry = &dict->entries[self->position];
+    }
+    self->value = entry->value;
+    RETURN_TRUE;
 }
 
 LOX_METHOD(Entry, __init__) {
@@ -1237,7 +1281,6 @@ LOX_METHOD(LinkedList, __init__) {
     setObjProperty(vm, self, "length", INT_VAL(0));
     setObjProperty(vm, self, "first", NIL_VAL);
     setObjProperty(vm, self, "last", NIL_VAL);
-    setObjProperty(vm, self, "current", NIL_VAL);
     RETURN_OBJ(self);
 }
 
@@ -1282,7 +1325,6 @@ LOX_METHOD(LinkedList, clear) {
     ObjInstance* self = AS_INSTANCE(receiver);
     setObjProperty(vm, self, "first", NIL_VAL);
     setObjProperty(vm, self, "last", NIL_VAL);
-    setObjProperty(vm, self, "current", NIL_VAL);
     setObjProperty(vm, self, "length", INT_VAL(0));
     RETURN_NIL;
 }
@@ -1320,6 +1362,11 @@ LOX_METHOD(LinkedList, isEmpty) {
     RETURN_BOOL(collectionIsEmpty(vm, AS_INSTANCE(receiver)));
 }
 
+LOX_METHOD(LinkedList, iterator) {
+    ASSERT_ARG_COUNT("LinkedList::iterator()", 0);
+    RETURN_OBJ(newIterator(vm, receiver, getNativeClass(vm, "clox.std.collection.LinkedListIterator")));
+}
+
 LOX_METHOD(LinkedList, lastIndexOf) {
     ASSERT_ARG_COUNT("LinkedList::lastIndexOf(element)", 1);
     RETURN_INT(linkFindLastIndex(vm, AS_INSTANCE(receiver), args[0]));
@@ -1329,39 +1376,6 @@ LOX_METHOD(LinkedList, length) {
     ASSERT_ARG_COUNT("LinkedList::length()", 0);
     Value length = getObjProperty(vm, AS_INSTANCE(receiver), "length");
     RETURN_INT(length);
-}
-
-LOX_METHOD(LinkedList, next) {
-    ASSERT_ARG_COUNT("LinkedList::next(index)", 1);
-    ObjInstance* self = AS_INSTANCE(receiver);
-    int length = AS_INT(getObjProperty(vm, self, "length"));
-    if (IS_NIL(args[0])) {
-        if (length == 0) RETURN_FALSE;
-        RETURN_INT(0);
-    }
-
-    ASSERT_ARG_TYPE("LinkedList::next(index)", 0, Int);
-    int index = AS_INT(args[0]);
-    if (index >= 0 && index < length - 1) {
-        ObjNode* current = AS_NODE(getObjProperty(vm, self, (index == 0) ? "first" : "current"));
-        setObjProperty(vm, self, "current", OBJ_VAL(current->next));
-        RETURN_INT(index + 1);
-    }
-    else {
-        setObjProperty(vm, self, "current", getObjProperty(vm, self, "first"));
-        RETURN_NIL;
-    }
-}
-
-LOX_METHOD(LinkedList, nextValue) {
-    ASSERT_ARG_COUNT("LinkedList::nextValue(index)", 1);
-    ASSERT_ARG_TYPE("LinkedList::nextValue(index)", 0, Int);
-    ObjInstance* self = AS_INSTANCE(receiver);
-    int length = AS_INT(getObjProperty(vm, self, "length"));
-    int index = AS_INT(args[0]);
-    if (index == 0) RETURN_VAL(AS_NODE(getObjProperty(vm, self, "first"))->element);
-    if (index > 0 && index < length) RETURN_VAL(AS_NODE(getObjProperty(vm, self, "current"))->element);
-    RETURN_NIL;
 }
 
 LOX_METHOD(LinkedList, node) {
@@ -1434,18 +1448,55 @@ LOX_METHOD(LinkedList, toString) {
     RETURN_OBJ(linkToString(vm, self));
 }
 
+LOX_METHOD(LinkedListIterator, __init__) {
+    ASSERT_ARG_COUNT("LinkedListIterator::__init__(iterable)", 1);
+    ASSERT_ARG_INSTANCE_OF("LinkedListIterator::__init__(iterable)", 0, clox.std.collection.LinkedList);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->iterable = args[0];
+    self->position = -1;
+    RETURN_OBJ(self);
+}
+
+LOX_METHOD(LinkedListIterator, currentValue) {
+    ASSERT_ARG_COUNT("LinkedListIterator::currentValue()", 0);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    if (IS_NIL(self->value)) RETURN_NIL;
+    RETURN_VAL(AS_NODE(self->value)->element);
+}
+
+LOX_METHOD(LinkedListIterator, moveNext) {
+    ASSERT_ARG_COUNT("LinkedListIterator::moveNext()", 0);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    ObjInstance* linkedList = AS_INSTANCE(self->iterable);
+    int length = AS_INT(getObjProperty(vm, linkedList, "length"));
+    if (length == 0 || self->position >= length - 1) RETURN_FALSE;
+
+    self->position++;
+    if (IS_NIL(self->value)) self->value = getObjProperty(vm, linkedList, "first");
+    else {
+        ObjNode* node = AS_NODE(self->value);
+        self->value = OBJ_VAL(node->next);
+    }
+    RETURN_TRUE;
+}
+
 LOX_METHOD(List, eachIndex) {
     ASSERT_ARG_COUNT("List::eachIndex(closure)", 1);
     ASSERT_ARG_TCALLABLE("List::eachIndex(closure)", 0);
     Value closure = args[0];
-    Value index = INT_VAL(0);
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
 
-    while (index != NIL_VAL) {
-        Value element = callReentrantMethod(vm, receiver, nextValueMethod, index);
+    Value currentIndexMethod = getObjMethod(vm, iterator, "currentIndex");
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value index = callReentrantMethod(vm, iterator, currentIndexMethod);
+        Value element = callReentrantMethod(vm, iterator, currentValueMethod);
         callReentrantMethod(vm, receiver, closure, index, element);
-        index = callReentrantMethod(vm, receiver, nextMethod, index);
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_NIL;
 }
@@ -1598,43 +1649,15 @@ LOX_METHOD(Queue, isEmpty) {
     RETURN_BOOL(collectionIsEmpty(vm, AS_INSTANCE(receiver)));
 }
 
+LOX_METHOD(Queue, iterator) {
+    ASSERT_ARG_COUNT("Queue::iterator()", 0);
+    RETURN_OBJ(newIterator(vm, receiver, getNativeClass(vm, "clox.std.collection.QueueIterator")));
+}
+
 LOX_METHOD(Queue, length) {
     ASSERT_ARG_COUNT("Queue::length()", 0);
     Value length = getObjProperty(vm, AS_INSTANCE(receiver), "length");
     RETURN_INT(length);
-}
-
-LOX_METHOD(Queue, next) {
-    ASSERT_ARG_COUNT("Queue::next(index)", 1);
-    ObjInstance* self = AS_INSTANCE(receiver);
-    int length = AS_INT(getObjProperty(vm, self, "length"));
-    if (IS_NIL(args[0])) {
-        if (length == 0) RETURN_FALSE;
-        RETURN_INT(0);
-    }
-
-    ASSERT_ARG_TYPE("Queue::next(index)", 0, Int);
-    int index = AS_INT(args[0]);
-    if (index >= 0 && index < length - 1) {
-        ObjNode* current = AS_NODE(getObjProperty(vm, self, (index == 0) ? "first" : "current"));
-        setObjProperty(vm, self, "current", OBJ_VAL(current->next));
-        RETURN_INT(index + 1);
-    }
-    else {
-        setObjProperty(vm, self, "current", getObjProperty(vm, self, "first"));
-        RETURN_NIL;
-    }
-}
-
-LOX_METHOD(Queue, nextValue) {
-    ASSERT_ARG_COUNT("Queue::nextValue(index)", 1);
-    ASSERT_ARG_TYPE("Queue::nextValue(index)", 0, Int);
-    ObjInstance* self = AS_INSTANCE(receiver);
-    int length = AS_INT(getObjProperty(vm, self, "length"));
-    int index = AS_INT(args[0]);
-    if (index == 0) RETURN_VAL(getObjProperty(vm, self, "first"));
-    if (index > 0 && index < length) RETURN_VAL(getObjProperty(vm, self, "current"));
-    RETURN_NIL;
 }
 
 LOX_METHOD(Queue, peek) {
@@ -1668,6 +1691,15 @@ LOX_METHOD(Queue, toString) {
     ASSERT_ARG_COUNT("Queue::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     RETURN_OBJ(linkToString(vm, self));
+}
+
+LOX_METHOD(QueueIterator, __init__) {
+    ASSERT_ARG_COUNT("QueueIterator::__init__(iterable)", 1);
+    ASSERT_ARG_INSTANCE_OF("QueueIterator::__init__(iterable)", 0, clox.std.collection.Queue);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->iterable = args[0];
+    self->position = -1;
+    RETURN_OBJ(self);
 }
 
 LOX_METHOD(Range, __init__) {
@@ -1707,21 +1739,6 @@ LOX_METHOD(Range, contains) {
     else RETURN_BOOL(element >= self->to && element <= self->from);
 }
 
-LOX_METHOD(Range, currentIndex) {
-    ASSERT_ARG_COUNT("Range::currentIndex()", 0);
-    ObjRange* self = AS_RANGE(receiver);
-    RETURN_INT(self->position);
-}
-
-LOX_METHOD(Range, currentValue) {
-    ASSERT_ARG_COUNT("Range::currentValue()", 0);
-    ObjRange* self = AS_RANGE(receiver);
-    if (self->position < 0 || self->position >= abs(self->to - self->from) + 1) RETURN_NIL;
-    int step = (self->from < self->to) ? self->position : -self->position;
-    if (self->position < abs(self->to - self->from) + 1) RETURN_INT(self->from + step);
-    RETURN_NIL;
-}
-
 LOX_METHOD(Range, from) {
     ASSERT_ARG_COUNT("Range::from()", 0);
     ObjRange* self = AS_RANGE(receiver);
@@ -1742,7 +1759,7 @@ LOX_METHOD(Range, getAt) {
 
 LOX_METHOD(Range, iterator) {
     ASSERT_ARG_COUNT("Range::iterator()", 0);
-    RETURN_OBJ(receiver);
+    RETURN_OBJ(newIterator(vm, receiver, getNativeClass(vm, "clox.std.collection.RangeIterator")));
 }
 
 LOX_METHOD(Range, length) {
@@ -1761,46 +1778,6 @@ LOX_METHOD(Range, min) {
     ASSERT_ARG_COUNT("Range::min()", 0);
     ObjRange* self = AS_RANGE(receiver);
     RETURN_INT((self->from < self->to) ? self->from : self->to);
-}
-
-LOX_METHOD(Range, moveNext) {
-    ASSERT_ARG_COUNT("Range::moveNext()", 0);
-    ObjRange* self = AS_RANGE(receiver);
-    if (self->position >= abs(self->to - self->from)) RETURN_FALSE;
-    self->position++;
-    RETURN_TRUE;
-}
-
-LOX_METHOD(Range, next) {
-    ASSERT_ARG_COUNT("Range::next(index)", 1);
-    ObjRange* self = AS_RANGE(receiver);
-    if (IS_NIL(args[0])) {
-        if (self->from == self->to) RETURN_FALSE;
-        RETURN_INT(0);
-    }
-
-    ASSERT_ARG_TYPE("Range::next(index)", 0, Int);
-    int index = AS_INT(args[0]);
-    if (index < 0 || index < abs(self->to - self->from)) RETURN_INT(index + 1);
-    RETURN_NIL;
-}
-
-LOX_METHOD(Range, nextValue) {
-    ASSERT_ARG_COUNT("Range::nextValue(index)", 1);
-    ASSERT_ARG_TYPE("Range::nextValue(index)", 0, Int);
-    ObjRange* self = AS_RANGE(receiver);
-    int index = AS_INT(args[0]);
-
-    int step = (self->from < self->to) ? index : -index;
-    if (index > -1 && index < abs(self->to - self->from) + 1) RETURN_INT(self->from + step);
-    RETURN_NIL;
-}
-
-LOX_METHOD(Range, reset) {
-    ASSERT_ARG_COUNT("Range::reset()", 0);
-    ObjRange* self = AS_RANGE(receiver);
-    self->position = -1;
-    RETURN_NIL;
 }
 
 LOX_METHOD(Range, step) {
@@ -1862,6 +1839,25 @@ LOX_METHOD(Range, toString) {
     RETURN_STRING_FMT("%d..%d", self->from, self->to);
 }
 
+LOX_METHOD(RangeIterator, __init__) {
+    ASSERT_ARG_COUNT("RangeIterator::__init__(iterable)", 1);
+    ASSERT_ARG_TYPE("RangeIterator::__init__(iterable)", 0, Range);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->iterable = args[0];
+    self->position = -1;
+    RETURN_OBJ(self);
+}
+
+LOX_METHOD(RangeIterator, moveNext) {
+    ASSERT_ARG_COUNT("RangeIterator::moveNext()", 0);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    ObjRange* range = AS_RANGE(self->iterable);
+    if (self->position >= abs(range->to - range->from)) RETURN_FALSE;
+    self->position++;
+    self->value = INT_VAL(range->from + ((range->from < range->to) ? self->position : -self->position));
+    RETURN_TRUE;
+}
+
 LOX_METHOD(Set, __init__) {
     ASSERT_ARG_COUNT("Set::__init__()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
@@ -1914,37 +1910,15 @@ LOX_METHOD(Set, isEmpty) {
     RETURN_BOOL(dict->count == 0);
 }
 
+LOX_METHOD(Set, iterator) {
+    ASSERT_ARG_COUNT("Set::iterator()", 0);
+    RETURN_OBJ(newIterator(vm, receiver, getNativeClass(vm, "clox.std.collection.SetIterator")));
+}
+
 LOX_METHOD(Set, length) {
     ASSERT_ARG_COUNT("Set::length()", 0);
     ObjDictionary* dict = AS_DICTIONARY(getObjProperty(vm, AS_INSTANCE(receiver), "dict"));
     RETURN_INT(dict->count);
-}
-
-LOX_METHOD(Set, next) {
-    ASSERT_ARG_COUNT("Set::next(index)", 1);
-    ObjDictionary* dict = AS_DICTIONARY(getObjProperty(vm, AS_INSTANCE(receiver), "dict"));
-    if (dict->count == 0) RETURN_NIL;
-
-    int index = 0;
-    if (!IS_NIL(args[0])) {
-        index = dictFindIndex(dict, args[0]);
-        if (index < 0 || index >= dict->capacity) RETURN_NIL;
-        index++;
-    }
-
-    for (; index < dict->capacity; index++) {
-        if (!IS_UNDEFINED(dict->entries[index].key)) {
-            RETURN_VAL(dict->entries[index].key);
-        }
-    }
-    RETURN_NIL;
-}
-
-LOX_METHOD(Set, nextValue) {
-    ASSERT_ARG_COUNT("Set::nextValue(index)", 1);
-    ObjDictionary* dict = AS_DICTIONARY(getObjProperty(vm, AS_INSTANCE(receiver), "dict"));
-    int index = dictFindIndex(dict, args[0]);
-    RETURN_VAL(dict->entries[index].key);
 }
 
 LOX_METHOD(Set, remove) {
@@ -1980,12 +1954,45 @@ LOX_METHOD(Set, toString) {
     RETURN_OBJ(setToString(vm, self));
 }
 
+LOX_METHOD(SetIterator, __init__) {
+    ASSERT_ARG_COUNT("SetIterator::__init__(iterable)", 1);
+    ASSERT_ARG_INSTANCE_OF("SetIterator::__init__(iterable)", 0, clox.std.collection.Set);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->iterable = args[0];
+    self->position = -1;
+    RETURN_OBJ(self);
+}
+
+LOX_METHOD(SetIterator, currentIndex) {
+    ASSERT_ARG_COUNT("SetIterator::currentIndex()", 0);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    RETURN_VAL(self->value);
+}
+
+LOX_METHOD(SetIterator, moveNext) {
+    ASSERT_ARG_COUNT("SetIterator::moveNext()", 0);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    ObjInstance* set = AS_INSTANCE(self->iterable);
+    ObjDictionary* dict = AS_DICTIONARY(getObjProperty(vm, set, "dict"));
+    if (dict->count == 0 || self->position >= dict->capacity - 1) RETURN_FALSE;
+
+    ObjEntry* entry = &dict->entries[++self->position];
+    while (entry == NULL || IS_UNDEFINED(entry->key)) {
+        self->position++;
+        if (self->position >= dict->capacity) {
+            RETURN_FALSE;
+        }
+        entry = &dict->entries[self->position];
+    }
+    self->value = entry->key;
+    RETURN_TRUE;
+}
+
 LOX_METHOD(Stack, __init__) {
     ASSERT_ARG_COUNT("Stack::__init__()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     setObjProperty(vm, self, "length", INT_VAL(0));
     setObjProperty(vm, self, "first", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
-    setObjProperty(vm, self, "current", NIL_VAL);
     RETURN_OBJ(receiver);
 }
 
@@ -1993,7 +2000,6 @@ LOX_METHOD(Stack, clear) {
     ASSERT_ARG_COUNT("Stack::clear()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     setObjProperty(vm, self, "first", NIL_VAL);
-    setObjProperty(vm, self, "current", NIL_VAL);
     setObjProperty(vm, self, "length", INT_VAL(0));
     RETURN_NIL;
 }
@@ -2014,43 +2020,15 @@ LOX_METHOD(Stack, isEmpty) {
     RETURN_BOOL(collectionIsEmpty(vm, AS_INSTANCE(receiver)));
 }
 
+LOX_METHOD(Stack, iterator) {
+    ASSERT_ARG_COUNT("Stack::iterator()", 0);
+    RETURN_OBJ(newIterator(vm, receiver, getNativeClass(vm, "clox.std.collection.StackIterator")));
+}
+
 LOX_METHOD(Stack, length) {
     ASSERT_ARG_COUNT("Stack::length()", 0);
     Value length = getObjProperty(vm, AS_INSTANCE(receiver), "length");
     RETURN_INT(length);
-}
-
-LOX_METHOD(Stack, next) {
-    ASSERT_ARG_COUNT("Stack::next(index)", 1);
-    ObjInstance* self = AS_INSTANCE(receiver);
-    int length = AS_INT(getObjProperty(vm, self, "length"));
-    if (IS_NIL(args[0])) {
-        if (length == 0) RETURN_FALSE;
-        RETURN_INT(0);
-    }
-
-    ASSERT_ARG_TYPE("Stack::next(index)", 0, Int);
-    int index = AS_INT(args[0]);
-    if (index >= 0 && index < length - 1) {
-        ObjNode* current = AS_NODE(getObjProperty(vm, self, (index == 0) ? "first" : "current"));
-        setObjProperty(vm, self, "current", OBJ_VAL(current->next));
-        RETURN_INT(index + 1);
-    }
-    else {
-        setObjProperty(vm, self, "current", getObjProperty(vm, self, "first"));
-        RETURN_NIL;
-    }
-}
-
-LOX_METHOD(Stack, nextValue) {
-    ASSERT_ARG_COUNT("Stack::nextValue(index)", 1);
-    ASSERT_ARG_TYPE("Stack::nextValue(index)", 0, Int);
-    ObjInstance* self = AS_INSTANCE(receiver);
-    int length = AS_INT(getObjProperty(vm, self, "length"));
-    int index = AS_INT(args[0]);
-    if (index == 0) RETURN_VAL(getObjProperty(vm, self, "first"));
-    if (index > 0 && index < length) RETURN_VAL(getObjProperty(vm, self, "current"));
-    RETURN_NIL;
 }
 
 LOX_METHOD(Stack, peek) {
@@ -2118,6 +2096,15 @@ LOX_METHOD(Stack, toString) {
     RETURN_OBJ(linkToString(vm, self));
 }
 
+LOX_METHOD(StackIterator, __init__) {
+    ASSERT_ARG_COUNT("StackIterator::__init__(iterable)", 1);
+    ASSERT_ARG_INSTANCE_OF("StackIterator::__init__(iterable)", 0, clox.std.collection.Stack);
+    ObjIterator* self = AS_ITERATOR(receiver);
+    self->iterable = args[0];
+    self->position = -1;
+    RETURN_OBJ(self);
+}
+
 void registerCollectionPackage(VM* vm) {
     ObjNamespace* collectionNamespace = defineNativeNamespace(vm, "collection", vm->stdNamespace);
     vm->currentNamespace = collectionNamespace;
@@ -2127,19 +2114,25 @@ void registerCollectionPackage(VM* vm) {
     ObjClass* collectionClass = defineNativeClass(vm, "Collection");
     ObjClass* listClass = defineNativeClass(vm, "List");
     vm->arrayClass = defineNativeClass(vm, "Array");
+    ObjClass* arrayIteratorClass = defineNativeClass(vm, "ArrayIterator");
     ObjClass* linkedListClass = defineNativeClass(vm, "LinkedList");
+    ObjClass* linkedListIteratorClass = defineNativeClass(vm, "LinkedListIterator");
     vm->nodeClass = defineNativeClass(vm, "Node");
     vm->dictionaryClass = defineNativeClass(vm, "Dictionary");
+    ObjClass* dictionaryIteratorClass = defineNativeClass(vm, "DictionaryIterator");
     vm->entryClass = defineNativeClass(vm, "Entry");
     ObjClass* setClass = defineNativeClass(vm, "Set");
+    ObjClass* setIteratorClass = defineNativeClass(vm, "SetIterator");
     vm->rangeClass = defineNativeClass(vm, "Range");
+    ObjClass* rangeIteratorClass = defineNativeClass(vm, "RangeIterator");
     ObjClass* stackClass = defineNativeClass(vm, "Stack");
+    ObjClass* stackIteratorClass = defineNativeClass(vm, "StackIterator");
     ObjClass* queueClass = defineNativeClass(vm, "Queue");
+    ObjClass* queueIteratorClass = defineNativeClass(vm, "QueueIterator");
 
     bindSuperclass(vm, collectionClass, vm->objectClass);
     bindTrait(vm, collectionClass, iterableTrait);
     DEF_FIELD(collectionClass, length, Int, false, INT_VAL(0));
-    DEF_FIELD(collectionClass, position, Int, true, INT_VAL(0));
     DEF_INTERCEPTOR(collectionClass, Collection, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Collection));
     DEF_METHOD(collectionClass, Collection, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(collectionClass, Collection, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
@@ -2166,8 +2159,6 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->arrayClass, Array, clone, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->arrayClass, Array, collect, 1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Object), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
-    DEF_METHOD(vm->arrayClass, Array, currentIndex, 0, RETURN_TYPE(Int));
-    DEF_METHOD(vm->arrayClass, Array, currentValue, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, detect, 1, RETURN_TYPE(Object), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Bool), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, each, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, eachIndex, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Int), PARAM_TYPE(Object)));
@@ -2177,15 +2168,13 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->arrayClass, Array, indexOf, 1, RETURN_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, insertAt, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, isEmpty, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(vm->arrayClass, Array, iterator, 0, RETURN_TYPE(clox.std.collection.Array));
+    DEF_METHOD(vm->arrayClass, Array, iterator, 0, RETURN_TYPE(clox.std.collection.ArrayIterator));
     DEF_METHOD(vm->arrayClass, Array, lastIndexOf, 1, RETURN_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, length, 0, RETURN_TYPE(Int));
-    DEF_METHOD(vm->arrayClass, Array, moveNext, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->arrayClass, Array, putAt, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, reject, 1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Bool), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, remove, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, removeAt, 1, RETURN_TYPE(Bool), PARAM_TYPE(Int));
-    DEF_METHOD(vm->arrayClass, Array, reset, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->arrayClass, Array, select, 1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Bool), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->arrayClass, Array, slice, 2, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE(Int), PARAM_TYPE(Int));
     DEF_METHOD(vm->arrayClass, Array, toString, 0, RETURN_TYPE(String));
@@ -2195,10 +2184,13 @@ void registerCollectionPackage(VM* vm) {
     ObjClass* arrayMetaclass = vm->arrayClass->obj.klass;
     DEF_METHOD(arrayMetaclass, ArrayClass, fromElements, -1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE(Object));
 
+    bindSuperclass(vm, arrayIteratorClass, vm->iteratorClass);
+    DEF_INTERCEPTOR(arrayIteratorClass, ArrayIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.collection.ArrayIterator), PARAM_TYPE(Object));
+    DEF_METHOD(arrayIteratorClass, ArrayIterator, moveNext, 0, RETURN_TYPE(Bool));
+
     bindSuperclass(vm, linkedListClass, listClass);
     DEF_FIELD(linkedListClass, first, clox.std.collection.Node, true, NIL_VAL);
     DEF_FIELD(linkedListClass, last, clox.std.collection.Node, true, NIL_VAL);
-    DEF_FIELD(linkedListClass, current, clox.std.collection.Node, true, NIL_VAL);
     DEF_INTERCEPTOR(linkedListClass, LinkedList, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.LinkedList));
     DEF_METHOD(linkedListClass, LinkedList, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, addAt, 2, RETURN_TYPE(Object), PARAM_TYPE(Int), PARAM_TYPE(Object));
@@ -2211,10 +2203,9 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(linkedListClass, LinkedList, getLast, 0, RETURN_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, indexOf, 1, RETURN_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, isEmpty, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(linkedListClass, LinkedList, iterator, 0, RETURN_TYPE(clox.std.collection.LinkedListIterator));
     DEF_METHOD(linkedListClass, LinkedList, lastIndexOf, 0, RETURN_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, length, 0, RETURN_TYPE(Int));
-    DEF_METHOD(linkedListClass, LinkedList, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(linkedListClass, LinkedList, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
     DEF_METHOD(linkedListClass, LinkedList, node, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
     DEF_METHOD(linkedListClass, LinkedList, peek, 0, RETURN_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, putAt, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE(Object));
@@ -2223,6 +2214,11 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(linkedListClass, LinkedList, removeLast, 0, RETURN_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(linkedListClass, LinkedList, toString, 0, RETURN_TYPE(String));
+
+    bindSuperclass(vm, linkedListIteratorClass, vm->iteratorClass);
+    DEF_INTERCEPTOR(linkedListIteratorClass, LinkedListIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.collection.LinkedListIterator), PARAM_TYPE(Object));
+    DEF_METHOD(linkedListIteratorClass, LinkedListIterator, currentValue, 0, RETURN_TYPE(Object));
+    DEF_METHOD(linkedListIteratorClass, LinkedListIterator, moveNext, 0, RETURN_TYPE(Bool));
 
     bindSuperclass(vm, vm->nodeClass, vm->objectClass);
     vm->nodeClass->classType = OBJ_NODE;
@@ -2244,8 +2240,6 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->dictionaryClass, Dictionary, collect, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, containsKey, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, containsValue, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, currentIndex, 0, RETURN_TYPE(Object));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, currentValue, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, detect, 1, RETURN_TYPE(Object), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, each, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, eachKey, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 1, PARAM_TYPE(Object)));
@@ -2254,20 +2248,23 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->dictionaryClass, Dictionary, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, getAt, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
     DEF_METHOD(vm->dictionaryClass, Dictionary, isEmpty, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, iterator, 0, RETURN_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, iterator, 0, RETURN_TYPE(clox.std.collection.DictionaryIterator));
     DEF_METHOD(vm->dictionaryClass, Dictionary, length, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->dictionaryClass, Dictionary, keySet, 0, RETURN_TYPE(clox.std.collection.Set));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, moveNext, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->dictionaryClass, Dictionary, putAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(vm->dictionaryClass, Dictionary, putAt, 2, RETURN_TYPE(void), PARAM_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, reject, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, removeAt, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, reset, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->dictionaryClass, Dictionary, select, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->dictionaryClass, Dictionary, valueSet, 0, RETURN_TYPE(clox.std.collection.Set));
     DEF_OPERATOR(vm->dictionaryClass, Dictionary, [], __getSubscript__, 1, RETURN_TYPE(Object), PARAM_TYPE(Object));
     DEF_OPERATOR(vm->dictionaryClass, Dictionary, []=, __setSubscript__, 2, RETURN_TYPE(Nil), PARAM_TYPE(Object), PARAM_TYPE(Object));
+
+    bindSuperclass(vm, dictionaryIteratorClass, vm->iteratorClass);
+    DEF_INTERCEPTOR(dictionaryIteratorClass, DictionaryIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.collection.DictionaryIterator), PARAM_TYPE(Object));
+    DEF_METHOD(dictionaryIteratorClass, DictionaryIterator, currentIndex, 0, RETURN_TYPE(Object));
+    DEF_METHOD(dictionaryIteratorClass, DictionaryIterator, moveNext, 0, RETURN_TYPE(Bool));
 
     bindSuperclass(vm, vm->entryClass, vm->objectClass);
     vm->entryClass->classType = OBJ_ENTRY;
@@ -2289,12 +2286,16 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(setClass, Set, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(setClass, Set, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(setClass, Set, isEmpty, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(setClass, Set, iterator, 0, RETURN_TYPE(clox.std.collection.SetIterator));
     DEF_METHOD(setClass, Set, length, 0, RETURN_TYPE(Int));
-    DEF_METHOD(setClass, Set, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(setClass, Set, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
     DEF_METHOD(setClass, Set, remove, 1, RETURN_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(setClass, Set, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(setClass, Set, toString, 0, RETURN_TYPE(String));
+
+    bindSuperclass(vm, setIteratorClass, vm->iteratorClass);
+    DEF_INTERCEPTOR(setIteratorClass, SetIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.collection.SetIterator), PARAM_TYPE(Object));
+    DEF_METHOD(setIteratorClass, SetIterator, currentIndex, 0, RETURN_TYPE(Object));
+    DEF_METHOD(setIteratorClass, SetIterator, moveNext, 0, RETURN_TYPE(Bool));
 
     bindSuperclass(vm, vm->rangeClass, listClass);
     vm->rangeClass->classType = OBJ_RANGE;
@@ -2305,22 +2306,20 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->rangeClass, Range, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
     DEF_METHOD(vm->rangeClass, Range, clone, 0, RETURN_TYPE(clox.std.collection.Range));
     DEF_METHOD(vm->rangeClass, Range, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
-    DEF_METHOD(vm->rangeClass, Range, currentIndex, 0, RETURN_TYPE(Int));
-    DEF_METHOD(vm->rangeClass, Range, currentValue, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->rangeClass, Range, from, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, getAt, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(vm->rangeClass, Range, iterator, 0, RETURN_TYPE(clox.std.collection.Range));
+    DEF_METHOD(vm->rangeClass, Range, iterator, 0, RETURN_TYPE(clox.std.collection.RangeIterator));
     DEF_METHOD(vm->rangeClass, Range, length, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, max, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, min, 0, RETURN_TYPE(Int));
-    DEF_METHOD(vm->rangeClass, Range, moveNext, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(vm->rangeClass, Range, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(vm->rangeClass, Range, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
-    DEF_METHOD(vm->rangeClass, Range, reset, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->rangeClass, Range, step, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 1, PARAM_TYPE(Int)));
     DEF_METHOD(vm->rangeClass, Range, to, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->rangeClass, Range, toString, 0, RETURN_TYPE(String));
+
+    bindSuperclass(vm, rangeIteratorClass, vm->iteratorClass);
+    DEF_INTERCEPTOR(rangeIteratorClass, RangeIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.collection.RangeIterator), PARAM_TYPE(Object));
+    DEF_METHOD(rangeIteratorClass, RangeIterator, moveNext, 0, RETURN_TYPE(Bool));
 
     bindSuperclass(vm, stackClass, collectionClass);
     DEF_FIELD(stackClass, first, clox.std.collection.Node, true, NIL_VAL);
@@ -2330,15 +2329,17 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(stackClass, Stack, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(stackClass, Stack, getFirst, 0, RETURN_TYPE(Object));
     DEF_METHOD(stackClass, Stack, isEmpty, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(stackClass, Stack, iterator, 0, RETURN_TYPE(clox.std.collection.StackIterator));
     DEF_METHOD(stackClass, Stack, length, 0, RETURN_TYPE(Int));
-    DEF_METHOD(stackClass, Stack, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(stackClass, Stack, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
     DEF_METHOD(stackClass, Stack, peek, 0, RETURN_TYPE(Object));
     DEF_METHOD(stackClass, Stack, pop, 0, RETURN_TYPE(Object));
     DEF_METHOD(stackClass, Stack, push, 1, RETURN_TYPE(void), PARAM_TYPE(Object));
     DEF_METHOD(stackClass, Stack, search, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(stackClass, Stack, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(stackClass, Stack, toString, 0, RETURN_TYPE(String));
+
+    bindSuperclass(vm, stackIteratorClass, linkedListIteratorClass);
+    DEF_INTERCEPTOR(stackIteratorClass, StackIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.collection.StackIterator), PARAM_TYPE(Object));
 
     bindSuperclass(vm, queueClass, collectionClass);
     DEF_FIELD(queueClass, first, clox.std.collection.Node, true, NIL_VAL);
@@ -2352,13 +2353,15 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(queueClass, Queue, getFirst, 0, RETURN_TYPE(Object));
     DEF_METHOD(queueClass, Queue, getLast, 0, RETURN_TYPE(Object));
     DEF_METHOD(queueClass, Queue, isEmpty, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(queueClass, Queue, iterator, 0, RETURN_TYPE(clox.std.collection.QueueIterator));
     DEF_METHOD(queueClass, Queue, length, 0, RETURN_TYPE(Int));
-    DEF_METHOD(queueClass, Queue, next, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(queueClass, Queue, nextValue, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
     DEF_METHOD(queueClass, Queue, peek, 0, RETURN_TYPE(Object));
     DEF_METHOD(queueClass, Queue, search, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_METHOD(queueClass, Queue, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(queueClass, Queue, toString, 0, RETURN_TYPE(String));
+
+    bindSuperclass(vm, queueIteratorClass, linkedListIteratorClass);
+    DEF_INTERCEPTOR(queueIteratorClass, QueueIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.collection.QueueIterator), PARAM_TYPE(Object));
 
     vm->currentNamespace = vm->rootNamespace;
 }

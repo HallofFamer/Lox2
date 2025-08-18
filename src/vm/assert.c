@@ -78,14 +78,6 @@ Value assertArgIsEntry(VM* vm, const char* method, Value* args, int index) {
     RETURN_NIL;
 }
 
-Value assertArgIsEnumerable(VM* vm, const char* method, Value* args, int index) {
-    if (!isObjInstanceOf(vm, args[index], getNativeClass(vm, "clox.std.lang.TEnumerable"))) {
-        RETURN_STRING_FMT("method %s expects argument %d to an instance of trait TEnumrable(ie. Collection) but got %s.",
-            method, index + 1, getObjClass(vm, args[index])->name->chars);
-    }
-    RETURN_NIL;
-}
-
 Value assertArgIsException(VM* vm, const char* method, Value* args, int index) {
     if (!IS_EXCEPTION(args[index]) && !isObjInstanceOf(vm, args[index], vm->exceptionClass)) {
         RETURN_STRING_FMT("method %s expects argument %d to be an exception.", method, index + 1);
@@ -117,6 +109,21 @@ Value assertArgIsGenerator(VM* vm, const char* method, Value* args, int index) {
 Value assertArgIsInt(VM* vm, const char* method, Value* args, int index) {
     if (!IS_INT(args[index]) && !isObjInstanceOf(vm, args[index], vm->intClass)) {
         RETURN_STRING_FMT("method %s expects argument %d to be an integer number.", method, index + 1);
+    }
+    RETURN_NIL;
+}
+
+Value assertArgIsIterable(VM* vm, const char* method, Value* args, int index) {
+    if (!isObjInstanceOf(vm, args[index], getNativeClass(vm, "clox.std.lang.TIterable"))) {
+        RETURN_STRING_FMT("method %s expects argument %d to an instance of trait TIterable(ie. Collection) but got %s.",
+            method, index + 1, getObjClass(vm, args[index])->name->chars);
+    }
+    RETURN_NIL;
+}
+
+Value assertArgIsIterator(VM* vm, const char* method, Value* args, int index) {
+    if (!IS_ITERATOR(args[index]) && !isObjInstanceOf(vm, args[index], vm->iteratorClass)) {
+        RETURN_STRING_FMT("method %s expects argument %d to be an iterator.", method, index + 1);
     }
     RETURN_NIL;
 }

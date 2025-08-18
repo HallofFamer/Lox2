@@ -867,7 +867,8 @@ LOX_METHOD(Iterator, currentIndex) {
 }
 
 LOX_METHOD(Iterator, currentValue) {
-    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
+    ASSERT_ARG_COUNT("Iterator::currentValue()", 0);
+    RETURN_VAL(AS_ITERATOR(receiver)->value);
 }
 
 LOX_METHOD(Iterator, moveNext) {
@@ -1503,33 +1504,6 @@ LOX_METHOD(String, length) {
     RETURN_INT(AS_STRING(receiver)->length);
 }
 
-LOX_METHOD(String, next) {
-    ASSERT_ARG_COUNT("String::next(index)", 1);
-    ObjString* self = AS_STRING(receiver);
-    if (IS_NIL(args[0])) {
-        if (self->length == 0) RETURN_FALSE;
-        RETURN_INT(0);
-    }
-
-    ASSERT_ARG_TYPE("String::next(index)", 0, Int);
-    int index = AS_INT(args[0]);
-    if (index < 0 || index < self->length - 1) {
-        RETURN_INT(index + utf8CodePointOffset(vm, self->chars, index));
-    }
-    RETURN_NIL;
-}
-
-LOX_METHOD(String, nextValue) {
-    ASSERT_ARG_COUNT("String::nextValue(index)", 1);
-    ASSERT_ARG_TYPE("String::nextValue(index)", 0, Int);
-    ObjString* self = AS_STRING(receiver);
-    int index = AS_INT(args[0]);
-    if (index > -1 && index < self->length) {
-        RETURN_OBJ(utf8CodePointAtIndex(vm, self->chars, index));
-    }
-    RETURN_NIL;
-}
-
 LOX_METHOD(String, replace) {
     ASSERT_ARG_COUNT("String::replace(target, replacement)", 2);
     ASSERT_ARG_TYPE("String::replace(target, replacement)", 0, String);
@@ -1660,22 +1634,12 @@ LOX_METHOD(StringClass, fromCodePoint) {
 }
 
 LOX_METHOD(StringIterator, __init__) {
-    ASSERT_ARG_COUNT("StringIterator::__init__(string)", 1);
-    ASSERT_ARG_TYPE("StringIterator::__init__(string)", 0, String);
+    ASSERT_ARG_COUNT("StringIterator::__init__(iterable)", 1);
+    ASSERT_ARG_TYPE("StringIterator::__init__(iterable)", 0, String);
     ObjIterator* self = AS_ITERATOR(receiver);
     self->iterable = args[0];
     self->position = -1;
     RETURN_OBJ(self);
-}
-
-LOX_METHOD(StringIterator, currentValue) {
-    ASSERT_ARG_COUNT("StringIterator::currentValue()", 0);
-    ObjIterator* iterator = AS_ITERATOR(receiver);
-    ObjString* string = AS_STRING(iterator->iterable);
-    if (iterator->position >= 0 && iterator->position < string->length) {
-        RETURN_OBJ(utf8CodePointAtIndex(vm, string->chars, iterator->position));
-    }
-    RETURN_NIL;
 }
 
 LOX_METHOD(StringIterator, moveNext) {
@@ -1684,6 +1648,7 @@ LOX_METHOD(StringIterator, moveNext) {
     ObjString* string = AS_STRING(iterator->iterable);
     if (iterator->position < string->length - 1) {
         iterator->position += utf8CodePointOffset(vm, string->chars, iterator->position);
+        iterator->value = OBJ_VAL(utf8CodePointAtIndex(vm, string->chars, iterator->position));
         RETURN_TRUE;
     }
     RETURN_FALSE;
@@ -2150,10 +2115,12 @@ void registerLangPackage(VM* vm) {
     insertGlobalSymbolTable(vm, "TIterator", "Trait");
 
     bindSuperclass(vm, vm->iteratorClass, vm->objectClass);
+    bindTrait(vm, vm->iteratorClass, iteratorTrait);
     vm->iteratorClass->classType = OBJ_ITERATOR;
     DEF_INTERCEPTOR(vm->iteratorClass, Iterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Iterator), PARAM_TYPE(TIterable));
     DEF_FIELD(vm->iteratorClass, iterable, TIterable, false, NIL_VAL);
     DEF_FIELD(vm->iteratorClass, position, Int, false, INT_VAL(-1));
+    DEF_FIELD(vm->iteratorClass, value, Object, false, NIL_VAL);
     DEF_METHOD(vm->iteratorClass, Iterator, currentIndex, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->iteratorClass, Iterator, currentValue, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->iteratorClass, Iterator, moveNext, 0, RETURN_TYPE(Bool));
@@ -2198,7 +2165,6 @@ void registerLangPackage(VM* vm) {
 
     bindSuperclass(vm, stringIteratorClass, vm->iteratorClass);
     DEF_INTERCEPTOR(stringIteratorClass, StringIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(StringIterator), PARAM_TYPE(Object));
-    DEF_METHOD(stringIteratorClass, StringIterator, currentValue, 0, RETURN_TYPE(String));
     DEF_METHOD(stringIteratorClass, StringIterator, moveNext, 0, RETURN_TYPE(Bool));
     insertGlobalSymbolTable(vm, "StringIterator", "StringIterator class");
 

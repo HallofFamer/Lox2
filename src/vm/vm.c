@@ -1060,7 +1060,7 @@ InterpretResult run(VM* vm) {
             }
             case OP_JUMP_IF_EMPTY: {
                 uint16_t offset = READ_SHORT();
-                if (IS_NIL(peek(vm, 0)) || IS_UNDEFINED(peek(vm, 0))) frame->ip += offset;
+                if (IS_UNDEFINED(peek(vm, 0))) frame->ip += offset;
                 break;
             }
             case OP_LOOP: {
