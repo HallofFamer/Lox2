@@ -1005,8 +1005,8 @@ void registerUtilPackage(VM* vm) {
     DEF_METHOD(vm->timerClass, Timer, toString, 0, RETURN_TYPE(String));
 
     ObjClass* timerMetaclass = vm->timerClass->obj.klass;
-    DEF_METHOD(timerMetaclass, TimerClass, interval, 2, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE_CALLABLE(RETURN_TYPE(void)), PARAM_TYPE(Int));
-    DEF_METHOD(timerMetaclass, TimerClass, timeout, 2, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE_CALLABLE(RETURN_TYPE(void)), PARAM_TYPE(Int));
+    DEF_METHOD(timerMetaclass, TimerClass, interval, 2, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE(TCallable), PARAM_TYPE(Int));
+    DEF_METHOD(timerMetaclass, TimerClass, timeout, 2, RETURN_TYPE(clox.std.util.Timer), PARAM_TYPE(TCallable), PARAM_TYPE(Int));
 
     bindSuperclass(vm, uuidClass, vm->objectClass);
     DEF_FIELD(uuidClass, buffer, String, false, OBJ_VAL(emptyString(vm)));

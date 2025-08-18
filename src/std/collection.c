@@ -698,8 +698,8 @@ LOX_METHOD(Collection, addAll) {
     ASSERT_ARG_INSTANCE_OF("Collection::addAll(collection)", 0, clox.std.collection.Collection);
     Value collection = args[0];
     Value addMethod = getObjMethod(vm, receiver, "add");
-    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
-    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+    Value iteratorMethod = getObjMethod(vm, collection, "iterator");
+    Value iterator = callReentrantMethod(vm, collection, iteratorMethod);
 
     Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
     Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
@@ -1467,7 +1467,7 @@ LOX_METHOD(LinkedListIterator, currentValue) {
 LOX_METHOD(LinkedListIterator, moveNext) {
     ASSERT_ARG_COUNT("LinkedListIterator::moveNext()", 0);
     ObjIterator* self = AS_ITERATOR(receiver);
-    ObjInstance* linkedList = AS_INSTANCE(self->iterable);
+    ObjInstance* linkedList = AS_INSTANCE(self->iterable);;
     int length = AS_INT(getObjProperty(vm, linkedList, "length"));
     if (length == 0 || self->position >= length - 1) RETURN_FALSE;
 
@@ -1571,7 +1571,6 @@ LOX_METHOD(Queue, __init__) {
     setObjProperty(vm, self, "length", INT_VAL(0));
     setObjProperty(vm, self, "first", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
     setObjProperty(vm, self, "last", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
-    setObjProperty(vm, self, "current", NIL_VAL);
     RETURN_OBJ(receiver);
 }
 
@@ -1580,7 +1579,6 @@ LOX_METHOD(Queue, clear) {
     ObjInstance* self = AS_INSTANCE(receiver);
     setObjProperty(vm, self, "first", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
     setObjProperty(vm, self, "last", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
-    setObjProperty(vm, self, "current", NIL_VAL);
     setObjProperty(vm, self, "length", INT_VAL(0));
     RETURN_NIL;
 }
@@ -2246,7 +2244,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->dictionaryClass, Dictionary, eachValue, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 1, PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, entrySet, 0, RETURN_TYPE(clox.std.collection.Set));
     DEF_METHOD(vm->dictionaryClass, Dictionary, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, getAt, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, getAt, 1, RETURN_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, isEmpty, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->dictionaryClass, Dictionary, iterator, 0, RETURN_TYPE(clox.std.collection.DictionaryIterator));
     DEF_METHOD(vm->dictionaryClass, Dictionary, length, 0, RETURN_TYPE(Int));
@@ -2254,7 +2252,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->dictionaryClass, Dictionary, putAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(vm->dictionaryClass, Dictionary, putAt, 2, RETURN_TYPE(void), PARAM_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, reject, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, removeAt, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, removeAt, 1, RETURN_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, select, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->dictionaryClass, Dictionary, valueSet, 0, RETURN_TYPE(clox.std.collection.Set));
@@ -2323,7 +2321,6 @@ void registerCollectionPackage(VM* vm) {
 
     bindSuperclass(vm, stackClass, collectionClass);
     DEF_FIELD(stackClass, first, clox.std.collection.Node, true, NIL_VAL);
-    DEF_FIELD(stackClass, current, clox.std.collection.Node, true, NIL_VAL);
     DEF_INTERCEPTOR(stackClass, Stack, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Stack));
     DEF_METHOD(stackClass, Stack, clear, 0, RETURN_TYPE(void));
     DEF_METHOD(stackClass, Stack, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
@@ -2344,7 +2341,6 @@ void registerCollectionPackage(VM* vm) {
     bindSuperclass(vm, queueClass, collectionClass);
     DEF_FIELD(queueClass, first, clox.std.collection.Node, true, NIL_VAL);
     DEF_FIELD(queueClass, last, clox.std.collection.Node, true, NIL_VAL);
-    DEF_FIELD(queueClass, current, clox.std.collection.Node, true, NIL_VAL);
     DEF_INTERCEPTOR(queueClass, Queue, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Queue));
     DEF_METHOD(queueClass, Queue, clear, 0, RETURN_TYPE(void));
     DEF_METHOD(queueClass, Queue, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));

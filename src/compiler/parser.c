@@ -1347,6 +1347,7 @@ static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnTy
         return matchAsyncFunDeclaration(parser, hasReturnType);
     }
     else if (checkEither(parser, TOKEN_FUN, TOKEN_VOID) && checkNext(parser, TOKEN_IDENTIFIER)) {
+        advance(parser);
         *isAsync = false;
         *hasReturnType = false;
         return true;
@@ -1369,7 +1370,7 @@ static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnTy
 }
 
 static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
-    bool isVoid = match(parser, TOKEN_VOID);
+    bool isVoid = (previousTokenType(parser) == TOKEN_VOID);
     Ast* returnType = hasReturnType ? type_(parser, "Expect function return type.") : emptyAst(AST_EXPR_TYPE, emptyToken());
     consume(parser, TOKEN_IDENTIFIER, "Expect function name.");
     Token name = previousToken(parser);

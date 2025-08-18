@@ -169,8 +169,8 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
         for (int i = 0; i < ast->children->count; i++) {
             TypeInfo* argType = ast->children->elements[i]->type;
             if (!isSubtypeOfType(argType, paramType)) {
-                typeError(typeChecker, "%s expects variadic arguments to be an instance of %s but gets %s.",
-                    calleeDesc, paramType->shortName->chars, argType->shortName->chars);
+                typeError(typeChecker, "%s expects variadic arguments to be instances of %s but gets %s for argument %d.",
+                    calleeDesc, paramType->shortName->chars, argType->shortName->chars, i + 1);
             }
         }
     }
@@ -698,6 +698,7 @@ static void typeCheckParam(TypeChecker* typeChecker, Ast* ast) {
     ObjString* name = copyStringPerma(typeChecker->vm, ast->token.start, ast->token.length);
     SymbolItem* item = symbolTableLookup(ast->symtab, name);
     item->type = ast->type;
+    if (ast->attribute.isVariadic) item->type = getNativeType(typeChecker->vm, "clox.std.collection.Array");
 }
 
 static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {

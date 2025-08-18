@@ -729,6 +729,7 @@ static void resolveParam(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
     item->state = (resolver->currentFunction->attribute.isLambda) ? SYMBOL_STATE_ACCESSED : SYMBOL_STATE_DEFINED;
     insertParamType(resolver, ast, astHasChild(ast));
+    if (ast->attribute.isVariadic) resolver->currentFunction->attribute.isVariadic = true;
 }
 
 static void resolvePropertyGet(Resolver* resolver, Ast* ast) {
