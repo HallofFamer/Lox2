@@ -98,7 +98,6 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             if (index == 0) push(vm, INT_VAL(array->elements.count));
-            else if (index == 1) push(vm, INT_VAL(array->position));
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }
@@ -119,7 +118,6 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
         case OBJ_DICTIONARY: {
             ObjDictionary* dictionary = (ObjDictionary*)object;
             if (index == 0) push(vm, INT_VAL(dictionary->count));
-            else if (index == 1) push(vm, INT_VAL(dictionary->position));
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }
@@ -190,9 +188,8 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
                 int length = abs(range->to - range->from);
                 push(vm, INT_VAL(length));
             }
-            else if (index == 1) push(vm, INT_VAL(range->position));
-            else if (index == 2) push(vm, INT_VAL(range->from));
-            else if (index == 3) push(vm, INT_VAL(range->to));
+            else if (index == 1) push(vm, INT_VAL(range->from));
+            else if (index == 2) push(vm, INT_VAL(range->to));
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }
@@ -245,7 +242,6 @@ static bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             if (matchVariableName(name, "length", 6)) push(vm, INT_VAL(array->elements.count));
-            else if (matchVariableName(name, "position", 8)) push(vm, INT_VAL(array->position));
             else return getAndPushGenericInstanceVariableByName(vm, object, name);
             return true;
         }
@@ -266,7 +262,6 @@ static bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
         case OBJ_DICTIONARY: {
             ObjDictionary* dictionary = (ObjDictionary*)object;
             if (matchVariableName(name, "length", 6)) push(vm, INT_VAL(dictionary->count));
-            else if (matchVariableName(name, "position", 8)) push(vm, INT_VAL(dictionary->position));
             else return getAndPushGenericInstanceVariableByName(vm, object, name);
             return true;
         }
@@ -337,7 +332,6 @@ static bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
                 int length = abs(range->to - range->from);
                 push(vm, INT_VAL(length));
             }
-            else if (matchVariableName(name, "position", 8)) push(vm, INT_VAL(range->position));
             else if (matchVariableName(name, "from", 4)) push(vm, INT_VAL(range->from));
             else if (matchVariableName(name, "to", 2)) push(vm, INT_VAL(range->to));
             else return getAndPushGenericInstanceVariableByName(vm, object, name);
@@ -516,13 +510,6 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
                 runtimeError(vm, "Cannot set property length on Object Array.");
                 exit(70);
             }
-            else if (index == 1) {
-                if (IS_INT(value)) array->position = AS_INT(value);
-                else {
-                    runtimeError(vm, "Expected integer for property position on Object Array.");
-                    exit(70);
-                }
-            }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
         }
         case OBJ_BOUND_METHOD: {
@@ -547,13 +534,6 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
             if (index == 0) {
                 runtimeError(vm, "Cannot set property length on Object Dictionary.");
                 exit(70);
-            }
-            else if (index == 1) {
-                if (IS_INT(value)) dictionary->position = AS_INT(value);
-                else {
-                    runtimeError(vm, "Expected integer for property position on Object Dictionary.");
-                    exit(70);
-                }
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
         }
@@ -653,9 +633,8 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
                 runtimeError(vm, "Cannot set property length on Object Range.");
                 exit(70);
             }
-            else if (index == 1 && IS_INT(value)) range->position = AS_INT(value);
-            else if (index == 2 && IS_INT(value)) range->from = AS_INT(value);
-            else if (index == 3 && IS_INT(value)) range->to = AS_INT(value);
+            else if (index == 1 && IS_INT(value)) range->from = AS_INT(value);
+            else if (index == 2 && IS_INT(value)) range->to = AS_INT(value);
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
 
             push(vm, value);
@@ -712,13 +691,6 @@ static bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
                 runtimeError(vm, "Cannot set property length on Object Array.");
                 exit(70);
             }
-            else if (matchVariableName(name, "position", 8)) {
-                if (IS_INT(value)) array->position = AS_INT(value);
-                else {
-                    runtimeError(vm, "Expected integer for property position on Object Array.");
-                    exit(70);
-                }
-            }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
         }
         case OBJ_BOUND_METHOD: {
@@ -743,13 +715,6 @@ static bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
             if (matchVariableName(name, "length", 6)) {
                 runtimeError(vm, "Cannot set property length on Object Dictionary.");
                 exit(70);
-            }
-            else if (matchVariableName(name, "position", 8)) {
-                if (IS_INT(value)) dictionary->position = AS_INT(value);
-                else {
-                    runtimeError(vm, "Expected integer for property position on Object Dictionary.");
-                    exit(70);
-                }
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
         }
@@ -849,7 +814,6 @@ static bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* nam
                 runtimeError(vm, "Cannot set property length on Object Range.");
                 exit(70);
             }
-            else if (matchVariableName(name, "position", 8) && IS_INT(value)) range->position = AS_INT(value);
             else if (matchVariableName(name, "from", 4) && IS_INT(value)) range->from = AS_INT(value);
             else if (matchVariableName(name, "to", 4) && IS_INT(value)) range->to = AS_INT(value);
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);

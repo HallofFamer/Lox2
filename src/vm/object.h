@@ -176,7 +176,6 @@ typedef struct {
  
 struct ObjArray {
     Obj obj;
-    int position;
     ValueArray elements;
 };
 
@@ -190,7 +189,6 @@ struct ObjDictionary {
     Obj obj;
     int capacity;
     int count;
-    int position;
     ObjEntry* entries;
 };
 
@@ -210,7 +208,6 @@ typedef struct {
     Obj obj;
     int from;
     int to;
-    int position;
 } ObjRange;
 
 typedef struct {

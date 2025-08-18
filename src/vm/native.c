@@ -254,6 +254,14 @@ ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass) 
     return exceptionClass;
 }
 
+TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType) {
+    CallableTypeInfo* callableType = newCallableTypeInfo(-1, category, shortName, returnType);
+    char* name = createCallableTypeName(callableType);
+    callableType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
+    callableType->baseType.fullName = callableType->baseType.shortName;
+    return (TypeInfo*)callableType;
+}
+
 ObjClass* getNativeClass(VM* vm, const char* fullName) {
     Value klass;
     tableGet(&vm->classes, newStringPerma(vm, fullName), &klass);

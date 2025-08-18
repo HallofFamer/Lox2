@@ -28,7 +28,6 @@ Obj* allocateObject(VM* vm, size_t size, ObjType type, ObjClass* klass, GCGenera
 
 ObjArray* newArray(VM* vm) {
     ObjArray* array = ALLOCATE_OBJ(ObjArray, OBJ_ARRAY, vm->arrayClass);
-    array->position = -1;
     initValueArray(&array->elements, array->obj.generation);
     return array;
 }
@@ -89,7 +88,6 @@ ObjDictionary* newDictionary(VM* vm) {
     ObjDictionary* dict = ALLOCATE_OBJ(ObjDictionary, OBJ_DICTIONARY, vm->dictionaryClass);
     dict->count = 0;
     dict->capacity = 0;
-    dict->position = -1;
     dict->entries = NULL;
     return dict;
 }
@@ -290,7 +288,6 @@ ObjRange* newRange(VM* vm, int from, int to) {
     ObjRange* range = ALLOCATE_OBJ(ObjRange, OBJ_RANGE, vm->rangeClass);
     range->from = from;
     range->to = to;
-    range->position = -1;
     return range;
 }
 
@@ -494,6 +491,11 @@ void printObject(Value value) {
         case OBJ_INSTANCE:
             printf("<object %s>", AS_OBJ(value)->klass->name->chars);
             break;
+        case OBJ_ITERATOR: {
+            ObjIterator* iterator = AS_ITERATOR(value);
+            printf("<iterator %s>", iterator->obj.klass->name->chars);
+            break;
+        }
         case OBJ_METHOD: { 
             ObjMethod* method = AS_METHOD(value);
             printf("<method %s::%s>", method->behavior->name->chars, method->closure->function->name->chars);
