@@ -583,18 +583,11 @@ static void astOutputDeclMethod(Ast* ast, int indentLevel) {
     char* _class = ast->attribute.isClass ? "class " : "";
     char* _void = ast->attribute.isVoid ? "void " : "";
     char* methodName = tokenToCString(ast->token);
-    printf("methodDecl %s%s%s%s", async, _class, _void, methodName);
+    printf("methodDecl %s%s%s%s\n", async, _class, _void, methodName);
 
-    if (astNumChild(ast) > 2) {
-        Ast* returnType = astGetChild(ast, 2);
-        char* returnTypeName = tokenToCString(returnType->token);
-        printf("(%s)", returnTypeName);
-        free(returnTypeName);
-    }
-    
-    printf("\n");
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
+    astOutputChild(ast, indentLevel + 1, 2);
     free(methodName);
 }
 

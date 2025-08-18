@@ -929,10 +929,10 @@ static void typeCheckFinallyStatement(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckForStatement(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     typeCheckChild(typeChecker, ast, 1);
-    Ast* enumerable = astGetChild(ast, 1);
+    Ast* iterable = astGetChild(ast, 1);
 
-    if (!isSubtypeOfType(enumerable->type, getNativeType(typeChecker->vm, "clox.std.lang.TEnumerable"))) {
-        typeError(typeChecker, "Collection object in for statement must be an instance of TEnumerable but gets %s.", enumerable->type->shortName->chars);
+    if (!isSubtypeOfType(iterable->type, getNativeType(typeChecker->vm, "clox.std.lang.TIterable"))) {
+        typeError(typeChecker, "Collection object in for statement must be an instance of TIterable but gets %s.", iterable->type->shortName->chars);
     }
     typeCheckChild(typeChecker, ast, 2);
 }

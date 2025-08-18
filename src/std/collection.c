@@ -2122,7 +2122,7 @@ void registerCollectionPackage(VM* vm) {
     ObjNamespace* collectionNamespace = defineNativeNamespace(vm, "collection", vm->stdNamespace);
     vm->currentNamespace = collectionNamespace;
 
-    ObjClass* enumerableTrait = getNativeClass(vm, "clox.std.lang.TEnumerable");
+    ObjClass* iterableTrait = getNativeClass(vm, "clox.std.lang.TIterable");
     ObjClass* iteratorTrait = getNativeClass(vm, "clox.std.lang.TIterator");
     ObjClass* collectionClass = defineNativeClass(vm, "Collection");
     ObjClass* listClass = defineNativeClass(vm, "List");
@@ -2137,8 +2137,7 @@ void registerCollectionPackage(VM* vm) {
     ObjClass* queueClass = defineNativeClass(vm, "Queue");
 
     bindSuperclass(vm, collectionClass, vm->objectClass);
-    bindTrait(vm, collectionClass, enumerableTrait);
-    bindTrait(vm, collectionClass, iteratorTrait);
+    bindTrait(vm, collectionClass, iterableTrait);
     DEF_FIELD(collectionClass, length, Int, false, INT_VAL(0));
     DEF_FIELD(collectionClass, position, Int, true, INT_VAL(0));
     DEF_INTERCEPTOR(collectionClass, Collection, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Collection));

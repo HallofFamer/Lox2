@@ -1753,7 +1753,7 @@ LOX_METHOD(TComparable, __less__) {
     }
 }
 
-LOX_METHOD(TEnumerable, iterator) {
+LOX_METHOD(TIterable, iterator) {
     THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
 }
 
@@ -1901,9 +1901,9 @@ void registerLangPackage(VM* vm) {
     vm->numberClass = defineNativeClass(vm, "Number");
     vm->intClass = defineNativeClass(vm, "Int");
     vm->floatClass = defineNativeClass(vm, "Float");
-    ObjClass* enumerableTrait = defineNativeTrait(vm, "TEnumerable");
+    ObjClass* iterableTrait = defineNativeTrait(vm, "TIterable");
     ObjClass* iteratorTrait = defineNativeTrait(vm, "TIterator");
-    ObjClass* iteratorClass = defineNativeClass(vm, "Iterator");
+    vm->iteratorClass = defineNativeClass(vm, "Iterator");
     vm->stringClass = defineNativeClass(vm, "String");
     ObjClass* stringIteratorClass = defineNativeClass(vm, "StringIterator");
     ObjClass* callableTrait = defineNativeTrait(vm, "TCallable");
@@ -2140,8 +2140,8 @@ void registerLangPackage(VM* vm) {
     DEF_FIELD(floatMetaclass, min, Number, true, NUMBER_VAL(DBL_MIN));
     DEF_METHOD(floatMetaclass, FloatClass, parse, 1, RETURN_TYPE(Float), PARAM_TYPE(Object));
 
-    DEF_METHOD(enumerableTrait, TEnumerable, iterator, 1, RETURN_TYPE(Iterator));
-    insertGlobalSymbolTable(vm, "TEnumerable", "Trait");
+    DEF_METHOD(iterableTrait, TIterable, iterator, 1, RETURN_TYPE(TIterator));
+    insertGlobalSymbolTable(vm, "TIterable", "Trait");
 
     DEF_METHOD(iteratorTrait, TIterator, currentIndex, 0, RETURN_TYPE(Object));
     DEF_METHOD(iteratorTrait, TIterator, currentValue, 0, RETURN_TYPE(Object));
@@ -2149,19 +2149,19 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(iteratorTrait, TIterator, reset, 0, RETURN_TYPE(void));
     insertGlobalSymbolTable(vm, "TIterator", "Trait");
 
-    bindSuperclass(vm, iteratorClass, vm->objectClass);
-    iteratorClass->classType = OBJ_ITERATOR;
-    DEF_INTERCEPTOR(iteratorClass, Iterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Iterator), PARAM_TYPE(TEnumerable));
-    DEF_FIELD(iteratorClass, iterable, TEnumerable, false, NIL_VAL);
-    DEF_FIELD(iteratorClass, position, Int, false, INT_VAL(-1));
-    DEF_METHOD(iteratorClass, Iterator, currentIndex, 0, RETURN_TYPE(Object));
-    DEF_METHOD(iteratorClass, Iterator, currentValue, 0, RETURN_TYPE(Object));
-    DEF_METHOD(iteratorClass, Iterator, moveNext, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(iteratorClass, Iterator, reset, 0, RETURN_TYPE(void));
+    bindSuperclass(vm, vm->iteratorClass, vm->objectClass);
+    vm->iteratorClass->classType = OBJ_ITERATOR;
+    DEF_INTERCEPTOR(vm->iteratorClass, Iterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Iterator), PARAM_TYPE(TIterable));
+    DEF_FIELD(vm->iteratorClass, iterable, TIterable, false, NIL_VAL);
+    DEF_FIELD(vm->iteratorClass, position, Int, false, INT_VAL(-1));
+    DEF_METHOD(vm->iteratorClass, Iterator, currentIndex, 0, RETURN_TYPE(Object));
+    DEF_METHOD(vm->iteratorClass, Iterator, currentValue, 0, RETURN_TYPE(Object));
+    DEF_METHOD(vm->iteratorClass, Iterator, moveNext, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->iteratorClass, Iterator, reset, 0, RETURN_TYPE(void));
     insertGlobalSymbolTable(vm, "Iterator", "Iterator class");
 
     bindSuperclass(vm, vm->stringClass, vm->objectClass);
-    bindTrait(vm, vm->stringClass, enumerableTrait);
+    bindTrait(vm, vm->stringClass, iterableTrait);
     vm->stringClass->classType = OBJ_STRING;
     DEF_INTERCEPTOR(vm->stringClass, String, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(String), PARAM_TYPE(String));
     DEF_FIELD(vm->stringClass, length, Int, false, INT_VAL(0));
@@ -2196,7 +2196,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(stringMetaclass, StringClass, fromByte, 1, RETURN_TYPE(String), PARAM_TYPE(Object));
     DEF_METHOD(stringMetaclass, StringClass, fromCodePoint, 1, RETURN_TYPE(String), PARAM_TYPE(Object));
 
-    bindSuperclass(vm, stringIteratorClass, iteratorClass);
+    bindSuperclass(vm, stringIteratorClass, vm->iteratorClass);
     DEF_INTERCEPTOR(stringIteratorClass, StringIterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(StringIterator), PARAM_TYPE(Object));
     DEF_METHOD(stringIteratorClass, StringIterator, currentValue, 0, RETURN_TYPE(String));
     DEF_METHOD(stringIteratorClass, StringIterator, moveNext, 0, RETURN_TYPE(Bool));

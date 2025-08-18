@@ -1273,7 +1273,7 @@ static void resolveVarDeclaration(Resolver* resolver, Ast* ast) {
         defineVariable(resolver, ast);
     }
     else if (!ast->attribute.isMutable) {
-        semanticError(resolver, "Immutable variable must be initialized upon declaration.");
+        semanticError(resolver, "Immutable variables must be initialized upon declaration.");
     }
 }
 
