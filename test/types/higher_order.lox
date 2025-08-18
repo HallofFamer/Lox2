@@ -1,0 +1,56 @@
+namespace test.types
+using clox.std.collection.Array
+
+Array filterArray(Array array, Bool fun(Int) filter) {
+    val result = []
+    for (val item : array) {
+        if (filter(item)) {
+            result.add(item)
+        }
+    }
+    return result
+}
+
+val numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+println("Original numbers: ${numbers}")
+val evenNumbers = filterArray(numbers, { 
+    |n| 
+    //throw n
+    n % 2 == 0     
+})
+println("Even numbers: ${evenNumbers}")
+
+String fun(String) createURL(String baseURL) { 
+    return { |path| "https://${baseURL}/${path}" }
+}
+println("URL is: ${createURL("https://example.com")("path")}")
+
+val toUppercase = String fun(String original) { 
+    return original.toUppercase()
+}
+println("abc to uppercase is: ${toUppercase("abc")}")
+
+class Calculator { 
+
+    val String serialID = "12345"
+    var Int fun(Int, Int) operation
+
+    Int fun(Int, Int) getOperation() { 
+        return this.operation
+    }
+
+    Int performOperation(Int a, Int b) { 
+        if (this.operation != nil) { 
+            return this.operation(a, b)
+        }
+        else { 
+            throw UnsupportedOperationException("Operation is not set.");
+        }
+    }
+}
+
+val calc = Calculator()
+calc.operation = fun(x, y) { return x + y } 
+println("Operation of 5 + 3 is: ${calc.performOperation(5, 3)}")
+calc.operation = fun(x, y) { return x - y }
+println("Operation of 5 - 3 is: ${calc.performOperation(5, 3)}")

@@ -1,5 +1,28 @@
 namespace test.types
 using clox.std.util.Date
+using clox.std.util.DateTime
+using clox.std.util.Duration
 
 val date = Date(2025, 01, 31)
-println(date.toString())
+println("This Date: ${date.month}/${date.day}/${date.year}")
+println("Current Date: ${Date.now.month}/${Date.now.day}/${Date.now.year}\n")
+
+val dateTime = DateTime(2025, 01, 31, 12, 30, 45)
+println("This DateTime: ${dateTime.month}/${dateTime.day}/${dateTime.year} ${dateTime.hour}:${dateTime.minute}:${dateTime.second}")
+println("Current DateTime: ${DateTime.now.month}/${DateTime.now.day}/${DateTime.now.year} ${DateTime.now.hour}:${DateTime.now.minute}:${DateTime.now.second}\n")
+
+val duration = Duration(2, 10, 20, 36)
+println("This Duration: ${duration.days} days, ${duration.hours} hours, ${duration.minutes} minutes, ${duration.seconds} seconds")
+
+class MilliDuration extends Duration {
+
+    val Int milliseconds = 0
+
+    __init__(Int days, Int hours, Int minutes, Int seconds, Int milliseconds) {
+        super.__init__(days, hours, minutes, seconds)
+        this.milliseconds = milliseconds
+    }
+}
+
+val milliDuration = MilliDuration(3, 12, 25, 48, 500)
+println("Other Duration: ${milliDuration.days} days, ${milliDuration.hours} hours, ${milliDuration.minutes} minutes, ${milliDuration.seconds} seconds, ${milliDuration.milliseconds} milliseconds\n")

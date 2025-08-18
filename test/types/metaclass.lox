@@ -1,0 +1,30 @@
+namespace test.types
+using clox.std.collection.Array
+using clox.std.util.Date
+using clox.std.util.DateTime
+
+Date class getDate() { 
+    return DateTime
+}
+println("Current date is: ${getDate().now}")
+
+Date parseDate(Date class dClass, String dString) {
+    return dClass.parse(dString)
+}
+println("Parsed date is: ${parseDate(Date, "2023-10-01")}")
+
+class DateFactory {
+
+    val Date class dateClass
+
+    __init__(Date class dClass) {
+        this.dateClass = dClass
+    }
+
+    Date class getDateClass() {
+        return this.dateClass
+    }
+}
+
+val factory = DateFactory(DateTime)
+println("Factory date class is: ${factory.getDateClass()}")

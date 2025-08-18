@@ -1,11 +1,17 @@
 # Change Log
 
-### Lox2 v2.0.3(current version)
+### Lox2 v2.1.0(current version)
+- Extend parser with infinite lookahead and backtrack, allowing parsing context sensitive grammar for Lox2.
+- Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be type inferred. 
+- Allow declaration of object instance/class fields outside of class initializer, which also enables optional static typing and default values.
+- Redesign of Iterator/Enumerator API for ease of use and implementation of iterable types, add new object type ObjIterator.
+
+### Lox2 v2.0.3
 - Add instance field `length` to class `Range` in package `clox.std.collection`, it now behaves correctly like a collection subclass.
 - Fix potential memory leak issue that AST is not properly freed when parser, resolver or typechecker fails with error.
 - Fix incorrect param types for initializer methods of `Behavior`, `Namespace` and `Trait`, as well as return types for methods in Comparable trait and Number class.
 
-### Lox2 v2.0.2(last version)
+### Lox2 v2.0.2
 - Fix buffer.h to include header for <stdlib.h>, which used to prevent Lox2 from compiling on certain platforms.
 - Fix CMakeLists.txt to find package libuv correctly on windows with vcpkg installation. 
 - Modify docker files to fetch latest stable version of Lox2 instead of from main branch directly.
