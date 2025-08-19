@@ -759,7 +759,7 @@ static Ast* methods(Parser* parser, Token* name) {
         if (match(parser, TOKEN_CLASS)) isClass = true;
         if (match(parser, TOKEN_VOID)) isVoid = true;
 
-        if (checkBoth(parser, TOKEN_IDENTIFIER) || (check(parser, TOKEN_IDENTIFIER) && tokenIsOperator(parser->tokens->elements[parser->index]))) {
+        if (checkBoth(parser, TOKEN_IDENTIFIER) || (check(parser, TOKEN_IDENTIFIER) && tokenIsOperator(nextToken(parser)))) {
             hasReturnType = true;
             returnType = behaviorType(parser, "Expect method return type.");
         }

@@ -2261,6 +2261,7 @@ void registerLangPackage(VM* vm) {
     defineNativeException(vm, "StackOverflowException", runtimeExceptionClass);
     defineNativeException(vm, "UnsupportedOperationException", runtimeExceptionClass);
 
+    insertGlobalSymbolTable(vm, "RuntimeException", "RuntimeException class");
     insertGlobalSymbolTable(vm, "AssertionException", "AssertionException class");
     insertGlobalSymbolTable(vm, "ArithmeticException", "ArithmeticException class");
     insertGlobalSymbolTable(vm, "FormatException", "FormatException class");
