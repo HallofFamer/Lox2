@@ -1734,10 +1734,6 @@ LOX_METHOD(TIterator, moveNext) {
     THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
 }
 
-LOX_METHOD(TIterator, reset) {
-    THROW_EXCEPTION(clox.std.lang.NotImplementedException, "Not implemented, subclass responsibility.");
-}
-
 LOX_METHOD(Trait, __init__) {
     ASSERT_ARG_COUNT("Trait::__init__(name, traits)", 2);
     ASSERT_ARG_TYPE("Trait::__init__(name, traits)", 0, String);
@@ -2111,7 +2107,6 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(iteratorTrait, TIterator, currentIndex, 0, RETURN_TYPE(Object));
     DEF_METHOD(iteratorTrait, TIterator, currentValue, 0, RETURN_TYPE(Object));
     DEF_METHOD(iteratorTrait, TIterator, moveNext, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(iteratorTrait, TIterator, reset, 0, RETURN_TYPE(void));
     insertGlobalSymbolTable(vm, "TIterator", "Trait");
 
     bindSuperclass(vm, vm->iteratorClass, vm->objectClass);

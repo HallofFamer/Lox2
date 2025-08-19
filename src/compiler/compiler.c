@@ -1080,7 +1080,6 @@ static void compileForStatement(Compiler* compiler, Ast* ast) {
 
     emitByte(compiler, OP_POP);
     emitByte(compiler, OP_POP);
-    invokeMethod(compiler, 0, "reset", 5);
     emitByte(compiler, OP_POP);
 
     compiler->localCount -= 2;
