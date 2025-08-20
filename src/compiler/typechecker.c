@@ -24,6 +24,7 @@ struct FunctionTypeChecker {
     bool isAsync;
     bool isClass;
     bool isInitializer;
+    bool isMethod;
 };
 
 static void typeError(TypeChecker* typeChecker, const char* format, ...) {
@@ -48,13 +49,14 @@ static void endClassTypeChecker(TypeChecker* typeChecker) {
     typeChecker->currentClass = typeChecker->currentClass->enclosing;
 }
 
-static void initFunctionTypeChecker(TypeChecker* typeChecker, FunctionTypeChecker* function, Token name, CallableTypeInfo* type, bool isAsync, bool isClass, bool isInitializer) {
+static void initFunctionTypeChecker(TypeChecker* typeChecker, FunctionTypeChecker* function, Token name, CallableTypeInfo* type, bool isAsync, bool isClass, bool isInitializer, bool isMethod) {
     function->enclosing = typeChecker->currentFunction;
     function->name = name;
     function->type = type;
     function->isAsync = isAsync;
     function->isClass = isClass;
     function->isInitializer = isInitializer;
+    function->isMethod = isMethod;
     typeChecker->currentFunction = function;
 }
 
@@ -523,7 +525,7 @@ static void block(TypeChecker* typeChecker, Ast* ast) {
 static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer) {
     if (calleeType == NULL) calleeType = AS_CALLABLE_TYPE(ast->type);
     FunctionTypeChecker functionTypeChecker;
-    initFunctionTypeChecker(typeChecker, &functionTypeChecker, ast->token, calleeType, isAsync, isClass, isInitializer);
+    initFunctionTypeChecker(typeChecker, &functionTypeChecker, ast->token, calleeType, isAsync, isClass, isInitializer, ast->kind == AST_DECL_METHOD);
     functionTypeChecker.symtab = ast->symtab;
 
     typeCheckChild(typeChecker, ast, 0);
@@ -733,7 +735,8 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
             typeError(typeChecker, "Cannot modify immutable field '%s'.", fieldName->chars);
         }
     }
-    else if (!isSubtypeOfType(value->type, fieldType->declaredType)) {
+
+    if (!isSubtypeOfType(value->type, fieldType->declaredType)) {
         typeError(typeChecker, "Assignment to field %s expects type %s but gets %s.", fieldName->chars, fieldType->declaredType->shortName->chars, value->type->shortName->chars);
     }
     else if (fieldType->declaredType != NULL && value->type != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
@@ -965,9 +968,9 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
         char calleeDesc[UINT8_MAX];
         ObjString* calleeName = createSymbol(typeChecker, typeChecker->currentFunction->name);
 
-        if (typeChecker->currentFunction->type->baseType.category == TYPE_CATEGORY_METHOD) {
+        if (typeChecker->currentFunction->isMethod) {
             ObjString* className = createSymbol(typeChecker, typeChecker->currentClass->name);
-            sprintf_s(calleeDesc, UINT8_MAX, "Method %s::%s", className->chars, calleeName->chars);
+            sprintf_s(calleeDesc, UINT8_MAX, "Method %s%s::%s", className->chars, typeChecker->currentFunction->isClass ? " class" : "", calleeName->chars);
         }
         else sprintf_s(calleeDesc, UINT8_MAX, "Function %s", calleeName->chars);
 
@@ -1248,7 +1251,7 @@ void typeCheckChild(TypeChecker* typeChecker, Ast* ast, int index) {
 
 void typeCheck(TypeChecker* typeChecker, Ast* ast) {
     FunctionTypeChecker functionTypeChecker;
-    initFunctionTypeChecker(typeChecker, &functionTypeChecker, syntheticToken("script"), NULL, ast->attribute.isAsync, false, false);
+    initFunctionTypeChecker(typeChecker, &functionTypeChecker, syntheticToken("script"), NULL, ast->attribute.isAsync, false, false, false);
     typeCheckAst(typeChecker, ast);
 
     endFunctionTypeChecker(typeChecker);

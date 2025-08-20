@@ -247,6 +247,21 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Token sup
     typeTableAddAll(AS_BEHAVIOR_TYPE(superclassType)->fields, currentClassType->fields);
 }
 
+static void bindTraitType(Resolver* resolver, Token currentClass, Token trait) {
+    BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false));
+    TypeInfo* traitType = getTypeForSymbol(resolver, trait, false);
+    if (traitType == NULL) return;
+    TypeInfoArrayAdd(currentClassType->traitTypes, traitType);
+}
+
+static void bindTraitTypes(Resolver* resolver, Token currentClass, Ast* ast) {
+    if (!astHasChild(ast)) return;
+    for (int i = 0; i < ast->children->count; i++) {
+        Ast* trait = astGetChild(ast, i);
+        bindTraitType(resolver, currentClass, trait->token);
+    }
+}
+
 static void checkUnusedVariables(Resolver* resolver, int flag) {
     for (int i = 0; i < resolver->currentSymtab->capacity; i++) {
         SymbolEntry* entry = &resolver->currentSymtab->entries[i];
@@ -561,6 +576,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     traitList->symtab = ast->symtab;
     if (astNumChild(traitList) > 0) {
         resolveChild(resolver, ast, childIndex);
+        bindTraitTypes(resolver, resolver->currentClass->name, traitList);
     }
 
     childIndex++;

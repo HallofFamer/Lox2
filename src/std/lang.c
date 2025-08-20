@@ -1611,7 +1611,7 @@ LOX_METHOD(String, __add__) {
 
 LOX_METHOD(String, __getSubscript__) {
     ASSERT_ARG_COUNT("String::[](index)", 1);
-    ASSERT_ARG_TYPE("String::[getChar]](index)", 0, Int);
+    ASSERT_ARG_TYPE("String::[](index)", 0, Int);
     ObjString* self = AS_STRING(receiver);
     int index = AS_INT(args[0]);
     ASSERT_INDEX_WITHIN_BOUNDS("String::[](index)", index, 0, self->length, 0);
