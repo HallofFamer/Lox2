@@ -17,4 +17,5 @@ class Calculator {
 
 val calc = Calculator()
 println(calc.sumInt(1, 2))
+println(Calculator.sumNumber(1.5, 2.5))
 calc.printSum(2, 4)

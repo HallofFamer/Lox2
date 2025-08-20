@@ -13,11 +13,7 @@ Array filterArray(Array array, Bool fun(Int) filter) {
 
 val numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 println("Original numbers: ${numbers}")
-val evenNumbers = filterArray(numbers, { 
-    |n| 
-    //throw n
-    n % 2 == 0     
-})
+val evenNumbers = filterArray(numbers, { |n| n % 2 == 0 })
 println("Even numbers: ${evenNumbers}")
 
 String fun(String) createURL(String baseURL) { 

@@ -1,0 +1,35 @@
+namespace test.features
+using clox.std.collection.Dictionary
+
+class IterableObject with TIterable { 
+    
+    val Dictionary fields = Dictionary()
+    var Int position = -1
+    var Object value = nil
+
+    void addField(String name, Object value) {
+        this.fields[name] = value
+    }
+
+    TIterator iterator() {
+        return this.fields.iterator()
+    }
+
+    __undefinedGet__(name) { 
+        if (this.fields.containsKey(name)) {
+            return this.fields[name]
+        } else {
+            throw RuntimeException("Undefined field '${name}'")
+        }
+    }
+}
+
+val object = IterableObject()
+object.addField("name", "Test Object")
+object.addField("value", 42)
+object.addField("active", true)
+object.addField("description", "This is a test object.")
+
+for (val (field, value) : object) {
+    println("Field: ${field}, Value: ${value}")
+}
