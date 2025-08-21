@@ -47,6 +47,7 @@ https://github.com/munificent/craftinginterpreters
 - Semicolon inference as well as basic type inference for immutable local/global variables. 
 - Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be type inferred. 
 - Allow declaration of object instance/class fields outside of class initializer, which also enables optional static typing and default values.
+- Iterator API for user defined classes, allowing easy implementation of iterable classes which can be used in for loop.
 - Customized Runtime configuration for Lox2 using lox2.ini.
 - Allow loading lox source files in lox script and another lox source file with `require` keyword.
 - Cross-platform build with Cmake and package manager with vcpkg.
@@ -73,7 +74,7 @@ https://github.com/munificent/craftinginterpreters
 ## Documentation
 [Lox2's documentation](https://mysidia-inc.gitbook.io/lox2) can be found on gitbook, which explores the features in Lox2 as well as some concrete example Lox2 programs. It is still a work in progress as the standard library reference and VM internals sections are still under construction. 
 
-At this moment only the web version is available, though in Lox2 v2.1.0 onwards, Lox2 may have PDF documentation to download for interested developers. 
+At this moment only the web version is available, though in Lox2 v2.2.0 onwards, Lox2 may have PDF documentation to download for interested developers. 
 
 
 ## Roadmap
@@ -90,26 +91,32 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 
 ### Lox2 v2.3.0
 - Additional type system enhancement for union types, with `|` operator on types such as `String | Number`.
-- Add new namespace `clox.ext` which may be optionally enabled/disabled in lox2.ini, add new package `clox.ext.text` for text processing.
-- Improved type system with non-nullable by default for type declaration, as well as variance for method parameter/return types.
+- Type ascription using `as` keyword, allowing userland to specify the type of an expression rather than inferred by compiler.
 - Trailing closure similar to Kotlin and Swift which allows last lambda argument to be placed outside of parenthesis.
+- Add new namespace `clox.ext` which may be optionally enabled/disabled in lox2.ini, add new package `clox.ext.text` for text processing.
 
 ### Lox2 v2.4.0
 - Support for structural pattern matching using `match` keyword, remove `switch` statement as it has been superceded.
 - Enhanced Generics/parametric polymorphism with constraints on generic type parameters using `extends` or `with` keywords.
-- Object literal syntax similar to Javascript which can be good for configuration objects. 
+- Improved type system with non-nullable by default for type declaration, as well as variance for method parameter/return types.
 - Foreign function interface(FFI) as a way to write Lox2 libraries in C and load in lox script.
 
 ### Lox2 v2.5.0
 - C# style property accessor syntax which provides a flexible way to access and modify the value of instance fields. 
-- Add new package `clox.ext.sql` which supports database connections and queries for mysql/mariadb, postgres, sqlite, etc.
-- Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
+- Support for "this type" in method declarations using `this` or `this class`, which allows returning the same type as the class in which methods are declared. 
 - Implement a profiler which can identify the "Hotspots" of the program and how long they execute, prerequiste for future JIT. 
+- Add new package `clox.ext.sql` which supports database connections and queries for mysql/mariadb, postgres, sqlite, etc.
 
 ### Lox2 v2.6.0
 - Initial implementation of tracing JIT compiler that optimizes hot loops, only for x64 architecture. 
-- First class continuation with keyword `thisContext`, enabling manipulation of call stack in userland.
+- Object literal syntax similar to Javascript which can be good for configuration objects. 
 - Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body.
+- Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
+
+### Lox2 v2.7.0
+- Add control flow graph (CFG) and data flow analysis in the compiler, which can be used for constant propagation, dead code elimination and other optimizations.
+- Improvement of JIT compiler with further optimizations made possible from Lox2's new CFG and data  flow analysis.
+- First class continuation with keyword `thisContext`, enabling manipulation of call stack in userland.
 - Add new package `clox.ext.gui` which supports writing GUI applications using gtk binding for Lox2.
 
 
@@ -157,7 +164,7 @@ docker build -t lox2:linux -f Docker/[$LinuxDockerfile] .
 docker run -w /Lox2-2.1.0/Lox2 -i -t lox2:linux
 ```
 
-Note: It is recommended to clone from the latest stable release branch("v2.0.3" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
+Note: It is recommended to clone from the latest stable release branch("v2.1.0" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
 
 
 ## Credits & Special Thanks

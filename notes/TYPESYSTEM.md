@@ -124,11 +124,11 @@ type Option<T> = T | Nil
 ```
 
 ## Nil Type
-The literal value `nil` has type `Nil` which is also the name of its class. In Lox 2.2-, `Nil` is a bottom type which means all types are effectively nullable. However, this behavior will change in Lox 2.3, as types are no longer nullable by default. The below code will become invalid:
+The literal value `nil` has type `Nil` which is also the name of its class. In Lox 2.3 or earlier, `Nil` is a bottom type which means all types are effectively nullable. However, this behavior will change in Lox 2.4, as types are no longer nullable by default. The below code will become invalid:
 ```
 void setAge(Int age) {}
 setAge(nil)
-// In Lox 2.3 this is a compile time error
+// In Lox 2.4 this is a compile time error
 ```
 With the introduction of union types, it is possible to specify nullable types if needed. The above example can be corrected as:
 ```
@@ -145,7 +145,7 @@ class Repository<T extends Entity> {}
 ```
 
 ## This Types
-Lox 2.4 will also introduce this types, which allows a class to refer to itself in field types, method return/param types. This is useful for fluent APIs and method chaining. This types may be declared with syntax `this class`. Below is an example of how this can be used:
+Lox 2.5 will also introduce this types, which allows a class to refer to itself in field types, method return/param types. This is useful for fluent APIs and method chaining. This types may be declared with syntax `this class`. Below is an example of how this can be used:
 ```
 class UserBuilder {
     this class setName(String name) {}
@@ -157,6 +157,6 @@ val user = UserBuilder().setName("Alice").setAge(30).build()
 ```
 
 ## Further Enhancements
-Lox 2.5 and beyond may continue to improve the type system, and this note will be updated to reflect this. With this being said, Lox2  is meant to be an education language for building industrial/production graded compilers/interpreters, but not for research in academia. 
+Lox 2.6 and beyond may continue to improve the type system, and this note will be updated to reflect this. With this being said, Lox2  is meant to be an education language for building industrial/production graded compilers/interpreters, but not for research in academia. 
 
 For this reason, the type system is expected to be expressive and yet simple enough to understand. There is no plan to add complicated type level programming features such as Higher Kinded Types and Dependent Types to the language. 
