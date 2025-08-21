@@ -1,6 +1,6 @@
 FROM debian:latest
 
-WORKDIR Lox2-2.0.3
+WORKDIR Lox2-2.1.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -10,7 +10,7 @@ RUN apt-get update \
 	&& apt-get install -y --reinstall ca-certificates \
 	&& apt-get install -y --no-install-recommends git cmake libcurl4-gnutls-dev libuv1.dev
 
-RUN git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
+RUN git clone -b v2.1.0 https://github.com/HallofFamer/Lox2.git
 
 RUN cd Lox2 \
 	&& mkdir build \
@@ -21,4 +21,4 @@ RUN cd Lox2 \
 
 CMD ["Lox2"]
 
-# To run the REPL from container, use this command: docker run -w /Lox2-2.0.3/Lox2 -i -t lox2:debian
+# To run the REPL from container, use this command: docker run -w /Lox2-2.1.0/Lox2 -i -t lox2:debian

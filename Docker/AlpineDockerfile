@@ -1,10 +1,10 @@
 FROM alpine:latest
 
-WORKDIR Lox2-2.0.3
+WORKDIR Lox2-2.1.0
 
 RUN apk add git make gcc libc-dev cmake curl-dev libuv-dev --no-cache
 
-RUN git clone -b v2.0.3 https://github.com/HallofFamer/Lox2
+RUN git clone -b v2.1.0 https://github.com/HallofFamer/Lox2
 
 RUN cd Lox2 \
 	&& mkdir build \
@@ -15,4 +15,4 @@ RUN cd Lox2 \
 
 CMD ["Lox2"]
 
-# To run the REPL from container, use this command: docker run -w /Lox2-2.0.3/Lox2 -i -t lox2:alpine
+# To run the REPL from container, use this command: docker run -w /Lox2-2.1.0/Lox2 -i -t lox2:alpine
