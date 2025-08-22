@@ -50,7 +50,6 @@ typedef struct {
 typedef struct {
     bool isAsync;
     bool isClassMethod;
-    bool isGenerator;
     bool isInitializer;
     bool isInstanceMethod;
     bool isLambda;
@@ -96,7 +95,6 @@ static inline CallableTypeAttribute callableTypeInitAttribute() {
     return (CallableTypeAttribute) {
         .isAsync = false,
         .isClassMethod = false,
-        .isGenerator = false,
         .isInitializer = false,
         .isInstanceMethod = false,
         .isLambda = false,
@@ -110,11 +108,10 @@ BehaviorTypeInfo* newBehaviorTypeInfo(int id, TypeCategory category, ObjString* 
 BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType, int numTraits, ...);
 BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType, TypeTable* methods);
 CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* name, TypeInfo* returnType);
-CallableTypeInfo* newCallableTypeInfoWithParams(int id, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...);
 FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer);
-void freeTypeInfo(TypeInfo* type);
 char* createCallableTypeName(CallableTypeInfo* callableType);
+void freeTypeInfo(TypeInfo* type);
 void freeCallableTypes(TypeInfoArray* callableTypes);
 
 TypeTable* newTypeTable(int id);

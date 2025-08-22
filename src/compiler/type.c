@@ -80,27 +80,6 @@ CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* 
     return callableType;
 }
 
-CallableTypeInfo* newCallableTypeInfoWithParams(int id, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...) {
-    CallableTypeInfo* callableType = (CallableTypeInfo*)newTypeInfo(id, sizeof(CallableTypeInfo), category, name, name);
-    if (callableType != NULL) {
-        callableType->returnType = returnType;
-        callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->attribute = callableTypeInitAttribute();
-
-        if (callableType->paramTypes != NULL) {
-            TypeInfoArrayInit(callableType->paramTypes);
-            va_list args;
-            va_start(args, numParams);
-            for (int i = 0; i < numParams; i++) {
-                TypeInfo* type = va_arg(args, TypeInfo*);
-                TypeInfoArrayAdd(callableType->paramTypes, type);
-            }
-            va_end(args);
-        }
-    }
-    return callableType;
-}
-
 FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer) {
     FieldTypeInfo* fieldType = (FieldTypeInfo*)newTypeInfo(id, sizeof(FieldTypeInfo), TYPE_CATEGORY_FIELD, name, name);
     if (fieldType != NULL) {
@@ -120,25 +99,6 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
         methodType->isInitializer = isInitializer;
     }
     return methodType;
-}
-
-void freeTypeInfo(TypeInfo* type) {
-    if (type == NULL) return;
-    if (IS_BEHAVIOR_TYPE(type)) {
-        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
-        if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
-        freeTypeTable(behaviorType->fields);
-        freeTypeTable(behaviorType->methods);
-        free(behaviorType);
-    }
-    else if (IS_CALLABLE_TYPE(type)) {
-        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
-        if (callableType->paramTypes != NULL) TypeInfoArrayFree(callableType->paramTypes);
-        free(callableType);
-    }
-    else {
-        free(type);
-    }
 }
 
 char* createCallableTypeName(CallableTypeInfo* callableType) {
@@ -187,12 +147,29 @@ char* createCallableTypeName(CallableTypeInfo* callableType) {
     return callableName;
 }
 
+void freeTypeInfo(TypeInfo* type) {
+    if (type == NULL) return;
+    if (IS_BEHAVIOR_TYPE(type)) {
+        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+        if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
+        freeTypeTable(behaviorType->fields);
+        freeTypeTable(behaviorType->methods);
+        free(behaviorType);
+    }
+    else if (IS_CALLABLE_TYPE(type)) {
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
+        if (callableType->paramTypes != NULL) TypeInfoArrayFree(callableType->paramTypes);
+        free(callableType);
+    }
+    else {
+        free(type);
+    }
+}
+
 void freeCallableTypes(TypeInfoArray* freeCallableTypes) {
     for (int i = 0; i < freeCallableTypes->count; i++) {
         TypeInfo* type = freeCallableTypes->elements[i];
-        if (type != NULL) {
-            freeTypeInfo(type);
-        }
+        if (type != NULL) freeTypeInfo(type);
     }
 }
 
@@ -210,9 +187,7 @@ TypeTable* newTypeTable(int id) {
 void freeTypeTable(TypeTable* typetab) {
     for (int i = 0; i < typetab->capacity; i++) {
         TypeEntry* entry = &typetab->entries[i];
-        if (entry != NULL) {
-            freeTypeInfo(entry->value);
-        }
+        if (entry != NULL) freeTypeInfo(entry->value);
     }
 
     if (typetab->entries != NULL) free(typetab->entries);
