@@ -2108,7 +2108,6 @@ void registerCollectionPackage(VM* vm) {
     vm->currentNamespace = collectionNamespace;
 
     ObjClass* iterableTrait = getNativeClass(vm, "clox.std.lang.TIterable");
-    ObjClass* iteratorTrait = getNativeClass(vm, "clox.std.lang.TIterator");
     ObjClass* collectionClass = defineNativeClass(vm, "Collection");
     ObjClass* listClass = defineNativeClass(vm, "List");
     vm->arrayClass = defineNativeClass(vm, "Array");

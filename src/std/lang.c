@@ -2078,10 +2078,10 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->intClass, Int, toOctal, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->intClass, Int, upTo, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 1, PARAM_TYPE(Int)));
-    DEF_OPERATOR(vm->intClass, Int, +, __add__, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_OPERATOR(vm->intClass, Int, -, __subtract__, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_OPERATOR(vm->intClass, Int, *, __multiply__, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
-    DEF_OPERATOR(vm->intClass, Int, %, __modulo__, 1, RETURN_TYPE(Int), PARAM_TYPE(Int));
+    DEF_OPERATOR(vm->intClass, Int, +, __add__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
+    DEF_OPERATOR(vm->intClass, Int, -, __subtract__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
+    DEF_OPERATOR(vm->intClass, Int, *, __multiply__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
+    DEF_OPERATOR(vm->intClass, Int, %, __modulo__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     DEF_OPERATOR(vm->intClass, Int, .., __range__, 1, RETURN_TYPE(Object), PARAM_TYPE(Int));
     insertGlobalSymbolTable(vm, "Int", "Int class");
 
