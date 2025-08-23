@@ -142,6 +142,28 @@ static void deriveCallableType(TypeChecker* typeChecker, Ast* ast, CallableTypeI
     }
 }
 
+static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType) {
+    Ast* callee = astGetChild(ast, 0);
+    Ast* args = astGetChild(ast, 1);
+    Ast* params = astGetChild(callee, 1);
+
+    for (int i = 0; i < args->children->count; i++) {
+        Ast* arg = astGetChild(args, i);
+        Ast* param = astGetChild(params, i);
+        if (param->type == NULL) {
+            param->type = arg->type;
+            TypeInfoArrayAdd(calleeType->paramTypes, arg->type);
+            SymbolItem* item = symbolTableLookup(callee->symtab, createSymbol(typeChecker, param->token));
+            item->type = arg->type;
+        }
+        else TypeInfoArrayAdd(calleeType->paramTypes, param->type);
+    }
+
+    char* callableTypeName = createCallableTypeName(calleeType);
+    calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, callableTypeName, (int)strlen(callableTypeName));
+    calleeType->baseType.fullName = calleeType->baseType.shortName;
+}
+
 static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast* ast, CallableTypeInfo* callableType) {
     if (!callableType->attribute.isVariadic) {
         if (callableType->paramTypes->count != ast->children->count) {
@@ -385,7 +407,21 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
     ObjString* name = createSymbol(typeChecker, callee->token);
     char calleeDesc[UINT8_MAX];
 
-    if (isSubtypeOfType(callee->type, typeChecker->functionType)) {
+    if (callee->kind == AST_EXPR_FUNCTION) {
+        Ast* params = astGetChild(callee, 1);
+        if (args->children->count != params->children->count) {
+            typeError(typeChecker, "Immediate function expects to receive a total of %d arguments but gets %d.", params->children->count, args->children->count);
+            return;
+        }
+
+        CallableTypeInfo* calleeType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(typeChecker->vm), NULL);
+        calleeType->attribute.isAsync = callee->attribute.isAsync;
+        deriveCalleeType(typeChecker, ast, calleeType);       
+        callee->type = (TypeInfo*)calleeType;
+        TypeInfoArrayAdd(typeChecker->vm->callableTypes, callee->type);
+        function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false);
+    }
+    else if (isSubtypeOfType(callee->type, typeChecker->functionType)) {
         SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL || item->type == NULL || !IS_CALLABLE_TYPE(item->type)) return;
         CallableTypeInfo* functionType = AS_CALLABLE_TYPE(item->type);
