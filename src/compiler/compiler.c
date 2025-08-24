@@ -1077,7 +1077,6 @@ static void compileForStatement(Compiler* compiler, Ast* ast) {
     emitLoop(compiler);
     patchJump(compiler, compiler->currentLoop->exitJump);
     endLoopCompiler(compiler);
-
     emitByte(compiler, OP_POP);
     emitByte(compiler, OP_POP);
     emitByte(compiler, OP_POP);

@@ -250,6 +250,11 @@ static void bindTraitType(Resolver* resolver, Token currentClass, Token trait) {
     BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false));
     TypeInfo* traitType = getTypeForSymbol(resolver, trait, false);
     if (traitType == NULL) return;
+
+    for (int i = 0; i < currentClassType->traitTypes->count; i++) {
+        TypeInfo* existingTraitType = currentClassType->traitTypes->elements[i];
+        if (existingTraitType->id == traitType->id) return;
+    }
     TypeInfoArrayAdd(currentClassType->traitTypes, traitType);
 }
 
