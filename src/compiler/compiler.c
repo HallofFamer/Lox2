@@ -1271,7 +1271,6 @@ static void compileFieldDeclaration(Compiler* compiler, Ast* ast) {
     if (ast->attribute.isTyped && astNumChild(ast) == 2) compileChild(compiler, ast, 1);
     else if (!ast->attribute.isTyped && astNumChild(ast) == 1) compileChild(compiler, ast, 0);
     else emitByte(compiler, OP_NIL);
-
     emitByte(compiler, OP_FIELD);
     emitByte(compiler, index);
     emitByte(compiler, ast->attribute.isClass ? 1 : 0);

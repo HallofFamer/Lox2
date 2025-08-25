@@ -1410,6 +1410,39 @@ LOX_METHOD(Object, objectID) {
     RETURN_NUMBER(fetchObjectID(vm, AS_OBJ(receiver)));
 }
 
+LOX_METHOD(Object, setField) {
+    ASSERT_ARG_COUNT("Object::setField(field, value)", 2);
+    ASSERT_ARG_TYPE("Object::setField(field, value)", 0, String);
+    if (!IS_INSTANCE(receiver)) {
+        THROW_EXCEPTION(clox.std.lang.IllegalStateException, "Method Object::setField(field, value) can only be called on instances.");
+    }
+    ObjInstance* instance = AS_INSTANCE(receiver);
+    IDMap* idMap = getShapeIndexes(vm, instance->obj.shapeID);
+    int index;
+
+    if (idMapGet(idMap, AS_STRING(args[0]), &index)) {
+        instance->fields.values[index] = args[1];
+        RETURN_NIL;
+    }
+    else {
+        ObjString* fieldName = AS_STRING(args[0]);
+        Value fieldValue = args[1];
+        int newShapeID = createShapeFromParent(vm, instance->obj.shapeID, fieldName);
+        instance->obj.shapeID = newShapeID;
+
+        IDMap* newIdMap = getShapeIndexes(vm, newShapeID);
+        if (instance->fields.capacity < newIdMap->count) {
+            int oldCapacity = instance->fields.capacity;
+            instance->fields.capacity = GROW_CAPACITY(oldCapacity);
+            GROW_ARRAY(Value, instance->fields.values, oldCapacity, instance->fields.capacity, instance->fields.generation);
+        }
+
+        idMapGet(newIdMap, fieldName, &index);
+        valueArrayWrite(vm, &instance->fields, fieldValue);
+        RETURN_NIL;
+    }
+}
+
 LOX_METHOD(Object, toString) {
     ASSERT_ARG_COUNT("Object::toString()", 0);
     RETURN_STRING_FMT("<object %s>", AS_OBJ(receiver)->klass->name->chars);
@@ -1884,6 +1917,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->objectClass, Object, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->objectClass, Object, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Class));
     DEF_METHOD(vm->objectClass, Object, objectID, 0, RETURN_TYPE(Number));
+    DEF_METHOD(vm->objectClass, Object, setField, 2, RETURN_TYPE(Void), PARAM_TYPE(String), PARAM_TYPE(Object));
     DEF_METHOD(vm->objectClass, Object, toString, 0, RETURN_TYPE(String));
     DEF_OPERATOR(vm->objectClass, Object, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
 
