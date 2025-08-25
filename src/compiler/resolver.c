@@ -774,7 +774,7 @@ static void resolveSubscriptSet(Resolver* resolver, Ast* ast) {
 
 static void resolveSuperGet(Resolver* resolver, Ast* ast) {
     if (resolver->currentClass == NULL) {
-        semanticError(resolver, "Cannot use 'super' outside of a class.");
+        semanticError(resolver, "Cannot use 'super' outside of a class/trait.");
     }
     findThis(resolver);
     resolveChild(resolver, ast, 0);
@@ -782,7 +782,7 @@ static void resolveSuperGet(Resolver* resolver, Ast* ast) {
 
 static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
     if (resolver->currentClass == NULL) {
-        semanticError(resolver, "Cannot use 'super' outside of a class.");
+        semanticError(resolver, "Cannot use 'super' outside of a class/trait.");
     }
     findThis(resolver);
     resolveChild(resolver, ast, 0);
@@ -790,7 +790,7 @@ static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
 
 static void resolveThis(Resolver* resolver, Ast* ast) {
     if (resolver->currentClass == NULL) {
-        semanticError(resolver, "Cannot use 'this' outside of a class.");
+        semanticError(resolver, "Cannot use 'this' outside of a class/trait.");
     }
     findThis(resolver);
 }

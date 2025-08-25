@@ -142,7 +142,7 @@ static void deriveCallableType(TypeChecker* typeChecker, Ast* ast, CallableTypeI
     }
 }
 
-static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType) {
+static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType) {    
     Ast* callee = astGetChild(ast, 0);
     Ast* args = astGetChild(ast, 1);
     Ast* params = astGetChild(callee, 1);
@@ -150,6 +150,7 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
     for (int i = 0; i < args->children->count; i++) {
         Ast* arg = astGetChild(args, i);
         Ast* param = astGetChild(params, i);
+        if (param->attribute.isVariadic) return;
         if (param->type == NULL) {
             param->type = arg->type;
             TypeInfoArrayAdd(calleeType->paramTypes, arg->type);
