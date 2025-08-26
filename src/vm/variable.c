@@ -237,7 +237,7 @@ static bool getAndPushGenericInstanceVariableByName(VM* vm, Obj* object, ObjStri
     return true;
 }
 
-static bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
+bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
     switch (object->type) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
@@ -683,7 +683,7 @@ static bool setAndPushGenericInstanceVariableByName(VM* vm, Obj* object, ObjStri
     return true;
 }
 
-static bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Value value) {
+bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Value value) {
     switch (object->type) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
