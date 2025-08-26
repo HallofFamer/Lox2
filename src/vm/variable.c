@@ -947,7 +947,7 @@ bool setInstanceVariable(VM* vm, Value receiver, Chunk* chunk, uint8_t byte, Val
         ObjString* name = AS_STRING(chunk->identifiers.values[byte]);
         Value existingValue; 
         if (tableGet(&namespace->values, name, &existingValue)) {
-            runtimeError(vm, "Identifier %s already exists as class, trait or subnamespace in namespace %s", name->chars, namespace->fullName->chars);
+            runtimeError(vm, "Identifier %s already exists as class, trait or subnamespace in namespace %s.", name->chars, namespace->fullName->chars);
             exit(70);
         }
 

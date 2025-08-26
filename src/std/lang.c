@@ -14,6 +14,7 @@
 #include "../vm/native.h"
 #include "../vm/object.h"
 #include "../vm/string.h"
+#include "../vm/variable.h"
 #include "../vm/vm.h"
 
 static int factorial(int self) {
@@ -415,7 +416,7 @@ LOX_METHOD(FloatClass, parse) {
 LOX_METHOD(Function, __init__) {
     ASSERT_ARG_COUNT("Function::__init__(name, closure)", 2);
     ASSERT_ARG_TYPE("Function::__init__(name, closure)", 0, String);
-    ASSERT_ARG_TYPE("Function::__init__(name, closure)", 1, Closure);
+    ASSERT_ARG_TCALLABLE("Function::__init__(name, closure)", 1);
 
     ObjClosure* self = AS_CLOSURE(receiver);
     ObjString* name = AS_STRING(args[0]);
@@ -1413,34 +1414,37 @@ LOX_METHOD(Object, objectID) {
 LOX_METHOD(Object, setField) {
     ASSERT_ARG_COUNT("Object::setField(field, value)", 2);
     ASSERT_ARG_TYPE("Object::setField(field, value)", 0, String);
-    if (!IS_INSTANCE(receiver)) {
-        THROW_EXCEPTION(clox.std.lang.IllegalStateException, "Method Object::setField(field, value) can only be called on instances.");
+    
+    if (IS_INSTANCE(receiver)) {
+        ObjInstance* instance = AS_INSTANCE(receiver);
+        setObjProperty(vm, instance, AS_CSTRING(args[0]), args[1]);
     }
-    ObjInstance* instance = AS_INSTANCE(receiver);
-    IDMap* idMap = getShapeIndexes(vm, instance->obj.shapeID);
-    int index;
+    else if (IS_CLASS(receiver)) {
+        ObjClass* klass = AS_CLASS(receiver);
+        setClassProperty(vm, klass, AS_CSTRING(args[0]), args[1]);
+    }
+    else if (IS_NAMESPACE(receiver)) {
+        ObjNamespace* _namespace = AS_NAMESPACE(receiver);
+        if (!IS_CLASS(args[1]) && !IS_NAMESPACE(args[1])) {
+            THROW_EXCEPTION_FMT(clox.std.lang.UnsupportedOperationException, "Only classes, traits and sub-namespaces may be assigned to namespace %s.", _namespace->fullName->chars);
+        }
+        PROCESS_WRITE_BARRIER((Obj*)_namespace, args[1]);
 
-    if (idMapGet(idMap, AS_STRING(args[0]), &index)) {
-        instance->fields.values[index] = args[1];
-        RETURN_NIL;
+        ObjString* name = AS_STRING(args[0]);
+        Value existingValue;
+        if (tableGet(&_namespace->values, name, &existingValue)) {
+            THROW_EXCEPTION_FMT(clox.std.lang.UnsupportedOperationException, "Identifier %s already exists as class, trait or subnamespace in namespace %s.", name->chars, _namespace->fullName->chars);
+        }
+        tableSet(vm, &_namespace->values, name, args[1]);
+    }
+    else if (IS_OBJ(receiver)) {
+        setGenericInstanceVariableByName(vm, AS_OBJ(receiver), AS_STRING(args[0]), args[1]);
+        pop(vm);
     }
     else {
-        ObjString* fieldName = AS_STRING(args[0]);
-        Value fieldValue = args[1];
-        int newShapeID = createShapeFromParent(vm, instance->obj.shapeID, fieldName);
-        instance->obj.shapeID = newShapeID;
-
-        IDMap* newIdMap = getShapeIndexes(vm, newShapeID);
-        if (instance->fields.capacity < newIdMap->count) {
-            int oldCapacity = instance->fields.capacity;
-            instance->fields.capacity = GROW_CAPACITY(oldCapacity);
-            GROW_ARRAY(Value, instance->fields.values, oldCapacity, instance->fields.capacity, instance->fields.generation);
-        }
-
-        idMapGet(newIdMap, fieldName, &index);
-        valueArrayWrite(vm, &instance->fields, fieldValue);
-        RETURN_NIL;
+        THROW_EXCEPTION(clox.std.lang.UnsupportedOperationException, "Method Object::setField(field, value) can only be invoked on heap allocated objects.");
     }
+    RETURN_NIL;
 }
 
 LOX_METHOD(Object, toString) {
@@ -1917,7 +1921,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->objectClass, Object, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->objectClass, Object, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Class));
     DEF_METHOD(vm->objectClass, Object, objectID, 0, RETURN_TYPE(Number));
-    DEF_METHOD(vm->objectClass, Object, setField, 2, RETURN_TYPE(Void), PARAM_TYPE(String), PARAM_TYPE(Object));
+    DEF_METHOD(vm->objectClass, Object, setField, 2, RETURN_TYPE(void), PARAM_TYPE(String), PARAM_TYPE(Object));
     DEF_METHOD(vm->objectClass, Object, toString, 0, RETURN_TYPE(String));
     DEF_OPERATOR(vm->objectClass, Object, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
 
