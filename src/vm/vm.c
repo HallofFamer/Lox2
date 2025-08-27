@@ -206,6 +206,7 @@ void freeVM(VM* vm) {
     freeShapeTree(vm, &vm->shapes);
     freeGenericIDMap(vm, &vm->genericIDMap);
     vm->initString = NULL;
+    vm->voidString = NULL;
     vm->runningGenerator = NULL;
 
     freeSymbolTable(vm->symtab);
@@ -493,7 +494,7 @@ Value callGenerator(VM* vm, ObjGenerator* generator) {
 
 static bool callValue(VM* vm, Value callee, int argCount) {
     if (IS_OBJ(callee)) {
-        switch (OBJ_TYPE(callee)) {
+        switch (OBJ_CATEGORY(callee)) {
             case OBJ_BOUND_METHOD: return callBoundMethod(vm, AS_BOUND_METHOD(callee), argCount);
             case OBJ_CLASS: return callClass(vm, AS_CLASS(callee), argCount);
             case OBJ_CLOSURE: return callClosure(vm, AS_CLOSURE(callee), argCount);

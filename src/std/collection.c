@@ -1778,6 +1778,12 @@ LOX_METHOD(Range, min) {
     RETURN_INT((self->from < self->to) ? self->from : self->to);
 }
 
+LOX_METHOD(Range, reverse) {
+    ASSERT_ARG_COUNT("Range::reverse()", 0);
+    ObjRange* self = AS_RANGE(receiver);
+    RETURN_OBJ(newRange(vm, self->to, self->from));
+}
+
 LOX_METHOD(Range, step) {
     ASSERT_ARG_COUNT("Range::step(by, closure)", 2);
     ASSERT_ARG_TYPE("Range::step(by, closure)", 0, Number);
@@ -2309,6 +2315,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->rangeClass, Range, length, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, max, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, min, 0, RETURN_TYPE(Int));
+    DEF_METHOD(vm->rangeClass, Range, reverse, 0, RETURN_TYPE(clox.std.collection.Range));
     DEF_METHOD(vm->rangeClass, Range, step, 2, RETURN_TYPE(void), PARAM_TYPE(Int), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 1, PARAM_TYPE(Int)));
     DEF_METHOD(vm->rangeClass, Range, to, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->rangeClass, Range, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
