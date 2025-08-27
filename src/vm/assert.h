@@ -53,6 +53,18 @@
         if (IS_STRING(message)) RETURN_PROMISE_EX(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
     } while (false)
 
+#define ASSERT_ARG_TCOMPARABLE(method, index) \
+    do { \
+        Value message = assertArgIsComparable(vm, method, args, index); \
+        if (IS_STRING(message)) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
+    } while (false)
+
+#define ASSERT_ARG_TCOMPARABLE_ASYNC(method, index) \
+    do { \
+        Value message = assertArgIsComparable(vm, method, args, index); \
+        if (IS_STRING(message)) RETURN_PROMISE_EX(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
+    } while (false)
+
 #define ASSERT_ARG_TITERABLE(method, index) \
     do { \
         Value message = assertArgIsIterable(vm, method, args, index); \
@@ -97,6 +109,7 @@ Value assertArgIsBool(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsCallable(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsClass(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsClosure(VM* vm, const char* method, Value* args, int index);
+Value assertArgIsComparable(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsDictionary(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsEntry(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsIterable(VM * vm, const char* method, Value * args, int index);

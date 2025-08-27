@@ -43,8 +43,8 @@ Value assertArgIsBool(VM* vm, const char* method, Value* args, int index) {
 }
 
 Value assertArgIsCallable(VM* vm, const char* method, Value* args, int index) {
-    if (!isObjInstanceOf(vm, args[index], getNativeClass(vm, "clox.std.lang.TCallable"))) {
-        RETURN_STRING_FMT("method %s expects argument %d to an instance of trait TCallable(ie. Closure) but got %s.",
+    if (!isObjInstanceOf(vm, args[index], getNativeClass(vm, "clox.std.lang.TComparable"))) {
+        RETURN_STRING_FMT("method %s expects argument %d to an instance of trait TComparable(ie. Number) but got %s.",
             method, index + 1, getObjClass(vm, args[index])->name->chars);
     }
     RETURN_NIL;
@@ -60,6 +60,14 @@ Value assertArgIsClass(VM* vm, const char* method, Value* args, int index) {
 Value assertArgIsClosure(VM* vm, const char* method, Value* args, int index) {
     if (!IS_CLOSURE(args[index]) && !isObjInstanceOf(vm, args[index], vm->functionClass)) {
         RETURN_STRING_FMT("method %s expects argument %d to be a closure.", method, index + 1);
+    }
+    RETURN_NIL;
+}
+
+Value assertArgIsComparable(VM* vm, const char* method, Value* args, int index) {
+    if (!isObjInstanceOf(vm, args[index], getNativeClass(vm, "clox.std.lang.TCallable"))) {
+        RETURN_STRING_FMT("method %s expects argument %d to an instance of trait TCallable(ie. Closure) but got %s.",
+            method, index + 1, getObjClass(vm, args[index])->name->chars);
     }
     RETURN_NIL;
 }
