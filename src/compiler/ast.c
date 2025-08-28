@@ -615,6 +615,14 @@ static void astOutputDeclTrait(Ast* ast, int indentLevel) {
     free(traitName);
 }
 
+static void astOutputDeclType(Ast* ast, int indentLevel) {
+    astOutputIndent(indentLevel);
+    char* typeName = tokenToCString(ast->token);
+    printf("typeDecl %s\n", typeName);
+    astOutputChild(ast, indentLevel + 1, 0);
+    free(typeName);
+}
+
 static void astOutputDeclVar(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     char* attribute = ast->attribute.isMutable ? "var" : "val";
@@ -850,6 +858,9 @@ void astOutput(Ast* ast, int indentLevel) {
                     break;
                 case AST_DECL_TRAIT:
                     astOutputDeclTrait(ast, indentLevel);
+                    break;
+                case AST_DECL_TYPE:
+                    astOutputDeclType(ast, indentLevel);
                     break;
                 case AST_DECL_VAR:
                     astOutputDeclVar(ast, indentLevel);

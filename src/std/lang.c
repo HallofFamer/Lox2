@@ -1343,7 +1343,7 @@ LOX_METHOD(Object, clone) {
     ObjInstance* thisObject = AS_INSTANCE(receiver);
     ObjInstance* thatObject = newInstance(vm, OBJ_KLASS(receiver));
     push(vm, OBJ_VAL(thatObject));
-    copyObjProperties(vm, thisObject, thatObject);
+    copyObjFields(vm, thisObject, thatObject);
     pop(vm);
     RETURN_OBJ(thatObject);
 }
@@ -1417,7 +1417,7 @@ LOX_METHOD(Object, setField) {
     
     if (IS_INSTANCE(receiver)) {
         ObjInstance* instance = AS_INSTANCE(receiver);
-        setObjProperty(vm, instance, AS_CSTRING(args[0]), args[1]);
+        setObjField(vm, instance, AS_CSTRING(args[0]), args[1]);
     }
     else if (IS_CLASS(receiver)) {
         ObjClass* klass = AS_CLASS(receiver);

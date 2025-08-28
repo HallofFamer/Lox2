@@ -54,9 +54,9 @@ LOX_METHOD(Date, __init__) {
     ASSERT_ARG_TYPE("Date::__init__(year, month, day)", 2, Int);
 
     ObjInstance* self = AS_INSTANCE(receiver);
-    setObjProperty(vm, self, "year", args[0]);
-    setObjProperty(vm, self, "month", args[1]);
-    setObjProperty(vm, self, "day", args[2]);
+    setObjField(vm, self, "year", args[0]);
+    setObjField(vm, self, "month", args[1]);
+    setObjField(vm, self, "day", args[2]);
     RETURN_OBJ(receiver);
 }
 
@@ -88,12 +88,12 @@ LOX_METHOD(Date, toDateTime) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjInstance* dateTime = newInstance(vm, getNativeClass(vm, "clox.std.util.DateTime"));
     push(vm, OBJ_VAL(dateTime));
-    copyObjProperty(vm, self, dateTime, "year");
-    copyObjProperty(vm, self, dateTime, "month");
-    copyObjProperty(vm, self, dateTime, "day");
-    setObjProperty(vm, dateTime, "hour", INT_VAL(0));
-    setObjProperty(vm, dateTime, "minute", INT_VAL(0));
-    setObjProperty(vm, dateTime, "second", INT_VAL(0));
+    copyObjField(vm, self, dateTime, "year");
+    copyObjField(vm, self, dateTime, "month");
+    copyObjField(vm, self, dateTime, "day");
+    setObjField(vm, dateTime, "hour", INT_VAL(0));
+    setObjField(vm, dateTime, "minute", INT_VAL(0));
+    setObjField(vm, dateTime, "second", INT_VAL(0));
     pop(vm);
     RETURN_OBJ(dateTime);
 }
@@ -101,9 +101,9 @@ LOX_METHOD(Date, toDateTime) {
 LOX_METHOD(Date, toString) {
     ASSERT_ARG_COUNT("Date::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    Value year = getObjProperty(vm, self, "year");
-    Value month = getObjProperty(vm, self, "month");
-    Value day = getObjProperty(vm, self, "day");
+    Value year = getObjField(vm, self, "year");
+    Value month = getObjField(vm, self, "month");
+    Value day = getObjField(vm, self, "day");
     RETURN_STRING_FMT("%d-%02d-%02d", AS_INT(year), AS_INT(month), AS_INT(day));
 }
 
@@ -165,9 +165,9 @@ LOX_METHOD(DateClass, parse) {
     if (sscanf_s(dateString->chars, "%d-%d-%d", &year, &month, &day) == 3) {
         ObjInstance* instance = newInstance(vm, self);
         push(vm, OBJ_VAL(instance));
-        setObjProperty(vm, instance, "year", INT_VAL(year));
-        setObjProperty(vm, instance, "month", INT_VAL(month));
-        setObjProperty(vm, instance, "day", INT_VAL(day));
+        setObjField(vm, instance, "year", INT_VAL(year));
+        setObjField(vm, instance, "month", INT_VAL(month));
+        setObjField(vm, instance, "day", INT_VAL(day));
         pop(vm);
         RETURN_OBJ(instance);
     }
@@ -184,12 +184,12 @@ LOX_METHOD(DateTime, __init__) {
     ASSERT_ARG_TYPE("DateTime::__init__(year, month, day, hour, minute, second)", 5, Int);
 
     ObjInstance* self = AS_INSTANCE(receiver);
-    setObjProperty(vm, self, "year", args[0]);
-    setObjProperty(vm, self, "month", args[1]);
-    setObjProperty(vm, self, "day", args[2]);
-    setObjProperty(vm, self, "hour", args[3]);
-    setObjProperty(vm, self, "minute", args[4]);
-    setObjProperty(vm, self, "second", args[5]);
+    setObjField(vm, self, "year", args[0]);
+    setObjField(vm, self, "month", args[1]);
+    setObjField(vm, self, "day", args[2]);
+    setObjField(vm, self, "hour", args[3]);
+    setObjField(vm, self, "minute", args[4]);
+    setObjField(vm, self, "second", args[5]);
     RETURN_OBJ(receiver);
 }
 
@@ -221,9 +221,9 @@ LOX_METHOD(DateTime, toDate) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjInstance* date = newInstance(vm, getNativeClass(vm, "clox.std.util.Date"));
     push(vm, OBJ_VAL(date));
-    copyObjProperty(vm, self, date, "year");
-    copyObjProperty(vm, self, date, "month");
-    copyObjProperty(vm, self, date, "day");
+    copyObjField(vm, self, date, "year");
+    copyObjField(vm, self, date, "month");
+    copyObjField(vm, self, date, "day");
     pop(vm);
     RETURN_OBJ(date);
 }
@@ -231,12 +231,12 @@ LOX_METHOD(DateTime, toDate) {
 LOX_METHOD(DateTime, toString) {
     ASSERT_ARG_COUNT("DateTime::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    Value year = getObjProperty(vm, self, "year");
-    Value month = getObjProperty(vm, self, "month");
-    Value day = getObjProperty(vm, self, "day");
-    Value hour = getObjProperty(vm, self, "hour");
-    Value minute = getObjProperty(vm, self, "minute");
-    Value second = getObjProperty(vm, self, "second");
+    Value year = getObjField(vm, self, "year");
+    Value month = getObjField(vm, self, "month");
+    Value day = getObjField(vm, self, "day");
+    Value hour = getObjField(vm, self, "hour");
+    Value minute = getObjField(vm, self, "minute");
+    Value second = getObjField(vm, self, "second");
     RETURN_STRING_FMT("%d-%02d-%02d %02d:%02d:%02d", AS_INT(year), AS_INT(month), AS_INT(day), AS_INT(hour), AS_INT(minute), AS_INT(second));
 }
 
@@ -298,12 +298,12 @@ LOX_METHOD(DateTimeClass, parse) {
     if (sscanf_s(dateTimeString->chars, "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second) == 6) {
         ObjInstance* instance = newInstance(vm, self);
         push(vm, OBJ_VAL(instance));
-        setObjProperty(vm, instance, "year", INT_VAL(year));
-        setObjProperty(vm, instance, "month", INT_VAL(month));
-        setObjProperty(vm, instance, "day", INT_VAL(day));
-        setObjProperty(vm, instance, "hour", INT_VAL(hour));
-        setObjProperty(vm, instance, "minute", INT_VAL(minute));
-        setObjProperty(vm, instance, "second", INT_VAL(second));
+        setObjField(vm, instance, "year", INT_VAL(year));
+        setObjField(vm, instance, "month", INT_VAL(month));
+        setObjField(vm, instance, "day", INT_VAL(day));
+        setObjField(vm, instance, "hour", INT_VAL(hour));
+        setObjField(vm, instance, "minute", INT_VAL(minute));
+        setObjField(vm, instance, "second", INT_VAL(second));
         pop(vm);
         RETURN_OBJ(instance);
     }
@@ -352,10 +352,10 @@ LOX_METHOD(Duration, getTotalSeconds) {
 LOX_METHOD(Duration, toString) {
     ASSERT_ARG_COUNT("Duration::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    Value days = getObjProperty(vm, self, "days");
-    Value hours = getObjProperty(vm, self, "hours");
-    Value minutes = getObjProperty(vm, self, "minutes");
-    Value seconds = getObjProperty(vm, self, "seconds");
+    Value days = getObjField(vm, self, "days");
+    Value hours = getObjField(vm, self, "hours");
+    Value minutes = getObjField(vm, self, "minutes");
+    Value seconds = getObjField(vm, self, "seconds");
     RETURN_STRING_FMT("%d days, %02d hours, %02d minutes, %02d seconds", AS_INT(days), AS_INT(hours), AS_INT(minutes), AS_INT(seconds));
 }
 
@@ -659,13 +659,13 @@ LOX_METHOD(Random, __init__) {
     ObjInstance* self = AS_INSTANCE(receiver);
     uint64_t seed = (uint64_t)time(NULL);
     pcg32_seed(seed);
-    setObjProperty(vm, self, "seed", INT_VAL(abs((int)seed)));
+    setObjField(vm, self, "seed", INT_VAL(abs((int)seed)));
     RETURN_OBJ(receiver);
 }
 
 LOX_METHOD(Random, getSeed) {
     ASSERT_ARG_COUNT("Random::getSeed()", 0);
-    Value seed = getObjProperty(vm, AS_INSTANCE(receiver), "seed");
+    Value seed = getObjField(vm, AS_INSTANCE(receiver), "seed");
     RETURN_VAL(seed);
 }
 
@@ -703,7 +703,7 @@ LOX_METHOD(Random, setSeed) {
         THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Random::setSeed(seed) expects argument 1 to be a non negative integer but got %d.", seed);
     }
     pcg32_seed((uint64_t)AS_INT(args[0]));
-    setObjProperty(vm, AS_INSTANCE(receiver), "seed", args[0]);
+    setObjField(vm, AS_INSTANCE(receiver), "seed", args[0]);
     RETURN_NIL;
 }
 
@@ -711,14 +711,14 @@ LOX_METHOD(Regex, __init__) {
     ASSERT_ARG_COUNT("Regex::__init__(pattern)", 1);
     ASSERT_ARG_TYPE("Regex::__init__(pattern)", 0, String);
     ObjInstance* self = AS_INSTANCE(receiver);
-    setObjProperty(vm, self, "pattern", args[0]);
+    setObjField(vm, self, "pattern", args[0]);
     RETURN_OBJ(self);
 }
 
 LOX_METHOD(Regex, match) {
     ASSERT_ARG_COUNT("Regex::match(string)", 1);
     ASSERT_ARG_TYPE("Regex::match(string)", 0, String);
-    Value pattern = getObjProperty(vm, AS_INSTANCE(receiver), "pattern");
+    Value pattern = getObjField(vm, AS_INSTANCE(receiver), "pattern");
     int length;
     int index = re_match(AS_CSTRING(pattern), AS_CSTRING(args[0]), &length);
     RETURN_BOOL(index != -1);
@@ -728,7 +728,7 @@ LOX_METHOD(Regex, replace) {
     ASSERT_ARG_COUNT("Regex::replace(original, replacement)", 2);
     ASSERT_ARG_TYPE("Regex::replace(original, replacement)", 0, String);
     ASSERT_ARG_TYPE("Regex::replace(original, replacement)", 1, String);
-    Value pattern = getObjProperty(vm, AS_INSTANCE(receiver), "pattern");
+    Value pattern = getObjField(vm, AS_INSTANCE(receiver), "pattern");
     ObjString* original = AS_STRING(args[0]);
     ObjString* replacement = AS_STRING(args[1]);
 
@@ -741,7 +741,7 @@ LOX_METHOD(Regex, replace) {
 
 LOX_METHOD(Regex, toString) {
     ASSERT_ARG_COUNT("Regex::toString()", 0);
-    Value pattern = getObjProperty(vm, AS_INSTANCE(receiver), "pattern");
+    Value pattern = getObjField(vm, AS_INSTANCE(receiver), "pattern");
     RETURN_OBJ(pattern);
 }
 
@@ -834,13 +834,13 @@ LOX_METHOD(UUID, __init__) {
     char buffer[UUID4_LEN];
     uuid4_init();
     uuid4_generate(buffer);
-    setObjProperty(vm, self, "buffer", OBJ_VAL(newString(vm, buffer)));
+    setObjField(vm, self, "buffer", OBJ_VAL(newString(vm, buffer)));
     RETURN_OBJ(self);
 }
 
 LOX_METHOD(UUID, toString) {
     ASSERT_ARG_COUNT("UUID::toString()", 0);
-    Value buffer = getObjProperty(vm, AS_INSTANCE(receiver), "buffer");
+    Value buffer = getObjField(vm, AS_INSTANCE(receiver), "buffer");
     RETURN_OBJ(buffer);
 }
 
@@ -865,7 +865,7 @@ LOX_METHOD(UUIDClass, parse) {
     if (!uuidCheckString(uuid)) RETURN_NIL;
     else {
         ObjInstance* instance = newInstance(vm, AS_CLASS(receiver));
-        setObjProperty(vm, instance, "buffer", OBJ_VAL(uuid));
+        setObjField(vm, instance, "buffer", OBJ_VAL(uuid));
         RETURN_OBJ(instance);
     }
 }

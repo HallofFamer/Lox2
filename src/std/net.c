@@ -19,14 +19,14 @@ LOX_METHOD(Domain, __init__) {
     ASSERT_ARG_COUNT("Domain::__init__(name)", 1);
     ASSERT_ARG_TYPE("Domain::__init__(name)", 0, String);
     ObjInstance* self = AS_INSTANCE(receiver);
-    setObjProperty(vm, self, "name", args[0]);
+    setObjField(vm, self, "name", args[0]);
     RETURN_OBJ(self);
 }
 
 LOX_METHOD(Domain, getIPAddresses) {
     ASSERT_ARG_COUNT("Domain::getIPAddresses()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjString* name = AS_STRING(getObjProperty(vm, self, "name"));
+    ObjString* name = AS_STRING(getObjField(vm, self, "name"));
 
     int status = -1;
     struct addrinfo* result = dnsGetDomainInfo(vm, name->chars, &status);
@@ -49,7 +49,7 @@ LOX_METHOD(Domain, getIPAddressesAsync) {
 LOX_METHOD(Domain, toString) {
     ASSERT_ARG_COUNT("Domain::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjString* name = AS_STRING(getObjProperty(vm, self, "name"));
+    ObjString* name = AS_STRING(getObjField(vm, self, "name"));
     RETURN_OBJ(name);
 }
 
@@ -67,14 +67,14 @@ LOX_METHOD(HTTPClient, __init__) {
     curl_multi_setopt(curlMData->curlM, CURLMOPT_TIMERDATA, (void*)curlMData);
 
     ObjRecord* data = newRecord(vm, curlMData);
-    setObjProperty(vm, self, "metadata", OBJ_VAL(data));
+    setObjField(vm, self, "metadata", OBJ_VAL(data));
     RETURN_VAL(receiver);
 }
 
 LOX_METHOD(HTTPClient, close) {
     ASSERT_ARG_COUNT("HTTPClient::close()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
     CURLMData* curlMData = (CURLMData*)metadata->data;
     if (curlMData != NULL) curl_multi_cleanup(curlMData->curlM);
     RETURN_NIL;
@@ -105,7 +105,7 @@ LOX_METHOD(HTTPClient, deleteAsync) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
 
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
     CURLMData* curlMData = (CURLMData*)metadata->data;
     ObjPromise* promise = httpSendRequestAsync(vm, url, HTTP_DELETE, NULL, NULL, curlMData, httpOnSendRequest);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.HTTPException, "Failed to initiate a DELETE request using CURL.");
@@ -139,7 +139,7 @@ LOX_METHOD(HTTPClient, downloadAsync) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* src = httpRawURL(vm, args[0]);
     ObjString* dest = AS_STRING(args[1]);
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
 
     CURLMData* curlMData = (CURLMData*)metadata->data;
     ObjPromise* promise = httpDownloadFileAsync(vm, src, dest, curlMData, httpOnDownloadFile);
@@ -172,7 +172,7 @@ LOX_METHOD(HTTPClient, getAsync) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
 
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
     CURLMData* curlMData = (CURLMData*)metadata->data;
     ObjPromise* promise = httpSendRequestAsync(vm, url, HTTP_GET, NULL, NULL, curlMData, httpOnSendRequest);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.HTTPException, "Failed to initiate a GET request using CURL.");
@@ -204,7 +204,7 @@ LOX_METHOD(HTTPClient, headAsync) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
 
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
     CURLMData* curlMData = (CURLMData*)metadata->data;
     ObjPromise* promise = httpSendRequestAsync(vm, url, HTTP_HEAD, NULL, NULL, curlMData, httpOnSendRequest);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.HTTPException, "Failed to initiate a HEAD request using CURL.");
@@ -237,7 +237,7 @@ LOX_METHOD(HTTPClient, optionsAsync) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
 
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
     CURLMData* curlMData = (CURLMData*)metadata->data;
     ObjPromise* promise = httpSendRequestAsync(vm, url, HTTP_OPTIONS, NULL, NULL, curlMData, httpOnSendRequest);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.HTTPException, "Failed to initiate an OPTIONS request using CURL.");
@@ -273,7 +273,7 @@ LOX_METHOD(HTTPClient, patchAsync) {
     ObjString* url = httpRawURL(vm, args[0]);
     ObjDictionary* data = AS_DICTIONARY(args[1]);
 
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
     CURLMData* curlMData = (CURLMData*)metadata->data;
     ObjPromise* promise = httpSendRequestAsync(vm, url, HTTP_PATCH, NULL, data, curlMData, httpOnSendRequest);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.HTTPException, "Failed to initiate a PATCH request using CURL.");
@@ -309,7 +309,7 @@ LOX_METHOD(HTTPClient, postAsync) {
     ObjString* url = httpRawURL(vm, args[0]);
     ObjDictionary* data = AS_DICTIONARY(args[1]);
 
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
     CURLMData* curlMData = (CURLMData*)metadata->data;
     ObjPromise* promise = httpSendRequestAsync(vm, url, HTTP_POST, NULL, data, curlMData, httpOnSendRequest);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.HTTPException, "Failed to initiate a POST request using CURL.");
@@ -345,7 +345,7 @@ LOX_METHOD(HTTPClient, putAsync) {
     ObjString* url = httpRawURL(vm, args[0]);
     ObjDictionary* data = AS_DICTIONARY(args[1]);
 
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
     CURLMData* curlMData = (CURLMData*)metadata->data;
     ObjPromise* promise = httpSendRequestAsync(vm, url, HTTP_PUT, NULL, data, curlMData, httpOnSendRequest);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.HTTPException, "Failed to initiate a PUT request using CURL.");
@@ -359,10 +359,10 @@ LOX_METHOD(HTTPClient, send) {
     if (curl == NULL) THROW_EXCEPTION(clox.std.net.HTTPException, "Failed to initiate an HTTP request using CURL.");
 
     ObjInstance* request = AS_INSTANCE(args[0]);
-    ObjString* url = AS_STRING(getObjProperty(vm, request, "url"));
-    HTTPMethod method = (HTTPMethod)AS_INT(getObjProperty(vm, request, "method"));
-    ObjDictionary* headers = AS_DICTIONARY(getObjProperty(vm, request, "headers"));
-    ObjDictionary* data = AS_DICTIONARY(getObjProperty(vm, request, "data"));
+    ObjString* url = AS_STRING(getObjField(vm, request, "url"));
+    HTTPMethod method = (HTTPMethod)AS_INT(getObjField(vm, request, "method"));
+    ObjDictionary* headers = AS_DICTIONARY(getObjField(vm, request, "headers"));
+    ObjDictionary* data = AS_DICTIONARY(getObjField(vm, request, "data"));
 
     struct curl_slist* curlHeaders = httpParseHeaders(vm, headers, curl);
     CURLResponse curlResponse;
@@ -384,12 +384,12 @@ LOX_METHOD(HTTPClient, sendAsync) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjInstance* request = AS_INSTANCE(args[0]);
 
-    ObjString* url = AS_STRING(getObjProperty(vm, request, "url"));
-    HTTPMethod method = (HTTPMethod)AS_INT(getObjProperty(vm, request, "method"));
-    ObjDictionary* headers = AS_DICTIONARY(getObjProperty(vm, request, "headers"));
-    ObjDictionary* data = AS_DICTIONARY(getObjProperty(vm, request, "data"));
+    ObjString* url = AS_STRING(getObjField(vm, request, "url"));
+    HTTPMethod method = (HTTPMethod)AS_INT(getObjField(vm, request, "method"));
+    ObjDictionary* headers = AS_DICTIONARY(getObjField(vm, request, "headers"));
+    ObjDictionary* data = AS_DICTIONARY(getObjField(vm, request, "data"));
 
-    ObjRecord* metadata = AS_RECORD(getObjProperty(vm, self, "metadata"));
+    ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
     CURLMData* curlMData = (CURLMData*)metadata->data;
     ObjPromise* promise = httpSendRequestAsync(vm, url, method, headers, data, curlMData, httpOnSendRequest);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.HTTPException, "Failed to initiate a PUT request using CURL.");
@@ -405,19 +405,19 @@ LOX_METHOD(HTTPRequest, __init__) {
 
     ObjInstance* self = AS_INSTANCE(receiver);
     Value rawURL = OBJ_VAL(httpRawURL(vm, args[0]));
-    setObjProperty(vm, self, "url", rawURL);
-    setObjProperty(vm, self, "method", args[1]);
-    setObjProperty(vm, self, "headers", args[2]);
-    setObjProperty(vm, self, "data", args[3]);
+    setObjField(vm, self, "url", rawURL);
+    setObjField(vm, self, "method", args[1]);
+    setObjField(vm, self, "headers", args[2]);
+    setObjField(vm, self, "data", args[3]);
     RETURN_OBJ(self);
 }
 
 LOX_METHOD(HTTPRequest, toString) {
     ASSERT_ARG_COUNT("HTTPRequest::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjString* url = AS_STRING(getObjProperty(vm, self, "url"));
-    HTTPMethod method = (HTTPMethod)AS_INT(getObjProperty(vm, self, "method"));
-    ObjDictionary* data = AS_DICTIONARY(getObjProperty(vm, self, "data"));
+    ObjString* url = AS_STRING(getObjField(vm, self, "url"));
+    HTTPMethod method = (HTTPMethod)AS_INT(getObjField(vm, self, "method"));
+    ObjDictionary* data = AS_DICTIONARY(getObjField(vm, self, "data"));
     RETURN_STRING_FMT("HTTPRequest - URL: %s; Method: %s; Data: %s", url->chars, httpMapMethod(method), httpParsePostData(vm, data)->chars);
 }
 
@@ -429,19 +429,19 @@ LOX_METHOD(HTTPResponse, __init__) {
     ASSERT_ARG_TYPE("HTTPResponse::__init__(url, status, headers, contentType)", 3, String);
 
     ObjInstance* self = AS_INSTANCE(receiver);
-    setObjProperty(vm, self, "url", args[0]);
-    setObjProperty(vm, self, "status", args[1]);
-    setObjProperty(vm, self, "headers", args[2]);
-    setObjProperty(vm, self, "contentType", args[3]);
+    setObjField(vm, self, "url", args[0]);
+    setObjField(vm, self, "status", args[1]);
+    setObjField(vm, self, "headers", args[2]);
+    setObjField(vm, self, "contentType", args[3]);
     RETURN_OBJ(self);
 }
 
 LOX_METHOD(HTTPResponse, toString) {
     ASSERT_ARG_COUNT("HTTPResponse::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjString* url = AS_STRING(getObjProperty(vm, self, "url"));
-    int status = AS_INT(getObjProperty(vm, self, "status"));
-    ObjString* contentType = AS_STRING(getObjProperty(vm, self, "contentType"));
+    ObjString* url = AS_STRING(getObjField(vm, self, "url"));
+    int status = AS_INT(getObjField(vm, self, "status"));
+    ObjString* contentType = AS_STRING(getObjField(vm, self, "contentType"));
     RETURN_STRING_FMT("HTTPResponse - URL: %s; Status: %d; ContentType: %s", url->chars, status, contentType->chars);
 }
 
@@ -456,15 +456,15 @@ LOX_METHOD(IPAddress, __init__) {
     else if (ipIsV6(address)) version = 6;
     else THROW_EXCEPTION(clox.std.net.IPAddressException, "Invalid IP address specified.");
 
-    setObjProperty(vm, self, "address", args[0]);
-    setObjProperty(vm, self, "version", INT_VAL(version));
+    setObjField(vm, self, "address", args[0]);
+    setObjField(vm, self, "version", INT_VAL(version));
     RETURN_OBJ(self);
 }
 
 LOX_METHOD(IPAddress, getDomain) {
     ASSERT_ARG_COUNT("IPAddress::getDomain()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjString* address = AS_STRING(getObjProperty(vm, self, "address"));
+    ObjString* address = AS_STRING(getObjField(vm, self, "address"));
     int status = -1;
     ObjString* domain = dnsGetDomainFromIPAddress(vm, address->chars, &status);
     if (status) THROW_EXCEPTION(clox.std.net.DomainHostException, "Failed to get domain information for IP Address.");
@@ -482,22 +482,22 @@ LOX_METHOD(IPAddress, getDomainAsync) {
 LOX_METHOD(IPAddress, isIPV4) {
     ASSERT_ARG_COUNT("IPAddress::isIPV4()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    int version = AS_INT(getObjProperty(vm, self, "version"));
+    int version = AS_INT(getObjField(vm, self, "version"));
     RETURN_BOOL(version == 4);
 }
 
 LOX_METHOD(IPAddress, isIPV6) {
     ASSERT_ARG_COUNT("IPAddress::isIPV6()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    int version = AS_INT(getObjProperty(vm, self, "version"));
+    int version = AS_INT(getObjField(vm, self, "version"));
     RETURN_BOOL(version == 6);
 }
 
 LOX_METHOD(IPAddress, toArray) {
     ASSERT_ARG_COUNT("IPAddress::toArray()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjString* address = AS_STRING(getObjProperty(vm, self, "address"));
-    int version = AS_INT(getObjProperty(vm, self, "version"));
+    ObjString* address = AS_STRING(getObjField(vm, self, "address"));
+    int version = AS_INT(getObjField(vm, self, "version"));
     ObjArray* array = newArray(vm);
     ipWriteByteArray(vm, array, address, version == 6 ? 16 : 10);
     RETURN_OBJ(array);
@@ -506,7 +506,7 @@ LOX_METHOD(IPAddress, toArray) {
 LOX_METHOD(IPAddress, toString) {
     ASSERT_ARG_COUNT("IPAddress::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    Value address = getObjProperty(vm, self, "address");
+    Value address = getObjField(vm, self, "address");
     RETURN_OBJ(AS_STRING(address));
 }
 
@@ -520,17 +520,17 @@ LOX_METHOD(Socket, __init__) {
     if (descriptor == INVALID_SOCKET) THROW_EXCEPTION(clox.std.net.SocketException, "Socket creation failed...");
     ObjInstance* self = AS_INSTANCE(receiver);
 
-    setObjProperty(vm, self, "addressFamily", args[0]);
-    setObjProperty(vm, self, "socketType", args[1]);
-    setObjProperty(vm, self, "protocolType", args[2]);
-    setObjProperty(vm, self, "descriptor", INT_VAL(descriptor));
+    setObjField(vm, self, "addressFamily", args[0]);
+    setObjField(vm, self, "socketType", args[1]);
+    setObjField(vm, self, "protocolType", args[2]);
+    setObjField(vm, self, "descriptor", INT_VAL(descriptor));
     RETURN_OBJ(self);
 }
 
 LOX_METHOD(Socket, close) {
     ASSERT_ARG_COUNT("Socket::close()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    int descriptor = AS_INT(getObjProperty(vm, self, "descriptor"));
+    int descriptor = AS_INT(getObjField(vm, self, "descriptor"));
     closesocket(descriptor);
     RETURN_NIL;
 }
@@ -538,7 +538,7 @@ LOX_METHOD(Socket, close) {
 LOX_METHOD(Socket, receive) {
     ASSERT_ARG_COUNT("Socket::receive()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    int descriptor = AS_INT(getObjProperty(vm, self, "descriptor"));
+    int descriptor = AS_INT(getObjField(vm, self, "descriptor"));
     char message[UINT8_MAX] = "";
     if (recv(descriptor, message, UINT8_MAX, 0) < 0) THROW_EXCEPTION(clox.std.net.SocketException, "Failed to receive message from socket.");
     RETURN_STRING(message, (int)strlen(message));
@@ -550,7 +550,7 @@ LOX_METHOD(Socket, send) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* message = AS_STRING(args[0]);
 
-    int descriptor = AS_INT(getObjProperty(vm, self, "descriptor"));
+    int descriptor = AS_INT(getObjField(vm, self, "descriptor"));
     if (send(descriptor, message->chars, message->length, 0) < 0) {
         THROW_EXCEPTION(clox.std.net.SocketException, "Failed to send message to socket.");
     }
@@ -560,9 +560,9 @@ LOX_METHOD(Socket, send) {
 LOX_METHOD(Socket, toString) {
     ASSERT_ARG_COUNT("Socket::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    Value addressFamily = getObjProperty(vm, self, "addressFamily");
-    Value socketType = getObjProperty(vm, self, "socketType");
-    Value protocolType = getObjProperty(vm, self, "protocolType");
+    Value addressFamily = getObjField(vm, self, "addressFamily");
+    Value socketType = getObjField(vm, self, "socketType");
+    Value protocolType = getObjField(vm, self, "protocolType");
     RETURN_STRING_FMT("Socket - AddressFamily: %d, SocketType: %d, ProtocolType: %d", AS_INT(addressFamily), AS_INT(socketType), AS_INT(protocolType));
 }
 
@@ -573,20 +573,20 @@ LOX_METHOD(SocketAddress, __init__) {
     ASSERT_ARG_TYPE("SocketAddress::__init__(address, family, port)", 2, Int);
 
     ObjInstance* self = AS_INSTANCE(receiver);
-    setObjProperty(vm, self, "address", args[0]);
-    setObjProperty(vm, self, "family", args[1]);
-    setObjProperty(vm, self, "port", args[2]);
+    setObjField(vm, self, "address", args[0]);
+    setObjField(vm, self, "family", args[1]);
+    setObjField(vm, self, "port", args[2]);
     RETURN_OBJ(self);
 }
 
 LOX_METHOD(SocketAddress, ipAddress) {
     ASSERT_ARG_COUNT("SocketAddress::ipAddress()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    Value address = getObjProperty(vm, self, "address");
+    Value address = getObjField(vm, self, "address");
 
     ObjInstance* ipAddress = newInstance(vm, getNativeClass(vm, "clox.std.net.IPAddress"));
     push(vm, OBJ_VAL(ipAddress));
-    copyObjProperty(vm, self, ipAddress, "address");
+    copyObjField(vm, self, ipAddress, "address");
     pop(vm);
     RETURN_OBJ(ipAddress);
 }
@@ -594,8 +594,8 @@ LOX_METHOD(SocketAddress, ipAddress) {
 LOX_METHOD(SocketAddress, toString) {
     ASSERT_ARG_COUNT("SocketAddress::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    char* address = AS_CSTRING(getObjProperty(vm, self, "address"));
-    int port = AS_INT(getObjProperty(vm, self, "port"));
+    char* address = AS_CSTRING(getObjField(vm, self, "address"));
+    int port = AS_INT(getObjField(vm, self, "port"));
     RETURN_STRING_FMT("%s:%d", address, port);
 }
 
@@ -606,13 +606,13 @@ LOX_METHOD(SocketClient, connect) {
     ObjInstance* socketAddress = AS_INSTANCE(args[0]);
 
     struct sockaddr_in sockAddr = { 0 };
-    ObjString* ipAddress = AS_STRING(getObjProperty(vm, socketAddress, "address"));
-    int addressFamily = AS_INT(getObjProperty(vm, socketAddress, "family"));
+    ObjString* ipAddress = AS_STRING(getObjField(vm, socketAddress, "address"));
+    int addressFamily = AS_INT(getObjField(vm, socketAddress, "family"));
     if (inet_pton(addressFamily, ipAddress->chars, &sockAddr.sin_addr) <= 0) {
         THROW_EXCEPTION(clox.std.net.SocketException, "Invalid socket address provided.");
     }
 
-    int descriptor = AS_INT(getObjProperty(vm, self, "descriptor"));
+    int descriptor = AS_INT(getObjField(vm, self, "descriptor"));
     if (connect(descriptor, (struct sockaddr*)&sockAddr, sizeof(sockAddr)) <= 0) {
         THROW_EXCEPTION(clox.std.net.SocketException, "Socket connection failed.");
     }
@@ -622,7 +622,7 @@ LOX_METHOD(SocketClient, connect) {
 LOX_METHOD(SocketServer, accept) {
     ASSERT_ARG_COUNT("SocketServer::accept()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    int descriptor = AS_INT(getObjProperty(vm, self, "descriptor"));
+    int descriptor = AS_INT(getObjField(vm, self, "descriptor"));
 
     struct sockaddr_in socketAddress = { 0 };
     int clientSize = sizeof(socketAddress);
@@ -634,9 +634,9 @@ LOX_METHOD(SocketServer, accept) {
 
     ObjInstance* clientAddress = newInstance(vm, getNativeClass(vm, "clox.std.net.SocketAddress"));
     push(vm, OBJ_VAL(clientAddress));
-    setObjProperty(vm, clientAddress, "address", OBJ_VAL(newString(vm, ipAddress)));
-    setObjProperty(vm, clientAddress, "family", INT_VAL(socketAddress.sin_family));
-    setObjProperty(vm, clientAddress, "port", INT_VAL(socketAddress.sin_port));
+    setObjField(vm, clientAddress, "address", OBJ_VAL(newString(vm, ipAddress)));
+    setObjField(vm, clientAddress, "family", INT_VAL(socketAddress.sin_family));
+    setObjField(vm, clientAddress, "port", INT_VAL(socketAddress.sin_port));
     pop(vm);
     RETURN_OBJ(clientAddress);
 }
@@ -647,10 +647,10 @@ LOX_METHOD(SocketServer, bind) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjInstance* serverAddress = AS_INSTANCE(args[0]);
 
-    int descriptor = AS_INT(getObjProperty(vm, self, "descriptor"));
-    ObjString* ipAddress = AS_STRING(getObjProperty(vm, serverAddress, "address"));
-    int addressFamily = AS_INT(getObjProperty(vm, serverAddress, "family"));
-    int port = AS_INT(getObjProperty(vm, serverAddress, "port"));
+    int descriptor = AS_INT(getObjField(vm, self, "descriptor"));
+    ObjString* ipAddress = AS_STRING(getObjField(vm, serverAddress, "address"));
+    int addressFamily = AS_INT(getObjField(vm, serverAddress, "family"));
+    int port = AS_INT(getObjField(vm, serverAddress, "port"));
 
     struct sockaddr_in socketAddress = {
         .sin_family = addressFamily,
@@ -669,7 +669,7 @@ LOX_METHOD(SocketServer, bind) {
 LOX_METHOD(SocketServer, listen) {
     ASSERT_ARG_COUNT("SocketServer::listen()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    int descriptor = AS_INT(getObjProperty(vm, self, "descriptor"));
+    int descriptor = AS_INT(getObjField(vm, self, "descriptor"));
     if (listen(descriptor, 1) < 0) THROW_EXCEPTION(clox.std.net.SocketException, "Failed to listen for incoming connections.");
     RETURN_NIL;
 }
@@ -684,13 +684,13 @@ LOX_METHOD(URL, __init__) {
     ASSERT_ARG_TYPE("URL::__init__(scheme, host, port, path, query, fragment)", 5, String);
 
     ObjInstance* self = AS_INSTANCE(receiver);
-    setObjProperty(vm, self, "scheme", args[0]);
-    setObjProperty(vm, self, "host", args[1]);
-    setObjProperty(vm, self, "port", args[2]);
-    setObjProperty(vm, self, "path", args[3]);
-    setObjProperty(vm, self, "query", args[4]);
-    setObjProperty(vm, self, "fragment", args[5]);
-    setObjProperty(vm, self, "raw", OBJ_VAL(urlToString(vm, self)));
+    setObjField(vm, self, "scheme", args[0]);
+    setObjField(vm, self, "host", args[1]);
+    setObjField(vm, self, "port", args[2]);
+    setObjField(vm, self, "path", args[3]);
+    setObjField(vm, self, "query", args[4]);
+    setObjField(vm, self, "fragment", args[5]);
+    setObjField(vm, self, "raw", OBJ_VAL(urlToString(vm, self)));
     RETURN_OBJ(self);
 }
 
@@ -707,7 +707,7 @@ LOX_METHOD(URL, isRelative) {
 LOX_METHOD(URL, pathArray) {
     ASSERT_ARG_COUNT("URL::pathArray()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjString* path = AS_STRING(getObjProperty(vm, self, "path"));
+    ObjString* path = AS_STRING(getObjField(vm, self, "path"));
     if (path->length == 0) RETURN_NIL;
     else {
         char* paths[UINT4_MAX];
@@ -729,7 +729,7 @@ LOX_METHOD(URL, pathArray) {
 LOX_METHOD(URL, queryDict) {
     ASSERT_ARG_COUNT("URL::queryDict()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjString* query = AS_STRING(getObjProperty(vm, self, "query"));
+    ObjString* query = AS_STRING(getObjField(vm, self, "query"));
     if (query->length == 0) RETURN_NIL;
     else {
         struct yuarel_param params[UINT4_MAX];
@@ -754,7 +754,7 @@ LOX_METHOD(URL, relativize) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjInstance* url = AS_INSTANCE(args[0]);
     if (urlIsAbsolute(vm, self) || urlIsAbsolute(vm, url)) RETURN_OBJ(url);
-    ObjString* urlString = AS_STRING(getObjProperty(vm, self, "raw"));
+    ObjString* urlString = AS_STRING(getObjField(vm, self, "raw"));
     ObjString* urlString2 = urlToString(vm, url);
     int index = searchString(vm, urlString, urlString2, 0);
 
@@ -766,13 +766,13 @@ LOX_METHOD(URL, relativize) {
         int length = sprintf_s(fullURL, UINT8_MAX, "%s%s", "https://example.com/", relativizedURL->chars);
         yuarel_parse(&component, fullURL);
 
-        setObjProperty(vm, relativized, "scheme", OBJ_VAL(emptyString(vm)));
-        setObjProperty(vm, relativized, "host", OBJ_VAL(emptyString(vm)));
-        setObjProperty(vm, relativized, "port", INT_VAL(0));
-        setObjProperty(vm, relativized, "path", OBJ_VAL(newString(vm, component.path != NULL ? component.path : "")));
-        setObjProperty(vm, relativized, "query", OBJ_VAL(newString(vm, component.query != NULL ? component.query : "")));
-        setObjProperty(vm, relativized, "fragment", OBJ_VAL(newString(vm, component.fragment != NULL ? component.fragment : "")));
-        setObjProperty(vm, relativized, "raw", OBJ_VAL(relativizedURL));
+        setObjField(vm, relativized, "scheme", OBJ_VAL(emptyString(vm)));
+        setObjField(vm, relativized, "host", OBJ_VAL(emptyString(vm)));
+        setObjField(vm, relativized, "port", INT_VAL(0));
+        setObjField(vm, relativized, "path", OBJ_VAL(newString(vm, component.path != NULL ? component.path : "")));
+        setObjField(vm, relativized, "query", OBJ_VAL(newString(vm, component.query != NULL ? component.query : "")));
+        setObjField(vm, relativized, "fragment", OBJ_VAL(newString(vm, component.fragment != NULL ? component.fragment : "")));
+        setObjField(vm, relativized, "raw", OBJ_VAL(relativizedURL));
         RETURN_OBJ(relativized);
     }
     RETURN_OBJ(url);
@@ -781,7 +781,7 @@ LOX_METHOD(URL, relativize) {
 LOX_METHOD(URL, toString) {
     ASSERT_ARG_COUNT("URL::toString()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjString* raw = AS_STRING(getObjProperty(vm, self, "raw"));
+    ObjString* raw = AS_STRING(getObjField(vm, self, "raw"));
     RETURN_OBJ(raw);
 }
 
@@ -794,13 +794,13 @@ LOX_METHOD(URLClass, parse) {
     struct yuarel component;
     if (yuarel_parse(&component, url->chars) == -1) THROW_EXCEPTION(clox.std.net.URLException, "Failed to parse the supplied url.");
 
-    setObjProperty(vm, instance, "scheme", OBJ_VAL(newString(vm, component.scheme != NULL ? component.scheme : "")));
-    setObjProperty(vm, instance, "host", OBJ_VAL(newString(vm, component.host != NULL ? component.host : "")));
-    setObjProperty(vm, instance, "port", INT_VAL(component.port));
-    setObjProperty(vm, instance, "path", OBJ_VAL(newString(vm, component.path != NULL ? component.path : "")));
-    setObjProperty(vm, instance, "query", OBJ_VAL(newString(vm, component.query != NULL ? component.query : "")));
-    setObjProperty(vm, instance, "fragment", OBJ_VAL(newString(vm, component.fragment != NULL ? component.fragment : "")));
-    setObjProperty(vm, instance, "raw", OBJ_VAL(urlToString(vm, instance)));
+    setObjField(vm, instance, "scheme", OBJ_VAL(newString(vm, component.scheme != NULL ? component.scheme : "")));
+    setObjField(vm, instance, "host", OBJ_VAL(newString(vm, component.host != NULL ? component.host : "")));
+    setObjField(vm, instance, "port", INT_VAL(component.port));
+    setObjField(vm, instance, "path", OBJ_VAL(newString(vm, component.path != NULL ? component.path : "")));
+    setObjField(vm, instance, "query", OBJ_VAL(newString(vm, component.query != NULL ? component.query : "")));
+    setObjField(vm, instance, "fragment", OBJ_VAL(newString(vm, component.fragment != NULL ? component.fragment : "")));
+    setObjField(vm, instance, "raw", OBJ_VAL(urlToString(vm, instance)));
     pop(vm);
     RETURN_OBJ(instance);
 }
