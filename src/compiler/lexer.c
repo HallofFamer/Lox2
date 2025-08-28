@@ -226,6 +226,8 @@ static TokenSymbol identifierType(Lexer* lexer) {
                                 case 'y': return checkKeyword(lexer, 3, 0, "", TOKEN_TRY);
                             }
                         }
+                   case 'y':
+                       return checkKeyword(lexer, 2, 2, "pe", TOKEN_TYPE_);
                 }
             }
             break;
