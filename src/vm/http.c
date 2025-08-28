@@ -142,12 +142,12 @@ ObjInstance* httpCreateResponse(VM* vm, ObjString* url, CURL* curl, CURLResponse
     ObjInstance* httpResponse = newInstance(vm, getNativeClass(vm, "clox.std.net.HTTPResponse"));
     push(vm, OBJ_VAL(httpResponse));
 
-    setObjProperty(vm, httpResponse, "content", OBJ_VAL(copyString(vm, curlResponse.content, (int)curlResponse.cSize)));
-    setObjProperty(vm, httpResponse, "contentType", OBJ_VAL(newString(vm, contentType)));
-    setObjProperty(vm, httpResponse, "cookies", OBJ_VAL(httpCreateCookies(vm, curl)));
-    setObjProperty(vm, httpResponse, "headers", OBJ_VAL(httpCreateHeaders(vm, curlResponse)));
-    setObjProperty(vm, httpResponse, "status", INT_VAL(statusCode));
-    setObjProperty(vm, httpResponse, "url", OBJ_VAL(url));
+    setObjField(vm, httpResponse, "content", OBJ_VAL(copyString(vm, curlResponse.content, (int)curlResponse.cSize)));
+    setObjField(vm, httpResponse, "contentType", OBJ_VAL(newString(vm, contentType)));
+    setObjField(vm, httpResponse, "cookies", OBJ_VAL(httpCreateCookies(vm, curl)));
+    setObjField(vm, httpResponse, "headers", OBJ_VAL(httpCreateHeaders(vm, curlResponse)));
+    setObjField(vm, httpResponse, "status", INT_VAL(statusCode));
+    setObjField(vm, httpResponse, "url", OBJ_VAL(url));
     pop(vm);
     return httpResponse;
 }
@@ -385,7 +385,7 @@ ObjString* httpParsePostData(VM* vm, ObjDictionary* postData) {
 ObjString* httpRawURL(VM* vm, Value value) {
     if (IS_INSTANCE(value)) {
         ObjInstance* url = AS_INSTANCE(value);
-        return AS_STRING(getObjProperty(vm, url, "raw"));
+        return AS_STRING(getObjField(vm, url, "raw"));
     }
     else return AS_STRING(value);
 }

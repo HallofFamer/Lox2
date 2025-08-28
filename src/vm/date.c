@@ -40,9 +40,9 @@ static double dateTimeGetTimestamp(int year, int month, int day, int hour, int m
 }
 
 double dateObjGetTimestamp(VM* vm, ObjInstance* date) {
-    Value year = getObjProperty(vm, date, "year");
-    Value month = getObjProperty(vm, date, "month");
-    Value day = getObjProperty(vm, date, "day");
+    Value year = getObjField(vm, date, "year");
+    Value month = getObjField(vm, date, "month");
+    Value day = getObjField(vm, date, "day");
     return dateGetTimestamp(AS_INT(year), AS_INT(month), AS_INT(day));
 }
 
@@ -53,20 +53,20 @@ ObjInstance* dateObjNow(VM* vm, ObjClass* klass) {
     localtime_s(&now, &nowTime);
     ObjInstance* date = newInstance(vm, klass);
     push(vm, OBJ_VAL(date));
-    setObjProperty(vm, date, "year", INT_VAL(1900 + now.tm_year));
-    setObjProperty(vm, date, "month", INT_VAL(1 + now.tm_mon));
-    setObjProperty(vm, date, "day", INT_VAL(now.tm_mday));
+    setObjField(vm, date, "year", INT_VAL(1900 + now.tm_year));
+    setObjField(vm, date, "month", INT_VAL(1 + now.tm_mon));
+    setObjField(vm, date, "day", INT_VAL(now.tm_mday));
     pop(vm);
     return date;
 }
 
 double dateTimeObjGetTimestamp(VM* vm, ObjInstance* dateTime) {
-    Value year = getObjProperty(vm, dateTime, "year");
-    Value month = getObjProperty(vm, dateTime, "month");
-    Value day = getObjProperty(vm, dateTime, "day");
-    Value hour = getObjProperty(vm, dateTime, "hour");
-    Value minute = getObjProperty(vm, dateTime, "minute");
-    Value second = getObjProperty(vm, dateTime, "second");
+    Value year = getObjField(vm, dateTime, "year");
+    Value month = getObjField(vm, dateTime, "month");
+    Value day = getObjField(vm, dateTime, "day");
+    Value hour = getObjField(vm, dateTime, "hour");
+    Value minute = getObjField(vm, dateTime, "minute");
+    Value second = getObjField(vm, dateTime, "second");
     return dateTimeGetTimestamp(AS_INT(year), AS_INT(month), AS_INT(day), AS_INT(hour), AS_INT(minute), AS_INT(second));
 }
 
@@ -76,9 +76,9 @@ ObjInstance* dateObjFromTimestamp(VM* vm, ObjClass* dateClass, double timeValue)
     localtime_s(&time, &timestamp);
     ObjInstance* date = newInstance(vm, dateClass);
     push(vm, OBJ_VAL(date));
-    setObjProperty(vm, date, "year", INT_VAL(1900 + time.tm_year));
-    setObjProperty(vm, date, "month", INT_VAL(1 + time.tm_mon));
-    setObjProperty(vm, date, "day", INT_VAL(time.tm_mday));
+    setObjField(vm, date, "year", INT_VAL(1900 + time.tm_year));
+    setObjField(vm, date, "month", INT_VAL(1 + time.tm_mon));
+    setObjField(vm, date, "day", INT_VAL(time.tm_mday));
     pop(vm);
     return date;
 }
@@ -89,12 +89,12 @@ ObjInstance* dateTimeObjFromTimestamp(VM* vm, ObjClass* dateTimeClass, double ti
     localtime_s(&time, &timestamp);
     ObjInstance* dateTime = newInstance(vm, dateTimeClass);
     push(vm, OBJ_VAL(dateTime));
-    setObjProperty(vm, dateTime, "year", INT_VAL(1900 + time.tm_year));
-    setObjProperty(vm, dateTime, "month", INT_VAL(1 + time.tm_mon));
-    setObjProperty(vm, dateTime, "day", INT_VAL(time.tm_mday));
-    setObjProperty(vm, dateTime, "hour", INT_VAL(time.tm_hour));
-    setObjProperty(vm, dateTime, "minute", INT_VAL(time.tm_min));
-    setObjProperty(vm, dateTime, "second", INT_VAL(time.tm_sec));
+    setObjField(vm, dateTime, "year", INT_VAL(1900 + time.tm_year));
+    setObjField(vm, dateTime, "month", INT_VAL(1 + time.tm_mon));
+    setObjField(vm, dateTime, "day", INT_VAL(time.tm_mday));
+    setObjField(vm, dateTime, "hour", INT_VAL(time.tm_hour));
+    setObjField(vm, dateTime, "minute", INT_VAL(time.tm_min));
+    setObjField(vm, dateTime, "second", INT_VAL(time.tm_sec));
     pop(vm);
     return dateTime;
 }
@@ -106,12 +106,12 @@ ObjInstance* dateTimeObjNow(VM* vm, ObjClass* klass) {
     localtime_s(&now, &nowTime);
     ObjInstance* dateTime = newInstance(vm, getNativeClass(vm, "clox.std.util.DateTime"));
     push(vm, OBJ_VAL(dateTime));
-    setObjProperty(vm, dateTime, "year", INT_VAL(1900 + now.tm_year));
-    setObjProperty(vm, dateTime, "month", INT_VAL(1 + now.tm_mon));
-    setObjProperty(vm, dateTime, "day", INT_VAL(now.tm_mday));
-    setObjProperty(vm, dateTime, "hour", INT_VAL(now.tm_hour));
-    setObjProperty(vm, dateTime, "minute", INT_VAL(now.tm_min));
-    setObjProperty(vm, dateTime, "second", INT_VAL(now.tm_sec));
+    setObjField(vm, dateTime, "year", INT_VAL(1900 + now.tm_year));
+    setObjField(vm, dateTime, "month", INT_VAL(1 + now.tm_mon));
+    setObjField(vm, dateTime, "day", INT_VAL(now.tm_mday));
+    setObjField(vm, dateTime, "hour", INT_VAL(now.tm_hour));
+    setObjField(vm, dateTime, "minute", INT_VAL(now.tm_min));
+    setObjField(vm, dateTime, "second", INT_VAL(now.tm_sec));
     pop(vm);
     return dateTime;
 }
@@ -148,17 +148,17 @@ void durationFromArgs(int* duration, Value* args) {
 
 void durationObjInit(VM* vm, int* duration, ObjInstance* object) {
     push(vm, OBJ_VAL(object));
-    setObjProperty(vm, object, "days", INT_VAL(duration[0]));
-    setObjProperty(vm, object, "hours", INT_VAL(duration[1]));
-    setObjProperty(vm, object, "minutes", INT_VAL(duration[2]));
-    setObjProperty(vm, object, "seconds", INT_VAL(duration[3]));
+    setObjField(vm, object, "days", INT_VAL(duration[0]));
+    setObjField(vm, object, "hours", INT_VAL(duration[1]));
+    setObjField(vm, object, "minutes", INT_VAL(duration[2]));
+    setObjField(vm, object, "seconds", INT_VAL(duration[3]));
     pop(vm);
 }
 
 double durationTotalSeconds(VM* vm, ObjInstance* duration) {
-    Value days = getObjProperty(vm, duration, "days");
-    Value hours = getObjProperty(vm, duration, "hours");
-    Value minutes = getObjProperty(vm, duration, "minutes");
-    Value seconds = getObjProperty(vm, duration, "seconds");
+    Value days = getObjField(vm, duration, "days");
+    Value hours = getObjField(vm, duration, "hours");
+    Value minutes = getObjField(vm, duration, "minutes");
+    Value seconds = getObjField(vm, duration, "seconds");
     return 86400.0 * AS_INT(days) + 3600.0 * AS_INT(hours) + 60.0 * AS_INT(minutes) + AS_INT(seconds);
 }

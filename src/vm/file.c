@@ -253,7 +253,7 @@ void fileOnOpen(uv_fs_t* fsOpen) {
         data->file->isOpen = true;
         ObjClass* streamClass = getNativeClass(data->vm, streamClassName(data->file->mode->chars));
         ObjInstance* stream = newInstance(data->vm, streamClass);
-        setObjProperty(data->vm, stream, "file", OBJ_VAL(data->file));
+        setObjField(data->vm, stream, "file", OBJ_VAL(data->file));
         promiseFulfill(data->vm, data->promise, OBJ_VAL(stream));
     }
 
@@ -582,7 +582,7 @@ ObjFile* getFileArgument(VM* vm, Value arg) {
 }
 
 ObjFile* getFileProperty(VM* vm, ObjInstance* object, char* field) {
-    return AS_FILE(getObjProperty(vm, object, field));
+    return AS_FILE(getObjField(vm, object, field));
 }
 
 bool loadFileRead(VM* vm, ObjFile* file) {
@@ -614,7 +614,7 @@ bool loadFileOperation(VM* vm, ObjFile* file, const char* streamClass) {
 
 bool setFileProperty(VM* vm, ObjInstance* object, ObjFile* file, const char* mode) {
     if(!fileOpen(vm, file, mode)) return false;
-    setObjProperty(vm, object, "file", OBJ_VAL(file));
+    setObjField(vm, object, "file", OBJ_VAL(file));
     return true;
 }
 

@@ -23,37 +23,37 @@
 #define OBJ_KLASS(value)            (AS_OBJ(value)->klass)
 #define OBJ_GEN(value)              (AS_OBJ(value)->generation)
 
-#define IS_ARRAY(value)             isObjType(value, OBJ_ARRAY)
+#define IS_ARRAY(value)             isObjCategory(value, OBJ_ARRAY)
 #define IS_BOOL_INSTANCE(arg)       (IS_BOOL(arg) || (IS_VALUE_INSTANCE(arg) && IS_BOOL(AS_VALUE_INSTANCE(arg)->value)))
-#define IS_BOUND_METHOD(value)      isObjType(value, OBJ_BOUND_METHOD)
-#define IS_CLASS(value)             isObjType(value, OBJ_CLASS)
-#define IS_CLOSURE(value)           isObjType(value, OBJ_CLOSURE)
-#define IS_DICTIONARY(value)        isObjType(value, OBJ_DICTIONARY)
-#define IS_ENTRY(value)             isObjType(value, OBJ_ENTRY)
-#define IS_EXCEPTION(value)         isObjType(value, OBJ_EXCEPTION)
-#define IS_FILE(value)              isObjType(value, OBJ_FILE)
+#define IS_BOUND_METHOD(value)      isObjCategory(value, OBJ_BOUND_METHOD)
+#define IS_CLASS(value)             isObjCategory(value, OBJ_CLASS)
+#define IS_CLOSURE(value)           isObjCategory(value, OBJ_CLOSURE)
+#define IS_DICTIONARY(value)        isObjCategory(value, OBJ_DICTIONARY)
+#define IS_ENTRY(value)             isObjCategory(value, OBJ_ENTRY)
+#define IS_EXCEPTION(value)         isObjCategory(value, OBJ_EXCEPTION)
+#define IS_FILE(value)              isObjCategory(value, OBJ_FILE)
 #define IS_FLOAT_INSTANCE(arg)      (IS_FLOAT(arg) || (IS_VALUE_INSTANCE(arg) && IS_FLOAT(AS_VALUE_INSTANCE(arg)->value))) 
-#define IS_FRAME(value)             isObjType(value, OBJ_FRAME);
-#define IS_FUNCTION(value)          isObjType(value, OBJ_FUNCTION)
-#define IS_GENERATOR(value)         isObjType(value, OBJ_GENERATOR)
-#define IS_INSTANCE(value)          isObjType(value, OBJ_INSTANCE)
+#define IS_FRAME(value)             isObjCategory(value, OBJ_FRAME);
+#define IS_FUNCTION(value)          isObjCategory(value, OBJ_FUNCTION)
+#define IS_GENERATOR(value)         isObjCategory(value, OBJ_GENERATOR)
+#define IS_INSTANCE(value)          isObjCategory(value, OBJ_INSTANCE)
 #define IS_INT_INSTANCE(arg)        (IS_INT(arg) || (IS_VALUE_INSTANCE(arg) && IS_INT(AS_VALUE_INSTANCE(arg)->value))) 
-#define IS_ITERATOR(value)          isObjType(value, OBJ_ITERATOR)
-#define IS_METHOD(value)            isObjType(value, OBJ_METHOD)
-#define IS_MODULE(value)            isObjType(value, OBJ_MODULE)
-#define IS_NAMESPACE(value)         isObjType(value, OBJ_NAMESPACE)
-#define IS_NATIVE_FUNCTION(value)   isObjType(value, OBJ_NATIVE_FUNCTION)
-#define IS_NATIVE_METHOD(value)     isObjType(value, OBJ_NATIVE_METHOD)
+#define IS_ITERATOR(value)          isObjCategory(value, OBJ_ITERATOR)
+#define IS_METHOD(value)            isObjCategory(value, OBJ_METHOD)
+#define IS_MODULE(value)            isObjCategory(value, OBJ_MODULE)
+#define IS_NAMESPACE(value)         isObjCategory(value, OBJ_NAMESPACE)
+#define IS_NATIVE_FUNCTION(value)   isObjCategory(value, OBJ_NATIVE_FUNCTION)
+#define IS_NATIVE_METHOD(value)     isObjCategory(value, OBJ_NATIVE_METHOD)
 #define IS_NIL_INSTANCE(arg)        (IS_NIL(arg) || (IS_VALUE_INSTANCE(arg) && IS_NIL(AS_VALUE_INSTANCE(arg)->value))) 
-#define IS_NODE(value)              isObjType(value, OBJ_NODE)
+#define IS_NODE(value)              isObjCategory(value, OBJ_NODE)
 #define IS_NUMBER_INSTANCE(arg)     (IS_NUMBER(arg) || (IS_VALUE_INSTANCE(arg) && IS_NUMBER(AS_VALUE_INSTANCE(arg)->value))) 
-#define IS_PROMISE(value)           isObjType(value, OBJ_PROMISE)
-#define IS_RANGE(value)             isObjType(value, OBJ_RANGE)    
-#define IS_RECORD(value)            isObjType(value, OBJ_RECORD)
-#define IS_STRING(value)            isObjType(value, OBJ_STRING)
-#define IS_TIMER(value)             isObjType(value, OBJ_TIMER)
-#define IS_UPVALUE(value)           isObjType(value, OBJ_UPVALUE)
-#define IS_VALUE_INSTANCE(value)    isObjType(value, OBJ_VALUE_INSTANCE)
+#define IS_PROMISE(value)           isObjCategory(value, OBJ_PROMISE)
+#define IS_RANGE(value)             isObjCategory(value, OBJ_RANGE)    
+#define IS_RECORD(value)            isObjCategory(value, OBJ_RECORD)
+#define IS_STRING(value)            isObjCategory(value, OBJ_STRING)
+#define IS_TIMER(value)             isObjCategory(value, OBJ_TIMER)
+#define IS_UPVALUE(value)           isObjCategory(value, OBJ_UPVALUE)
+#define IS_VALUE_INSTANCE(value)    isObjCategory(value, OBJ_VALUE_INSTANCE)
 
 #define AS_ARRAY(value)             ((ObjArray*)AS_OBJ(value))
 #define AS_BOOL_INSTANCE(arg)       (IS_BOOL(arg) ? AS_BOOL(arg) : AS_BOOL(AS_VALUE_INSTANCE(arg)->value))
@@ -381,16 +381,16 @@ ObjTimer* newTimer(VM* vm, ObjClosure* closure, int delay, int interval);
 ObjUpvalue* newUpvalue(VM* vm, Value* slot);
 ObjValueInstance* newValueInstance(VM* vm, Value value, ObjClass* klass);
 
-Value getObjProperty(VM* vm, ObjInstance* object, char* name);
-Value getObjPropertyByIndex(VM* vm, ObjInstance* object, int index);
-void setObjProperty(VM* vm, ObjInstance* object, char* name, Value value);
-void setObjPropertyByIndex(VM* vm, ObjInstance* object, int index, Value value);
-void copyObjProperty(VM* vm, ObjInstance* object, ObjInstance* object2, char* name);
-void copyObjProperties(VM* vm, ObjInstance* fromObject, ObjInstance* toObject);
+Value getObjField(VM* vm, ObjInstance* object, char* name);
+Value getObjFieldByIndex(VM* vm, ObjInstance* object, int index);
+void setObjField(VM* vm, ObjInstance* object, char* name, Value value);
+void setObjFieldByIndex(VM* vm, ObjInstance* object, int index, Value value);
+void copyObjField(VM* vm, ObjInstance* object, ObjInstance* object2, char* name);
+void copyObjFields(VM* vm, ObjInstance* fromObject, ObjInstance* toObject);
 Value getObjMethod(VM* vm, Value object, char* name);
 void printObject(Value value);
 
-static inline bool isObjType(Value value, ObjCategory category) {
+static inline bool isObjCategory(Value value, ObjCategory category) {
     return IS_OBJ(value) && (AS_OBJ(value)->category == category);
 }
 

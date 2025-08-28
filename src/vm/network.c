@@ -39,7 +39,7 @@ ObjPromise* dnsGetDomainInfoAsync(VM* vm, ObjInstance* domain, uv_getaddrinfo_cb
     if (netGetAddrInfo == NULL) return NULL;
     else {
         netGetAddrInfo->data = networkLoadData(vm, domain, promise);
-        char* domainName = AS_CSTRING(getObjProperty(vm, domain, "name"));
+        char* domainName = AS_CSTRING(getObjField(vm, domain, "name"));
         struct addrinfo hints;
         memset(&hints, 0, sizeof(hints));
 
@@ -69,7 +69,7 @@ ObjPromise* dnsGetDomainFromIPAddressAsync(VM* vm, ObjInstance* ipAddress, uv_ge
     if (netGetNameInfo == NULL) return NULL;
     else {
         netGetNameInfo->data = networkLoadData(vm, ipAddress, promise);
-        char* address = AS_CSTRING(getObjProperty(vm, ipAddress, "address"));
+        char* address = AS_CSTRING(getObjField(vm, ipAddress, "address"));
         struct sockaddr_in socketAddress;
         memset(&socketAddress, 0, sizeof(socketAddress));
         socketAddress.sin_family = AF_INET;
@@ -182,17 +182,17 @@ void ipWriteByteArray(VM* vm, ObjArray* array, ObjString* address, int radix) {
 }
 
 bool urlIsAbsolute(VM* vm, ObjInstance* url) {
-    ObjString* host = AS_STRING(getObjProperty(vm, url, "host"));
+    ObjString* host = AS_STRING(getObjField(vm, url, "host"));
     return (host->length > 0);
 }
 
 ObjString* urlToString(VM* vm, ObjInstance* url) {
-    ObjString* scheme = AS_STRING(getObjProperty(vm, url, "scheme"));
-    ObjString* host = AS_STRING(getObjProperty(vm, url, "host"));
-    int port = AS_INT(getObjProperty(vm, url, "port"));
-    ObjString* path = AS_STRING(getObjProperty(vm, url, "path"));
-    ObjString* query = AS_STRING(getObjProperty(vm, url, "query"));
-    ObjString* fragment = AS_STRING(getObjProperty(vm, url, "fragment"));
+    ObjString* scheme = AS_STRING(getObjField(vm, url, "scheme"));
+    ObjString* host = AS_STRING(getObjField(vm, url, "host"));
+    int port = AS_INT(getObjField(vm, url, "port"));
+    ObjString* path = AS_STRING(getObjField(vm, url, "path"));
+    ObjString* query = AS_STRING(getObjField(vm, url, "query"));
+    ObjString* fragment = AS_STRING(getObjField(vm, url, "fragment"));
 
     ObjString* urlString = emptyString(vm);
     if (host->length > 0) {

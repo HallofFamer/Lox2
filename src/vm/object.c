@@ -334,14 +334,14 @@ ObjValueInstance* newValueInstance(VM* vm, Value value, ObjClass* klass) {
     return valueInstance;
 }
 
-Value getObjProperty(VM* vm, ObjInstance* object, char* name) {
+Value getObjField(VM* vm, ObjInstance* object, char* name) {
     IDMap* idMap = getShapeIndexes(vm, object->obj.shapeID);
     int index;
     idMapGet(idMap, newStringPerma(vm, name), &index);
     return object->fields.values[index];
 }
 
-Value getObjPropertyByIndex(VM* vm, ObjInstance* object, int index) {
+Value getObjFieldByIndex(VM* vm, ObjInstance* object, int index) {
     if (index >= object->fields.count) {
         runtimeError(vm, "Invalid index %d for object property", index);
         exit(70);
@@ -349,7 +349,7 @@ Value getObjPropertyByIndex(VM* vm, ObjInstance* object, int index) {
     return object->fields.values[index];
 }
 
-void setObjProperty(VM* vm, ObjInstance* object, char* name, Value value) {
+void setObjField(VM* vm, ObjInstance* object, char* name, Value value) {
     PROCESS_WRITE_BARRIER((Obj*)object, value);
     IDMap* idMap = getShapeIndexes(vm, object->obj.shapeID);
     ObjString* key = newStringPerma(vm, name);
@@ -364,7 +364,7 @@ void setObjProperty(VM* vm, ObjInstance* object, char* name, Value value) {
     pop(vm);
 }
 
-void setObjPropertyByIndex(VM* vm, ObjInstance* object, int index, Value value) {
+void setObjFieldByIndex(VM* vm, ObjInstance* object, int index, Value value) {
     PROCESS_WRITE_BARRIER((Obj*)object, value);
     if (index < object->fields.count) {
         runtimeError(vm, "Invalid index %d for object property", index);
@@ -373,12 +373,12 @@ void setObjPropertyByIndex(VM* vm, ObjInstance* object, int index, Value value) 
     object->fields.values[index] = value;
 }
 
-void copyObjProperty(VM* vm, ObjInstance* fromObject, ObjInstance* toObject, char* name) {
-    Value value = getObjProperty(vm, fromObject, name);
-    setObjProperty(vm, toObject, name, value);
+void copyObjField(VM* vm, ObjInstance* fromObject, ObjInstance* toObject, char* name) {
+    Value value = getObjField(vm, fromObject, name);
+    setObjField(vm, toObject, name, value);
 }
 
-void copyObjProperties(VM* vm, ObjInstance* fromObject, ObjInstance* toObject) {
+void copyObjFields(VM* vm, ObjInstance* fromObject, ObjInstance* toObject) {
     toObject->obj.shapeID = fromObject->obj.shapeID;
     for (int i = 0; i < fromObject->fields.count; i++) {
         PROCESS_WRITE_BARRIER((Obj*)toObject, fromObject->fields.values[i]);
