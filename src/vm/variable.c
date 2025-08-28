@@ -94,7 +94,7 @@ static void getAndPushGenericInstanceVariableByIndex(VM* vm, Obj* object, int in
 }
 
 static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
-    switch (object->type) {
+    switch (object->category) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             if (index == 0) push(vm, INT_VAL(array->elements.count));
@@ -212,7 +212,7 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
             return true;
         }
         default:
-            runtimeError(vm, "Undefined property at index %d on Object type %d.", index, object->type);
+            runtimeError(vm, "Undefined property at index %d on Object category %d.", index, object->category);
             exit(70);
     }
     return false;
@@ -238,7 +238,7 @@ static bool getAndPushGenericInstanceVariableByName(VM* vm, Obj* object, ObjStri
 }
 
 bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
-    switch (object->type) {
+    switch (object->category) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             if (matchVariableName(name, "length", 6)) push(vm, INT_VAL(array->elements.count));
@@ -361,7 +361,7 @@ bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
             return true;
         }
         default:
-            runtimeError(vm, "Undefined property %s on Object type %d.", name->chars, object->type);
+            runtimeError(vm, "Undefined property %s on Object category %d.", name->chars, object->category);
             exit(70);
     }
     return false;
@@ -503,7 +503,7 @@ static bool setAndPushGenericInstanceVariableByIndex(VM* vm, Obj* object, int in
 }
 
 static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Value value) {
-    switch (object->type) {
+    switch (object->category) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             if (index == 0) {
@@ -658,7 +658,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
             return true;
         }
         default:
-            runtimeError(vm, "Undefined property at index %d on Object type %d.", index, object->type);
+            runtimeError(vm, "Undefined property at index %d on Object category %d.", index, object->category);
             exit(70);
     }
     return false;
@@ -684,7 +684,7 @@ static bool setAndPushGenericInstanceVariableByName(VM* vm, Obj* object, ObjStri
 }
 
 bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Value value) {
-    switch (object->type) {
+    switch (object->category) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             if (matchVariableName(name, "length", 6)) {
@@ -839,7 +839,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
             return true;
         }
         default:
-            runtimeError(vm, "Undefined property %s on Object type %d.", name->chars, object->type);
+            runtimeError(vm, "Undefined property %s on Object category %d.", name->chars, object->category);
             exit(70);
     }
     return false;
@@ -966,7 +966,7 @@ bool setInstanceVariable(VM* vm, Value receiver, Chunk* chunk, uint8_t byte, Val
 }
 
 int getOffsetForGenericObject(Obj* object) {
-    switch (object->type) { 
+    switch (object->category) { 
         case OBJ_ARRAY: return 1; 
         case OBJ_BOUND_METHOD: return 2;
         case OBJ_CLOSURE: return 2;

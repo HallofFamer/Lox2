@@ -1421,7 +1421,7 @@ LOX_METHOD(Object, setField) {
     }
     else if (IS_CLASS(receiver)) {
         ObjClass* klass = AS_CLASS(receiver);
-        setClassProperty(vm, klass, AS_CSTRING(args[0]), args[1]);
+        setClassField(vm, klass, AS_CSTRING(args[0]), args[1]);
     }
     else if (IS_NAMESPACE(receiver)) {
         ObjNamespace* _namespace = AS_NAMESPACE(receiver);

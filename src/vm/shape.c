@@ -130,7 +130,7 @@ IDMap* getShapeIndexes(VM* vm, int id) {
 }
 
 int getDefaultShapeIDForObject(Obj* object) {
-    return defaultShapeIDs[object->type];
+    return defaultShapeIDs[object->category];
 }
 
 int createShapeFromParent(VM* vm, int parentID, ObjString* edge) {

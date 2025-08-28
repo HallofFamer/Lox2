@@ -924,7 +924,7 @@ void registerUtilPackage(VM* vm) {
     DEF_OPERATOR(dateTimeClass, DateTime, -, __subtract__, 1, RETURN_TYPE(clox.std.util.DateTime), PARAM_TYPE(clox.std.util.Duration));
 
     ObjClass* dateTimeMetaClass = dateTimeClass->obj.klass;
-    setClassProperty(vm, dateTimeClass, "now", OBJ_VAL(dateTimeObjNow(vm, dateTimeClass)));
+    setClassField(vm, dateTimeClass, "now", OBJ_VAL(dateTimeObjNow(vm, dateTimeClass)));
     DEF_METHOD(dateTimeMetaClass, DateTimeClass, fromTimestamp, 1, RETURN_TYPE(clox.std.util.DateTime), PARAM_TYPE(Number));
     DEF_METHOD(dateTimeMetaClass, DateTimeClass, parse, 1, RETURN_TYPE(clox.std.util.DateTime), PARAM_TYPE(String));
 

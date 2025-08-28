@@ -26,7 +26,7 @@ void bindSuperclass(VM* vm, ObjClass* subclass, ObjClass* superclass);
 void implementTraits(VM* vm, ObjClass* klass, ValueArray* traits);
 void bindTrait(VM* vm, ObjClass* klass, ObjClass* trait);
 void bindTraits(VM* vm, int numTraits, ObjClass* klass, ...);
-Value getClassProperty(VM* vm, ObjClass* klass, char* name);
-void setClassProperty(VM* vm, ObjClass* klass, char* name, Value value);
+Value getClassField(VM* vm, ObjClass* klass, char* name);
+void setClassField(VM* vm, ObjClass* klass, char* name, Value value);
 
 #endif // !clox_class_h
