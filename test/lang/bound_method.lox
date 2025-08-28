@@ -2,7 +2,7 @@ namespace test.lang
 
 class Scone { 
     topping(first, second){ 
-        println("Scone with " + first + " and " + second)
+        println("Scone with ${first} and ${second}")
     }
 }
 
@@ -11,29 +11,19 @@ val scone = Scone()
 val topping = scone.topping
 println("Invoking bound method 'topping': ")
 topping("berries", "cream")
-print("class of bound method 'topping': ")
-println(topping.getClassName())
-print("'topping' method's arity: ")
-println(topping.arity())
-print("'topping' method is native: ")
-println(topping.isNative())
-print("'topping' method's name: ")
-println(topping.name)
-print("'topping' method's receiver: ")
-println(topping.receiver)
+println("class of bound method 'topping': ${topping.getClassName()}")
+println("'topping' method's arity: ${topping.arity()}")
+println("'topping' method is native: ${topping.isNative()}")
+println("'topping' method's name: ${topping.name()}")
+println("'topping' method's receiver: ${topping.receiver}")
 println("")
 
 println("Testing bound native method: ")
 val toString = scone.toString
 println("Invoking bound method 'toString': ")
 println(toString())
-print("class of bound method 'toString': ")
-println(toString.getClassName())
-print("'toString' method's arity: ")
-println(toString.arity())
-print("'toString' method is native: ")
-println(toString.isNative())
-print("'toString' method's name: ")
-println(toString.name)
-print("'toString' method's receiver: ")
-println(toString.receiver)
+println("class of bound method 'toString': ${toString.getClassName()}")
+println("'toString' method's arity: ${toString.arity()}")
+println("'toString' method is native: ${toString.isNative()}")
+println("'toString' method's name: ${toString.name()}")
+println("'toString' method's receiver: ${toString.receiver}")

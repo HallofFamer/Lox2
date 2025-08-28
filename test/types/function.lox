@@ -19,3 +19,7 @@ void printSum(Number a, Number b) {
 println(sum(3.5, 5))
 println(sum2(1, 2, 3, 4, 5))
 printSum(1.5, 2.6)
+
+fun(a, b) { 
+    println(a * b) 
+}(2, 3)
