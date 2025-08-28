@@ -6,9 +6,9 @@
 #include "object.h"
 #include "../common/os.h"
 
-Obj* allocateObject(VM* vm, size_t size, ObjType type, ObjClass* klass, GCGenerationType generation) {
+Obj* allocateObject(VM* vm, size_t size, ObjCategory category, ObjClass* klass, GCGenerationType generation) {
     Obj* object = (Obj*)reallocate(vm, NULL, 0, size, generation);
-    object->type = type;
+    object->category = category;
     object->klass = klass;
     object->isMarked = false;
     object->generation = generation;
@@ -20,7 +20,7 @@ Obj* allocateObject(VM* vm, size_t size, ObjType type, ObjClass* klass, GCGenera
     currentHeap->objects = object;
 
 #ifdef DEBUG_LOG_GC
-    printf("%p allocate %zu for %d at generation %d\n", (void*)object, size, type, generation);
+    printf("%p allocate %zu for %d at generation %d\n", (void*)object, size, category, generation);
 #endif
 
     return object;
@@ -40,7 +40,7 @@ ObjBoundMethod* newBoundMethod(VM* vm, Value receiver, Value method) {
     return boundMethod;
 }
 
-ObjClass* newClass(VM* vm, ObjString* name, ObjType classType) {
+ObjClass* newClass(VM* vm, ObjString* name, ObjCategory classType) {
     if (vm->behaviorCount == INT32_MAX) {
         runtimeError(vm, "Cannot have more than %d classes/traits.", INT32_MAX);
         exit(70);
@@ -449,7 +449,7 @@ static void printFunction(ObjFunction* function) {
 }
 
 void printObject(Value value) {
-    switch (OBJ_TYPE(value)) {
+    switch (OBJ_CATEGORY(value)) {
         case OBJ_ARRAY:
             printArray(AS_ARRAY(value));
             break;

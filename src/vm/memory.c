@@ -206,7 +206,7 @@ void markRememberedSet(VM* vm, GCGenerationType generation) {
 }
 
 static size_t sizeOfObject(Obj* object) {
-    switch (object->type) {
+    switch (object->category) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             return sizeof(ObjArray) + sizeof(Value) * array->elements.capacity;
@@ -298,7 +298,7 @@ static void blackenObject(VM* vm, Obj* object, GCGenerationType generation) {
     printf("\n");
 #endif
 
-    switch (object->type) {
+    switch (object->category) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             markArray(vm, &array->elements, generation);
@@ -474,10 +474,10 @@ static void blackenObject(VM* vm, Obj* object, GCGenerationType generation) {
 
 static void freeObject(VM* vm, Obj* object) {
 #ifdef DEBUG_LOG_GC
-    printf("%p free type %d at generation %d\n", (void*)object, object->type, object->generation);
+    printf("%p free category %d at generation %d\n", (void*)object, object->category, object->generation);
 #endif
 
-    switch (object->type) {
+    switch (object->category) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             freeValueArray(vm, &array->elements);
@@ -637,7 +637,7 @@ static void promoteObject(VM* vm, Obj* object, GCGenerationType generation) {
     object->next = nextHeap->objects;
     nextHeap->objects = object;
 
-    switch (object->type) {
+    switch (object->category) {
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             array->elements.generation++;

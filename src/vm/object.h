@@ -13,13 +13,13 @@
 #include "value.h"
 #include "../compiler/chunk.h"
 
-#define ALLOCATE_OBJ(type, objectType, objectClass) (type*)allocateObject(vm, sizeof(type), objectType, objectClass, GC_GENERATION_TYPE_EDEN)
-#define ALLOCATE_OBJ_GEN(type, objectType, objectClass, generation) (type*)allocateObject(vm, sizeof(type), objectType, objectClass, generation)
+#define ALLOCATE_OBJ(category, objectType, objectClass) (category*)allocateObject(vm, sizeof(category), objectType, objectClass, GC_GENERATION_TYPE_EDEN)
+#define ALLOCATE_OBJ_GEN(category, objectType, objectClass, generation) (category*)allocateObject(vm, sizeof(category), objectType, objectClass, generation)
 #define ALLOCATE_CLASS(classClass) ALLOCATE_OBJ_GEN(ObjClass, OBJ_CLASS, classClass, GC_GENERATION_TYPE_PERMANENT)
 #define ALLOCATE_CLOSURE(closureClass, generation) ALLOCATE_OBJ_GEN(ObjClosure, OBJ_CLOSURE, closureClass, generation)
 #define ALLOCATE_NAMESPACE(namespaceClass) ALLOCATE_OBJ_GEN(ObjNamespace, OBJ_NAMESPACE, namespaceClass, GC_GENERATION_TYPE_PERMANENT)
 
-#define OBJ_TYPE(value)             (AS_OBJ(value)->type)
+#define OBJ_CATEGORY(value)         (AS_OBJ(value)->category)
 #define OBJ_KLASS(value)            (AS_OBJ(value)->klass)
 #define OBJ_GEN(value)              (AS_OBJ(value)->generation)
 
@@ -87,7 +87,7 @@
 #define AS_VALUE_INSTANCE(value)    ((ObjValueInstance*)AS_OBJ(value))
 
 #define AS_CARRAY(value)            (((ObjArray*)AS_OBJ(value))->elements)
-#define AS_CRECORD(value, type)     ((type*)((ObjRecord*)AS_OBJ(value)->data))
+#define AS_CRECORD(value, category)     ((category*)((ObjRecord*)AS_OBJ(value)->data))
 #define AS_CSTRING(value)           (((ObjString*)AS_OBJ(value))->chars)
 
 typedef enum {
@@ -118,12 +118,12 @@ typedef enum {
     OBJ_UPVALUE,
     OBJ_VALUE_INSTANCE,
     OBJ_VOID
-} ObjType;
+} ObjCategory;
 
 struct Obj {
     uint64_t objectID;
     int shapeID;
-    ObjType type;
+    ObjCategory category;
     ObjClass* klass;
     bool isMarked;
     GCGenerationType generation;
@@ -274,7 +274,7 @@ typedef struct {
 
 struct ObjClass {
     Obj obj;
-    ObjType classType;
+    ObjCategory classType;
     BehaviorType behaviorType;
     int behaviorID;
     ObjString* name;
@@ -352,10 +352,10 @@ struct ObjString {
     char chars[];
 };
 
-Obj* allocateObject(VM* vm, size_t size, ObjType type, ObjClass* klass, GCGenerationType generation);
+Obj* allocateObject(VM* vm, size_t size, ObjCategory category, ObjClass* klass, GCGenerationType generation);
 ObjArray* newArray(VM* vm);
 ObjBoundMethod* newBoundMethod(VM* vm, Value receiver, Value method);
-ObjClass* newClass(VM* vm, ObjString* name, ObjType classType);
+ObjClass* newClass(VM* vm, ObjString* name, ObjCategory classType);
 void initClosure(VM* vm, ObjClosure* closure, ObjFunction* function);
 ObjClosure* newClosure(VM* vm, ObjFunction* function);
 ObjDictionary* newDictionary(VM* vm);
@@ -390,8 +390,8 @@ void copyObjProperties(VM* vm, ObjInstance* fromObject, ObjInstance* toObject);
 Value getObjMethod(VM* vm, Value object, char* name);
 void printObject(Value value);
 
-static inline bool isObjType(Value value, ObjType type) {
-    return IS_OBJ(value) && (AS_OBJ(value)->type == type);
+static inline bool isObjType(Value value, ObjCategory category) {
+    return IS_OBJ(value) && (AS_OBJ(value)->category == category);
 }
 
 #endif // !clox_object_h

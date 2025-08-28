@@ -342,7 +342,7 @@ static ObjString* linkToString(VM* vm, ObjInstance* linkedList) {
 }
 
 static Value newCollection(VM* vm, ObjClass* klass) {
-    switch (klass->obj.type) {
+    switch (klass->obj.category) {
         case OBJ_ARRAY: return OBJ_VAL(newArray(vm));
         case OBJ_DICTIONARY: return OBJ_VAL(newDictionary(vm));
         case OBJ_RANGE: return OBJ_VAL(newRange(vm, 0, 0));

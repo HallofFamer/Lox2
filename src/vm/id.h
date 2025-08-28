@@ -7,7 +7,7 @@
 #define ENSURE_OBJECT_ID(object) \
     do { \
         if (object->objectID == 0){ \
-            if(object->type == OBJ_INSTANCE) object->objectID = ++vm->objectIndex * 8; \
+            if(object->category == OBJ_INSTANCE) object->objectID = ++vm->objectIndex * 8; \
             else { \
                 object->objectID = vm->genericIDMap.count * 8 + 6; \
                 appendToGenericIDMap(vm, object); \

@@ -12,7 +12,7 @@ uint32_t hashString(const char* chars, int length) {
 }
 
 uint32_t hashObject(Obj* object) {
-    switch (object->type) {
+    switch (object->category) {
         case OBJ_ARRAY: { 
             ObjArray* array = (ObjArray*)object;
             int hash = 7;
