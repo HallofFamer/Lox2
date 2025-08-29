@@ -1287,6 +1287,12 @@ static void resolveTraitDeclaration(Resolver* resolver, Ast* ast) {
     item->state = SYMBOL_STATE_ACCESSED;
 }
 
+static void resolveTypeDeclaration(Resolver* resolver, Ast* ast) {
+    SymbolItem* item = declareVariable(resolver, ast, false);
+    resolveChild(resolver, ast, 0);
+    item->state = SYMBOL_STATE_ACCESSED;
+}
+
 static void resolveVarDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
     if (astHasChild(ast)) {
@@ -1317,6 +1323,9 @@ static void resolveDeclaration(Resolver* resolver, Ast* ast) {
             break;
         case AST_DECL_TRAIT:
             resolveTraitDeclaration(resolver, ast);
+            break;
+        case AST_DECL_TYPE:
+            resolveTypeDeclaration(resolver, ast);
             break;
         case AST_DECL_VAR:
             resolveVarDeclaration(resolver, ast);

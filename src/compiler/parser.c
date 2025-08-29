@@ -1411,6 +1411,14 @@ static bool matchTraitDeclaration(Parser* parser) {
     return false;
 }
 
+static bool matchTypeDeclaration(Parser* parser) {
+    if (check(parser, TOKEN_TYPE_) && checkNext(parser, TOKEN_IDENTIFIER)) {
+        advance(parser);
+        return true;
+    }
+    return false;
+}
+
 static Ast* traitDeclaration(Parser* parser) {
     consume(parser, TOKEN_IDENTIFIER, "Expect trait name.");
     Token name = previousToken(parser);
@@ -1420,6 +1428,15 @@ static Ast* traitDeclaration(Parser* parser) {
     consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after trait body.");
     Ast* trait = newAst(AST_EXPR_TRAIT, name, 2, traitList, methodList);
     return newAst(AST_DECL_TRAIT, name, 1, trait);
+}
+
+static Ast* typeDeclaration(Parser* parser) {
+    consume(parser, TOKEN_IDENTIFIER, "Expect type name.");
+    Token name = previousToken(parser);
+    consume(parser, TOKEN_EQUAL, "Expect '=' after type name.");
+    Ast* typeDef = type_(parser, "Expect type definition.");
+    consumerTerminator(parser, "Expect semicolon or new line after type declaration.");
+    return newAst(AST_DECL_TYPE, name, 1, typeDef);
 }
 
 static bool matchVarDeclaration(Parser* parser, bool* isMutable) {
@@ -1465,6 +1482,9 @@ static Ast* declaration(Parser* parser) {
     }
     else if (matchTraitDeclaration(parser)) {
         return traitDeclaration(parser);
+    }
+    else if (matchTypeDeclaration(parser)) {
+        return typeDeclaration(parser);
     }
     else if (matchVarDeclaration(parser, &isMutable)) {
         return varDeclaration(parser, isMutable);
