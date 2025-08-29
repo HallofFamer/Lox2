@@ -14,12 +14,14 @@ DECLARE_BUFFER(TypeInfoArray, TypeInfo*)
 #define IS_CALLABLE_TYPE(type) (type->category == TYPE_CATEGORY_FUNCTION)
 #define IS_FIELD_TYPE(type) (type->category == TYPE_CATEGORY_FIELD)
 #define IS_METHOD_TYPE(type) (type->category == TYPE_CATEGORY_METHOD)
+#define IS_ALIAS_TYPE(type) (type->category == TYPE_CATEGORY_ALIAS)
 #define IS_VOID_TYPE(type) (type->category == TYPE_CATEGORY_VOID)
 
 #define AS_BEHAVIOR_TYPE(type) ((BehaviorTypeInfo*)type)
 #define AS_CALLABLE_TYPE(type) ((CallableTypeInfo*)type)
 #define AS_FIELD_TYPE(type) ((FieldTypeInfo*)type)
 #define AS_METHOD_TYPE(type) ((MethodTypeInfo*)type)
+#define AS_ALIAS_TYPE(type) ((AliasTypeInfo*)type)
 
 typedef enum {
     TYPE_CATEGORY_NONE,
@@ -29,6 +31,7 @@ typedef enum {
     TYPE_CATEGORY_FUNCTION,
     TYPE_CATEGORY_FIELD,
     TYPE_CATEGORY_METHOD,
+    TYPE_CATEGORY_ALIAS,
     TYPE_CATEGORY_VOID
 } TypeCategory;
 
@@ -80,6 +83,11 @@ typedef struct {
 } MethodTypeInfo;
 
 typedef struct {
+    TypeInfo baseType;
+    TypeInfo* targetType;
+} AliasTypeInfo;
+
+typedef struct {
     ObjString* key;
     TypeInfo* value;
 } TypeEntry;
@@ -110,9 +118,11 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
 CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* name, TypeInfo* returnType);
 FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer);
+AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
 char* createCallableTypeName(CallableTypeInfo* callableType);
 void freeTypeInfo(TypeInfo* type);
 void freeCallableTypes(TypeInfoArray* callableTypes);
+void freeAliasTypes(TypeInfoArray* aliasTypes);
 
 TypeTable* newTypeTable(int id);
 void freeTypeTable(TypeTable* typeTable);
@@ -124,6 +134,7 @@ BehaviorTypeInfo* typeTableInsertBehavior(TypeTable* typetab, TypeCategory categ
 CallableTypeInfo* typeTableInsertCallable(TypeTable* typetab, TypeCategory category, ObjString* name, TypeInfo* returnType);
 FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer);
+AliasTypeInfo* typeTableInsertAlias(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
 void typeTableOutput(TypeTable* typetab);
 
 bool isEqualType(TypeInfo* type, TypeInfo* type2);

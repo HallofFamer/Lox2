@@ -101,6 +101,12 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
     return methodType;
 }
 
+AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType) {
+    AliasTypeInfo* aliasType = (AliasTypeInfo*)newTypeInfo(id, sizeof(AliasTypeInfo), TYPE_CATEGORY_ALIAS, shortName, fullName);
+    if (aliasType != NULL) aliasType->targetType = targetType;
+    return aliasType;
+}
+
 char* createCallableTypeName(CallableTypeInfo* callableType) {
     char* callableName = bufferNewCString(UINT16_MAX);
     size_t length = 0;
@@ -166,11 +172,20 @@ void freeTypeInfo(TypeInfo* type) {
     }
 }
 
-void freeCallableTypes(TypeInfoArray* freeCallableTypes) {
-    for (int i = 0; i < freeCallableTypes->count; i++) {
-        TypeInfo* type = freeCallableTypes->elements[i];
+void freeCallableTypes(TypeInfoArray* callableTypes) {
+    for (int i = 0; i < callableTypes->count; i++) {
+        TypeInfo* type = callableTypes->elements[i];
         if (type != NULL) freeTypeInfo(type);
     }
+    free(callableTypes);
+}
+
+void freeAliasTypes(TypeInfoArray* aliasTypes) {
+    for (int i = 0; i < aliasTypes->count; i++) {
+        TypeInfo* type = aliasTypes->elements[i];
+        if (type != NULL) freeTypeInfo(type);
+    }
+    free(aliasTypes);
 }
 
 TypeTable* newTypeTable(int id) {
@@ -308,6 +323,13 @@ MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, TypeI
     return methodType;
 }
 
+AliasTypeInfo* typeTableInsertAlias(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* targetType) {
+    int id = typetab->count + 1;
+    AliasTypeInfo* aliasType = newAliasTypeInfo(id, shortName, fullName, targetType);
+    typeTableSet(typetab, fullName, (TypeInfo*)aliasType);
+    return aliasType;
+}
+
 static void typeTableOutputCategory(TypeCategory category) {
     switch (category) {
         case TYPE_CATEGORY_CLASS:
@@ -324,6 +346,9 @@ static void typeTableOutputCategory(TypeCategory category) {
             break;
         case TYPE_CATEGORY_METHOD:
             printf("method");
+            break;
+        case TYPE_CATEGORY_ALIAS:
+            printf("typealias");
             break;
         case TYPE_CATEGORY_VOID:
             printf("void");
@@ -409,6 +434,12 @@ static void typeTableOutputFunction(CallableTypeInfo* function) {
     printf(")\n");
 }
 
+static void typeTableOutputAlias(AliasTypeInfo* alias) {
+    if (alias->targetType != NULL) {
+        printf("    target: %s\n", alias->targetType->shortName->chars);
+    }
+}
+
 static void typeTableOutputEntry(TypeEntry* entry) {
     printf("  %s", entry->value->shortName->chars);
     if (IS_BEHAVIOR_TYPE(entry->value)) printf("(%s)", entry->value->fullName->chars);
@@ -417,6 +448,7 @@ static void typeTableOutputEntry(TypeEntry* entry) {
 
     if (IS_BEHAVIOR_TYPE(entry->value)) typeTableOutputBehavior(AS_BEHAVIOR_TYPE(entry->value));
     else if (IS_CALLABLE_TYPE(entry->value)) typeTableOutputFunction(AS_CALLABLE_TYPE(entry->value));
+    else if (IS_ALIAS_TYPE(entry->value)) typeTableOutputAlias(AS_ALIAS_TYPE(entry->value));
     printf("\n");
 }
 
