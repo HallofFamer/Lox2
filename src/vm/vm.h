@@ -105,6 +105,7 @@ struct VM {
     SymbolTable* symtab;
     TypeTable* behaviorTypetab;
     TypeInfoArray* callableTypes;
+    TypeInfoArray* aliasTypes;
     Compiler* compiler;
     GC* gc;
 
