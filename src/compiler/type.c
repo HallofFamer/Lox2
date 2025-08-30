@@ -467,7 +467,10 @@ void typeTableOutput(TypeTable* typetab) {
 
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (type == NULL || type2 == NULL) return true;
-    else if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return (type->id == type2->id);
+    type = IS_ALIAS_TYPE(type) ? AS_ALIAS_TYPE(type)->targetType : type;
+    type2 = IS_ALIAS_TYPE(type2) ? AS_ALIAS_TYPE(type2)->targetType : type2;
+
+    if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return (type->id == type2->id);
     else if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
         CallableTypeInfo* callableType2 = AS_CALLABLE_TYPE(type2);
@@ -484,6 +487,9 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
+    type = IS_ALIAS_TYPE(type) ? AS_ALIAS_TYPE(type)->targetType : type;
+    type2 = IS_ALIAS_TYPE(type2) ? AS_ALIAS_TYPE(type2)->targetType : type2;
+
     if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (strcmp(type2->shortName->chars, "Function") == 0 || strcmp(type2->shortName->chars, "TCallable") == 0)) return true;
     if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false; 
     if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;

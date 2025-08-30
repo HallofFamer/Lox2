@@ -12,6 +12,7 @@
 #include "table.h"
 #include "value.h"
 #include "../compiler/chunk.h"
+#include "../compiler/type.h"
 
 #define ALLOCATE_OBJ(category, objectType, objectClass) (category*)allocateObject(vm, sizeof(category), objectType, objectClass, GC_GENERATION_TYPE_EDEN)
 #define ALLOCATE_OBJ_GEN(category, objectType, objectClass, generation) (category*)allocateObject(vm, sizeof(category), objectType, objectClass, generation)
@@ -52,6 +53,7 @@
 #define IS_RECORD(value)            isObjCategory(value, OBJ_RECORD)
 #define IS_STRING(value)            isObjCategory(value, OBJ_STRING)
 #define IS_TIMER(value)             isObjCategory(value, OBJ_TIMER)
+#define IS_TYPE(value)              isObjCategory(value, OBJ_TYPE)
 #define IS_UPVALUE(value)           isObjCategory(value, OBJ_UPVALUE)
 #define IS_VALUE_INSTANCE(value)    isObjCategory(value, OBJ_VALUE_INSTANCE)
 
@@ -83,12 +85,14 @@
 #define AS_RECORD(value)            ((ObjRecord*)AS_OBJ(value))
 #define AS_STRING(value)            ((ObjString*)AS_OBJ(value))
 #define AS_TIMER(value)             ((ObjTimer*)AS_OBJ(value))
+#define AS_TYPE(value)              ((ObjType*)AS_OBJ(value))
 #define AS_UPVALUE(value)           ((ObjUpvalue*)AS_OBJ(value));
 #define AS_VALUE_INSTANCE(value)    ((ObjValueInstance*)AS_OBJ(value))
 
 #define AS_CARRAY(value)            (((ObjArray*)AS_OBJ(value))->elements)
-#define AS_CRECORD(value, category)     ((category*)((ObjRecord*)AS_OBJ(value)->data))
+#define AS_CRECORD(value, category) ((category*)((ObjRecord*)AS_OBJ(value)->data))
 #define AS_CSTRING(value)           (((ObjString*)AS_OBJ(value))->chars)
+#define AS_CTYPE(value)             (((ObjType*)AS_OBJ(value))->typeInfo)
 
 typedef enum {
     OBJ_ARRAY,
@@ -115,6 +119,7 @@ typedef enum {
     OBJ_RECORD,
     OBJ_STRING,
     OBJ_TIMER,
+    OBJ_TYPE,
     OBJ_UPVALUE,
     OBJ_VALUE_INSTANCE,
     OBJ_VOID
@@ -351,6 +356,12 @@ struct ObjString {
     uint32_t hash;
     char chars[];
 };
+
+typedef struct {
+    Obj obj;
+    ObjString* name;
+    TypeInfo* typeInfo;
+} ObjType;
 
 Obj* allocateObject(VM* vm, size_t size, ObjCategory category, ObjClass* klass, GCGenerationType generation);
 ObjArray* newArray(VM* vm);
