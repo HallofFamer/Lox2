@@ -85,6 +85,7 @@ struct VM {
     ObjClass* promiseClass;
     ObjClass* timerClass;
     ObjClass* iteratorClass;
+    ObjClass* typeClass;
 
     ObjNamespace* rootNamespace;
     ObjNamespace* cloxNamespace;

@@ -1819,6 +1819,50 @@ LOX_METHOD(Trait, toString) {
     else RETURN_STRING_FMT("<trait %s.%s>", self->namespace->fullName->chars, self->name->chars);
 }
 
+LOX_METHOD(Type, __init__) {
+    ASSERT_ARG_COUNT("Type::__init__(name)", 1);
+    ASSERT_ARG_TYPE("Trait::__init__(name)", 0, String);
+    ObjType* type = AS_TYPE(receiver);
+    type->name = AS_STRING(args[0]);
+    RETURN_OBJ(type);
+}
+
+LOX_METHOD(Type, isBehavior) {
+    ASSERT_ARG_COUNT("Type::isBehavior()", 0);
+    ObjType* type = AS_TYPE(receiver);
+    RETURN_BOOL(IS_BEHAVIOR_TYPE(type->typeInfo));
+}
+
+LOX_METHOD(Type, isClass) {
+    ASSERT_ARG_COUNT("Type::isClass()", 0);
+    ObjType* type = AS_TYPE(receiver);
+    RETURN_BOOL(type->typeInfo->category == TYPE_CATEGORY_CLASS);
+}
+
+LOX_METHOD(Type, isMetaclass) {
+    ASSERT_ARG_COUNT("Type::isMetaclass()", 0);
+    ObjType* type = AS_TYPE(receiver);
+    RETURN_BOOL(type->typeInfo->category == TYPE_CATEGORY_METACLASS);
+}
+
+LOX_METHOD(Type, isFunction) {
+   ASSERT_ARG_COUNT("Type::isFunction()", 0);
+    ObjType* type = AS_TYPE(receiver);
+    RETURN_BOOL(IS_CALLABLE_TYPE(type->typeInfo));
+}
+
+LOX_METHOD(Type, isTrait) {
+    ASSERT_ARG_COUNT("Type::isTrait()", 0);
+    ObjType* type = AS_TYPE(receiver);
+    RETURN_BOOL(type->typeInfo->category == TYPE_CATEGORY_TRAIT);
+}
+
+LOX_METHOD(Type, toString) {
+    ASSERT_ARG_COUNT("Type::toString()", 0);
+    ObjType* type = AS_TYPE(receiver);
+    RETURN_STRING_FMT("<type %s>", type->name->chars);
+}
+
 static void bindStringClass(VM* vm) {
     for (int i = 0; i < vm->strings.capacity; i++) {
         Entry* entry = &vm->strings.entries[i];
@@ -1893,17 +1937,21 @@ void registerLangPackage(VM* vm) {
     vm->methodClass = defineNativeClass(vm, "Method");
     vm->namespaceClass = defineNativeClass(vm, "Namespace");
     vm->traitClass = defineNativeClass(vm, "Trait");
+    vm->typeClass = defineNativeClass(vm, "Type");
+
     vm->nilClass = defineNativeClass(vm, "Nil");
     vm->boolClass = defineNativeClass(vm, "Bool");
     ObjClass* comparableTrait = defineNativeTrait(vm, "TComparable");
     vm->numberClass = defineNativeClass(vm, "Number");
     vm->intClass = defineNativeClass(vm, "Int");
     vm->floatClass = defineNativeClass(vm, "Float");
+
     ObjClass* iterableTrait = defineNativeTrait(vm, "TIterable");
     ObjClass* iteratorTrait = defineNativeTrait(vm, "TIterator");
     vm->iteratorClass = defineNativeClass(vm, "Iterator");
     vm->stringClass = defineNativeClass(vm, "String");
     ObjClass* stringIteratorClass = defineNativeClass(vm, "StringIterator");
+
     ObjClass* callableTrait = defineNativeTrait(vm, "TCallable");
     vm->functionClass = defineNativeClass(vm, "Function");
     vm->boundMethodClass = defineNativeClass(vm, "BoundMethod");
@@ -2022,6 +2070,15 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->traitClass, Trait, superclass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->traitClass, Trait, toString, 0, RETURN_TYPE(String));
 
+    bindSuperclass(vm, vm->typeClass, behaviorClass);
+    DEF_INTERCEPTOR(vm->typeClass, Type, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Type), PARAM_TYPE(String));
+    DEF_METHOD(vm->typeClass, Type, isBehavior, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isClass, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isFunction, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isMetaclass, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isTrait, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, toString, 0, RETURN_TYPE(String));
+
     insertGlobalSymbolTable(vm, "clox", "Namespace");
     insertGlobalSymbolTable(vm, "Object", "Object class");
     insertGlobalSymbolTable(vm, "Behavior", "Behavior class");
@@ -2030,6 +2087,7 @@ void registerLangPackage(VM* vm) {
     insertGlobalSymbolTable(vm, "Method", "Method class");
     insertGlobalSymbolTable(vm, "Namespace", "Namespace class");
     insertGlobalSymbolTable(vm, "Trait", "Trait class");
+    insertGlobalSymbolTable(vm, "Type", "Type class");
 
     bindSuperclass(vm, vm->nilClass, vm->objectClass);
     DEF_INTERCEPTOR(vm->nilClass, Nil, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(Nil));
