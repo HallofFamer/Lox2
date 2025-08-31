@@ -319,6 +319,13 @@ ObjTimer* newTimer(VM* vm, ObjClosure* closure, int delay, int interval) {
     return timer;
 }
 
+ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
+    ObjType* type = ALLOCATE_OBJ_GEN(ObjType, OBJ_TYPE, vm->typeClass, GC_GENERATION_TYPE_PERMANENT);
+    type->name = name;
+    type->typeInfo = typeInfo;
+    return type;
+}
+
 ObjUpvalue* newUpvalue(VM* vm, Value* slot) {
     ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, OBJ_UPVALUE, NULL);
     upvalue->closed = NIL_VAL;

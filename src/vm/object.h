@@ -389,6 +389,7 @@ ObjPromise* newPromise(VM* vm, PromiseState state, Value value, Value executor);
 ObjRange* newRange(VM* vm, int from, int to);
 ObjRecord* newRecord(VM* vm, void* data);
 ObjTimer* newTimer(VM* vm, ObjClosure* closure, int delay, int interval);
+ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo);
 ObjUpvalue* newUpvalue(VM* vm, Value* slot);
 ObjValueInstance* newValueInstance(VM* vm, Value value, ObjClass* klass);
 
