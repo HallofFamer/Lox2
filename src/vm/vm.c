@@ -341,6 +341,7 @@ static Value createObject(VM* vm, ObjClass* klass, int argCount) {
         case OBJ_RECORD: return OBJ_VAL(newRecord(vm, NULL));
         case OBJ_STRING: return OBJ_VAL(ALLOCATE_STRING(0, klass));
         case OBJ_TIMER: return OBJ_VAL(newTimer(vm, NULL, 0, 0));
+        case OBJ_TYPE: return OBJ_VAL(newType(vm, emptyString(vm), NULL));
         case OBJ_VALUE_INSTANCE: return OBJ_VAL(newValueInstance(vm, NIL_VAL, klass));
         default: return NIL_VAL;
     }

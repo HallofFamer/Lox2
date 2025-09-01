@@ -1857,6 +1857,12 @@ LOX_METHOD(Type, isTrait) {
     RETURN_BOOL(type->typeInfo->category == TYPE_CATEGORY_TRAIT);
 }
 
+LOX_METHOD(Type, name) {
+    ASSERT_ARG_COUNT("Type::name()", 0);
+    ObjType* type = AS_TYPE(receiver);
+    RETURN_OBJ(type->name);
+}
+
 LOX_METHOD(Type, toString) {
     ASSERT_ARG_COUNT("Type::toString()", 0);
     ObjType* type = AS_TYPE(receiver);
@@ -2077,6 +2083,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, isFunction, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isMetaclass, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isTrait, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, name, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, toString, 0, RETURN_TYPE(String));
 
     insertGlobalSymbolTable(vm, "clox", "Namespace");
