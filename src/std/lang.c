@@ -1827,6 +1827,42 @@ LOX_METHOD(Type, __init__) {
     RETURN_OBJ(type);
 }
 
+LOX_METHOD(Type, getMethod) {
+    ASSERT_ARG_COUNT("Type::getMethod(name)", 1);
+    ASSERT_ARG_TYPE("Type::getMethod(name)", 0, String);
+    ObjType* type = AS_TYPE(receiver);
+    if (IS_BEHAVIOR_TYPE(type->typeInfo)) {
+        Value value;
+        bool result = tableGet(&vm->classes, type->typeInfo->fullName, &value);
+        if (!result) RETURN_NIL;
+
+        ObjClass* klass = AS_CLASS(value);
+        if (tableGet(&klass->methods, AS_STRING(args[0]), &value)) {
+            if (IS_NATIVE_METHOD(value)) RETURN_OBJ(AS_NATIVE_METHOD(value));
+            else if (IS_CLOSURE(value)) RETURN_OBJ(newMethod(vm, klass, AS_CLOSURE(value)));
+            else {
+                THROW_EXCEPTION(clox.std.lang.MethodNotFoundException, "Invalid method object found.");
+            }
+        }
+        else RETURN_NIL;
+    }
+    RETURN_NIL;
+}
+
+LOX_METHOD(Type, hasMethod) {
+    ASSERT_ARG_COUNT("Type::hasMethod(name)", 1);
+    ASSERT_ARG_TYPE("Type::hasMethod(name)", 0, String);
+    ObjType* type = AS_TYPE(receiver);
+    if (IS_BEHAVIOR_TYPE(type->typeInfo)) {
+        Value value;
+        bool result = tableGet(&vm->classes, type->typeInfo->fullName, &value);
+        if (!result) RETURN_FALSE;
+        ObjClass* klass = AS_CLASS(value);
+        RETURN_BOOL(tableGet(&klass->methods, AS_STRING(args[0]), &value));
+    }
+    RETURN_FALSE;
+}
+
 LOX_METHOD(Type, isBehavior) {
     ASSERT_ARG_COUNT("Type::isBehavior()", 0);
     ObjType* type = AS_TYPE(receiver);
@@ -1846,9 +1882,14 @@ LOX_METHOD(Type, isMetaclass) {
 }
 
 LOX_METHOD(Type, isFunction) {
-   ASSERT_ARG_COUNT("Type::isFunction()", 0);
+    ASSERT_ARG_COUNT("Type::isFunction()", 0);
     ObjType* type = AS_TYPE(receiver);
     RETURN_BOOL(IS_CALLABLE_TYPE(type->typeInfo));
+}
+
+LOX_METHOD(Type, isNative) {
+    ASSERT_ARG_COUNT("Type::isNative()", 0);
+    RETURN_FALSE;
 }
 
 LOX_METHOD(Type, isTrait) {
@@ -2078,10 +2119,13 @@ void registerLangPackage(VM* vm) {
 
     bindSuperclass(vm, vm->typeClass, behaviorClass);
     DEF_INTERCEPTOR(vm->typeClass, Type, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Type), PARAM_TYPE(String));
+    DEF_METHOD(vm->typeClass, Type, getMethod, 1, RETURN_TYPE(Method), PARAM_TYPE(String));
+    DEF_METHOD(vm->typeClass, Type, hasMethod, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, isBehavior, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isClass, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isFunction, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isMetaclass, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isNative, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isTrait, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, name, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, toString, 0, RETURN_TYPE(String));
