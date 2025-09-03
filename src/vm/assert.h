@@ -112,22 +112,23 @@ Value assertArgIsClosure(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsComparable(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsDictionary(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsEntry(VM* vm, const char* method, Value* args, int index);
-Value assertArgIsIterable(VM * vm, const char* method, Value * args, int index);
+Value assertArgIsIterable(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsException(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsFile(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsFloat(VM* vm, const char* method, Value* args, int index);
-Value assertArgIsGenerator(VM * vm, const char* method, Value * args, int index);
+Value assertArgIsGenerator(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsInt(VM* vm, const char* method, Value* args, int index);
-Value assertArgIsIterator(VM * vm, const char* method, Value * args, int index);
+Value assertArgIsIterator(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsMethod(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsNamespace(VM* vm, const char* method, Value* args, int index);
-Value assertArgIsNil(VM * vm, const char* method, Value * args, int index);
+Value assertArgIsNil(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsNode(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsNumber(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsPromise(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsRange(VM* vm, const char* method, Value* args, int index);
 Value assertArgIsString(VM* vm, const char* method, Value* args, int index);
-Value assertArgIsTimer(VM * vm, const char* method, Value* args, int index);
+Value assertArgIsTimer(VM* vm, const char* method, Value* args, int index);
+Value assertArgIsType(VM* vm, const char* method, Value* args, int index);
 Value assertIndexWithinBounds(VM* vm, const char* method, int value, int min, int max, int index);
 
 #endif // !clox_assert_h
