@@ -1290,6 +1290,8 @@ static void resolveTraitDeclaration(Resolver* resolver, Ast* ast) {
 static void resolveTypeDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     resolveChild(resolver, ast, 0);
+    Ast* typeDef = astGetChild(ast, 0);
+    item->type = typeDef->type;
     item->state = SYMBOL_STATE_ACCESSED;
 }
 

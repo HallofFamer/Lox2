@@ -1898,6 +1898,40 @@ LOX_METHOD(Type, isTrait) {
     RETURN_BOOL(type->typeInfo->category == TYPE_CATEGORY_TRAIT);
 }
 
+LOX_METHOD(Type, methods) {
+    ASSERT_ARG_COUNT("Type::methods()", 0);
+    ObjType* self = AS_TYPE(receiver);
+    ObjClass* klass = NULL;
+    
+    if (IS_BEHAVIOR_TYPE(self->typeInfo)) {
+        Value value;
+        bool result = tableGet(&vm->classes, self->typeInfo->fullName, &value);
+        if (!result) RETURN_NIL;
+        klass = AS_CLASS(value);
+    }
+    else if (IS_CALLABLE_TYPE(self->typeInfo)) klass = getNativeClass(vm, "clox.std.lang.Function");
+
+    if (klass == NULL) RETURN_NIL;
+    ObjDictionary* dict = newDictionary(vm);
+    push(vm, OBJ_VAL(dict));
+
+    for (int i = 0; i < klass->methods.capacity; i++) {
+        Entry* entry = &klass->methods.entries[i];
+        if (entry != NULL) {
+            if (IS_NATIVE_METHOD(entry->value)) dictSet(vm, dict, OBJ_VAL(entry->key), entry->value);
+            else if (IS_CLOSURE(entry->value)) {
+                ObjMethod* method = newMethod(vm, klass, AS_CLOSURE(entry->value));
+                push(vm, OBJ_VAL(method));
+                dictSet(vm, dict, OBJ_VAL(entry->key), OBJ_VAL(method));
+                pop(vm);
+            }
+        }
+    }
+
+    pop(vm);
+    RETURN_OBJ(dict);
+}
+
 LOX_METHOD(Type, name) {
     ASSERT_ARG_COUNT("Type::name()", 0);
     ObjType* type = AS_TYPE(receiver);
@@ -2127,6 +2161,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, isMetaclass, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isNative, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isTrait, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, methods, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->typeClass, Type, name, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, toString, 0, RETURN_TYPE(String));
 
