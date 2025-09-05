@@ -496,6 +496,14 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
     return callableType;
 }
 
+static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
+    ObjString* alias = createSymbol(resolver, ast->token);
+    Ast* actualType = astGetChild(ast, 0);
+    AliasTypeInfo* aliasType = newAliasTypeInfo(-1, alias, alias, actualType->type);
+    TypeInfoArrayAdd(resolver->vm->aliasTypes, (TypeInfo*)aliasType);
+    return aliasType;
+}
+
 static SymbolItem* getVariable(Resolver* resolver, Ast* ast) {
     ObjString* symbol = createSymbol(resolver, ast->token);
     SymbolItem* item = findLocal(resolver, ast);
@@ -1290,8 +1298,9 @@ static void resolveTraitDeclaration(Resolver* resolver, Ast* ast) {
 static void resolveTypeDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     resolveChild(resolver, ast, 0);
-    Ast* typeDef = astGetChild(ast, 0);
-    item->type = typeDef->type;
+    insertAliasType(resolver, ast);
+    Ast* actualType = astGetChild(ast, 0);
+    item->type = actualType->type;
     item->state = SYMBOL_STATE_ACCESSED;
 }
 

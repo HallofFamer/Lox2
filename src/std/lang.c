@@ -1944,6 +1944,26 @@ LOX_METHOD(Type, toString) {
     RETURN_STRING_FMT("<type %s>", type->name->chars);
 }
 
+LOX_METHOD(Type, traits) {
+    ASSERT_ARG_COUNT("Type::traits()", 0);
+    ObjType* self = AS_TYPE(receiver);
+    ObjClass* klass = NULL;
+
+    if (IS_BEHAVIOR_TYPE(self->typeInfo)) {
+        Value value;
+        bool result = tableGet(&vm->classes, self->typeInfo->fullName, &value);
+        if (!result) RETURN_NIL;
+        klass = AS_CLASS(value);
+    }
+    else if (IS_CALLABLE_TYPE(self->typeInfo)) klass = getNativeClass(vm, "clox.std.lang.Function");
+
+    ObjArray* traits = newArray(vm);
+    for (int i = 0; i < klass->traits.count; i++) {
+        valueArrayWrite(vm, &traits->elements, klass->traits.values[i]);
+    }
+    RETURN_OBJ(traits);
+}
+
 static void bindStringClass(VM* vm) {
     for (int i = 0; i < vm->strings.capacity; i++) {
         Entry* entry = &vm->strings.entries[i];
@@ -2164,6 +2184,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, methods, 0, RETURN_TYPE(Object));
     DEF_METHOD(vm->typeClass, Type, name, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, toString, 0, RETURN_TYPE(String));
+    DEF_METHOD(vm->typeClass, Type, traits, 0, RETURN_TYPE(Object));
 
     insertGlobalSymbolTable(vm, "clox", "Namespace");
     insertGlobalSymbolTable(vm, "Object", "Object class");
