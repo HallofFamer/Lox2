@@ -499,9 +499,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
 static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
     ObjString* alias = createSymbol(resolver, ast->token);
     Ast* actualType = astGetChild(ast, 0);
-    AliasTypeInfo* aliasType = newAliasTypeInfo(-1, alias, alias, actualType->type);
-    TypeInfoArrayAdd(resolver->vm->aliasTypes, (TypeInfo*)aliasType);
-    return aliasType;
+    return typeTableInsertAlias(resolver->vm->aliasTypes, alias, alias, actualType->type);
 }
 
 static SymbolItem* getVariable(Resolver* resolver, Ast* ast) {

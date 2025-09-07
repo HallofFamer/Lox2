@@ -1956,7 +1956,8 @@ LOX_METHOD(Type, traits) {
         klass = AS_CLASS(value);
     }
     else if (IS_CALLABLE_TYPE(self->typeInfo)) klass = getNativeClass(vm, "clox.std.lang.Function");
-
+    
+    if (klass == NULL) RETURN_NIL;
     ObjArray* traits = newArray(vm);
     for (int i = 0; i < klass->traits.count; i++) {
         valueArrayWrite(vm, &traits->elements, klass->traits.values[i]);
