@@ -54,6 +54,7 @@ typedef enum {
     OP_IMPLEMENT,
     OP_FIELD,
     OP_METHOD,
+    OP_TYPE,
     OP_ARRAY,
     OP_DICTIONARY,
     OP_RANGE,

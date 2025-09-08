@@ -200,6 +200,8 @@ int disassembleInstruction(Chunk* chunk, int offset) {
             return memberInstruction("OP_FIELD", chunk, offset);
         case OP_METHOD:
             return memberInstruction("OP_METHOD", chunk, offset);
+        case OP_TYPE:
+            return identifierInstruction("OP_TYPE", chunk, offset);
         case OP_ARRAY: 
             return byteInstruction("OP_ARRAY", chunk, offset);
         case OP_DICTIONARY:

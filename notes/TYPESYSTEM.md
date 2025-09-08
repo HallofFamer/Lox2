@@ -55,9 +55,9 @@ class Device {
 Here the type annotations are used to declare types for instance and class fields. If type annotations are omitted, they default to dynamic. However, if initializer is specified for an immutable field, it can deduce the type from the initializer similar to how it works for local variables. In the above case, the field batteryLife is inferred to have type Int instead of Dynamic, and class field serialID has its type inferred to be String. 
 
 ## Metaclass Types
-As classes themselves are objects, they can be assigned to variables, passed to functions/methods as arguments and returned as values. This implies need to allow type annotations for metaclass types, which will be added in Lox 2.1. The syntax is `(MetaclassType class)`, note the enclosing parenthesis is mandatory. For instance the below code allows returning class UserFactory instead of instance of UserFactory. 
+As classes themselves are objects, they can be assigned to variables, passed to functions/methods as arguments and returned as values. This implies need to allow type annotations for metaclass types, which will be added in Lox 2.1. The syntax is `ClassType class`, the below code allows returning class UserFactory instead of instance of UserFactory. 
 ```
-(UserFactory class) getUserFactory() {}
+UserFactory class getUserFactory() {}
 ```
 Lox2 has an object model similar to Smalltalk, which specifies that metaclass hierarchy mirrors class hierarchy. In the above example, the function may return either class UserFactory, or a subclass of this factory.
 
@@ -103,7 +103,7 @@ class AnimalShelter {
 class DogShelter extends AnimalShelter {
     Dog getByName(String name) {}
 }
-// Will be valid in Lox 2.2+
+// Will be valid in Lox 2.3+
 ```
 The same subtyping rules will not work for param types, as type theory dictates that param types are contravariant. As contravariance is confusing and rarely useful in practice, Lox2 does not support contravariant param types. 
 

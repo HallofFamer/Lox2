@@ -1313,6 +1313,14 @@ static void compileTraitDeclaration(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
 }
 
+static void compileTypeDeclaration(Compiler* compiler, Ast* ast) {
+    Token* name = &ast->token;
+    uint8_t index = identifierConstant(compiler, name);
+    declareVariable(compiler, name);
+    emitBytes(compiler, OP_TYPE, index);
+    compileChild(compiler, ast, 0);
+}
+
 static void compileVarDeclaration(Compiler* compiler, Ast* ast) {
     uint8_t index = makeVariable(compiler, &ast->token, "Expect variable name.");
     if (astHasChild(ast)) compileChild(compiler, ast, 0);
@@ -1339,6 +1347,9 @@ static void compileDeclaration(Compiler* compiler, Ast* ast) {
             break;
         case AST_DECL_TRAIT:
             compileTraitDeclaration(compiler, ast);
+            break;
+        case  AST_DECL_TYPE:
+            compileTypeDeclaration(compiler, ast);
             break;
         case AST_DECL_VAR:
             compileVarDeclaration(compiler, ast);

@@ -1215,6 +1215,17 @@ InterpretResult run(VM* vm) {
                 defineMethod(vm, methodName, isClassMethod);
                 break;
             }
+            case OP_TYPE: {
+                ObjString* typeName = READ_STRING();
+                TypeInfo* typeInfo = typeTableGet(vm->aliasTypes, typeName);
+                if (!IS_ALIAS_TYPE(typeInfo)) {
+                    RUNTIME_ERROR("The specified type alias is invalid.");
+                }
+                
+                push(vm, OBJ_VAL(newType(vm, typeName, AS_ALIAS_TYPE(typeInfo)->targetType)));
+                tableSet(vm, &vm->currentNamespace->values, typeName, peek(vm, 0));
+                break;
+            }
             case OP_ARRAY: {
                 uint8_t elementCount = READ_BYTE();
                 makeArray(vm, elementCount);
