@@ -1393,9 +1393,24 @@ LOX_METHOD(Object, hashCode) {
 }
 
 LOX_METHOD(Object, instanceOf) {
-    ASSERT_ARG_COUNT("Object::instanceOf(class)", 1);
-    if (!IS_CLASS(args[0])) RETURN_FALSE;
-    RETURN_BOOL(isObjInstanceOf(vm, receiver, AS_CLASS(args[0])));
+    ASSERT_ARG_COUNT("Object::instanceOf(behavior)", 1);
+    if (IS_CLASS(args[0])) RETURN_BOOL(isObjInstanceOf(vm, receiver, AS_CLASS(args[0])));
+    else if (IS_TYPE(args[0])) {
+        ObjType* type = AS_TYPE(args[0]);
+        ObjClass* klass = NULL;
+
+        if (IS_BEHAVIOR_TYPE(type->typeInfo)) {
+            Value value;
+            bool result = tableGet(&vm->classes, type->typeInfo->fullName, &value);
+            if (!result) RETURN_FALSE;
+            klass = AS_CLASS(value);
+        }
+        else if (IS_CALLABLE_TYPE(type->typeInfo)) klass = getNativeClass(vm, "clox.std.lang.Function");
+        else RETURN_FALSE;
+
+        RETURN_BOOL(isObjInstanceOf(vm, receiver, klass));
+    }
+    else RETURN_FALSE;
 }
 
 LOX_METHOD(Object, memberOf) {

@@ -546,6 +546,9 @@ void printObject(Value value) {
         case OBJ_TIMER: 
             printf("<timer: %d>", AS_TIMER(value)->id);
             break;
+        case OBJ_TYPE:
+            printf("<type: %s>", AS_TYPE(value)->name->chars);
+            break;
         case OBJ_UPVALUE:
             printf("<upvalue>");
             break;

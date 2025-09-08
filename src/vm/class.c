@@ -266,13 +266,13 @@ Value getClassField(VM* vm, ObjClass* klass, char* name) {
 
 void setClassField(VM* vm, ObjClass* klass, char* name, Value value) {
     PROCESS_WRITE_BARRIER((Obj*)klass, value);
-    ObjString* propertyName = newStringPerma(vm, name);
+    ObjString* fieldName = newStringPerma(vm, name);
     int index;
 
-    if (!idMapGet(&klass->indexes, propertyName, &index)) {
+    if (!idMapGet(&klass->indexes, fieldName, &index)) {
         index = klass->fields.count;
         valueArrayWrite(vm, &klass->fields, value);
-        idMapSet(vm, &klass->indexes, propertyName, index);
+        idMapSet(vm, &klass->indexes, fieldName, index);
     }
     else klass->fields.values[index] = value;
 }
