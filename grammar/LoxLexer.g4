@@ -1,7 +1,7 @@
 lexer grammar Lox;
 
 SEPARATOR: [ \t\r\n];
-KEYWORD: AND | AS | ASYNC | AWAIT | BREAK | CATCH | CLASS | CONTINUE | DEFAULT | ELSE | EXTENDS | FINALLY | FOR | FROM | FUN | IF | OR | RETURN | SUPER | THROW | TRAIT | TRY | VAL | VAR | VOID | WHILE | WITH | YIELD;
+KEYWORD: AND | AS | ASYNC | AWAIT | BREAK | CATCH | CLASS | CONTINUE | DEFAULT | ELSE | EXTENDS | FINALLY | FOR | FROM | FUN | IF | OR | RETURN | SUPER | THIS | THROW | TRAIT | TRY | TYPE | VAL | VAR | VOID | WHILE | WITH | YIELD;
 AND: 'and';
 AS: 'as';
 ASYNC: 'async';
@@ -25,9 +25,11 @@ REQUIRE: 'require';
 RETURN: 'return';
 SUPER: 'super';
 SWITCH: 'switch';
+THIS: 'this';
 THROW: 'throw';
 TRAIT: 'trait';
 TRY: 'try';
+TYPE: 'type';
 USING: 'using';
 VAL: 'val';
 VAR: 'var';

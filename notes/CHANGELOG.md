@@ -1,11 +1,21 @@
 # Change Log
 
-### Lox2 v2.1.0(current version)
+### Lox2 v2.1.1(current version)
+- Modify typechecker to infer function/lambda parameter types for immediate function calls.
+- Update native callable type creation to display informative names when type error occurs.
+- Fix async methods in package `clox.std.io` and `clox.std.net` to use the asynchronous version of assertion macros.
+ 
+### Lox2 v2.1.0(last version)
 - Extend parser with infinite lookahead and backtrack, allowing parsing context sensitive grammar for Lox2.
 - Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be type inferred. 
 - Allow declaration of object instance/class fields outside of class initializer, which also enables optional static typing and default values.
 - Redesign of Iterator/Enumerator API for ease of use and implementation of iterable types, add new object type ObjIterator.
 
+### Lox2 v2.0.4
+- Add name resolution table in order to be able to typecheck invoke expressions like namespace.className(..args)
+- Modify typechecker to check if provided object is an instance of `TEnumerable` or `String` in for statement.
+- Fix async methods in package `clox.std.io` and `clox.std.net` to use the asynchronous version of assertion macros.
+ 
 ### Lox2 v2.0.3
 - Add instance field `length` to class `Range` in package `clox.std.collection`, it now behaves correctly like a collection subclass.
 - Fix potential memory leak issue that AST is not properly freed when parser, resolver or typechecker fails with error.

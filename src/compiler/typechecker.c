@@ -1221,6 +1221,15 @@ static void typeCheckTraitDeclaration(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
 }
 
+static void typeCheckTypeDeclaration(TypeChecker* typeChecker, Ast* ast) {
+    ObjString* typeName = createSymbol(typeChecker, ast->token);
+    SymbolItem* item = symbolTableGet(ast->symtab, typeName);
+    TypeInfo* aliasType = typeTableGet(typeChecker->vm->aliasTypes, typeName);
+    ast->type = (TypeInfo*)aliasType;
+    item->type = ast->type;
+    typeCheckChild(typeChecker, ast, 0);
+}
+
 static void typeCheckVarDeclaration(TypeChecker* typeChecker, Ast* ast) {
     SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
     if (astHasChild(ast)) {
@@ -1248,6 +1257,9 @@ static void typeCheckDeclaration(TypeChecker* typeChecker, Ast* ast) {
             break;
         case AST_DECL_TRAIT:
             typeCheckTraitDeclaration(typeChecker, ast);
+            break;
+        case AST_DECL_TYPE:
+            typeCheckTypeDeclaration(typeChecker, ast);
             break;
         case AST_DECL_VAR:
             typeCheckVarDeclaration(typeChecker, ast);

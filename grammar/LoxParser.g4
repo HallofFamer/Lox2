@@ -44,6 +44,9 @@ classBody: (LT IDENTIFIER)? (WITH parameters)? LBRACE fieldDecl* function* RBRAC
 function: ASYNC? CLASS? type? IDENTIFIER functionBody;
 functionBody: LPAREN parameters? RPAREN block;
 traitBody: (WITH parameters)? LBRACE CLASS? function* RBRACE;
-type: VOID | IDENTIFIER CLASS? | ((IDENTIFIER | VOID)? fun LPAREN type? (COMMA type)* RPAREN)
+behaviorType: IDENTIFIER CLASS?;
+callableType: (type | VOID)? fun LPAREN (type (COMMA type)*)? RPAREN;
+genericType: IDENTIFIER (LT type (COMMA type)*)? GT;
+type: behaviorType | callableType | genericType
 parameters: (VAR? type? IDENTIFIER (VAR? COMMA type? IDENTIFIER)*) | (DOTDOT type? IDENTIFIER);
 arguments: expression (COMMA expression)*;
