@@ -2,11 +2,9 @@ namespace test.features
 using clox.std.collection.Array
 
 val array = []
-print("Creating empty array: ")
-println(array)
+println("Creating empty array: ${array}")
 val array2 = Array()
-print("Two empty arrays are equal: ")
-println(array.equals(array2))
+println("Two empty arrays are equal: ${array.equals(array2)}")
 println("")
 
 print("Adding elements 2, 3.5, true and 'Hello World': ")
@@ -15,40 +13,31 @@ array.add(3.5)
 array[2] = true
 array[3] = "Hello World"
 println(array)
-print("Testing array equality again: ")
-println(array.equals(array2))
-print("Creating another array using literal: ")
+println("Testing array equality again: ${array.equals(array2)}")
+
 val array3 = [1 + 1, 3.5, true, "hello World".capitalize()]
-println(array3)
-print("The first and last array are equal: ")
+println("Creating another array using literal: ${array3}")
+println("The first and last array are equal: ${array.equals(array3)}")
 println(array.equals(array3))
 println("")
 
-print("Getting element at index 3: ")
-println(array.getAt(3))
-print("Index of element 'true': ")
-println(array.indexOf(true))
+println("Getting element at index 3: ${array.getAt(3)}")
+println("Index of element 'true': ${array.indexOf(true)}")
 println("")
-
-print("Setting element false at index 2: ")
 array[2] = false
-println(array.toString())
-print("Inserting element nil at index 3: ")
+println("Setting element false at index 2: ${array}")
 array.insertAt(3, nil)
-println(array.toString())
+println("Inserting element nil at index 3: ${array}")
 println("")
 
-print("Remove element at index 1: ")
 val element = array.removeAt(1)
-println(element.toString())
-print("Current array is: ")
-println(array.toString())
-print("Clearing array: ")
+println("Remove element at index 1: ${element}")
+println("Current array is: ${array}")
 array.clear()
+println("Clearing array: ${array}")
 println(array.toString())
 println("")
 
 val array4 = Array.fromElements(1, 2, 3, 4, 5)
-println("Creating an array from class methods: " + array4.toString())
-print("New array contains element 2: ")
-println(array4.contains(2))
+println("Creating an array from class methods: ${array4}")
+println("New array contains element 2: ${array4.contains(2)}")

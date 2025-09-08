@@ -1,0 +1,10 @@
+namespace test.types
+
+type Predicate = Bool fun(Object)
+println(Predicate)
+
+Bool fun callPredicate(Predicate p, Object arg) { 
+    return p(arg)
+}
+
+println(callPredicate({|arg| arg % 2 == 0}, 4))

@@ -2,11 +2,11 @@ namespace test.features
 
 class Listener { 
     listen(port){
-        println("Listening to port: " + port.toString()) 
+        println("Listening to port: ${port}") 
     }  
 
     toString(){ 
-        return "Listener class: " + this.getClassName()
+        return "Listener class: ${this.getClassName()}"
     }
 }
 
@@ -23,7 +23,7 @@ val listenerClass = class extends Listener with listenerTrait {
             println(this.toString())
         }
         else{ 
-            println("Invalid port number specified: " + port.toString())
+            println("Invalid port number specified: ${port}")
         }
     }
 };
