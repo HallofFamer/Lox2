@@ -490,12 +490,13 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     type = IS_ALIAS_TYPE(type) ? AS_ALIAS_TYPE(type)->targetType : type;
     type2 = IS_ALIAS_TYPE(type2) ? AS_ALIAS_TYPE(type2)->targetType : type2;
 
+    if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
+    if (memcmp(type2->shortName->chars, "Object", 3) == 0) return true;
     if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (strcmp(type2->shortName->chars, "Function") == 0 || strcmp(type2->shortName->chars, "TCallable") == 0)) return true;
     if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false; 
-    if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
+   
     BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type);
     BehaviorTypeInfo* supertype = AS_BEHAVIOR_TYPE(type2);
-
     TypeInfo* superclassType = subtype->superclassType;
     while (superclassType != NULL) {
         if (superclassType->id == type2->id) return true;
