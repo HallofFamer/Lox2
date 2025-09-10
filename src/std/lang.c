@@ -107,6 +107,11 @@ LOX_METHOD(Behavior, isTrait) {
     RETURN_BOOL(AS_CLASS(receiver)->behaviorType == BEHAVIOR_TRAIT);
 }
 
+LOX_METHOD(Behavior, isType) {
+    ASSERT_ARG_COUNT("Behavior::isType()", 0);
+    RETURN_BOOL(IS_TYPE(receiver));
+}
+
 LOX_METHOD(Behavior, methods) {
     ASSERT_ARG_COUNT("Behavior::methods()", 0);
     ObjClass* self = AS_CLASS(receiver);
@@ -2100,6 +2105,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(behaviorClass, Behavior, isClass, 0, RETURN_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, isMetaclass, 0, RETURN_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, isNative, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(behaviorClass, Behavior, isType, 0, RETURN_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, methods, 0, RETURN_TYPE(Object));
     DEF_METHOD(behaviorClass, Behavior, name, 0, RETURN_TYPE(String));
     DEF_METHOD(behaviorClass, Behavior, traits, 0, RETURN_TYPE(Object));
@@ -2228,9 +2234,9 @@ void registerLangPackage(VM* vm) {
 
     DEF_METHOD(comparableTrait, TComparable, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
     DEF_METHOD(comparableTrait, TComparable, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
-    DEF_OPERATOR(comparableTrait, TComparable, ==, __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
-    DEF_OPERATOR(comparableTrait, TComparable, >, __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
-    DEF_OPERATOR(comparableTrait, TComparable, <, __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(comparableTrait, TComparable, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(comparableTrait, TComparable, > , __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(comparableTrait, TComparable, < , __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     insertGlobalSymbolTable(vm, "TComparable", "Trait");
 
     bindSuperclass(vm, vm->numberClass, vm->objectClass);
@@ -2264,13 +2270,13 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->numberClass, Number, tan, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, toInt, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->numberClass, Number, toString, 0, RETURN_TYPE(String));
-    DEF_OPERATOR(vm->numberClass, Number, ==, __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
-    DEF_OPERATOR(vm->numberClass, Number, >, __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
-    DEF_OPERATOR(vm->numberClass, Number, <, __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, > , __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, < , __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(vm->numberClass, Number, +, __add__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, -, __subtract__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, *, __multiply__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
-    DEF_OPERATOR(vm->numberClass, Number, /, __divide__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
+    DEF_OPERATOR(vm->numberClass, Number, / , __divide__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, %, __modulo__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     insertGlobalSymbolTable(vm, "Number", "Number class");
 
