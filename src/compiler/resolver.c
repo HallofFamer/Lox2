@@ -153,7 +153,8 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
     ObjString* shortName = createSymbol(resolver, token);
     ObjString* originalName = shortName;
     if (isMetaclass) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
-    TypeInfo* type = typeTableGet(resolver->vm->behaviorTypetab, shortName);
+    TypeInfo* type = typeTableGet(resolver->vm->aliasTypes, shortName);
+    if (type == NULL) type = typeTableGet(resolver->vm->behaviorTypetab, shortName);
     ObjString* fullName = NULL;
 
     if (type == NULL) {
