@@ -2105,6 +2105,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(behaviorClass, Behavior, isClass, 0, RETURN_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, isMetaclass, 0, RETURN_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, isNative, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(behaviorClass, Behavior, isTrait, 0, RETURN_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, isType, 0, RETURN_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, methods, 0, RETURN_TYPE(Object));
     DEF_METHOD(behaviorClass, Behavior, name, 0, RETURN_TYPE(String));

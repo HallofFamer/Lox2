@@ -350,7 +350,7 @@ Value getObjField(VM* vm, ObjInstance* object, char* name) {
 
 Value getObjFieldByIndex(VM* vm, ObjInstance* object, int index) {
     if (index >= object->fields.count) {
-        runtimeError(vm, "Invalid index %d for object property", index);
+        runtimeError(vm, "Invalid index %d for object field.", index);
         exit(70);
     }
     return object->fields.values[index];
@@ -374,7 +374,7 @@ void setObjField(VM* vm, ObjInstance* object, char* name, Value value) {
 void setObjFieldByIndex(VM* vm, ObjInstance* object, int index, Value value) {
     PROCESS_WRITE_BARRIER((Obj*)object, value);
     if (index < object->fields.count) {
-        runtimeError(vm, "Invalid index %d for object field", index);
+        runtimeError(vm, "Invalid index %d for object field.", index);
         exit(70);
     }
     object->fields.values[index] = value;
