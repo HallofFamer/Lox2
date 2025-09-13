@@ -589,7 +589,7 @@ static void behavior(TypeChecker* typeChecker, BehaviorType type, Ast* ast) {
         childIndex++;
 
         if (!isSubtypeOfType(superclassItem->type, typeChecker->classType)) {
-            typeError(typeChecker, "Superclass must be an instance of Class, but gets %s.", superclassItem->type->shortName->chars);
+            typeError(typeChecker, "Superclass must be an instance of Class but gets %s.", superclassItem->type->shortName->chars);
         }
 
         if (typeChecker->currentClass->isAnonymous) ast->type = superclassItem->type;

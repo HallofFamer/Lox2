@@ -426,9 +426,9 @@ static void typeTableOutputFunction(CallableTypeInfo* function) {
     printf("%s(", function->baseType.shortName->chars);
 
     if (function->paramTypes != NULL && function->paramTypes->count > 0) {
-        printf("%s", function->paramTypes->elements[0]->shortName->chars);
+        printf("%s", (function->paramTypes->elements[0] != NULL) ? function->paramTypes->elements[0]->shortName->chars : "dynamic");
         for (int i = 1; i < function->paramTypes->count; i++) {
-            printf(", %s", function->paramTypes->elements[i]->shortName->chars);
+            printf(", %s", (function->paramTypes->elements[i] != NULL) ? function->paramTypes->elements[i]->shortName->chars : "dynamic");
         }
     } 
     printf(")\n");
