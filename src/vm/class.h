@@ -3,6 +3,7 @@
 #define clox_class_h
 
 #include "value.h"
+#include "../compiler/type.h"
 
 typedef enum {
     BEHAVIOR_CLASS,
@@ -26,6 +27,7 @@ void bindSuperclass(VM* vm, ObjClass* subclass, ObjClass* superclass);
 void implementTraits(VM* vm, ObjClass* klass, ValueArray* traits);
 void bindTrait(VM* vm, ObjClass* klass, ObjClass* trait);
 void bindTraits(VM* vm, int numTraits, ObjClass* klass, ...);
+ObjClass* getClassFromTypeInfo(VM* vm, TypeInfo* type);
 Value getClassField(VM* vm, ObjClass* klass, char* name);
 void setClassField(VM* vm, ObjClass* klass, char* name, Value value);
 
