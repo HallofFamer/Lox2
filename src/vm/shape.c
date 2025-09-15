@@ -161,7 +161,7 @@ int createShapeFromParent(VM* vm, int parentID, ObjString* edge) {
     for (int i = 0; i < newShape.indexes.capacity; i++) {
         IndexEntry* entry = &newShape.indexes.entries[i];
         if (entry->key != NULL) {
-            printf("Property at index %d: '%s'\n", entry->value, entry->key->chars);
+            printf("Field at index %d: '%s'\n", entry->value, entry->key->chars);
         }
     }
     printf("\n");

@@ -1402,17 +1402,8 @@ LOX_METHOD(Object, instanceOf) {
     if (IS_CLASS(args[0])) RETURN_BOOL(isObjInstanceOf(vm, receiver, AS_CLASS(args[0])));
     else if (IS_TYPE(args[0])) {
         ObjType* type = AS_TYPE(args[0]);
-        ObjClass* klass = NULL;
-
-        if (IS_BEHAVIOR_TYPE(type->typeInfo)) {
-            Value value;
-            bool result = tableGet(&vm->classes, type->typeInfo->fullName, &value);
-            if (!result) RETURN_FALSE;
-            klass = AS_CLASS(value);
-        }
-        else if (IS_CALLABLE_TYPE(type->typeInfo)) klass = getNativeClass(vm, "clox.std.lang.Function");
-        else RETURN_FALSE;
-
+        ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
+        if (klass == NULL) RETURN_FALSE;
         RETURN_BOOL(isObjInstanceOf(vm, receiver, klass));
     }
     else RETURN_FALSE;
@@ -1921,16 +1912,7 @@ LOX_METHOD(Type, isTrait) {
 LOX_METHOD(Type, methods) {
     ASSERT_ARG_COUNT("Type::methods()", 0);
     ObjType* self = AS_TYPE(receiver);
-    ObjClass* klass = NULL;
-    
-    if (IS_BEHAVIOR_TYPE(self->typeInfo)) {
-        Value value;
-        bool result = tableGet(&vm->classes, self->typeInfo->fullName, &value);
-        if (!result) RETURN_NIL;
-        klass = AS_CLASS(value);
-    }
-    else if (IS_CALLABLE_TYPE(self->typeInfo)) klass = getNativeClass(vm, "clox.std.lang.Function");
-
+    ObjClass* klass = getClassFromTypeInfo(vm, self->typeInfo);
     if (klass == NULL) RETURN_NIL;
     ObjDictionary* dict = newDictionary(vm);
     push(vm, OBJ_VAL(dict));
@@ -1967,21 +1949,15 @@ LOX_METHOD(Type, toString) {
 LOX_METHOD(Type, traits) {
     ASSERT_ARG_COUNT("Type::traits()", 0);
     ObjType* self = AS_TYPE(receiver);
-    ObjClass* klass = NULL;
-
-    if (IS_BEHAVIOR_TYPE(self->typeInfo)) {
-        Value value;
-        bool result = tableGet(&vm->classes, self->typeInfo->fullName, &value);
-        if (!result) RETURN_NIL;
-        klass = AS_CLASS(value);
-    }
-    else if (IS_CALLABLE_TYPE(self->typeInfo)) klass = getNativeClass(vm, "clox.std.lang.Function");
-    
+    ObjClass* klass = getClassFromTypeInfo(vm, self->typeInfo);
     if (klass == NULL) RETURN_NIL;
+
     ObjArray* traits = newArray(vm);
+    push(vm, OBJ_VAL(traits));
     for (int i = 0; i < klass->traits.count; i++) {
         valueArrayWrite(vm, &traits->elements, klass->traits.values[i]);
     }
+    pop(vm);
     RETURN_OBJ(traits);
 }
 
