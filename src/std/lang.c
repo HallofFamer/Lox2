@@ -1411,10 +1411,19 @@ LOX_METHOD(Object, instanceOf) {
 
 LOX_METHOD(Object, memberOf) {
     ASSERT_ARG_COUNT("Object::memberOf(class)", 1);
-    if (!IS_CLASS(args[0])) RETURN_FALSE;
-    ObjClass* thisClass = getObjClass(vm, receiver);
-    ObjClass* thatClass = AS_CLASS(args[0]);
-    RETURN_BOOL(thisClass == thatClass);
+    if (IS_CLASS(args[0])) {
+        ObjClass* thisClass = getObjClass(vm, receiver);
+        ObjClass* thatClass = AS_CLASS(args[0]);
+        RETURN_BOOL(thisClass == thatClass);
+    }
+    else if (IS_TYPE(args[0])) {
+        ObjType* type = AS_TYPE(args[0]);
+        ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
+        if (klass == NULL) RETURN_FALSE;
+        ObjClass* thisClass = getObjClass(vm, receiver);
+        RETURN_BOOL(thisClass == klass);
+    }
+    else RETURN_FALSE;
 }
 
 LOX_METHOD(Object, objectID) {
@@ -2065,7 +2074,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->objectClass, Object, hasField, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
     DEF_METHOD(vm->objectClass, Object, hashCode, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->objectClass, Object, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
-    DEF_METHOD(vm->objectClass, Object, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Class));
+    DEF_METHOD(vm->objectClass, Object, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->objectClass, Object, objectID, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->objectClass, Object, setField, 2, RETURN_TYPE(void), PARAM_TYPE(String), PARAM_TYPE(Object));
     DEF_METHOD(vm->objectClass, Object, toString, 0, RETURN_TYPE(String));
