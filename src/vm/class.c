@@ -257,15 +257,13 @@ void bindTraits(VM* vm, int numTraits, ObjClass* klass, ...) {
 }
 
 ObjClass* getClassFromTypeInfo(VM* vm, TypeInfo* type) {
-    ObjClass* klass = NULL;
-
     if (IS_BEHAVIOR_TYPE(type)) {
         Value value;
         bool result = tableGet(&vm->classes, type->fullName, &value);
         if (!result) return NULL;
-        klass = AS_CLASS(value);
+        return AS_CLASS(value);
     }
-    else if (IS_CALLABLE_TYPE(type)) klass = getNativeClass(vm, "clox.std.lang.Function");
+    else if (IS_CALLABLE_TYPE(type)) return getNativeClass(vm, "clox.std.lang.Function");
     else return NULL;
 }
 
