@@ -104,9 +104,9 @@ struct VM {
     Configuration config;
     int numSymtabs;
     SymbolTable* symtab;
-    TypeTable* behaviorTypetab;
+    TypeTable* typetab;
     TypeTable* aliasTypes;
-    TypeInfoArray* callableTypes;
+    TypeInfoArray* tempTypes;
     Compiler* compiler;
     GC* gc;
 

@@ -2,6 +2,7 @@
 #ifndef clox_buffer_h
 #define clox_buffer_h
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "common.h"

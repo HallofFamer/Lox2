@@ -164,10 +164,10 @@ void initVM(VM* vm) {
     vm->currentModule = NULL;
     vm->numSymtabs = 0;
     vm->symtab = newSymbolTable(vm->numSymtabs++, NULL, SYMBOL_SCOPE_GLOBAL, -1);
-    vm->behaviorTypetab = newTypeTable(0);
+    vm->typetab = newTypeTable(0);
     vm->aliasTypes = newTypeTable(1);
-    vm->callableTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-    TypeInfoArrayInit(vm->callableTypes);
+    vm->tempTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+    TypeInfoArrayInit(vm->tempTypes);
 
     vm->initString = NULL;
     vm->voidString = NULL;
@@ -188,7 +188,7 @@ void initVM(VM* vm) {
 
     vm->initString = copyStringPerma(vm, "__init__", 8);
     vm->voidString = copyStringPerma(vm, "void", 4);
-    typeTableSet(vm->behaviorTypetab, vm->voidString, newTypeInfo(0, sizeof(TypeInfo), TYPE_CATEGORY_VOID, vm->voidString, vm->voidString));
+    typeTableSet(vm->typetab, vm->voidString, newTypeInfo(0, sizeof(TypeInfo), TYPE_CATEGORY_VOID, vm->voidString, vm->voidString));
     vm->runningGenerator = NULL;
 
     registerLangPackage(vm);
@@ -211,9 +211,9 @@ void freeVM(VM* vm) {
     vm->runningGenerator = NULL;
 
     freeSymbolTable(vm->symtab);
-    freeCallableTypes(vm->callableTypes);
+    freeTempTypes(vm->tempTypes);
     freeTypeTable(vm->aliasTypes);
-    freeTypeTable(vm->behaviorTypetab);
+    freeTypeTable(vm->typetab);
     freeObjects(vm);
     freeGC(vm);
     freeLoop(vm);

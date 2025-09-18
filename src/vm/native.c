@@ -111,16 +111,16 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
     item->type = (TypeInfo*)functionType;
     item->type->shortName = takeStringPerma(vm, functionTypeName, (int)strlen(functionTypeName));
     item->type->fullName = item->type->shortName;
-    TypeInfoArrayAdd(vm->callableTypes, item->type);
+    TypeInfoArrayAdd(vm->tempTypes, item->type);
     va_end(args);
 }
 
 void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type, bool isMutable, Value defaultValue) {
     ObjString* fieldName = newStringPerma(vm, name);
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->behaviorTypetab, klass->fullName));
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     FieldTypeInfo* fieldType = typeTableInsertField(behaviorType->fields, fieldName, type, isMutable, !IS_NIL(defaultValue));
     if (fieldType->declaredType != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
-        TypeInfoArrayAdd(vm->callableTypes, fieldType->declaredType);
+        TypeInfoArrayAdd(vm->tempTypes, fieldType->declaredType);
     }
 
     if (klass->classType == OBJ_INSTANCE || klass->classType == OBJ_CLASS) {
@@ -147,9 +147,9 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
 
     va_list args;
     va_start(args, method);
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->behaviorTypetab, klass->fullName));
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     TypeInfo* returnType = va_arg(args, TypeInfo*);
-    if (IS_CALLABLE_TYPE(returnType)) TypeInfoArrayAdd(vm->callableTypes, returnType);
+    if (IS_CALLABLE_TYPE(returnType)) TypeInfoArrayAdd(vm->tempTypes, returnType);
     
     bool isClass = (klass->behaviorType == BEHAVIOR_METACLASS);
     bool isInitializer = (strcmp(name, "__init__") == 0);
@@ -161,19 +161,19 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
         methodType->declaredType->attribute.isVariadic = true;
         TypeInfo* paramType = va_arg(args, TypeInfo*);
         TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
-        if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->callableTypes, paramType);
+        if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
     }
     else {
         for (int i = 0; i < arity; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
             TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
-            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->callableTypes, paramType);
+            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
         }
     }
 
     typeTableSet(behaviorType->methods, methodName, (TypeInfo*)methodType);
     if (methodType->declaredType != NULL) {
-        TypeInfoArrayAdd(vm->callableTypes, (TypeInfo*)methodType->declaredType);
+        TypeInfoArrayAdd(vm->tempTypes, (TypeInfo*)methodType->declaredType);
     }
     va_end(args);
 }
@@ -232,7 +232,7 @@ ObjClass* defineNativeTrait(VM* vm, const char* name) {
     tableSet(vm, &vm->classes, nativeTrait->fullName, OBJ_VAL(nativeTrait));
     tableSet(vm, &vm->currentNamespace->values, traitName, OBJ_VAL(nativeTrait));
     pop(vm);
-    typeTableInsertBehavior(vm->behaviorTypetab, TYPE_CATEGORY_TRAIT, traitName, nativeTrait->fullName, NULL);
+    typeTableInsertBehavior(vm->typetab, TYPE_CATEGORY_TRAIT, traitName, nativeTrait->fullName, NULL);
     return nativeTrait;
 }
 
@@ -262,7 +262,7 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
         for (int i = 0; i < numParams; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
             TypeInfoArrayAdd(callableType->paramTypes, paramType);
-            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->callableTypes, paramType);
+            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
         }
         va_end(args);
     }
@@ -287,15 +287,15 @@ TypeInfo* getNativeType(VM* vm, const char* name) {
     if (name == NULL || strcmp(name, "dynamic") == 0) return NULL;
     ObjString* shortName = newStringPerma(vm, name);
     ObjString* fullName = NULL;
-    TypeInfo* type = typeTableGet(vm->behaviorTypetab, shortName);
+    TypeInfo* type = typeTableGet(vm->typetab, shortName);
 
     if (type == NULL) {
         fullName = concatenateString(vm, vm->currentNamespace->fullName, shortName, ".");
-        type = typeTableGet(vm->behaviorTypetab, fullName);
+        type = typeTableGet(vm->typetab, fullName);
 
         if (type == NULL) {
             fullName = concatenateString(vm, vm->langNamespace->fullName, shortName, ".");
-            type = typeTableGet(vm->behaviorTypetab, fullName);
+            type = typeTableGet(vm->typetab, fullName);
             
             if (type == NULL) {
                 runtimeError(vm, "Type %s is undefined.", name);
