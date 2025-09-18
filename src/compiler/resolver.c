@@ -153,8 +153,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
     ObjString* shortName = createSymbol(resolver, token);
     ObjString* originalName = shortName;
     if (isMetaclass) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
-    TypeInfo* type = typeTableGet(resolver->vm->aliasTypes, shortName);
-    if (type == NULL) type = typeTableGet(resolver->vm->typetab, shortName);
+    TypeInfo* type = typeTableGet(resolver->vm->typetab, shortName);
     ObjString* fullName = NULL;
 
     if (type == NULL) {
@@ -501,7 +500,7 @@ static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
     ObjString* alias = createSymbol(resolver, ast->token);
     Ast* typeDef = astGetChild(ast, 0);
     TypeInfo* targetType = IS_ALIAS_TYPE(typeDef->type) ? AS_ALIAS_TYPE(typeDef->type)->targetType : typeDef->type;
-    return typeTableInsertAlias(resolver->vm->aliasTypes, alias, alias, targetType);
+    return typeTableInsertAlias(resolver->vm->typetab, alias, alias, targetType);
 }
 
 static SymbolItem* getVariable(Resolver* resolver, Ast* ast) {

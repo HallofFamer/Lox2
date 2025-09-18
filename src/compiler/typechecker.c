@@ -1224,7 +1224,7 @@ static void typeCheckTraitDeclaration(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckTypeDeclaration(TypeChecker* typeChecker, Ast* ast) {
     ObjString* typeName = createSymbol(typeChecker, ast->token);
     SymbolItem* item = symbolTableGet(ast->symtab, typeName);
-    TypeInfo* aliasType = typeTableGet(typeChecker->vm->aliasTypes, typeName);
+    TypeInfo* aliasType = typeTableGet(typeChecker->vm->typetab, typeName);
     ast->type = (TypeInfo*)aliasType;
     item->type = ast->type;
     typeCheckChild(typeChecker, ast, 0);

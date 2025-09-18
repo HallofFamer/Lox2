@@ -165,7 +165,6 @@ void initVM(VM* vm) {
     vm->numSymtabs = 0;
     vm->symtab = newSymbolTable(vm->numSymtabs++, NULL, SYMBOL_SCOPE_GLOBAL, -1);
     vm->typetab = newTypeTable(0);
-    vm->aliasTypes = newTypeTable(1);
     vm->tempTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
     TypeInfoArrayInit(vm->tempTypes);
 
@@ -212,7 +211,6 @@ void freeVM(VM* vm) {
 
     freeSymbolTable(vm->symtab);
     freeTempTypes(vm->tempTypes);
-    freeTypeTable(vm->aliasTypes);
     freeTypeTable(vm->typetab);
     freeObjects(vm);
     freeGC(vm);
@@ -1217,7 +1215,7 @@ InterpretResult run(VM* vm) {
             }
             case OP_TYPE: {
                 ObjString* typeName = READ_STRING();
-                TypeInfo* typeInfo = typeTableGet(vm->aliasTypes, typeName);
+                TypeInfo* typeInfo = typeTableGet(vm->typetab, typeName);
                 if (!IS_ALIAS_TYPE(typeInfo)) {
                     RUNTIME_ERROR("The specified type alias is invalid.");
                 }
