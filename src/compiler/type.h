@@ -121,7 +121,7 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
 char* createCallableTypeName(CallableTypeInfo* callableType);
 void freeTypeInfo(TypeInfo* type);
-void freeCallableTypes(TypeInfoArray* callableTypes);
+void freeTempTypes(TypeInfoArray* typeArray);
 void freeAliasTypes(TypeInfoArray* aliasTypes);
 
 TypeTable* newTypeTable(int id);

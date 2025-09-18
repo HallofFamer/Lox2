@@ -172,12 +172,12 @@ void freeTypeInfo(TypeInfo* type) {
     }
 }
 
-void freeCallableTypes(TypeInfoArray* callableTypes) {
-    for (int i = 0; i < callableTypes->count; i++) {
-        TypeInfo* type = callableTypes->elements[i];
+void freeTempTypes(TypeInfoArray* typeArray) {
+    for (int i = 0; i < typeArray->count; i++) {
+        TypeInfo* type = typeArray->elements[i];
         if (type != NULL) freeTypeInfo(type);
     }
-    free(callableTypes);
+    free(typeArray);
 }
 
 void freeAliasTypes(TypeInfoArray* aliasTypes) {

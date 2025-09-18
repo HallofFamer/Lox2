@@ -111,7 +111,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
     item->type = (TypeInfo*)functionType;
     item->type->shortName = takeStringPerma(vm, functionTypeName, (int)strlen(functionTypeName));
     item->type->fullName = item->type->shortName;
-    TypeInfoArrayAdd(vm->tempTypes, item->type);
+    TypeInfoArrayAdd(vm->callableTypes, item->type);
     va_end(args);
 }
 
@@ -120,7 +120,7 @@ void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     FieldTypeInfo* fieldType = typeTableInsertField(behaviorType->fields, fieldName, type, isMutable, !IS_NIL(defaultValue));
     if (fieldType->declaredType != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
-        TypeInfoArrayAdd(vm->tempTypes, fieldType->declaredType);
+        TypeInfoArrayAdd(vm->callableTypes, fieldType->declaredType);
     }
 
     if (klass->classType == OBJ_INSTANCE || klass->classType == OBJ_CLASS) {
@@ -149,7 +149,7 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     va_start(args, method);
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     TypeInfo* returnType = va_arg(args, TypeInfo*);
-    if (IS_CALLABLE_TYPE(returnType)) TypeInfoArrayAdd(vm->tempTypes, returnType);
+    if (IS_CALLABLE_TYPE(returnType)) TypeInfoArrayAdd(vm->callableTypes, returnType);
     
     bool isClass = (klass->behaviorType == BEHAVIOR_METACLASS);
     bool isInitializer = (strcmp(name, "__init__") == 0);
@@ -161,19 +161,19 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
         methodType->declaredType->attribute.isVariadic = true;
         TypeInfo* paramType = va_arg(args, TypeInfo*);
         TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
-        if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+        if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->callableTypes, paramType);
     }
     else {
         for (int i = 0; i < arity; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
             TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
-            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->callableTypes, paramType);
         }
     }
 
     typeTableSet(behaviorType->methods, methodName, (TypeInfo*)methodType);
     if (methodType->declaredType != NULL) {
-        TypeInfoArrayAdd(vm->tempTypes, (TypeInfo*)methodType->declaredType);
+        TypeInfoArrayAdd(vm->callableTypes, (TypeInfo*)methodType->declaredType);
     }
     va_end(args);
 }
@@ -262,7 +262,7 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
         for (int i = 0; i < numParams; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
             TypeInfoArrayAdd(callableType->paramTypes, paramType);
-            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->callableTypes, paramType);
         }
         va_end(args);
     }
