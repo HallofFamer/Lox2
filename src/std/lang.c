@@ -331,7 +331,11 @@ LOX_METHOD(Class, isClass) {
 LOX_METHOD(Class, memberOf) {
     ASSERT_ARG_COUNT("Class::memberOf(class)", 1);
     if (!IS_CLASS(args[0])) RETURN_FALSE;
-    RETURN_BOOL(AS_CLASS(receiver)->obj.klass == AS_CLASS(args[0]));
+    ObjClass* klass = NULL;
+
+    if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
+    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    RETURN_BOOL(AS_CLASS(receiver)->obj.klass == klass);
 }
 
 LOX_METHOD(Class, superclass) {
@@ -2103,7 +2107,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->classClass, Class, hasField, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
     DEF_METHOD(vm->classClass, Class, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->classClass, Class, isClass, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(vm->classClass, Class, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Class));
+    DEF_METHOD(vm->classClass, Class, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->classClass, Class, superclass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->classClass, Class, toString, 0, RETURN_TYPE(String));
     DEF_OPERATOR(vm->classClass, Class, (), __invoke__, -1, RETURN_TYPE(Object));

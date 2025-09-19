@@ -455,6 +455,10 @@ static void printFunction(ObjFunction* function) {
     else printf("<function %s>", function->name->chars);
 }
 
+static void printType(ObjType* type) {
+    printf("<type %s: %s>", type->name->chars, AS_ALIAS_TYPE(type->typeInfo)->targetType->shortName->chars);
+}
+
 void printObject(Value value) {
     switch (OBJ_CATEGORY(value)) {
         case OBJ_ARRAY:
@@ -547,8 +551,7 @@ void printObject(Value value) {
             printf("<timer: %d>", AS_TIMER(value)->id);
             break;
         case OBJ_TYPE: {
-            ObjType* type = AS_TYPE(value);
-            printf("<type %s: %s>", type->name->chars, AS_ALIAS_TYPE(type->typeInfo)->targetType->shortName->chars);
+            printType(AS_TYPE(value));
             break;
         }
         case OBJ_UPVALUE:
