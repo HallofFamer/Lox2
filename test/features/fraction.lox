@@ -20,6 +20,6 @@ class Fraction {
     }
 
     String toString(){
-        return this.numerator.toString() + "/" + this.denominator.toString()
+        return "${this.numerator} / ${this.denominator}"
     }
 }

@@ -3,16 +3,12 @@ namespace test.features
 val square = fun(a){ 
     return a * a
 }
-print("Using anonymous function for square(2): ")
-println(square(2))
-print("Invoke anonymous function pow(2, 3) directly: ")
+println("Using anonymous function for square(2): ${square(2)}")
+println("Invoke anonymous function pow(2, 3) directly: ")
 fun(a, b){ println(a.pow(b)) }(2, 3)
-print("Class of anonymous function: ")
-println(square.getClassName())
-print("Arity of anonymous function: ")
-println(square.arity())
-print("Name of anonymous function: ")
-println(square.name())
+println("Class of anonymous function: ${square.getClassName()}")
+println("Arity of anonymous function: ${square.arity()}")
+println("Name of anonymous function: ${square.name()}")
 
 val calculate = fun(n, operation){ 
     return operation(n)
@@ -24,14 +20,12 @@ val curry = fun(x){
         return x * y
     }
 }
-print("Curried Higher order function multiply(2)(3): ")
-println(curry(2)(3))
+println("Curried Higher order function multiply(2)(3): ${curry(2)(3)}")
 
 val pow = fun(x, y) {
     return x.pow(y)
 }
-print("Call function dynamically using pow.call(2, 3): ")
-println(pow.call(2, 3))
+println("Call function dynamically using pow.call(2, 3): ${pow.call(2, 3)}")
 println("")
 
 fun sum(..args){ 
@@ -43,10 +37,8 @@ fun sum(..args){
     }
     return sum
 }
-print("Creating a variadic function sum(..args): ")
-println(sum(1, 2, 3, 4, 5))
-print("Function sum is variadic: ")
-println(sum.isVariadic())
+println("Creating a variadic function sum(..args): ${sum(1, 2, 3, 4, 5)}")
+println("Function sum is variadic: ${sum.isVariadic()}")
 println("")
 
 val lambda0 = { 5; }
@@ -58,12 +50,9 @@ val lambda2 = {
     z
 }
 println("Creating lambda closures: ")
-print("Evaluate lambda without parameter: ")
-println(lambda0())
-print("Evaluate lambda with 1 parameter: ")
-println(lambda1(4))
-print("Evaluate lambda with 2 parameters: ")
-println(lambda2(2, 3))
+println("Evaluate lambda without parameter: ${lambda0}")
+println("Evaluate lambda with 1 parameter: ${lambda1(4)}")
+println("Evaluate lambda with 2 parameters: ${lambda2(2, 3)}")
 println("")
 
 println("Testing nonlocal return for lambda: ")

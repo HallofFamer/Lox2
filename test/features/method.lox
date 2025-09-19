@@ -6,23 +6,17 @@ class Scone {
     }
 }
 
-print("Acquiring method object for: ")
 val method = Scone.getMethod("topping")
-println(method.name())
-print("Arity of method is: ")
-println(method.arity())
-print("Method belongs to: ")
-println(method.behavior())
-print("Method is native: ")
-println(method.isNative())
-print("Method is variadic: ")
-println(method.isVariadic())
+println("Acquiring method object for: ${method.name()}")
+println("Arity of method is: ${method.arity()}")
+println("Method belongs to: ${method.behavior()}")
+println("Method is native: ${method.isNative()}")
+println("Method is variadic: ${method.isVariadic()}")
 println("")
 
 val scone = Scone()
-println("Bound method to receiver: ")
 val boundMethod = method.bind(scone)
-println(boundMethod.toString())
+println("Bound method to receiver: ${boundMethod}")
 println("Invoking bound method: ")
 boundMethod("berries", "cream")
 println("")
@@ -30,5 +24,5 @@ println("")
 println("Getting method dict from Object: ")
 var methods = Object.methods()
 for(val (name, method) : methods){
-   println("Method " + method.behavior().name() + "::" + name + ", arity: " + method.arity().toString())
+   println("Method ${method.behavior().name()}::${name}, arity: ${method.arity()}")
 }
