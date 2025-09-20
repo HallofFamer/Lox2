@@ -1826,9 +1826,12 @@ LOX_METHOD(Trait, isTrait) {
 }
 
 LOX_METHOD(Trait, memberOf) {
-    ASSERT_ARG_COUNT("Trait::memberOf(class)", 1);
-    if (!IS_CLASS(args[0])) RETURN_FALSE;
-    RETURN_BOOL(AS_CLASS(args[0]) == vm->traitClass);
+    ASSERT_ARG_COUNT("Trait::memberOf(behavior)", 1);
+    ObjClass* klass = NULL;
+
+    if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
+    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    RETURN_BOOL(klass == vm->traitClass);
 }
 
 LOX_METHOD(Trait, superclass) {
@@ -2179,7 +2182,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->traitClass, Trait, getClassName, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->traitClass, Trait, instanceOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->traitClass, Trait, isTrait, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(vm->traitClass, Trait, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Class));
+    DEF_METHOD(vm->traitClass, Trait, memberOf, 1, RETURN_TYPE(Bool), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->traitClass, Trait, superclass, 0, RETURN_TYPE(Class));
     DEF_METHOD(vm->traitClass, Trait, toString, 0, RETURN_TYPE(String));
 
