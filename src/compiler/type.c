@@ -148,6 +148,7 @@ char* createCallableTypeName(CallableTypeInfo* callableType) {
             length += 7;
         }
     }
+
     callableName[length++] = ')';
     callableName[length] = '\0';
     return callableName;
