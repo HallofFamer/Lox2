@@ -479,9 +479,15 @@ void printObject(Value value) {
         case OBJ_DICTIONARY:
             printDictionary(AS_DICTIONARY(value));
             break;
-        case OBJ_ENTRY:
-            printf("<entry>");
+        case OBJ_ENTRY: {
+            ObjEntry* entry = AS_ENTRY(value);
+            printf("<entry(");
+            printValue(entry->key);
+            printf(": ");
+            printValue(entry->value);
+            printf(")>");
             break;
+        }
         case OBJ_EXCEPTION:
             printf("<exception: %s>", AS_EXCEPTION(value)->obj.klass->fullName->chars);
             break;

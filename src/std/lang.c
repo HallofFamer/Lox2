@@ -319,8 +319,11 @@ LOX_METHOD(Class, hasField) {
 
 LOX_METHOD(Class, instanceOf) {
     ASSERT_ARG_COUNT("Class::instanceOf(class)", 1);
-    if (!IS_CLASS(args[0])) RETURN_FALSE;
-    RETURN_BOOL(isClassExtendingSuperclass(AS_CLASS(receiver)->obj.klass, AS_CLASS(args[0])));
+    ObjClass* klass = NULL;
+    if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
+    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    else RETURN_FALSE;
+    RETURN_BOOL(isClassExtendingSuperclass(AS_CLASS(receiver)->obj.klass, klass));
 }
 
 LOX_METHOD(Class, isClass) {
@@ -330,11 +333,10 @@ LOX_METHOD(Class, isClass) {
 
 LOX_METHOD(Class, memberOf) {
     ASSERT_ARG_COUNT("Class::memberOf(class)", 1);
-    if (!IS_CLASS(args[0])) RETURN_FALSE;
     ObjClass* klass = NULL;
-
     if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
     else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    else RETURN_FALSE;
     RETURN_BOOL(AS_CLASS(receiver)->obj.klass == klass);
 }
 
