@@ -906,8 +906,11 @@ LOX_METHOD(Metaclass, getClassName) {
 
 LOX_METHOD(Metaclass, instanceOf) {
     ASSERT_ARG_COUNT("Metaclass::instanceOf(class)", 1);
-    if (!IS_CLASS(args[0])) RETURN_FALSE;
-    RETURN_BOOL(isClassExtendingSuperclass(vm->metaclassClass, AS_CLASS(args[0])));
+    ObjClass* klass = NULL;
+    if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
+    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    else RETURN_FALSE;
+    RETURN_BOOL(isClassExtendingSuperclass(vm->metaclassClass, klass));
 }
 
 LOX_METHOD(Metaclass, isMetaclass) {

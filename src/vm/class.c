@@ -272,7 +272,7 @@ ObjClass* getClassFromTypeInfo(VM* vm, TypeInfo* type) {
 Value getClassField(VM* vm, ObjClass* klass, char* name) {
     int index;
     if (!idMapGet(&klass->indexes, newStringPerma(vm, name), &index)) {
-        runtimeError(vm, "Class field %s does not exist for class %s", name, klass->fullName->chars);
+        runtimeError(vm, "Class field '%s' does not exist for class %s", name, klass->fullName->chars);
         return NIL_VAL;
     }
     return klass->fields.values[index];
