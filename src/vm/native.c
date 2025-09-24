@@ -241,6 +241,7 @@ ObjNamespace* defineNativeNamespace(VM* vm, const char* name, ObjNamespace* encl
     push(vm, OBJ_VAL(shortName));
     ObjNamespace* nativeNamespace = newNamespace(vm, shortName, enclosing);
     push(vm, OBJ_VAL(nativeNamespace));
+
     tableSet(vm, &vm->namespaces, nativeNamespace->fullName, OBJ_VAL(nativeNamespace));
     tableSet(vm, &enclosing->values, nativeNamespace->shortName, OBJ_VAL(nativeNamespace));
     pop(vm);
