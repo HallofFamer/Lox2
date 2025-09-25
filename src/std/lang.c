@@ -1889,14 +1889,10 @@ LOX_METHOD(Type, hasMethod) {
     ASSERT_ARG_COUNT("Type::hasMethod(name)", 1);
     ASSERT_ARG_TYPE("Type::hasMethod(name)", 0, String);
     ObjType* type = AS_TYPE(receiver);
-    if (IS_BEHAVIOR_TYPE(type->typeInfo)) {
-        Value value;
-        bool result = tableGet(&vm->classes, type->typeInfo->fullName, &value);
-        if (!result) RETURN_FALSE;
-        ObjClass* klass = AS_CLASS(value);
-        RETURN_BOOL(tableGet(&klass->methods, AS_STRING(args[0]), &value));
-    }
-    RETURN_FALSE;
+    ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
+    if (klass == NULL) RETURN_FALSE;
+    Value value;
+    RETURN_BOOL(tableGet(&klass->methods, AS_STRING(args[0]), &value));
 }
 
 LOX_METHOD(Type, isBehavior) {
