@@ -361,6 +361,7 @@ typedef struct {
     Obj obj;
     ObjString* name;
     TypeInfo* typeInfo;
+    ObjClass* behavior;
 } ObjType;
 
 Obj* allocateObject(VM* vm, size_t size, ObjCategory category, ObjClass* klass, GCGenerationType generation);
