@@ -360,6 +360,7 @@ struct ObjString {
 typedef struct {
     Obj obj;
     ObjString* name;
+    TypeCategory category;
     TypeInfo* typeInfo;
     ObjClass* behavior;
 } ObjType;

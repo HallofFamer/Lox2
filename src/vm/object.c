@@ -323,6 +323,7 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
     ObjType* type = ALLOCATE_OBJ_GEN(ObjType, OBJ_TYPE, vm->typeClass, GC_GENERATION_TYPE_PERMANENT);
     type->name = name;
     type->typeInfo = typeInfo;
+    type->category = typeInfo->category;
     type->behavior = getClassFromTypeInfo(vm, typeInfo);
     return type;
 }
