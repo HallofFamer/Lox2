@@ -206,6 +206,12 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }
+        case OBJ_TYPE: {
+            ObjType* type = (ObjType*)object;
+            if (index == 0) push(vm, OBJ_VAL(type->name));
+            else getAndPushGenericInstanceVariableByIndex(vm, object, index);
+            return true;
+        }
         case OBJ_VALUE_INSTANCE: { 
             ObjValueInstance* instance = (ObjValueInstance*)object;
             push(vm, instance->fields.values[index]);
@@ -347,6 +353,12 @@ bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
             ObjTimer* timer = (ObjTimer*)object;
             if (matchVariableName(name, "id", 2)) push(vm, INT_VAL(timer->id));
             else if (matchVariableName(name, "isRunning", 9)) push(vm, BOOL_VAL(timer->isRunning));
+            else return getAndPushGenericInstanceVariableByName(vm, object, name);
+            return true;
+        }
+        case OBJ_TYPE: {
+            ObjType* type = (ObjType*)object;
+            if (matchVariableName(name, "name", 4)) push(vm, OBJ_VAL(type->name));
             else return getAndPushGenericInstanceVariableByName(vm, object, name);
             return true;
         }
@@ -657,6 +669,14 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
             push(vm, value);
             return true;
         }
+        case OBJ_TYPE: {
+            ObjType* type = (ObjType*)object;
+            if (index == 0) {
+                runtimeError(vm, "Cannot set property name on Object Type.");
+                exit(70);
+            }
+            else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
+        }
         default:
             runtimeError(vm, "Undefined property at index %d on Object category %d.", index, object->category);
             exit(70);
@@ -837,6 +857,14 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
 
             push(vm, value);
             return true;
+        }
+        case OBJ_TYPE: {
+            ObjType* type = (ObjType*)object;
+            if (matchVariableName(name, "name", 4)) {
+                runtimeError(vm, "Cannot set property name on Object Type.");
+                exit(70);
+            }
+            else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
         }
         default:
             runtimeError(vm, "Undefined property %s on Object category %d.", name->chars, object->category);

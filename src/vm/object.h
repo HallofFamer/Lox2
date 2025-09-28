@@ -363,6 +363,7 @@ typedef struct {
     TypeCategory category;
     TypeInfo* typeInfo;
     ObjClass* behavior;
+    ValueArray parameters;
 } ObjType;
 
 Obj* allocateObject(VM* vm, size_t size, ObjCategory category, ObjClass* klass, GCGenerationType generation);

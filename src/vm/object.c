@@ -325,6 +325,17 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
     type->typeInfo = typeInfo;
     type->category = typeInfo->category;
     type->behavior = getClassFromTypeInfo(vm, typeInfo);
+    initValueArray(&type->parameters, GC_GENERATION_TYPE_PERMANENT);
+    TypeInfo* targetType = IS_ALIAS_TYPE(typeInfo) ? AS_ALIAS_TYPE(typeInfo)->targetType : NULL;
+
+    if (targetType != NULL && IS_CALLABLE_TYPE(targetType)) {
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(targetType);
+        valueArrayWrite(vm, &type->parameters, callableType->returnType == NULL ? NIL_VAL : OBJ_VAL(newType(vm, callableType->returnType->shortName, callableType->returnType)));
+        for (int i = 0; i < callableType->paramTypes->count; i++) {
+            TypeInfo* paramType = callableType->paramTypes->elements[i];
+            valueArrayWrite(vm, &type->parameters, paramType == NULL ? NIL_VAL : OBJ_VAL(newType(vm, paramType->shortName, paramType)));
+        }
+    }
     return type;
 }
 

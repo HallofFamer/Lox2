@@ -281,7 +281,8 @@ static size_t sizeOfObject(Obj* object) {
             return sizeof(ObjTimer) + sizeof(uv_timer_t) + sizeof(timer->timer->data);
         }
         case OBJ_TYPE: {
-            return sizeof(ObjType) + sizeof(TypeInfo);
+            ObjType* type = (ObjType*)object;
+            return sizeof(ObjType) + sizeof(TypeInfo) + type->parameters.capacity * sizeof(Value);
         }
         case OBJ_UPVALUE:
             return sizeof(ObjUpvalue);
@@ -464,6 +465,8 @@ static void blackenObject(VM* vm, Obj* object, GCGenerationType generation) {
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
             markObject(vm, (Obj*)type->name, generation);
+            markObject(vm, (Obj*)type->behavior, generation);
+            markArray(vm, &type->parameters, generation);
             break;
         }
         case OBJ_UPVALUE:
@@ -628,6 +631,7 @@ static void freeObject(VM* vm, Obj* object) {
         }
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
+            freeValueArray(vm, &type->parameters);
             FREE(ObjType, object, object->generation);
             break;
         }
