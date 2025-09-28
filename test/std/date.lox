@@ -15,11 +15,11 @@ println("Birthday is before current Date: " + (birthday < nowDate).toString())
 println("Converting birthday to DateTime: " + birthday.toDateTime().toString())
 println("");
 
-val nowDateTime = DateTime.now;
-println("Current DateTime is: " + nowDateTime.toString());
-println("Current DateTime's timestamp is: " + nowDateTime.getTimestamp().toString());
-println("Birthday is after current DateTime: " + (birthday.toDateTime() > nowDateTime).toString());
-println("Difference in sec(s) between current DateTime and birthday: " + nowDateTime.diff(birthday.toDateTime()).toString());
+val nowDateTime = DateTime.now
+println("Current DateTime is: " + nowDateTime.toString())
+println("Current DateTime's timestamp is: " + nowDateTime.getTimestamp().toString())
+println("Birthday is after current DateTime: " + (birthday.toDateTime() > nowDateTime).toString())
+println("Difference in sec(s) between current DateTime and birthday: " + nowDateTime.diff(birthday.toDateTime()).toString())
 println("")
 
 println("current Date is instance of Date: " + nowDate.instanceOf(Date).toString())
@@ -27,9 +27,9 @@ println("current Date is instance of DateTime: " + nowDate.instanceOf(DateTime).
 println("current DateTime is instance of Date: " + nowDateTime.instanceOf(Date).toString())
 println("current DateTime is instance of DateTime: " + nowDateTime.instanceOf(DateTime).toString())
 
-val duration = Duration(1, 15, 80, 280);
-println("Creating Duration: " + duration.toString());
-println("Total number of seconds in Duration: " + duration.getTotalSeconds().toString());
+val duration = Duration(1, 15, 80, 280)
+println("Creating Duration: " + duration.toString())
+println("Total number of seconds in Duration: " + duration.getTotalSeconds().toString())
 println("")
 
 val duration2 = Duration.ofDays(1)

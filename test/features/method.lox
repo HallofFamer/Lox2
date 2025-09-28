@@ -1,8 +1,9 @@
 namespace test.features
 
 class Scone { 
+
     topping(first, second){ 
-        println("Scone with " + first + " and " + second)
+        println("Scone with ${first} and ${second}")
     }
 }
 
