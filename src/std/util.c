@@ -205,9 +205,12 @@ LOX_METHOD(DateTime, compareTo) {
 
 LOX_METHOD(DateTime, diff) {
     ASSERT_ARG_COUNT("DateTime::diff(dateTime)", 1);
-    ASSERT_ARG_INSTANCE_OF("DateTime::diff(dateTime)", 0, clox.std.util.DateTime);
+    ASSERT_ARG_INSTANCE_OF("DateTime::diff(dateTime)", 0, clox.std.util.Date);
+    ObjClass* dateTimeClass = getNativeClass(vm, "clox.std.util.DateTime");
+    ObjInstance* dateTime = AS_INSTANCE(args[0]);
+
     double timestamp = dateTimeObjGetTimestamp(vm, AS_INSTANCE(receiver));
-    double timestamp2 = dateTimeObjGetTimestamp(vm, AS_INSTANCE(args[0]));
+    double timestamp2 = (dateTime->obj.klass == dateTimeClass) ? dateTimeObjGetTimestamp(vm, dateTime) : dateObjGetTimestamp(vm, dateTime);
     RETURN_NUMBER(timestamp - timestamp2);
 }
 

@@ -1147,6 +1147,20 @@ LOX_METHOD(Dictionary, select) {
     RETURN_OBJ(selected);
 }
 
+LOX_METHOD(Dictionary, toArray) {
+    ASSERT_ARG_COUNT("Dictionary::toArray()", 0);
+    ObjDictionary* self = AS_DICTIONARY(receiver);
+    ObjArray* array = newArray(vm);
+    push(vm, OBJ_VAL(array));
+
+    for (int i = 0; i < self->count; i++) {
+        ObjEntry* entry = &self->entries[i];
+        valueArrayWrite(vm, &array->elements, OBJ_VAL(entry));
+    }
+    pop(vm);
+    RETURN_OBJ(array);
+}
+
 LOX_METHOD(Dictionary, toString) {
     ASSERT_ARG_COUNT("Dictionary::toString()", 0);
     RETURN_OBJ(dictToString(vm, AS_DICTIONARY(receiver)));
@@ -2259,6 +2273,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->dictionaryClass, Dictionary, reject, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, removeAt, 1, RETURN_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(vm->dictionaryClass, Dictionary, select, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(Object)));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->dictionaryClass, Dictionary, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->dictionaryClass, Dictionary, valueSet, 0, RETURN_TYPE(clox.std.collection.Set));
     DEF_OPERATOR(vm->dictionaryClass, Dictionary, [], __getSubscript__, 1, RETURN_TYPE(Object), PARAM_TYPE(Object));

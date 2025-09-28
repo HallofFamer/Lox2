@@ -1867,22 +1867,18 @@ LOX_METHOD(Type, getMethod) {
     ASSERT_ARG_COUNT("Type::getMethod(name)", 1);
     ASSERT_ARG_TYPE("Type::getMethod(name)", 0, String);
     ObjType* type = AS_TYPE(receiver);
-    if (IS_BEHAVIOR_TYPE(type->typeInfo)) {
-        Value value;
-        bool result = tableGet(&vm->classes, type->typeInfo->fullName, &value);
-        if (!result) RETURN_NIL;
+    ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
+    if (klass == NULL) RETURN_FALSE;
+    Value value;
 
-        ObjClass* klass = AS_CLASS(value);
-        if (tableGet(&klass->methods, AS_STRING(args[0]), &value)) {
-            if (IS_NATIVE_METHOD(value)) RETURN_OBJ(AS_NATIVE_METHOD(value));
-            else if (IS_CLOSURE(value)) RETURN_OBJ(newMethod(vm, klass, AS_CLOSURE(value)));
-            else {
-                THROW_EXCEPTION(clox.std.lang.MethodNotFoundException, "Invalid method object found.");
-            }
+    if (tableGet(&klass->methods, AS_STRING(args[0]), &value)) {
+        if (IS_NATIVE_METHOD(value)) RETURN_OBJ(AS_NATIVE_METHOD(value));
+        else if (IS_CLOSURE(value)) RETURN_OBJ(newMethod(vm, klass, AS_CLOSURE(value)));
+        else {
+            THROW_EXCEPTION(clox.std.lang.MethodNotFoundException, "Invalid method object found.");
         }
-        else RETURN_NIL;
     }
-    RETURN_NIL;
+    else RETURN_NIL;
 }
 
 LOX_METHOD(Type, hasMethod) {

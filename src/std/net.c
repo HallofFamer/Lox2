@@ -42,7 +42,7 @@ LOX_METHOD(Domain, getIPAddressesAsync) {
     ASSERT_ARG_COUNT_ASYNC("Domain::getIPAddressesAsync()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjPromise* promise = dnsGetDomainInfoAsync(vm, self, dnsOnGetAddrInfo);
-    if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.DomainHostException, "Failed to get IP Addresses from Domain.");
+    if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.DomainHostException, "Failed to get IP address information from domain.");
     RETURN_OBJ(promise);
 }
 
