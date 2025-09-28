@@ -321,7 +321,7 @@ LOX_METHOD(Class, instanceOf) {
     ASSERT_ARG_COUNT("Class::instanceOf(class)", 1);
     ObjClass* klass = NULL;
     if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
-    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    else if (IS_TYPE(receiver)) klass = AS_TYPE(args[0])->behavior;
     else RETURN_FALSE;
     RETURN_BOOL(isClassExtendingSuperclass(AS_CLASS(receiver)->obj.klass, klass));
 }
@@ -335,7 +335,7 @@ LOX_METHOD(Class, memberOf) {
     ASSERT_ARG_COUNT("Class::memberOf(class)", 1);
     ObjClass* klass = NULL;
     if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
-    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    else if (IS_TYPE(receiver)) klass = AS_TYPE(args[0])->behavior;
     else RETURN_FALSE;
     RETURN_BOOL(AS_CLASS(receiver)->obj.klass == klass);
 }
@@ -908,7 +908,7 @@ LOX_METHOD(Metaclass, instanceOf) {
     ASSERT_ARG_COUNT("Metaclass::instanceOf(class)", 1);
     ObjClass* klass = NULL;
     if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
-    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    else if (IS_TYPE(receiver)) klass = AS_TYPE(args[0])->behavior;
     else RETURN_FALSE;
     RETURN_BOOL(isClassExtendingSuperclass(vm->metaclassClass, klass));
 }
@@ -922,7 +922,7 @@ LOX_METHOD(Metaclass, memberOf) {
     ASSERT_ARG_COUNT("Metaclass::memberOf(class)", 1);
     ObjClass* klass = NULL;
     if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
-    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    else if (IS_TYPE(receiver)) klass = AS_TYPE(args[0])->behavior;
     RETURN_BOOL(klass == vm->metaclassClass);
 }
 
@@ -1413,7 +1413,7 @@ LOX_METHOD(Object, instanceOf) {
     if (IS_CLASS(args[0])) RETURN_BOOL(isObjInstanceOf(vm, receiver, AS_CLASS(args[0])));
     else if (IS_TYPE(args[0])) {
         ObjType* type = AS_TYPE(args[0]);
-        ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
+        ObjClass* klass = AS_TYPE(args[0])->behavior;
         if (klass == NULL) RETURN_FALSE;
         RETURN_BOOL(isObjInstanceOf(vm, receiver, klass));
     }
@@ -1429,7 +1429,7 @@ LOX_METHOD(Object, memberOf) {
     }
     else if (IS_TYPE(args[0])) {
         ObjType* type = AS_TYPE(args[0]);
-        ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
+        ObjClass* klass = AS_TYPE(args[0])->behavior;
         if (klass == NULL) RETURN_FALSE;
         ObjClass* thisClass = getObjClass(vm, receiver);
         RETURN_BOOL(thisClass == klass);
@@ -1825,7 +1825,7 @@ LOX_METHOD(Trait, instanceOf) {
     ASSERT_ARG_COUNT("Trait::instanceOf(trait)", 1);
     ObjClass* klass = NULL;
     if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
-    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    else if (IS_TYPE(receiver)) klass = AS_TYPE(args[0])->behavior;
     else RETURN_FALSE;
     RETURN_BOOL(isClassExtendingSuperclass(vm->traitClass, klass));
 }
@@ -1839,7 +1839,7 @@ LOX_METHOD(Trait, memberOf) {
     ASSERT_ARG_COUNT("Trait::memberOf(behavior)", 1);
     ObjClass* klass = NULL;
     if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
-    else if (IS_TYPE(receiver)) klass = getClassFromTypeInfo(vm, AS_TYPE(args[0])->typeInfo);
+    else if (IS_TYPE(receiver)) klass = AS_TYPE(args[0])->behavior;
     RETURN_BOOL(klass == vm->traitClass);
 }
 
@@ -1856,24 +1856,24 @@ LOX_METHOD(Trait, toString) {
 }
 
 LOX_METHOD(Type, __init__) {
-    ASSERT_ARG_COUNT("Type::__init__(name)", 1);
-    ASSERT_ARG_TYPE("Trait::__init__(name)", 0, String);
-    ObjType* type = AS_TYPE(receiver);
-    type->name = AS_STRING(args[0]);
-    RETURN_OBJ(type);
+    ASSERT_ARG_COUNT("Type::__init__(name, behavior)", 2);
+    ASSERT_ARG_TYPE("Type::__init__(name, behavior)", 0, String);
+    ASSERT_ARG_INSTANCE_OF("Type::__init__(name, behavior)", 1, Behavior);
+    ObjType* self = AS_TYPE(receiver);
+    self->name = AS_STRING(args[0]);
+    self->behavior = AS_CLASS(args[1]);
+    RETURN_OBJ(self);
 }
 
 LOX_METHOD(Type, getMethod) {
     ASSERT_ARG_COUNT("Type::getMethod(name)", 1);
     ASSERT_ARG_TYPE("Type::getMethod(name)", 0, String);
-    ObjType* type = AS_TYPE(receiver);
-    ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
-    if (klass == NULL) RETURN_FALSE;
+    ObjType* self = AS_TYPE(receiver);
     Value value;
 
-    if (tableGet(&klass->methods, AS_STRING(args[0]), &value)) {
+    if (tableGet(&self->behavior->methods, AS_STRING(args[0]), &value)) {
         if (IS_NATIVE_METHOD(value)) RETURN_OBJ(AS_NATIVE_METHOD(value));
-        else if (IS_CLOSURE(value)) RETURN_OBJ(newMethod(vm, klass, AS_CLOSURE(value)));
+        else if (IS_CLOSURE(value)) RETURN_OBJ(newMethod(vm, self->behavior, AS_CLOSURE(value)));
         else {
             THROW_EXCEPTION(clox.std.lang.MethodNotFoundException, "Invalid method object found.");
         }
@@ -1884,35 +1884,33 @@ LOX_METHOD(Type, getMethod) {
 LOX_METHOD(Type, hasMethod) {
     ASSERT_ARG_COUNT("Type::hasMethod(name)", 1);
     ASSERT_ARG_TYPE("Type::hasMethod(name)", 0, String);
-    ObjType* type = AS_TYPE(receiver);
-    ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
-    if (klass == NULL) RETURN_FALSE;
+    ObjType* self = AS_TYPE(receiver);
     Value value;
-    RETURN_BOOL(tableGet(&klass->methods, AS_STRING(args[0]), &value));
+    RETURN_BOOL(tableGet(&self->behavior->methods, AS_STRING(args[0]), &value));
 }
 
 LOX_METHOD(Type, isBehavior) {
     ASSERT_ARG_COUNT("Type::isBehavior()", 0);
-    ObjType* type = AS_TYPE(receiver);
-    RETURN_BOOL(IS_BEHAVIOR_TYPE(type->typeInfo));
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_CLASS || self->category == TYPE_CATEGORY_METACLASS || self->category == TYPE_CATEGORY_TRAIT);
 }
 
 LOX_METHOD(Type, isClass) {
     ASSERT_ARG_COUNT("Type::isClass()", 0);
-    ObjType* type = AS_TYPE(receiver);
-    RETURN_BOOL(type->typeInfo->category == TYPE_CATEGORY_CLASS);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_CLASS);
 }
 
 LOX_METHOD(Type, isMetaclass) {
     ASSERT_ARG_COUNT("Type::isMetaclass()", 0);
-    ObjType* type = AS_TYPE(receiver);
-    RETURN_BOOL(type->typeInfo->category == TYPE_CATEGORY_METACLASS);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_METACLASS);
 }
 
 LOX_METHOD(Type, isFunction) {
     ASSERT_ARG_COUNT("Type::isFunction()", 0);
-    ObjType* type = AS_TYPE(receiver);
-    RETURN_BOOL(IS_CALLABLE_TYPE(type->typeInfo));
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_FUNCTION);
 }
 
 LOX_METHOD(Type, isNative) {
@@ -1922,24 +1920,22 @@ LOX_METHOD(Type, isNative) {
 
 LOX_METHOD(Type, isTrait) {
     ASSERT_ARG_COUNT("Type::isTrait()", 0);
-    ObjType* type = AS_TYPE(receiver);
-    RETURN_BOOL(type->typeInfo->category == TYPE_CATEGORY_TRAIT);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_TRAIT);
 }
 
 LOX_METHOD(Type, methods) {
     ASSERT_ARG_COUNT("Type::methods()", 0);
     ObjType* self = AS_TYPE(receiver);
-    ObjClass* klass = getClassFromTypeInfo(vm, self->typeInfo);
-    if (klass == NULL) RETURN_NIL;
     ObjDictionary* dict = newDictionary(vm);
     push(vm, OBJ_VAL(dict));
 
-    for (int i = 0; i < klass->methods.capacity; i++) {
-        Entry* entry = &klass->methods.entries[i];
+    for (int i = 0; i < self->behavior->methods.capacity; i++) {
+        Entry* entry = &self->behavior->methods.entries[i];
         if (entry != NULL) {
             if (IS_NATIVE_METHOD(entry->value)) dictSet(vm, dict, OBJ_VAL(entry->key), entry->value);
             else if (IS_CLOSURE(entry->value)) {
-                ObjMethod* method = newMethod(vm, klass, AS_CLOSURE(entry->value));
+                ObjMethod* method = newMethod(vm, self->behavior, AS_CLOSURE(entry->value));
                 push(vm, OBJ_VAL(method));
                 dictSet(vm, dict, OBJ_VAL(entry->key), OBJ_VAL(method));
                 pop(vm);
@@ -1953,26 +1949,24 @@ LOX_METHOD(Type, methods) {
 
 LOX_METHOD(Type, name) {
     ASSERT_ARG_COUNT("Type::name()", 0);
-    ObjType* type = AS_TYPE(receiver);
-    RETURN_OBJ(type->name);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_OBJ(self->name);
 }
 
 LOX_METHOD(Type, toString) {
     ASSERT_ARG_COUNT("Type::toString()", 0);
-    ObjType* type = AS_TYPE(receiver);
-    RETURN_STRING_FMT("<type %s>", type->name->chars);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_STRING_FMT("<type %s: %s>", self->name->chars, self->behavior->fullName->chars);
 }
 
 LOX_METHOD(Type, traits) {
     ASSERT_ARG_COUNT("Type::traits()", 0);
     ObjType* self = AS_TYPE(receiver);
-    ObjClass* klass = getClassFromTypeInfo(vm, self->typeInfo);
-    if (klass == NULL) RETURN_NIL;
 
     ObjArray* traits = newArray(vm);
     push(vm, OBJ_VAL(traits));
-    for (int i = 0; i < klass->traits.count; i++) {
-        valueArrayWrite(vm, &traits->elements, klass->traits.values[i]);
+    for (int i = 0; i < self->behavior->traits.count; i++) {
+        valueArrayWrite(vm, &traits->elements, self->behavior->traits.values[i]);
     }
     pop(vm);
     RETURN_OBJ(traits);
@@ -2188,7 +2182,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->traitClass, Trait, toString, 0, RETURN_TYPE(String));
 
     bindSuperclass(vm, vm->typeClass, behaviorClass);
-    DEF_INTERCEPTOR(vm->typeClass, Type, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Type), PARAM_TYPE(String));
+    DEF_INTERCEPTOR(vm->typeClass, Type, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(Type), PARAM_TYPE(String), PARAM_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, getMethod, 1, RETURN_TYPE(Method), PARAM_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, hasMethod, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, isBehavior, 0, RETURN_TYPE(Bool));

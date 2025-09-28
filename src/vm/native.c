@@ -299,7 +299,7 @@ TypeInfo* getNativeType(VM* vm, const char* name) {
             type = typeTableGet(vm->typetab, fullName);
             
             if (type == NULL) {
-                runtimeError(vm, "Type %s is undefined.", name);
+                runtimeError(vm, "Type '%s' is undefined.", name);
                 exit(70);
             }
         }

@@ -209,6 +209,7 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
             if (index == 0) push(vm, OBJ_VAL(type->name));
+            else if (index == 1) push(vm, OBJ_VAL(type->behavior));
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }
@@ -359,6 +360,7 @@ bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
             if (matchVariableName(name, "name", 4)) push(vm, OBJ_VAL(type->name));
+            else if (matchVariableName(name, "behavior", 8)) push(vm, OBJ_VAL(type->behavior));
             else return getAndPushGenericInstanceVariableByName(vm, object, name);
             return true;
         }
@@ -671,8 +673,8 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         }
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
-            if (index == 0) {
-                runtimeError(vm, "Cannot set property name on Object Type.");
+            if (index <= 1) {
+                runtimeError(vm, "Cannot set property name or behavior on Object Type.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
@@ -860,8 +862,8 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         }
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
-            if (matchVariableName(name, "name", 4)) {
-                runtimeError(vm, "Cannot set property name on Object Type.");
+            if (matchVariableName(name, "name", 4) || matchVariableName(name, "behavior", 8)) {
+                runtimeError(vm, "Cannot set property %s or behavior on Object Type.", name);
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
