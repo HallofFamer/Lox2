@@ -325,7 +325,7 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
     type->name = name;
     type->typeInfo = typeInfo;
     type->category = targetType->category;
-    type->behavior = getClassFromTypeInfo(vm, typeInfo);
+    type->behavior = getClassFromTypeInfo(vm, targetType);
     initValueArray(&type->parameters, GC_GENERATION_TYPE_PERMANENT);
 
     if (targetType != NULL && IS_CALLABLE_TYPE(targetType)) {

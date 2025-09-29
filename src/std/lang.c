@@ -1869,13 +1869,14 @@ LOX_METHOD(Type, getMethod) {
     ASSERT_ARG_COUNT("Type::getMethod(name)", 1);
     ASSERT_ARG_TYPE("Type::getMethod(name)", 0, String);
     ObjType* self = AS_TYPE(receiver);
+    ObjString* name = AS_STRING(args[0]);
     Value value;
 
-    if (tableGet(&self->behavior->methods, AS_STRING(args[0]), &value)) {
+    if (tableGet(&self->behavior->methods, name, &value)) {
         if (IS_NATIVE_METHOD(value)) RETURN_OBJ(AS_NATIVE_METHOD(value));
         else if (IS_CLOSURE(value)) RETURN_OBJ(newMethod(vm, self->behavior, AS_CLOSURE(value)));
         else {
-            THROW_EXCEPTION(clox.std.lang.MethodNotFoundException, "Invalid method object found.");
+            THROW_EXCEPTION_FMT(clox.std.lang.MethodNotFoundException, "Method %s does not exist in type %s.", name->chars, self->behavior->name->chars);
         }
     }
     else RETURN_NIL;
