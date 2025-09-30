@@ -1902,16 +1902,16 @@ LOX_METHOD(Type, isClass) {
     RETURN_BOOL(self->category == TYPE_CATEGORY_CLASS);
 }
 
-LOX_METHOD(Type, isMetaclass) {
-    ASSERT_ARG_COUNT("Type::isMetaclass()", 0);
-    ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_METACLASS);
-}
-
 LOX_METHOD(Type, isFunction) {
     ASSERT_ARG_COUNT("Type::isFunction()", 0);
     ObjType* self = AS_TYPE(receiver);
     RETURN_BOOL(self->category == TYPE_CATEGORY_FUNCTION);
+}
+
+LOX_METHOD(Type, isMetaclass) {
+    ASSERT_ARG_COUNT("Type::isMetaclass()", 0);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_METACLASS);
 }
 
 LOX_METHOD(Type, isNative) {

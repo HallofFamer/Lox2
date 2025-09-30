@@ -469,7 +469,18 @@ static void printFunction(ObjFunction* function) {
 }
 
 static void printType(ObjType* type) {
-    printf("<type %s: %s>", type->name->chars, AS_ALIAS_TYPE(type->typeInfo)->targetType->shortName->chars);
+    printf("<type %s: ", type->name->chars);
+    if (IS_BEHAVIOR_TYPE(type)) printf("%s", type->behavior->name->chars);
+    else if (IS_CALLABLE_TYPE(type)) {
+        printf("%s fun(", AS_TYPE(type->parameters.values[0])->name->chars);
+        for (int i = 1; i < type->parameters.count; i++) {
+            if (i > 1) printf(", ");
+            printf("%s", AS_TYPE(type->parameters.values[i])->name->chars);
+        }
+        printf(")");
+    }
+    else printf("void");
+    printf(">");
 }
 
 void printObject(Value value) {
