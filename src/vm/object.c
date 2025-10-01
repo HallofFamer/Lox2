@@ -323,7 +323,6 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
     TypeInfo* targetType = IS_ALIAS_TYPE(typeInfo) ? AS_ALIAS_TYPE(typeInfo)->targetType : typeInfo;
     ObjType* type = ALLOCATE_OBJ_GEN(ObjType, OBJ_TYPE, vm->typeClass, GC_GENERATION_TYPE_PERMANENT);
     type->name = name;
-    type->typeInfo = typeInfo;
     type->category = targetType->category;
     type->behavior = getClassFromTypeInfo(vm, targetType);
     initValueArray(&type->parameters, GC_GENERATION_TYPE_PERMANENT);
