@@ -1916,7 +1916,8 @@ LOX_METHOD(Type, isMetaclass) {
 
 LOX_METHOD(Type, isNative) {
     ASSERT_ARG_COUNT("Type::isNative()", 0);
-    RETURN_FALSE;
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->behavior->isNative);
 }
 
 LOX_METHOD(Type, isTrait) {
