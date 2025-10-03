@@ -336,10 +336,10 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
 
     if (targetType != NULL && IS_CALLABLE_TYPE(targetType)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(targetType);
-        valueArrayWrite(vm, &type->parameters, callableType->returnType == NULL ? NIL_VAL : OBJ_VAL(newType(vm, callableType->returnType->shortName, callableType->returnType)));
+        valueArrayWrite(vm, &type->parameters, createTypeValue(vm, callableType->returnType));
         for (int i = 0; i < callableType->paramTypes->count; i++) {
             TypeInfo* paramType = callableType->paramTypes->elements[i];
-            valueArrayWrite(vm, &type->parameters, paramType == NULL ? NIL_VAL : OBJ_VAL(newType(vm, paramType->shortName, paramType)));
+            valueArrayWrite(vm, &type->parameters, createTypeValue(vm, paramType));
         }
     }
     return type;

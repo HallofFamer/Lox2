@@ -1964,12 +1964,13 @@ LOX_METHOD(Type, toString) {
 LOX_METHOD(Type, traits) {
     ASSERT_ARG_COUNT("Type::traits()", 0);
     ObjType* self = AS_TYPE(receiver);
-
     ObjArray* traits = newArray(vm);
     push(vm, OBJ_VAL(traits));
+
     for (int i = 0; i < self->behavior->traits.count; i++) {
         valueArrayWrite(vm, &traits->elements, self->behavior->traits.values[i]);
     }
+
     pop(vm);
     RETURN_OBJ(traits);
 }
