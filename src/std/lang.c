@@ -1975,6 +1975,24 @@ LOX_METHOD(Type, traits) {
     RETURN_OBJ(traits);
 }
 
+LOX_METHOD(Type, __invoke__) {
+    ObjType* self = AS_TYPE(receiver);
+    ObjClass* klass = self->behavior;
+    if (klass->behaviorType == BEHAVIOR_TRAIT) {
+        THROW_EXCEPTION_FMT(clox.std.lang.UnsupportedOperationException, "Cannot instantiate from trait %s.", klass->fullName->chars);
+    }
+
+    ObjInstance* instance = newInstance(vm, klass);
+    Value initMethod;
+    push(vm, OBJ_VAL(instance));
+
+    if (tableGet(&klass->methods, vm->initString, &initMethod)) {
+        callReentrantMethod(vm, receiver, initMethod, args);
+    }
+    pop(vm);
+    RETURN_OBJ(instance);
+}
+
 static void bindStringClass(VM* vm) {
     for (int i = 0; i < vm->strings.capacity; i++) {
         Entry* entry = &vm->strings.entries[i];
@@ -2198,6 +2216,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, name, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, traits, 0, RETURN_TYPE(Object));
+    DEF_OPERATOR(vm->typeClass, Type, (), __invoke__, -1, RETURN_TYPE(Object));
 
     insertGlobalSymbolTable(vm, "clox", "Namespace");
     insertGlobalSymbolTable(vm, "Object", "Object class");

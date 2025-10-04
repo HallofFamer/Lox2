@@ -317,7 +317,7 @@ static ObjArray* makeTraitArray(VM* vm, uint8_t behaviorCount) {
     return traits;
 }
 
-static Value createObject(VM* vm, ObjClass* klass, int argCount) {
+static Value createObject(VM* vm, ObjClass* klass) {
     switch (klass->classType) {
         case OBJ_ARRAY: return OBJ_VAL(newArray(vm));
         case OBJ_BOUND_METHOD: return OBJ_VAL(newBoundMethod(vm, NIL_VAL, NIL_VAL));
@@ -419,7 +419,7 @@ static bool callBoundMethod(VM* vm, ObjBoundMethod* boundMethod, int argCount) {
 }
 
 static bool callClass(VM* vm, ObjClass* klass, int argCount) {
-    vm->stackTop[-argCount - 1] = createObject(vm, klass, argCount);
+    vm->stackTop[-argCount - 1] = createObject(vm, klass);
     Value initializer;
     if (tableGet(&klass->methods, vm->initString, &initializer)) {
         return callMethod(vm, initializer, argCount);
