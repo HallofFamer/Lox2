@@ -26,6 +26,33 @@ Obj* allocateObject(VM* vm, size_t size, ObjCategory category, ObjClass* klass, 
     return object;
 }
 
+Value emptyObject(VM* vm, ObjClass* klass) {
+    switch (klass->classType) {
+        case OBJ_ARRAY: return OBJ_VAL(newArray(vm));
+        case OBJ_BOUND_METHOD: return OBJ_VAL(newBoundMethod(vm, NIL_VAL, NIL_VAL));
+        case OBJ_CLASS: return OBJ_VAL(ALLOCATE_CLASS(klass));
+        case OBJ_CLOSURE: return OBJ_VAL(ALLOCATE_CLOSURE(klass, GC_GENERATION_TYPE_EDEN));
+        case OBJ_DICTIONARY: return OBJ_VAL(newDictionary(vm));
+        case OBJ_ENTRY: return OBJ_VAL(newEntry(vm, NIL_VAL, NIL_VAL));
+        case OBJ_EXCEPTION: return OBJ_VAL(newException(vm, emptyString(vm), klass));
+        case OBJ_FILE: return OBJ_VAL(newFile(vm, NULL));
+        case OBJ_GENERATOR: return OBJ_VAL(newGenerator(vm, NULL, NULL));
+        case OBJ_INSTANCE: return OBJ_VAL(newInstance(vm, klass));
+        case OBJ_ITERATOR: return OBJ_VAL(newIterator(vm, NIL_VAL, klass));
+        case OBJ_METHOD: return OBJ_VAL(newMethod(vm, NULL, NULL));
+        case OBJ_NAMESPACE: return OBJ_VAL(ALLOCATE_NAMESPACE(klass));
+        case OBJ_NODE: return OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL));
+        case OBJ_PROMISE: return OBJ_VAL(newPromise(vm, PROMISE_PENDING, NIL_VAL, NIL_VAL));
+        case OBJ_RANGE: return OBJ_VAL(newRange(vm, 0, 1));
+        case OBJ_RECORD: return OBJ_VAL(newRecord(vm, NULL));
+        case OBJ_STRING: return OBJ_VAL(ALLOCATE_STRING(0, klass));
+        case OBJ_TIMER: return OBJ_VAL(newTimer(vm, NULL, 0, 0));
+        case OBJ_TYPE: return OBJ_VAL(newType(vm, emptyString(vm), NULL));
+        case OBJ_VALUE_INSTANCE: return OBJ_VAL(newValueInstance(vm, NIL_VAL, klass));
+        default: return NIL_VAL;
+    }
+}
+
 ObjArray* newArray(VM* vm) {
     ObjArray* array = ALLOCATE_OBJ(ObjArray, OBJ_ARRAY, vm->arrayClass);
     initValueArray(&array->elements, array->obj.generation);

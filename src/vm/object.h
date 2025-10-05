@@ -366,6 +366,7 @@ typedef struct {
 } ObjType;
 
 Obj* allocateObject(VM* vm, size_t size, ObjCategory category, ObjClass* klass, GCGenerationType generation);
+Value emptyObject(VM* vm, ObjClass* klass);
 ObjArray* newArray(VM* vm);
 ObjBoundMethod* newBoundMethod(VM* vm, Value receiver, Value method);
 ObjClass* newClass(VM* vm, ObjString* name, ObjCategory classType);
