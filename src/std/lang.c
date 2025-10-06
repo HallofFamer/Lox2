@@ -1982,15 +1982,15 @@ LOX_METHOD(Type, __invoke__) {
         THROW_EXCEPTION_FMT(clox.std.lang.UnsupportedOperationException, "Cannot instantiate from trait %s.", klass->fullName->chars);
     }
 
-    ObjInstance* instance = newInstance(vm, klass);
+    Value value = emptyObject(vm, klass);
     Value initMethod;
-    push(vm, OBJ_VAL(instance));
+    push(vm, value);
 
     if (tableGet(&klass->methods, vm->initString, &initMethod)) {
-        callReentrantMethod(vm, receiver, initMethod, args);
+        callReentrantMethod(vm, value, initMethod, args);
     }
     pop(vm);
-    RETURN_OBJ(instance);
+    RETURN_VAL(value);
 }
 
 static void bindStringClass(VM* vm) {
