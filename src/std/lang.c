@@ -212,7 +212,7 @@ LOX_METHOD(BoundMethod, __init__) {
         RETURN_OBJ(boundMethod);
     }
     else {
-        THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "method BoundMethod::__init__(object, method) expects argument 2 to be a method or string.");
+        THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "Method BoundMethod::__init__(object, method) expects argument 2 to be a method or string.");
     }
 }
 

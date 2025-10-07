@@ -512,7 +512,8 @@ static void printType(ObjType* type) {
         }
         printf(")");
     }
-    else printf("void");
+    else if (IS_VOID_TYPE(type)) printf("void");
+    else printf("dynamic");
     printf(">");
 }
 
