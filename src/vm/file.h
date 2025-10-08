@@ -55,12 +55,12 @@ ObjPromise* fileWriteByteAsync(VM* vm, ObjFile* file, uint8_t byte, uv_fs_cb cal
 void fileWriteBytes(VM* vm, ObjFile* file, ObjArray* bytes);
 ObjPromise* fileWriteBytesAsync(VM* vm, ObjFile* file, ObjArray* bytes, uv_fs_cb callback);
 ObjFile* getFileArgument(VM* vm, Value arg);
-ObjFile* getFileProperty(VM* vm, ObjInstance* object, char* field);
+ObjFile* getFileField(VM* vm, ObjInstance* object, char* field);
 bool loadFileOperation(VM* vm, ObjFile* file, const char* streamClass);
 bool loadFileRead(VM* vm, ObjFile* file);
 bool loadFileStat(VM* vm, ObjFile* file);
 bool loadFileWrite(VM* vm, ObjFile* file);
-bool setFileProperty(VM* vm, ObjInstance* object, ObjFile* file, const char* mode);
+bool setFileField(VM* vm, ObjInstance* object, ObjFile* file, const char* mode);
 char* streamClassName(const char* mode);
 
 #endif // !clox_file_h

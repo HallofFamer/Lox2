@@ -406,7 +406,7 @@ LOX_METHOD(DurationClass, ofDays) {
     ASSERT_ARG_COUNT("Duration class::ofDays(days)", 1);
     ASSERT_ARG_TYPE("Duration class::ofDays(days)", 0, Int);
     int days = AS_INT(args[0]);
-    if (days < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Duration class::ofDays(days) expects argument 1 to be a non negative integer but got %d.", days);
+    if (days < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "Method Duration class::ofDays(days) expects argument 1 to be a non negative integer but got %d.", days);
 
     ObjClass* self = AS_CLASS(receiver);
     ObjInstance* instance = newInstance(vm, self);
@@ -421,7 +421,7 @@ LOX_METHOD(DurationClass, ofHours) {
     ASSERT_ARG_COUNT("Duration class::ofHours(hours)", 1);
     ASSERT_ARG_TYPE("Duration class::ofHours(hours)", 0, Int);
     int hours = AS_INT(args[0]);
-    if (hours < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Duration class::ofHours(hours) expects argument 1 to be a non negative integer but got %d.", hours);
+    if (hours < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "Method Duration class::ofHours(hours) expects argument 1 to be a non negative integer but got %d.", hours);
 
     ObjClass* self = AS_CLASS(receiver);
     ObjInstance* instance = newInstance(vm, self);
@@ -436,7 +436,7 @@ LOX_METHOD(DurationClass, ofMinutes) {
     ASSERT_ARG_COUNT("Duration class::ofMinutes(minutes)", 1);
     ASSERT_ARG_TYPE("Duration class::ofMinutes(minutes)", 0, Int);
     int minutes = AS_INT(args[0]);
-    if (minutes < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Duration class::ofMinutes(minutes) expects argument 1 to be a non negative integer but got %d.", minutes);
+    if (minutes < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "Method Duration class::ofMinutes(minutes) expects argument 1 to be a non negative integer but got %d.", minutes);
     ObjClass* self = AS_CLASS(receiver);
     ObjInstance* instance = newInstance(vm, self);
 
@@ -451,7 +451,7 @@ LOX_METHOD(DurationClass, ofSeconds) {
     ASSERT_ARG_COUNT("Duration class::ofSeconds(seconds)", 1);
     ASSERT_ARG_TYPE("Duration class::ofSeconds(seconds)", 0, Int);
     int seconds = AS_INT(args[0]);
-    if (seconds < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Duration class::ofSeconds(seconds) expects argument 1 to be a non negative integer but got %d.", seconds);
+    if (seconds < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "Method Duration class::ofSeconds(seconds) expects argument 1 to be a non negative integer but got %d.", seconds);
 
     ObjClass* self = AS_CLASS(receiver);
     ObjInstance* instance = newInstance(vm, self);

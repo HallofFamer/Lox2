@@ -1822,7 +1822,7 @@ LOX_METHOD(Trait, getClassName) {
 }
 
 LOX_METHOD(Trait, instanceOf) {
-    ASSERT_ARG_COUNT("Trait::instanceOf(trait)", 1);
+    ASSERT_ARG_COUNT("Trait::instanceOf(behavior)", 1);
     ObjClass* klass = NULL;
     if (IS_CLASS(receiver)) klass = AS_CLASS(args[0]);
     else if (IS_TYPE(receiver)) klass = AS_TYPE(args[0])->behavior;

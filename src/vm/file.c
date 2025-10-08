@@ -581,7 +581,7 @@ ObjFile* getFileArgument(VM* vm, Value arg) {
     return file;
 }
 
-ObjFile* getFileProperty(VM* vm, ObjInstance* object, char* field) {
+ObjFile* getFileField(VM* vm, ObjInstance* object, char* field) {
     return AS_FILE(getObjField(vm, object, field));
 }
 
@@ -612,7 +612,7 @@ bool loadFileOperation(VM* vm, ObjFile* file, const char* streamClass) {
     else return false;
 }
 
-bool setFileProperty(VM* vm, ObjInstance* object, ObjFile* file, const char* mode) {
+bool setFileField(VM* vm, ObjInstance* object, ObjFile* file, const char* mode) {
     if(!fileOpen(vm, file, mode)) return false;
     setObjField(vm, object, "file", OBJ_VAL(file));
     return true;
