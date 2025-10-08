@@ -1,0 +1,29 @@
+namespace test.types
+
+class Box<T> {
+
+    var T content;
+
+    __init__(T content) {
+        this.content = content
+    }
+
+    T getContent() {
+        return this.content
+    }
+
+    void setContent(T content) {
+        this.content = content
+    }
+}
+
+trait TBox<T> { 
+    
+}
+
+T identity<T>(T arg) {
+    return arg
+}
+
+println(Box)
+println(TBox)

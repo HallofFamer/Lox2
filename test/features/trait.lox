@@ -19,23 +19,15 @@ trait TVehicle {
     }
 }
 
-println("Trait: " + TVehicle.toString())
-print("TVehicle is trait: ")
-println(TVehicle.isTrait())
-print("TVehicle is class: ")
-println(TVehicle.isClass())
-print("TVehicle has method 'drive': ")
-println(TVehicle.hasMethod("drive"))
-print("TVehicle has method 'carry': ")
-println(TVehicle.hasMethod("carry"))
-print("Class of TVehicle: ")
-println(TVehicle.getClass())
-print("Class of Trait: ")
-println(TVehicle.getClass().getClass())
-print("Class of Trait class: ")
-println(TVehicle.getClass().getClass().getClass())
-print("Superclass of Trait: ")
-println(TVehicle.getClass().superclass())
+println("Trait: ${TVehicle}")
+println("TVehicle is trait: ${TVehicle.isTrait()}")
+println("TVehicle is class: ${TVehicle.isClass()}")
+println("TVehicle has method 'drive': ${TVehicle.hasMethod("drive")}")
+println("TVehicle has method 'carry': ${TVehicle.hasMethod("carry")}")
+println("Class of TVehicle: ${TVehicle.getClass()}")
+println("Class of Trait: ${TVehicle.getClass().getClass()}")
+println("Class of Trait class: ${TVehicle.getClass().getClass().getClass()}")
+println("Superclass of Trait: ${TVehicle.getClass().superclass()}")
 println("")
 
 trait TTruck with TVehicle { 
@@ -50,11 +42,9 @@ trait TTruck with TVehicle {
     }
 }
 
-println("Trait: " + TTruck.toString())
-print("TTruck has method 'drive': ")
-println(TTruck.hasMethod("drive"))
-print("TTruck has method 'carry': ")
-println(TTruck.hasMethod("carry"))
+println("Trait: ${TTruck}")
+println("TTruck has method 'drive': ${TTruck.hasMethod("drive")}")
+println("TTruck has method 'carry': ${TTruck.hasMethod("carry")}")
 println("")
 
 class Vehicle with TVehicle { 
@@ -65,28 +55,24 @@ class Vehicle with TVehicle {
     }
 
     String toString(){ 
-        val message = this.color + " " + this.getClassName().toLowercase()
-        if(this.isMoving()) return message + " is moving at " + this.speed.toString() + " mph"
-        else return message + " is stationary"
+        val message = "${this.color} ${this.getClassName().toLowercase()}"
+        if(this.isMoving()) return "${message} is moving at ${this.speed} mph"
+        else return "${message} is stationary"
     }
 }
 
 val vehicle = Vehicle("blue", 40)
-println("Creating vehicle... ")
+println("Creating vehicle...")
 println(vehicle.toString())
-println("Vehicle color: " + vehicle.color)
-println("Vehicle speed: " + vehicle.speed.toString())
-print("Vehicle is moving: ")
-println(vehicle.isMoving())
+println("Vehicle color: ${vehicle.color}")
+println("Vehicle speed: ${vehicle.speed}")
+println("Vehicle is moving: ${vehicle.isMoving()}")
 println("Accelerate Vehicle by 10mph: ")
 vehicle.accelerate(10)
 println(vehicle.toString())
-print("Vehicle is instance of class Vehicle: ")
-println(vehicle.instanceOf(Vehicle))
-print("Vehicle is instance of trait TVehicle: ")
-println(vehicle.instanceOf(TVehicle))
-print("Vehicle is instance of trait TTruck: ")
-println(vehicle.instanceOf(TTruck))
+println("Vehicle is instance of class Vehicle: ${vehicle.instanceOf(Vehicle)}")
+println("Vehicle is instance of trait TVehicle: ${vehicle.instanceOf(TVehicle)}")
+println("Vehicle is instance of trait TTruck: ${vehicle.instanceOf(TTruck)}")
 println("")
 
 class Truck extends Vehicle with TTruck { 
@@ -97,37 +83,30 @@ class Truck extends Vehicle with TTruck {
     }
 
     String toString(){ 
-        val message = this.load.toString() + " ton " + this.color + " truck"
-        if(this.isMoving()) return message + " is moving at " + this.speed.toString() + " mph"
-        else return message + " is stationary"
+        val message = "${this.load} ton ${this.color} truck"
+        if(this.isMoving()) return "${message} is moving at ${this.speed} mph"
+        else return "${message} is stationary"
     }
 }
 
 val truck = Truck("white", 30, 5)
 println("Creating truck... ")
 println(truck.toString())
-println("Truck color: " + truck.color)
-println("Truck load: " + truck.load.toString())
-print("Vehicle is moving: ")
-println(truck.isMoving())
+println("Truck color: ${truck.color}")
+println("Truck load: ${truck.load}")
+println("Vehicle is moving: ${truck.isMoving()}")
 println("Adding 3 ton load to truck: ")
 truck.carry(3)
 println(truck.toString())
-print("Truck is an instance of class Truck: ")
-println(truck.instanceOf(Truck))
-print("Truck is instance of trait TTruck: ")
-println(truck.instanceOf(TTruck))
-print("Truck is instance of class Vehicle: ")
-println(truck.instanceOf(Vehicle))
-print("Truck is instance of trait TVehicle: ")
-println(truck.instanceOf(TVehicle))
+
+println("Truck is an instance of class Truck: ${truck.instanceOf(Truck)}")
+println("Truck is instance of trait TTruck: ${truck.instanceOf(TTruck)}")
+println("Truck is instance of class Vehicle: ${truck.instanceOf(Vehicle)}")
+println("Truck is instance of trait TVehicle: ${truck.instanceOf(TVehicle)}")
 println("")
 
-print("Number implements trait TComparable: ")
-println(Number.traits().contains(TComparable))
-print("Int is instance of trait TComparable: ")
-println(2.instanceOf(TComparable))
-print("Float is instance of trait TComparable: ")
-println(3.5.instanceOf(TComparable))
-print("Bool is instance of trait TComparable: ")
-println(true.instanceOf(TComparable))
+println("Number implements trait TComparable: ${Number.traits().contains(TComparable)}")
+println("Int is instance of trait TComparable: ${2.instanceOf(TComparable)}")
+println("Float is instance of trait TComparable: ${3.5.instanceOf(TComparable)}")
+println("Bool is instance of trait TComparable: ${true.instanceOf(TComparable)}")
+println("Nil is instance of trait TComparable: ${nil.instanceOf(TComparable)}")

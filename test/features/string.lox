@@ -2,7 +2,7 @@ namespace test.features
 using clox.std.util.DateTime
 
 println("Testing string concatenation...")
-println("Current time is: " + DateTime.now.toString())
+println("Current time is: ${DateTime.now}")
 println("Testing simple string interpolation...")
 val steep = 2
 val cool = 3

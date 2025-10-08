@@ -1,13 +1,10 @@
 namespace test.features
 
 val range = 0..4
-println("Creating an instance of Range class: (" + range.from().toString() + ".." +range.to().toString() + ")")
-print("Length of Range: ")
-println(range.length())
-print("Range contains value 2: ")
-println(range.contains(2))
-print("Range element at index 3: ")
-println(range.getAt(3))
+println("Creating an instance of Range class: (${range.from}..${range.to})")
+println("Length of Range: ${range.length()}")
+println("Range contains value 2: ${range.contains(2)}")
+println("Range element at index 3: ${range.getAt(3)}")
 println("")
 
 println("Looping through Range: ")
@@ -20,6 +17,4 @@ println("Looping through Range again with step 2: ")
 range.step(2, fun(n){ 
     println(n)
 })
-
-print("Convert Range to Array: ")
-println(range.toArray())
+println("Convert Range to Array: ${range.toArray()}")
