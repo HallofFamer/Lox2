@@ -14,6 +14,8 @@ DECLARE_BUFFER(TypeInfoArray, TypeInfo*)
 #define IS_CALLABLE_TYPE(type) (type->category == TYPE_CATEGORY_FUNCTION)
 #define IS_FIELD_TYPE(type) (type->category == TYPE_CATEGORY_FIELD)
 #define IS_METHOD_TYPE(type) (type->category == TYPE_CATEGORY_METHOD)
+#define IS_FORMAL_TYPE(type) (type->category == TYPE_CATEGORY_FORMAL)
+#define IS_GENERIC_TYPE(type) (type->category == TYPE_CATEGORY_GENERIC)
 #define IS_ALIAS_TYPE(type) (type->category == TYPE_CATEGORY_ALIAS)
 #define IS_VOID_TYPE(type) (type->category == TYPE_CATEGORY_VOID)
 
@@ -21,6 +23,7 @@ DECLARE_BUFFER(TypeInfoArray, TypeInfo*)
 #define AS_CALLABLE_TYPE(type) ((CallableTypeInfo*)type)
 #define AS_FIELD_TYPE(type) ((FieldTypeInfo*)type)
 #define AS_METHOD_TYPE(type) ((MethodTypeInfo*)type)
+#define AS_GENERIC_TYPE(type) ((GenericTypeInfo*)type)
 #define AS_ALIAS_TYPE(type) ((AliasTypeInfo*)type)
 
 typedef enum {
@@ -31,6 +34,8 @@ typedef enum {
     TYPE_CATEGORY_FUNCTION,
     TYPE_CATEGORY_FIELD,
     TYPE_CATEGORY_METHOD,
+    TYPE_CATEGORY_FORMAL,
+    TYPE_CATEGORY_GENERIC,
     TYPE_CATEGORY_ALIAS,
     TYPE_CATEGORY_VOID
 } TypeCategory;
@@ -48,11 +53,13 @@ typedef struct {
     TypeInfoArray* traitTypes;
     TypeTable* fields;
     TypeTable* methods;
+    bool isGeneric;
 } BehaviorTypeInfo;
 
 typedef struct {
     bool isAsync;
     bool isClassMethod;
+    bool isGeneric;
     bool isInitializer;
     bool isInstanceMethod;
     bool isLambda;
@@ -84,6 +91,12 @@ typedef struct {
 
 typedef struct {
     TypeInfo baseType;
+    TypeInfo* rawType;
+    TypeInfoArray* parameters;
+} GenericTypeInfo;
+
+typedef struct {
+    TypeInfo baseType;
     TypeInfo* targetType;
 } AliasTypeInfo;
 
@@ -103,6 +116,7 @@ static inline CallableTypeAttribute callableTypeInitAttribute() {
     return (CallableTypeAttribute) {
         .isAsync = false,
         .isClassMethod = false,
+        .isGeneric = false,
         .isInitializer = false,
         .isInstanceMethod = false,
         .isLambda = false,

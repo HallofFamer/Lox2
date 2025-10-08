@@ -536,6 +536,7 @@ static void astOutputDeclClass(Ast* ast, int indentLevel) {
     char* className = tokenToCString(ast->token);
     printf("classDecl %s\n", className);
     astOutputChild(ast, indentLevel + 1, 0);
+    if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
     free(className);
 }
 
@@ -612,6 +613,7 @@ static void astOutputDeclTrait(Ast* ast, int indentLevel) {
     char* traitName = tokenToCString(ast->token);
     printf("traitDecl %s\n", traitName);
     astOutputChild(ast, indentLevel + 1, 0);
+    if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
     free(traitName);
 }
 

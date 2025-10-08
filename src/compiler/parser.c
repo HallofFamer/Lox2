@@ -671,6 +671,23 @@ static Ast* parameterList(Parser* parser, bool isLambda, Token token) {
     return params;
 }
 
+static Ast* typeParameters(Parser* parser, Token token) {
+    Ast* typeParams = emptyAst(AST_LIST_VAR, token);
+    consume(parser, TOKEN_LESS, "Expect '<' before type parameters.");
+    int count = 0;
+
+    do {
+        count++;
+        if (count > UINT4_MAX) parseErrorAtCurrent(parser, "Can't have more than 15 type parameters.");
+        consume(parser, TOKEN_IDENTIFIER, "Expect type parameter name.");
+        Ast* typeParam = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+        astAppendChild(typeParams, typeParam);
+    } while (match(parser, TOKEN_COMMA));
+
+    consume(parser, TOKEN_GREATER, "Expect '>' after type parameters.");
+    return typeParams;
+}
+
 static Ast* functionParameters(Parser* parser) {
     Token token = previousToken(parser);
     consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after function keyword/name.");
@@ -1292,14 +1309,22 @@ static bool matchClassDeclaration(Parser* parser) {
 static Ast* classDeclaration(Parser* parser) {
     consume(parser, TOKEN_IDENTIFIER, "Expect class name.");
     Token name = previousToken(parser);
+    Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
     Ast* superClass = superclass_(parser);
     Ast* traitList = traits(parser, &name);
+
     consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before class body.");
     Ast* fieldList = fields(parser, &name);
     Ast* methodList = methods(parser, &name);
     consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
     Ast* _class = newAst(AST_EXPR_CLASS, name, 4, superClass, traitList, fieldList, methodList);
-    return newAst(AST_DECL_CLASS, name, 1, _class);
+
+    Ast* ast = newAst(AST_DECL_CLASS, name, 1, _class);
+    if (typeParams != NULL) {
+        ast->attribute.isGeneric = true;
+        astAppendChild(ast, typeParams);
+    }
+    return ast;
 }
 
 static bool matchAsyncFunDeclaration(Parser* parser, bool* hasReturnType) {
@@ -1422,12 +1447,20 @@ static bool matchTypeDeclaration(Parser* parser) {
 static Ast* traitDeclaration(Parser* parser) {
     consume(parser, TOKEN_IDENTIFIER, "Expect trait name.");
     Token name = previousToken(parser);
+    Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
     Ast* traitList = traits(parser, &name);
+
     consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before trait body.");
     Ast* methodList = methods(parser, &name);
     consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after trait body.");
     Ast* trait = newAst(AST_EXPR_TRAIT, name, 2, traitList, methodList);
-    return newAst(AST_DECL_TRAIT, name, 1, trait);
+
+    Ast* ast = newAst(AST_DECL_TRAIT, name, 1, trait);
+    if (typeParams != NULL) {
+        ast->attribute.isGeneric = true;
+        astAppendChild(ast, typeParams);
+    }
+    return ast;
 }
 
 static Ast* typeDeclaration(Parser* parser) {

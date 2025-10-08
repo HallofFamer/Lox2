@@ -348,6 +348,9 @@ static void typeTableOutputCategory(TypeCategory category) {
         case TYPE_CATEGORY_METHOD:
             printf("method");
             break;
+        case TYPE_CATEGORY_GENERIC:
+            printf("generic");
+            break;
         case TYPE_CATEGORY_ALIAS:
             printf("typealias");
             break;

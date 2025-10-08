@@ -87,6 +87,7 @@ typedef struct {
     bool isAsync;
     bool isClass;
     bool isFunction;
+    bool isGeneric;
     bool isInitializer;
     bool isLambda;
     bool isMutable;
@@ -114,6 +115,7 @@ static inline AstAttribute astInitAttribute() {
         .isAsync = false,
         .isClass = false,
         .isFunction = false,
+        .isGeneric = false,
         .isInitializer = false,
         .isLambda = false,
         .isMutable = false,
