@@ -361,6 +361,7 @@ typedef struct {
     Obj obj;
     ObjString* name;
     TypeCategory category;
+    bool isAlias;
     ObjClass* behavior;
     ValueArray parameters;
 } ObjType;

@@ -772,7 +772,7 @@ InterpretResult run(VM* vm) {
                 if (!getInstanceVariable(vm, receiver, &frame->closure->function->chunk, byte)) {
                     ObjString* name = AS_STRING(frame->closure->function->chunk.identifiers.values[byte]);
                     if (interceptUndefinedGet(vm, receiver, name)) LOAD_FRAME();
-                    else RUNTIME_ERROR("Undefined property '%s'", name->chars);
+                    else RUNTIME_ERROR("Undefined field '%s'", name->chars);
                 }
                 else if (CAN_INTERCEPT(receiver, INTERCEPTOR_AFTER_GET, __afterGet__)) {
                     ObjString* name = AS_STRING(frame->closure->function->chunk.identifiers.values[byte]);

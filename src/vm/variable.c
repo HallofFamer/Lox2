@@ -210,6 +210,7 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
             ObjType* type = (ObjType*)object;
             if (index == 0) push(vm, OBJ_VAL(type->name));
             else if (index == 1) push(vm, OBJ_VAL(type->behavior));
+            else if (index == 2) push(vm, BOOL_VAL(type->isAlias));
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }
@@ -219,7 +220,7 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
             return true;
         }
         default:
-            runtimeError(vm, "Undefined property at index %d on Object category %d.", index, object->category);
+            runtimeError(vm, "Undefined field at index %d on Object category %d.", index, object->category);
             exit(70);
     }
     return false;
@@ -235,7 +236,7 @@ static bool getAndPushGenericInstanceVariableByName(VM* vm, Obj* object, ObjStri
 
     int index = getIndexFromObjectShape(vm, object, name);
     if (index == -1) {
-        runtimeError(vm, "Undefined property %s on Object %s", name->chars, object->klass->fullName->chars);
+        runtimeError(vm, "Undefined field %s on Object %s", name->chars, object->klass->fullName->chars);
         exit(70);
     }
 
@@ -361,6 +362,7 @@ bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
             ObjType* type = (ObjType*)object;
             if (matchVariableName(name, "name", 4)) push(vm, OBJ_VAL(type->name));
             else if (matchVariableName(name, "behavior", 8)) push(vm, OBJ_VAL(type->behavior));
+            else if (matchVariableName(name, "isAlias", 7)) push(vm, INT_VAL(type->isAlias));
             else return getAndPushGenericInstanceVariableByName(vm, object, name);
             return true;
         }
@@ -368,14 +370,14 @@ bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
             ObjValueInstance* instance = (ObjValueInstance*)object;
             int index = getIndexFromObjectShape(vm, object, name);
             if (index == -1) {
-                runtimeError(vm, "Undefined property %s on instance.", name->chars);
+                runtimeError(vm, "Undefined field %s on instance.", name->chars);
                 return false;
             }
             push(vm, instance->fields.values[index]);
             return true;
         }
         default:
-            runtimeError(vm, "Undefined property %s on Object category %d.", name->chars, object->category);
+            runtimeError(vm, "Undefined field %s on Object category %d.", name->chars, object->category);
             exit(70);
     }
     return false;
@@ -469,7 +471,7 @@ bool getInstanceVariable(VM* vm, Value receiver, Chunk* chunk, uint8_t byte) {
             return true;
         }
         
-        runtimeError(vm, "Undefined property %s on class %s", name->chars, klass->fullName->chars);
+        runtimeError(vm, "Undefined field %s on class %s", name->chars, klass->fullName->chars);
         exit(70);
     }
     else if (IS_NAMESPACE(receiver)) {
@@ -501,7 +503,7 @@ bool getInstanceVariable(VM* vm, Value receiver, Chunk* chunk, uint8_t byte) {
         return getGenericInstanceVariable(vm, AS_OBJ(receiver), chunk, byte);
     }
     else {
-        if (IS_NIL(receiver)) runtimeError(vm, "Undefined property on nil.");
+        if (IS_NIL(receiver)) runtimeError(vm, "Undefined field on nil.");
         return false;
     }
 
@@ -521,7 +523,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             if (index == 0) {
-                runtimeError(vm, "Cannot set property length on Object Array.");
+                runtimeError(vm, "Cannot set field length on Object Array.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
@@ -538,7 +540,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         case OBJ_CLOSURE: {
             ObjClosure* closure = (ObjClosure*)object;
             if (index <= 1) {
-                runtimeError(vm, "Cannot set property name or arity on Object Function.");
+                runtimeError(vm, "Cannot set field name or arity on Object Function.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
@@ -546,7 +548,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         case OBJ_DICTIONARY: {
             ObjDictionary* dictionary = (ObjDictionary*)object;
             if (index == 0) {
-                runtimeError(vm, "Cannot set property length on Object Dictionary.");
+                runtimeError(vm, "Cannot set field length on Object Dictionary.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
@@ -554,7 +556,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         case OBJ_ENTRY: {
             ObjEntry* entry = (ObjEntry*)object;
             if (index == 0) {
-                runtimeError(vm, "Cannot set property key on Object Entry.");
+                runtimeError(vm, "Cannot set field key on Object Entry.");
                 exit(70);
             }
             else if (index == 1) {
@@ -578,7 +580,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
             if (index == 0 && IS_STRING(value)) file->name = AS_STRING(value);
             else if (index == 1 && IS_STRING(value)) file->mode = AS_STRING(value);
             else if (index == 2) {
-                runtimeError(vm, "Cannot set property isOpen on Object File.");
+                runtimeError(vm, "Cannot set field isOpen on Object File.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
@@ -599,7 +601,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         case OBJ_ITERATOR: {
             ObjIterator* iterator = (ObjIterator*)object;
             if (index == 0) {
-                runtimeError(vm, "Cannot set property iterable on Object Iterator.");
+                runtimeError(vm, "Cannot set field iterable on Object Iterator.");
                 exit(70);
             }
             else if (index == 1 && IS_INT(value)) iterator->position = AS_INT(value);
@@ -613,7 +615,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         case OBJ_METHOD: {
             ObjMethod* method = (ObjMethod*)object;
             if (index <= 2) {
-                runtimeError(vm, "Cannot set property name, arity or behavior on Object Method.");
+                runtimeError(vm, "Cannot set field name, arity or behavior on Object Method.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
@@ -633,7 +635,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
             if (index == 0 && IS_INT(value)) promise->state = AS_INT(value);
             else if (index == 1) promise->value = value;
             else if (index == 2) {
-                runtimeError(vm, "Cannot set property id on Object Promise.");
+                runtimeError(vm, "Cannot set field id on Object Promise.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
@@ -644,7 +646,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         case OBJ_RANGE: {
             ObjRange* range = (ObjRange*)object;
             if (index == 0) {
-                runtimeError(vm, "Cannot set property length on Object Range.");
+                runtimeError(vm, "Cannot set field length on Object Range.");
                 exit(70);
             }
             else if (index == 1 && IS_INT(value)) range->from = AS_INT(value);
@@ -657,7 +659,7 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         case OBJ_STRING: {
             ObjString* string = (ObjString*)object;
             if (index == 0) {
-                runtimeError(vm, "Cannot set property length on Object String.");
+                runtimeError(vm, "Cannot set field length on Object String.");
                 return false;
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
@@ -673,14 +675,14 @@ static bool setGenericInstanceVariableByIndex(VM* vm, Obj* object, int index, Va
         }
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
-            if (index <= 1) {
-                runtimeError(vm, "Cannot set property name or behavior on Object Type.");
+            if (index <= 2) {
+                runtimeError(vm, "Cannot set field name, behavior or isAlias on Object Type.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByIndex(vm, object, index, value);
         }
         default:
-            runtimeError(vm, "Undefined property at index %d on Object category %d.", index, object->category);
+            runtimeError(vm, "Undefined field at index %d on Object category %d.", index, object->category);
             exit(70);
     }
     return false;
@@ -710,7 +712,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)object;
             if (matchVariableName(name, "length", 6)) {
-                runtimeError(vm, "Cannot set property length on Object Array.");
+                runtimeError(vm, "Cannot set field length on Object Array.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
@@ -727,7 +729,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         case OBJ_CLOSURE: {
             ObjClosure* closure = (ObjClosure*)object;
             if (matchVariableName(name, "name", 4) || matchVariableName(name, "arity", 5)) {
-                runtimeError(vm, "Cannot set property %s on Object Function.", name->chars);
+                runtimeError(vm, "Cannot set field %s on Object Function.", name->chars);
                 return false;
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
@@ -735,7 +737,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         case OBJ_DICTIONARY: {
             ObjDictionary* dictionary = (ObjDictionary*)object;
             if (matchVariableName(name, "length", 6)) {
-                runtimeError(vm, "Cannot set property length on Object Dictionary.");
+                runtimeError(vm, "Cannot set field length on Object Dictionary.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
@@ -743,7 +745,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         case OBJ_ENTRY: {
             ObjEntry* entry = (ObjEntry*)object;
             if (matchVariableName(name, "key", 3)) {
-                runtimeError(vm, "Cannot set property key on Object Entry.");
+                runtimeError(vm, "Cannot set field key on Object Entry.");
                 exit(70);
             }
             else if (matchVariableName(name, "value", 5)) {
@@ -767,7 +769,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
             if (matchVariableName(name, "name", 4) && IS_STRING(value)) file->name = AS_STRING(value);
             else if (matchVariableName(name, "mode", 4) && IS_STRING(value)) file->mode = AS_STRING(value);
             else if (matchVariableName(name, "isOpen", 6)) {
-                runtimeError(vm, "Cannot set property isOpen on Object File.");
+                runtimeError(vm, "Cannot set field isOpen on Object File.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
@@ -778,7 +780,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         case OBJ_ITERATOR: {
             ObjIterator* iterator = (ObjIterator*)object;
             if (matchVariableName(name, "iterable", 8)) {
-                runtimeError(vm, "Cannot set property iterable on Object Iterator.");
+                runtimeError(vm, "Cannot set field iterable on Object Iterator.");
                 exit(70);
             }
             else if (matchVariableName(name, "position", 8) && IS_INT(value)) iterator->position = AS_INT(value);
@@ -802,7 +804,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         case OBJ_METHOD: {
             ObjMethod* method = (ObjMethod*)object;
             if (matchVariableName(name, "name", 4) || matchVariableName(name, "arity", 5) || matchVariableName(name, "behavior", 8)) {
-                runtimeError(vm, "Cannot set property %s on Object Method.", name->chars);
+                runtimeError(vm, "Cannot set field %s on Object Method.", name->chars);
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
@@ -822,7 +824,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
             if (matchVariableName(name, "state", 5) && IS_INT(value)) promise->state = AS_INT(value);
             else if (matchVariableName(name, "value", 5)) promise->value = value;
             else if (matchVariableName(name, "id", 2)) { 
-                runtimeError(vm, "Cannot set property id on Object Promise.");
+                runtimeError(vm, "Cannot set field id on Object Promise.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
@@ -833,7 +835,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         case OBJ_RANGE: {
             ObjRange* range = (ObjRange*)object;
             if (matchVariableName(name, "length", 6)) {
-                runtimeError(vm, "Cannot set property length on Object Range.");
+                runtimeError(vm, "Cannot set field length on Object Range.");
                 exit(70);
             }
             else if (matchVariableName(name, "from", 4) && IS_INT(value)) range->from = AS_INT(value);
@@ -846,7 +848,7 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         case OBJ_STRING: {
             ObjString* string = (ObjString*)object;
             if (matchVariableName(name, "length", 6)) {
-                runtimeError(vm, "Cannot set property length on Object String.");
+                runtimeError(vm, "Cannot set field length on Object String.");
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
@@ -862,14 +864,14 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         }
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
-            if (matchVariableName(name, "name", 4) || matchVariableName(name, "behavior", 8)) {
-                runtimeError(vm, "Cannot set property %s or behavior on Object Type.", name);
+            if (matchVariableName(name, "name", 4) || matchVariableName(name, "behavior", 8) || matchVariableName(name, "isAlias", 7)) {
+                runtimeError(vm, "Cannot set field %s on Object Type.", name);
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
         }
         default:
-            runtimeError(vm, "Undefined property %s on Object category %d.", name->chars, object->category);
+            runtimeError(vm, "Undefined field %s on Object category %d.", name->chars, object->category);
             exit(70);
     }
     return false;

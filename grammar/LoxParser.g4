@@ -40,7 +40,7 @@ unary: ((BANG | MINUS) unary) | call;
 call: primary (LPAREN arguments? RPAREN | LSQUARE expression QUESTION? RSQUARE | DOT IDENTIFIER)*;
 primary: 'nil' | 'true' | 'false' | INT | FLOAT | STRING | IDENTIFIER | (LPAREN expression RPAREN) | (LSQUARE arguments? RSQUARE) | (expression DOTDOT expression) | (CLASS classBody) | (FUN functionBody) | (SUPER DOT IDENTIFIER) | (TRAIT traitBody);
 
-classBody: (LT IDENTIFIER)? (WITH parameters)? LBRACE fieldDecl* function* RBRACE;
+classBody: (EXTENDS IDENTIFIER)? (WITH parameters)? LBRACE fieldDecl* function* RBRACE;
 function: ASYNC? CLASS? type? IDENTIFIER functionBody;
 functionBody: LPAREN parameters? RPAREN block;
 traitBody: (WITH parameters)? LBRACE CLASS? function* RBRACE;
