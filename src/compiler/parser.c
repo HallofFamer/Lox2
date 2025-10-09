@@ -1400,10 +1400,15 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     Ast* returnType = hasReturnType ? type_(parser, "Expect function return type.") : emptyAst(AST_EXPR_TYPE, emptyToken());
     consume(parser, TOKEN_IDENTIFIER, "Expect function name.");
     Token name = previousToken(parser);
+    Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
     Ast* body = function(parser, returnType, isAsync, false, isVoid);
 
     Ast* ast = newAst(AST_DECL_FUN, name, 1, body);
     ast->attribute.isVoid = isVoid;
+    if (typeParams != NULL) {
+        ast->attribute.isGeneric = true;
+        astAppendChild(ast, typeParams);
+    }
     return ast;
 }
 

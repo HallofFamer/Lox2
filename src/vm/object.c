@@ -370,6 +370,13 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
             valueArrayWrite(vm, &type->parameters, createTypeValue(vm, paramType));
         }
     }
+    else if (targetType != NULL && IS_GENERIC_TYPE(targetType)) {
+        GenericTypeInfo* genericType = AS_GENERIC_TYPE(targetType);
+        for (int i = 0; i < genericType->parameters->count; i++) {
+            TypeInfo* paramType = genericType->parameters->elements[i];
+            valueArrayWrite(vm, &type->parameters, createTypeValue(vm, paramType));
+        }
+    }
     return type;
 }
 
