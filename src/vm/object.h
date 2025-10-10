@@ -92,7 +92,6 @@
 #define AS_CARRAY(value)            (((ObjArray*)AS_OBJ(value))->elements)
 #define AS_CRECORD(value, category) ((category*)((ObjRecord*)AS_OBJ(value)->data))
 #define AS_CSTRING(value)           (((ObjString*)AS_OBJ(value))->chars)
-#define AS_CTYPE(value)             (((ObjType*)AS_OBJ(value))->typeInfo)
 
 typedef enum {
     OBJ_ARRAY,

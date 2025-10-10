@@ -335,15 +335,15 @@ ObjTimer* newTimer(VM* vm, ObjClosure* closure, int delay, int interval) {
 
     if (timer->timer != NULL) {
         timer->timer->data = timerData(vm, closure, delay, interval);
-        if (timer->timer->data == NULL) {
-            throwNativeException(vm, "clox.std.lang.OutOfMemoryException", "Not enough memory to allocate timer data.");
+        if (timer->timer->data != NULL) {
+            timer->id = 0;
+            timer->isRunning = false;
+            return timer;
         }
-        timer->id = 0;
-        timer->isRunning = false;
     }
-    else throwNativeException(vm, "clox.std.lang.OutOfMemoryException", "Not enough memory to allocate timer object.");
 
-    return timer;
+    throwNativeException(vm, "clox.std.lang.OutOfMemoryException", "Not enough memory to allocate timer object.");
+    return NULL;
 }
 
 static Value createTypeValue(VM* vm, TypeInfo* type) {
