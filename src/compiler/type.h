@@ -132,6 +132,8 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
 CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* name, TypeInfo* returnType);
 FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer);
+GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType);
+GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType, int numParameters, ...);
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
 char* createCallableTypeName(CallableTypeInfo* callableType);
 void freeTypeInfo(TypeInfo* type);

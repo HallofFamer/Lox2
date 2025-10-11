@@ -101,6 +101,36 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
     return methodType;
 }
 
+GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType) {
+    GenericTypeInfo* genericType = (GenericTypeInfo*)newTypeInfo(id, sizeof(GenericTypeInfo), TYPE_CATEGORY_GENERIC, shortName, fullName);
+    if (genericType != NULL) {
+        genericType->rawType = rawType;
+        genericType->parameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (genericType->parameters != NULL) TypeInfoArrayInit(genericType->parameters);
+    }
+    return genericType;
+}
+
+GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType, int numParameters, ...) {
+    GenericTypeInfo* genericType = (GenericTypeInfo*)newTypeInfo(id, sizeof(GenericTypeInfo), TYPE_CATEGORY_GENERIC, shortName, fullName);
+    if (genericType != NULL) {
+        genericType->rawType = rawType;
+        genericType->parameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        
+        if (genericType->parameters != NULL) {
+            TypeInfoArrayInit(genericType->parameters);
+            va_list args;
+            va_start(args, numParameters);
+
+            for (int i = 0; i < numParameters; i++) {
+                TypeInfo* type = va_arg(args, TypeInfo*);
+                TypeInfoArrayAdd(genericType->parameters, type);
+            }
+            va_end(args);
+        }
+    }
+}
+
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType) {
     AliasTypeInfo* aliasType = (AliasTypeInfo*)newTypeInfo(id, sizeof(AliasTypeInfo), TYPE_CATEGORY_ALIAS, shortName, fullName);
     if (aliasType != NULL) aliasType->targetType = targetType;
