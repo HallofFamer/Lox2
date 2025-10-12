@@ -468,6 +468,17 @@ static void typeTableOutputFunction(CallableTypeInfo* function) {
     printf(")\n");
 }
 
+static void typeTableOutputGeneric(GenericTypeInfo* generic) {
+    printf("    generic type: %s\n", generic->rawType->shortName->chars);
+    if (generic->parameters != NULL && generic->parameters->count > 0) {
+        printf("    parameters: %s", generic->parameters->elements[0]->shortName->chars);
+        for (int i = 1; i < generic->parameters->count; i++) {
+            printf(", %s", generic->parameters->elements[i]->shortName->chars);
+        }
+        printf("\n");
+    }
+}
+
 static void typeTableOutputAlias(AliasTypeInfo* alias) {
     if (alias->targetType != NULL) {
         printf("    target: %s\n", alias->targetType->shortName->chars);
@@ -482,6 +493,7 @@ static void typeTableOutputEntry(TypeEntry* entry) {
 
     if (IS_BEHAVIOR_TYPE(entry->value)) typeTableOutputBehavior(AS_BEHAVIOR_TYPE(entry->value));
     else if (IS_CALLABLE_TYPE(entry->value)) typeTableOutputFunction(AS_CALLABLE_TYPE(entry->value));
+    else if (IS_GENERIC_TYPE(entry->value)) typeTableOutputGeneric(AS_GENERIC_TYPE(entry->value));
     else if (IS_ALIAS_TYPE(entry->value)) typeTableOutputAlias(AS_ALIAS_TYPE(entry->value));
     printf("\n");
 }
