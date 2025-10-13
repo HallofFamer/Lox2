@@ -1471,10 +1471,17 @@ static Ast* traitDeclaration(Parser* parser) {
 static Ast* typeDeclaration(Parser* parser) {
     consume(parser, TOKEN_IDENTIFIER, "Expect type name.");
     Token name = previousToken(parser);
+    Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
     consume(parser, TOKEN_EQUAL, "Expect '=' after type name.");
     Ast* typeDef = type_(parser, "Expect type definition.");
     consumerTerminator(parser, "Expect semicolon or new line after type declaration.");
-    return newAst(AST_DECL_TYPE, name, 1, typeDef);
+
+    Ast* ast = newAst(AST_DECL_TYPE, name, 1, typeDef);
+    if (typeParams != NULL) {
+        ast->attribute.isGeneric = true;
+        astAppendChild(ast, typeParams);
+    }
+    return ast;
 }
 
 static bool matchVarDeclaration(Parser* parser, bool* isMutable) {

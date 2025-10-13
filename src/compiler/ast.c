@@ -561,20 +561,10 @@ static void astOutputDeclFun(Ast* ast, int indentLevel) {
     char* async = ast->attribute.isAsync ? "async " : "";
     char* _void = ast->attribute.isVoid ? "void " : "";
     char* funName = tokenToCString(ast->token);
-    printf("funDecl %s%s%s", async, _void, funName);
+    printf("funDecl %s%s%s\n", async, _void, funName);
 
-    if (astNumChild(ast) > 1) {
-        Ast* returnType = astGetChild(ast, 1);
-        if (astNumChild(returnType) == 0) {
-            char* returnTypeName = tokenToCString(returnType->token);
-            printf("(%s)", returnTypeName);
-            free(returnTypeName);
-        }
-        else printf("(TCallable)");
-    }
-
-    printf("\n");
     astOutputChild(ast, indentLevel + 1, 0);
+    if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
     free(funName);
 }
 
