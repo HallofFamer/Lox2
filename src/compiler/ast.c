@@ -579,6 +579,7 @@ static void astOutputDeclMethod(Ast* ast, int indentLevel) {
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
     astOutputChild(ast, indentLevel + 1, 2);
+    if (astNumChild(ast) > 3) astOutputChild(ast, indentLevel + 1, 3);
     free(methodName);
 }
 

@@ -795,9 +795,15 @@ static Ast* methods(Parser* parser, Token* name) {
             isInitializer = true;
         }
 
+        Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, methodName) : NULL;
         Ast* methodParams = functionParameters(parser);
         Ast* methodBody = block(parser);
         Ast* method = newAst(AST_DECL_METHOD, methodName, 3, returnType, methodParams, methodBody);
+        if (typeParams != NULL) {
+            method->attribute.isGeneric = true;
+            astAppendChild(method, typeParams);
+        }
+
         method->attribute.isAsync = isAsync;
         method->attribute.isClass = isClass;
         method->attribute.isInitializer = isInitializer;
