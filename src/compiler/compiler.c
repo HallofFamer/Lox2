@@ -1348,7 +1348,7 @@ static void compileDeclaration(Compiler* compiler, Ast* ast) {
         case AST_DECL_TRAIT:
             compileTraitDeclaration(compiler, ast);
             break;
-        case  AST_DECL_TYPE:
+        case AST_DECL_TYPE:
             compileTypeDeclaration(compiler, ast);
             break;
         case AST_DECL_VAR:

@@ -619,10 +619,41 @@ static Ast* metaclassType(Parser* parser, const char* message) {
     return type;
 }
 
+static Ast* genericType(Parser* parser, const char* message) {
+    consume(parser, TOKEN_IDENTIFIER, message);
+    Token token = previousToken(parser);
+    consume(parser, TOKEN_LESS, "Expect '<' before generic parameter declaration.");
+
+    Ast* paramTypes = emptyAst(AST_LIST_EXPR, previousToken(parser));
+    Ast* paramType = NULL;
+    int arity = 0;
+
+    do {
+        arity++;
+        if (arity > UINT4_MAX) parseErrorAtCurrent(parser, "Can't have more than 15 generic types.");
+        if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+            paramType = callableType(parser, "Expect function type.");
+            paramType->attribute.isFunction = true;
+        }
+        else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) {
+            paramType = genericType(parser, "Expect generic type.");
+            paramType->attribute.isGeneric = true;
+        }
+        else paramType = behaviorType(parser, "Expect param type.");
+        astAppendChild(paramTypes, paramType);
+    } while (match(parser, TOKEN_COMMA));
+
+    consume(parser, TOKEN_GREATER, "Expect '>' after generic parameter declaration.");
+    Ast* type = emptyAst(AST_EXPR_TYPE, token);
+    type->attribute.isGeneric = true;
+    return type;
+}
+
 static Ast* type_(Parser* parser, const char* message) {
     if (checkBoth(parser, TOKEN_IDENTIFIER)) return behaviorType(parser, message);
     else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return callableType(parser, message);
     else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) return metaclassType(parser, message);
+    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) return genericType(parser, message);
     else return emptyAst(AST_EXPR_TYPE, emptyToken());
 }
 
