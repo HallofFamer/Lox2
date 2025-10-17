@@ -324,6 +324,7 @@ static void synchronize(Parser* parser) {
 
 static Ast* expression(Parser* parser);
 static Ast* variable(Parser* parser, Token token, bool canAssign);
+static Ast* type_(Parser* parser, bool allowEmpty);
 static Ast* statement(Parser* parser);
 static Ast* block(Parser* parser);
 static Ast* function(Parser* parser, Ast* returnType, bool isAsync, bool isLambda, bool isVoid);
@@ -574,13 +575,13 @@ static Ast* lambda(Parser* parser, Token token, bool canAssign) {
     return function(parser, emptyAst(AST_EXPR_TYPE, emptyToken()), false, true, false);
 }
 
-static Ast* behaviorType(Parser* parser, const char* message) {
-    consume(parser, TOKEN_IDENTIFIER, message);
+static Ast* behaviorType(Parser* parser) {
+    consume(parser, TOKEN_IDENTIFIER, "Expect behavior type.");
     return emptyAst(AST_EXPR_TYPE, previousToken(parser));
 }
 
-static Ast* callableType(Parser* parser, const char* message) {
-    consume(parser, TOKEN_IDENTIFIER, message);
+static Ast* callableType(Parser* parser) {
+    advance(parser);
     Ast* returnType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
     if (returnType->token.type == TOKEN_VOID) {
         returnType->attribute.isVoid = true;
@@ -597,10 +598,10 @@ static Ast* callableType(Parser* parser, const char* message) {
         arity++;
         if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
         if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
-            paramType = callableType(parser, "Expect function type.");
+            paramType = callableType(parser);
             paramType->attribute.isFunction = true;
         }
-        else paramType = behaviorType(parser, "Expect param type.");
+        else paramType = behaviorType(parser);
         astAppendChild(paramTypes, paramType);
     } while (match(parser, TOKEN_COMMA));
 
@@ -610,8 +611,8 @@ static Ast* callableType(Parser* parser, const char* message) {
     return type;
 }
 
-static Ast* metaclassType(Parser* parser, const char* message) {
-    consume(parser, TOKEN_IDENTIFIER, message);
+static Ast* metaclassType(Parser* parser) {
+    consume(parser, TOKEN_IDENTIFIER, "Expect class name.");
     Token token = previousToken(parser);
     consume(parser, TOKEN_CLASS, "Expect 'class' keyword after metaclass type declaration.");
     Ast* type = emptyAst(AST_EXPR_TYPE, token);
@@ -619,8 +620,8 @@ static Ast* metaclassType(Parser* parser, const char* message) {
     return type;
 }
 
-static Ast* genericType(Parser* parser, const char* message) {
-    consume(parser, TOKEN_IDENTIFIER, message);
+static Ast* genericType(Parser* parser) {
+    consume(parser, TOKEN_IDENTIFIER, "Expect generic type name.");
     Token token = previousToken(parser);
     consume(parser, TOKEN_LESS, "Expect '<' before generic parameter declaration.");
 
@@ -632,14 +633,14 @@ static Ast* genericType(Parser* parser, const char* message) {
         arity++;
         if (arity > UINT4_MAX) parseErrorAtCurrent(parser, "Can't have more than 15 generic types.");
         if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
-            paramType = callableType(parser, "Expect function type.");
+            paramType = callableType(parser);
             paramType->attribute.isFunction = true;
         }
         else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) {
-            paramType = genericType(parser, "Expect generic type.");
+            paramType = genericType(parser);
             paramType->attribute.isGeneric = true;
         }
-        else paramType = behaviorType(parser, "Expect param type.");
+        else paramType = behaviorType(parser);
         astAppendChild(paramTypes, paramType);
     } while (match(parser, TOKEN_COMMA));
 
@@ -649,12 +650,16 @@ static Ast* genericType(Parser* parser, const char* message) {
     return type;
 }
 
-static Ast* type_(Parser* parser, const char* message) {
-    if (checkBoth(parser, TOKEN_IDENTIFIER)) return behaviorType(parser, message);
-    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return callableType(parser, message);
-    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) return metaclassType(parser, message);
-    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) return genericType(parser, message);
-    else return emptyAst(AST_EXPR_TYPE, emptyToken());
+static Ast* type_(Parser* parser, bool allowEmpty) {
+    if (checkBoth(parser, TOKEN_IDENTIFIER)) return behaviorType(parser);
+    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return callableType(parser);
+    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) return metaclassType(parser);
+    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) return genericType(parser);
+    else if (allowEmpty) return emptyAst(AST_EXPR_TYPE, emptyToken());
+    else {
+        parseErrorAtCurrent(parser, "Invalid type specified.");
+        return NULL;
+    }
 }
 
 static Ast* variable(Parser* parser, Token token, bool canAssign) {
@@ -672,7 +677,7 @@ static Ast* variable(Parser* parser, Token token, bool canAssign) {
 
 static Ast* parameter(Parser* parser, bool isLambda, const char* message) {
     bool isMutable = match(parser, TOKEN_VAR);
-    Ast* type = isLambda ? emptyAst(AST_EXPR_TYPE, emptyToken()) : type_(parser, "Expect type declaration.");
+    Ast* type = isLambda ? emptyAst(AST_EXPR_TYPE, emptyToken()) : type_(parser, true);
     consume(parser, TOKEN_IDENTIFIER, message);
 
     Ast* param = newAst(AST_EXPR_PARAM, previousToken(parser), 1, type);
@@ -765,15 +770,15 @@ static Ast* fields(Parser* parser, Token* name) {
         Ast* fieldType = NULL;
         if (checkBoth(parser, TOKEN_IDENTIFIER)) {
             hasFieldType = true;
-            fieldType = behaviorType(parser, "Expect field type.");
+            fieldType = behaviorType(parser);
         }
         else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
             hasFieldType = true;
-            fieldType = callableType(parser, "Expect callable field type");
+            fieldType = callableType(parser);
         }
         else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
             hasFieldType = true;
-            fieldType = metaclassType(parser, "Expect metaclass field type.");
+            fieldType = metaclassType(parser);
         }
 
         Token fieldName = identifierToken(parser, "Expect field name.");
@@ -809,15 +814,15 @@ static Ast* methods(Parser* parser, Token* name) {
 
         if (checkBoth(parser, TOKEN_IDENTIFIER) || (check(parser, TOKEN_IDENTIFIER) && tokenIsOperator(nextToken(parser)))) {
             hasReturnType = true;
-            returnType = behaviorType(parser, "Expect method return type.");
+            returnType = behaviorType(parser);
         }
         else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
             hasReturnType = true;
-            returnType = callableType(parser, "Expect method return type.");
+            returnType = callableType(parser);
         }
         else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
             hasReturnType = true;
-            returnType = metaclassType(parser, "Expect method return type.");
+            returnType = metaclassType(parser);
         }
         else returnType = emptyAst(AST_EXPR_TYPE, emptyToken());
 

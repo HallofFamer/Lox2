@@ -342,15 +342,12 @@ static void astOutputExprType(Ast* ast, int indentLevel) {
         astOutputChild(ast, indentLevel + 1, 0);
         astOutputChild(ast, indentLevel + 1, 1);
     }
-    else if (ast->attribute.isGeneric) {
-        char* typeName = tokenToCString(ast->token);
-        printf("type %s<>", typeName);
-        astOutputChild(ast, indentLevel + 1, 0);
-        free(typeName);
-    }
     else {
         char* typeName = tokenToCString(ast->token);
-        printf("type %s%s\n", ast->token.length > 0 ? typeName : "dynamic", ast->attribute.isClass ? " class": "");
+        if (ast->attribute.isGeneric) {
+            printf("type %s<>", typeName);
+        }
+        else printf("type %s%s\n", ast->token.length > 0 ? typeName : "dynamic", ast->attribute.isClass ? " class" : "");
         free(typeName);
     }
 }
