@@ -91,6 +91,13 @@ ObjClass* getObjClass(VM* vm, Value value) {
     else return NULL;
 }
 
+ObjType* getTypeFromClass(VM* vm, ObjClass* klass) {
+    Value value;
+    if (tableGet(&vm->types, klass->fullName, &value)) return AS_TYPE(value);
+    TypeInfo* typeInfo = typeTableGet(vm->typetab, klass->fullName);
+    return newType(vm, klass->fullName, typeInfo);
+}
+
 ObjString* getClassNameFromMetaclass(VM* vm, ObjString* metaclassName) {
     return subString(vm, metaclassName, 0, metaclassName->length - 7);
 }

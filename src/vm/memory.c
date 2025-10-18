@@ -693,6 +693,11 @@ static void promoteObject(VM* vm, Obj* object, GCGenerationType generation) {
             _namespace->values.generation++;
             break;
         }
+        case OBJ_TYPE: {
+            ObjType* type = (ObjType*)object;
+            type->parameters.generation++;
+            break;
+        }
         case OBJ_VALUE_INSTANCE: {
             ObjValueInstance* valueInstance = (ObjValueInstance*)object;
             valueInstance->fields.generation++;

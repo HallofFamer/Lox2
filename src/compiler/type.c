@@ -521,6 +521,7 @@ void typeTableOutput(TypeTable* typetab) {
 
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (type == NULL || type2 == NULL) return true;
+    if (IS_FORMAL_TYPE(type) && IS_FORMAL_TYPE(type2)) return true;
     type = IS_ALIAS_TYPE(type) ? AS_ALIAS_TYPE(type)->targetType : type;
     type2 = IS_ALIAS_TYPE(type2) ? AS_ALIAS_TYPE(type2)->targetType : type2;
 
@@ -533,6 +534,15 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 
         for (int i = 0; i < callableType->paramTypes->count; i++) {
             if (!isEqualType(callableType->paramTypes->elements[i], callableType2->paramTypes->elements[i])) return false;
+        }
+        return true;
+    }
+    else if (IS_GENERIC_TYPE(type) && IS_GENERIC_TYPE(type2)) {
+        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
+        GenericTypeInfo* genericType2 = AS_GENERIC_TYPE(type2);
+        if (genericType->parameters->count != genericType2->parameters->count) return false;
+        for (int i = 0; i < genericType->parameters->count; i++) {
+            if (!isEqualType(genericType->parameters->elements[i], genericType2->parameters->elements[i])) return false;
         }
         return true;
     }

@@ -16,6 +16,7 @@ ObjClass* createClass(VM* vm, ObjString* name, ObjClass* metaclass, BehaviorType
 void initTrait(VM* vm, ObjClass* trait, ObjString* name);
 ObjClass* createTrait(VM* vm, ObjString* name);
 ObjClass* getObjClass(VM* vm, Value value);
+ObjType* getTypeFromClass(VM* vm, ObjClass* klass);
 ObjString* getClassNameFromMetaclass(VM* vm, ObjString* metaclassName);
 ObjString* getMetaclassNameFromClass(VM* vm, ObjString* className);
 ObjString* getClassFullName(VM* vm, ObjString* shortName, ObjString* currentNamespace);
