@@ -843,6 +843,10 @@ static void compileTrait(Compiler* compiler, Ast* ast) {
     behavior(compiler, BEHAVIOR_TRAIT, ast);
 }
 
+static void compileType(Compiler* compiler, Ast* ast) {
+    getVariable(compiler, findSymbolItem(compiler, ast->symtab, ast->token));
+}
+
 static void compileUnary(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
     switch (ast->token.type) {
@@ -933,6 +937,9 @@ static void compileExpression(Compiler* compiler, Ast* ast) {
             break;
         case AST_EXPR_TRAIT:
             compileTrait(compiler, ast);
+            break;
+        case AST_EXPR_TYPE:
+            compileType(compiler, ast);
             break;
         case AST_EXPR_UNARY:
             compileUnary(compiler, ast);

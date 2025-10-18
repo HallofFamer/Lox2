@@ -324,7 +324,7 @@ static void synchronize(Parser* parser) {
 
 static Ast* expression(Parser* parser);
 static Ast* variable(Parser* parser, Token token, bool canAssign);
-static Ast* type_(Parser* parser, bool allowEmpty);
+static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam);
 static Ast* statement(Parser* parser);
 static Ast* block(Parser* parser);
 static Ast* function(Parser* parser, Ast* returnType, bool isAsync, bool isLambda, bool isVoid);
@@ -645,16 +645,16 @@ static Ast* genericType(Parser* parser) {
     } while (match(parser, TOKEN_COMMA));
 
     consume(parser, TOKEN_GREATER, "Expect '>' after generic parameter declaration.");
-    Ast* type = emptyAst(AST_EXPR_TYPE, token);
+    Ast* type = newAst(AST_EXPR_TYPE, token, 1, paramTypes);
     type->attribute.isGeneric = true;
     return type;
 }
 
-static Ast* type_(Parser* parser, bool allowEmpty) {
-    if (checkBoth(parser, TOKEN_IDENTIFIER)) return behaviorType(parser);
-    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return callableType(parser);
+static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
+    if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) return genericType(parser);
     else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) return metaclassType(parser);
-    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) return genericType(parser);
+    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return callableType(parser);
+    else if ((checkParam && checkBoth(parser, TOKEN_IDENTIFIER)) || (!checkParam && check(parser, TOKEN_IDENTIFIER))) return behaviorType(parser);
     else if (allowEmpty) return emptyAst(AST_EXPR_TYPE, emptyToken());
     else {
         parseErrorAtCurrent(parser, "Invalid type specified.");
@@ -677,7 +677,7 @@ static Ast* variable(Parser* parser, Token token, bool canAssign) {
 
 static Ast* parameter(Parser* parser, bool isLambda, const char* message) {
     bool isMutable = match(parser, TOKEN_VAR);
-    Ast* type = isLambda ? emptyAst(AST_EXPR_TYPE, emptyToken()) : type_(parser, true);
+    Ast* type = isLambda ? emptyAst(AST_EXPR_TYPE, emptyToken()) : type_(parser, true, true);
     consume(parser, TOKEN_IDENTIFIER, message);
 
     Ast* param = newAst(AST_EXPR_PARAM, previousToken(parser), 1, type);
@@ -852,7 +852,7 @@ static Ast* methods(Parser* parser, Token* name) {
 
 static Ast* superclass_(Parser* parser) {
     if (match(parser, TOKEN_EXTENDS)) {
-        return identifier(parser, "Expect super class name.");
+        return type_(parser, false, false);
     }
     return emptyAst(AST_EXPR_VARIABLE, parser->rootClass);
 }
@@ -1439,7 +1439,7 @@ static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnTy
 
 static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     bool isVoid = (previousTokenType(parser) == TOKEN_VOID);
-    Ast* returnType = hasReturnType ? type_(parser, "Expect function return type.") : emptyAst(AST_EXPR_TYPE, emptyToken());
+    Ast* returnType = hasReturnType ? type_(parser, false, false) : emptyAst(AST_EXPR_TYPE, emptyToken());
     consume(parser, TOKEN_IDENTIFIER, "Expect function name.");
     Token name = previousToken(parser);
     Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
@@ -1515,7 +1515,7 @@ static Ast* typeDeclaration(Parser* parser) {
     Token name = previousToken(parser);
     Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
     consume(parser, TOKEN_EQUAL, "Expect '=' after type name.");
-    Ast* typeDef = type_(parser, "Expect type definition.");
+    Ast* typeDef = type_(parser, false, true);
     consumerTerminator(parser, "Expect semicolon or new line after type declaration.");
 
     Ast* ast = newAst(AST_DECL_TYPE, name, 1, typeDef);

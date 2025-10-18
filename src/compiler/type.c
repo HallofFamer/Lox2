@@ -129,6 +129,7 @@ GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, 
             va_end(args);
         }
     }
+    return genericType;
 }
 
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType) {
@@ -352,6 +353,13 @@ MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, TypeI
     MethodTypeInfo* methodType = newMethodTypeInfo(id, name, returnType, isClass, isInitializer);
     typeTableSet(typetab, name, (TypeInfo*)methodType);
     return methodType;
+}
+
+GenericTypeInfo* typeTableInsertGeneric(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* rawType) {
+    int id = typetab->count + 1;
+    GenericTypeInfo* genericType = newGenericTypeInfo(id, shortName, fullName, rawType);
+    typeTableSet(typetab, fullName, (TypeInfo*)genericType);
+    return genericType;
 }
 
 AliasTypeInfo* typeTableInsertAlias(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* targetType) {
