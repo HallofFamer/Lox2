@@ -2,7 +2,7 @@ namespace test.types
 
 class Box<T> {
 
-    var T content;
+    var T content
 
     __init__(T content) {
         this.content = content
@@ -25,5 +25,20 @@ T identity<T>(T arg) {
     return arg
 }
 
+class KeyedBox<S, T> extends Box<T> { 
+
+    val S key
+
+    __init__(S key, T content) {
+        this.key = key
+        this.content = content
+    }
+
+    K getKey() {
+        return this.key
+    }
+}
+
 println(Box)
 println(TBox)
+println(KeyedBox)
