@@ -1902,6 +1902,12 @@ LOX_METHOD(Type, isClass) {
     RETURN_BOOL(self->category == TYPE_CATEGORY_CLASS);
 }
 
+LOX_METHOD(Type, isFormal) {
+    ASSERT_ARG_COUNT("Type::isFormal()", 0);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_FORMAL);
+}
+
 LOX_METHOD(Type, isFunction) {
     ASSERT_ARG_COUNT("Type::isFunction()", 0);
     ObjType* self = AS_TYPE(receiver);
@@ -2214,6 +2220,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, hasMethod, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, isBehavior, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isClass, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isFormal, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isFunction, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isGeneric, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isMetaclass, 0, RETURN_TYPE(Bool));

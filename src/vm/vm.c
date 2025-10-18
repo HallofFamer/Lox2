@@ -181,6 +181,7 @@ void initVM(VM* vm) {
     initTable(&vm->namespaces, GC_GENERATION_TYPE_PERMANENT);
     initTable(&vm->modules, GC_GENERATION_TYPE_PERMANENT);
     initTable(&vm->strings, GC_GENERATION_TYPE_PERMANENT);
+    initTable(&vm->types, GC_GENERATION_TYPE_PERMANENT);
     initShapeTree(vm);
     initGenericIDMap(vm);
     initLoop(vm);
@@ -203,6 +204,7 @@ void freeVM(VM* vm) {
     freeTable(vm, &vm->modules);
     freeTable(vm, &vm->classes);
     freeTable(vm, &vm->strings);
+    freeTable(vm, &vm->types);
     freeShapeTree(vm, &vm->shapes);
     freeGenericIDMap(vm, &vm->genericIDMap);
     vm->initString = NULL;

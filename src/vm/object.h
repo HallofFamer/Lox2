@@ -356,14 +356,14 @@ struct ObjString {
     char chars[];
 };
 
-typedef struct {
+struct ObjType {
     Obj obj;
     ObjString* name;
     TypeCategory category;
     bool isAlias;
     ObjClass* behavior;
     ValueArray parameters;
-} ObjType;
+};
 
 Obj* allocateObject(VM* vm, size_t size, ObjCategory category, ObjClass* klass, GCGenerationType generation);
 Value emptyObject(VM* vm, ObjClass* klass);

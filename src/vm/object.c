@@ -377,6 +377,8 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
             valueArrayWrite(vm, &type->parameters, createTypeValue(vm, paramType));
         }
     }
+
+    tableSet(vm, &vm->types, name, OBJ_VAL(type));
     return type;
 }
 

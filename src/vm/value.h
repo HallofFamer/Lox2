@@ -19,6 +19,7 @@ typedef struct ObjModule ObjModule;
 typedef struct ObjNamespace ObjNamespace;
 typedef struct ObjPromise ObjPromise;
 typedef struct ObjString ObjString;
+typedef struct ObjType ObjType;
 
 #ifdef NAN_BOXING
 

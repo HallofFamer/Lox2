@@ -118,6 +118,7 @@ struct VM {
     Table namespaces;
     Table modules;
     Table strings;
+    Table types;
     ShapeTree shapes;
     GenericIDMap genericIDMap;
 
