@@ -868,7 +868,10 @@ static Ast* traits(Parser* parser, Token* name) {
             parseErrorAtCurrent(parser, "Can't have more than 15 parameters.");
         }
 
-        Ast* trait = identifier(parser, "Expect trait name.");
+        Ast* trait = type_(parser, false, false);
+        if (trait->attribute.isFunction) {
+            parseErrorAtPrevious(parser, "Cannot use function type as trait.");
+        }
         astAppendChild(traitList, trait);
     } while (match(parser, TOKEN_COMMA));
 

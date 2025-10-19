@@ -522,6 +522,15 @@ static void printType(ObjType* type) {
         }
         printf(")");
     }
+    else if (IS_GENERIC_TYPE(type)) {
+        printf("%s<", type->name->chars);
+        for (int i = 0; i < type->parameters.count; i++) {
+            if (i > 0) printf(", ");
+            printf("%s", AS_TYPE(type->parameters.values[i])->name->chars);
+        }
+        printf(">");
+        return;
+    }
     else if (IS_VOID_TYPE(type)) printf("void");
     else printf("dynamic");
     printf(">");
