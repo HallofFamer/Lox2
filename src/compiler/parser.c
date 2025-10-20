@@ -852,7 +852,11 @@ static Ast* methods(Parser* parser, Token* name) {
 
 static Ast* superclass_(Parser* parser) {
     if (match(parser, TOKEN_EXTENDS)) {
-        return type_(parser, false, false);
+        Ast* _superclass = type_(parser, false, false);
+        if (_superclass->attribute.isFunction) {
+            parseErrorAtPrevious(parser, "Cannot use function type as superclass.");
+        }
+        return _superclass;
     }
     return emptyAst(AST_EXPR_VARIABLE, parser->rootClass);
 }

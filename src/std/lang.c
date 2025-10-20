@@ -1896,6 +1896,12 @@ LOX_METHOD(Type, isBehavior) {
     RETURN_BOOL(self->category == TYPE_CATEGORY_CLASS || self->category == TYPE_CATEGORY_METACLASS || self->category == TYPE_CATEGORY_TRAIT);
 }
 
+LOX_METHOD(Type, isCallable) {
+    ASSERT_ARG_COUNT("Type::isCallable()", 0);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_FUNCTION);
+}
+
 LOX_METHOD(Type, isClass) {
     ASSERT_ARG_COUNT("Type::isClass()", 0);
     ObjType* self = AS_TYPE(receiver);
@@ -1906,12 +1912,6 @@ LOX_METHOD(Type, isFormal) {
     ASSERT_ARG_COUNT("Type::isFormal()", 0);
     ObjType* self = AS_TYPE(receiver);
     RETURN_BOOL(self->category == TYPE_CATEGORY_FORMAL);
-}
-
-LOX_METHOD(Type, isFunction) {
-    ASSERT_ARG_COUNT("Type::isFunction()", 0);
-    ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_FUNCTION);
 }
 
 LOX_METHOD(Type, isGeneric) {
@@ -2219,9 +2219,9 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, getMethod, 1, RETURN_TYPE(Method), PARAM_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, hasMethod, 1, RETURN_TYPE(Bool), PARAM_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, isBehavior, 0, RETURN_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isCallable, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isClass, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isFormal, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(vm->typeClass, Type, isFunction, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isGeneric, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isMetaclass, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isNative, 0, RETURN_TYPE(Bool));
