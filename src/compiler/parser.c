@@ -1415,6 +1415,32 @@ static bool matchHigherOrderFunDeclaration(Parser* parser, bool* isAsync, bool* 
     return resetIndex(parser, index, current, true);
 }
 
+static bool matchGenericFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
+    int index = parser->index;
+    Token current = parser->current;
+    advance(parser);
+
+    while (!check(parser, TOKEN_GREATER) && !check(parser, TOKEN_EOF)) {
+        advance(parser);
+    }
+
+    if (check(parser, TOKEN_EOF)) {
+        return resetIndex(parser, index, current, false);
+    }
+    advance(parser);
+
+    if (currentTokenType(parser) == TOKEN_FUN) {
+        return resetIndex(parser, index, current, true);
+    }
+    else if (currentTokenType(parser) == TOKEN_LEFT_PAREN) {
+        return resetIndex(parser, index, current, false);
+    }
+    else {
+        *hasReturnType = true;
+        return resetIndex(parser, index, current, true);
+    }
+}
+
 static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
     if (check(parser, TOKEN_ASYNC)) {
         advance(parser);
@@ -1440,6 +1466,11 @@ static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnTy
         *isAsync = false;
         *hasReturnType = true;
         return true;
+    }
+    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) {
+        *isAsync = false;
+        *hasReturnType = true;
+        return matchGenericFunDeclaration(parser, isAsync, hasReturnType);
     }
     else return false;
 }

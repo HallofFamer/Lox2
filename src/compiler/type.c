@@ -386,6 +386,9 @@ static void typeTableOutputCategory(TypeCategory category) {
         case TYPE_CATEGORY_METHOD:
             printf("method");
             break;
+        case TYPE_CATEGORY_FORMAL:
+            printf("formal");
+            break;
         case TYPE_CATEGORY_GENERIC:
             printf("generic");
             break;
@@ -541,6 +544,7 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
         GenericTypeInfo* genericType2 = AS_GENERIC_TYPE(type2);
         if (genericType->parameters->count != genericType2->parameters->count) return false;
+
         for (int i = 0; i < genericType->parameters->count; i++) {
             if (!isEqualType(genericType->parameters->elements[i], genericType2->parameters->elements[i])) return false;
         }
