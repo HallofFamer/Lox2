@@ -199,6 +199,11 @@ void freeTypeInfo(TypeInfo* type) {
         if (callableType->paramTypes != NULL) TypeInfoArrayFree(callableType->paramTypes);
         free(callableType);
     }
+    else if (IS_GENERIC_TYPE(type)) {
+        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
+        if (genericType->parameters != NULL) TypeInfoArrayFree(genericType->parameters);
+        free(genericType);
+    }
     else {
         free(type);
     }

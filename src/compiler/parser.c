@@ -1419,26 +1419,17 @@ static bool matchGenericFunDeclaration(Parser* parser, bool* isAsync, bool* hasR
     int index = parser->index;
     Token current = parser->current;
     advance(parser);
-
-    while (!check(parser, TOKEN_GREATER) && !check(parser, TOKEN_EOF)) {
-        advance(parser);
-    }
-
-    if (check(parser, TOKEN_EOF)) {
-        return resetIndex(parser, index, current, false);
-    }
     advance(parser);
 
-    if (currentTokenType(parser) == TOKEN_FUN) {
-        return resetIndex(parser, index, current, true);
-    }
-    else if (currentTokenType(parser) == TOKEN_LEFT_PAREN) {
+    if (currentTokenType(parser) != TOKEN_IDENTIFIER && currentTokenType(parser) != TOKEN_VOID) {
         return resetIndex(parser, index, current, false);
     }
-    else {
-        *hasReturnType = true;
-        return resetIndex(parser, index, current, true);
+    else if (nextTokenType(parser) != TOKEN_CLASS && nextTokenType(parser) != TOKEN_FUN && nextTokenType(parser) != TOKEN_GREATER && nextTokenType(parser) != TOKEN_LESS) {
+        return resetIndex(parser, index, current, false);
     }
+
+    *hasReturnType = true;
+    return resetIndex(parser, index, current, true);
 }
 
 static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
