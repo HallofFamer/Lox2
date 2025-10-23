@@ -567,6 +567,10 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (memcmp(type2->shortName->chars, "Object", 3) == 0) return true;
     if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (strcmp(type2->shortName->chars, "Function") == 0 || strcmp(type2->shortName->chars, "TCallable") == 0)) return true;
     if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false; 
+    if (IS_GENERIC_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) {
+        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
+        return isSubtypeOfType(genericType->rawType, type2);
+    }
    
     BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type);
     BehaviorTypeInfo* supertype = AS_BEHAVIOR_TYPE(type2);
