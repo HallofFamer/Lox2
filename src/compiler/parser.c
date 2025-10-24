@@ -780,6 +780,10 @@ static Ast* fields(Parser* parser, Token* name) {
             hasFieldType = true;
             fieldType = metaclassType(parser);
         }
+        else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) {
+            hasFieldType = true;
+            fieldType = genericType(parser);
+        }
 
         Token fieldName = identifierToken(parser, "Expect field name.");
         Ast* initializer = NULL;

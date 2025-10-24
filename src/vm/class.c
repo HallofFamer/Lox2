@@ -273,6 +273,9 @@ ObjClass* getClassFromTypeInfo(VM* vm, TypeInfo* type) {
     else if (IS_CALLABLE_TYPE(type)) {
         return getNativeClass(vm, "clox.std.lang.Function");
     }
+    else if (IS_GENERIC_TYPE(type)) {
+        return getClassFromTypeInfo(vm, AS_GENERIC_TYPE(type)->rawType);
+    }
     else return NULL;
 }
 
