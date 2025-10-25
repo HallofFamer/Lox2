@@ -107,7 +107,9 @@ void initClosure(VM* vm, ObjClosure* closure, ObjFunction* function) {
 
 ObjClosure* newClosure(VM* vm, ObjFunction* function) {
     ObjClosure* closure = ALLOCATE_CLOSURE(vm->functionClass, function->obj.generation);
+    push(vm, OBJ_VAL(closure));
     initClosure(vm, closure, function);
+    pop(vm);
     return closure;
 }
 
