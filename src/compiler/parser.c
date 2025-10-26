@@ -399,6 +399,38 @@ static Ast* binary(Parser* parser, Token token, Ast* left, bool canAssign) {
     return newAst(AST_EXPR_BINARY, token, 2, left, right);
 }
 
+static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
+    if(left->token.type != TOKEN_IDENTIFIER) return binary(parser, token, left, canAssign);
+    int index = parser->index;
+    Token current = parser->current;
+    int genericDepth = 1;
+
+    do {
+        advance(parser);
+        if (currentTokenType(parser) != TOKEN_IDENTIFIER && currentTokenType(parser) != TOKEN_VOID) {
+            resetIndex(parser, index, current, false);
+            break;
+        }
+        else if (nextTokenType(parser) == TOKEN_LESS) {
+            genericDepth++;
+            continue;
+        }
+        else if (nextTokenType(parser) == TOKEN_GREATER) {
+            genericDepth--;
+            if (genericDepth == 0) {
+                resetIndex(parser, index, current, false);
+                return type_(parser, false, false);
+            }
+        }
+        else if (nextTokenType(parser) != TOKEN_CLASS && nextTokenType(parser) != TOKEN_FUN && nextTokenType(parser) != TOKEN_GREATER && nextTokenType(parser) != TOKEN_LESS) {
+            resetIndex(parser, index, current, false);
+            break;
+        }
+    } while (match(parser, TOKEN_COMMA));
+
+    return binary(parser, token, left, canAssign);
+}
+
 static Ast* call(Parser* parser, Token token, Ast* left, bool canAssign) { 
     Ast* right = argumentList(parser);
     return newAst(AST_EXPR_CALL, token, 2, left, right);
@@ -992,7 +1024,7 @@ ParseRule parseRules[] = {
     [TOKEN_EQUAL_EQUAL]    = {NULL,          binary,      PREC_EQUALITY,    false},
     [TOKEN_GREATER]        = {NULL,          binary,      PREC_COMPARISON,  false},
     [TOKEN_GREATER_EQUAL]  = {NULL,          binary,      PREC_COMPARISON,  false},
-    [TOKEN_LESS]           = {NULL,          binary,      PREC_COMPARISON,  false},
+    [TOKEN_LESS]           = {NULL,          lessThan,    PREC_COMPARISON,  false},
     [TOKEN_LESS_EQUAL]     = {NULL,          binary,      PREC_COMPARISON,  false},
     [TOKEN_DOT]            = {NULL,          dot,         PREC_CALL,        false},
     [TOKEN_DOT_DOT]        = {NULL,          binary,      PREC_CALL,        false},

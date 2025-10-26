@@ -92,7 +92,6 @@ ObjClass* newClass(VM* vm, ObjString* name, ObjCategory classType) {
 }
 
 void initClosure(VM* vm, ObjClosure* closure, ObjFunction* function) {
-    push(vm, OBJ_VAL(closure));
     ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*, function->upvalueCount, closure->obj.generation);
     for (int i = 0; i < function->upvalueCount; i++) {
         upvalues[i] = NULL;
@@ -102,7 +101,6 @@ void initClosure(VM* vm, ObjClosure* closure, ObjFunction* function) {
     closure->module = vm->currentModule;
     closure->upvalues = upvalues;
     closure->upvalueCount = function->upvalueCount;
-    pop(vm);
 }
 
 ObjClosure* newClosure(VM* vm, ObjFunction* function) {
