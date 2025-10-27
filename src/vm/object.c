@@ -346,7 +346,7 @@ ObjTimer* newTimer(VM* vm, ObjClosure* closure, int delay, int interval) {
     return NULL;
 }
 
-static Value createTypeValue(VM* vm, TypeInfo* type) {
+static Value createTypeObjFromTypeInfo(VM* vm, TypeInfo* type) {
     if (type == NULL) return NIL_VAL;
     ObjString* name = type->shortName;
     if (IS_ALIAS_TYPE(type)) type = AS_ALIAS_TYPE(type)->targetType;
@@ -364,17 +364,17 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
 
     if (targetType != NULL && IS_CALLABLE_TYPE(targetType)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(targetType);
-        valueArrayWrite(vm, &type->parameters, createTypeValue(vm, callableType->returnType));
+        valueArrayWrite(vm, &type->parameters, createTypeObjFromTypeInfo(vm, callableType->returnType));
         for (int i = 0; i < callableType->paramTypes->count; i++) {
             TypeInfo* paramType = callableType->paramTypes->elements[i];
-            valueArrayWrite(vm, &type->parameters, createTypeValue(vm, paramType));
+            valueArrayWrite(vm, &type->parameters, createTypeObjFromTypeInfo(vm, paramType));
         }
     }
     else if (targetType != NULL && IS_GENERIC_TYPE(targetType)) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(targetType);
         for (int i = 0; i < genericType->parameters->count; i++) {
             TypeInfo* paramType = genericType->parameters->elements[i];
-            valueArrayWrite(vm, &type->parameters, createTypeValue(vm, paramType));
+            valueArrayWrite(vm, &type->parameters, createTypeObjFromTypeInfo(vm, paramType));
         }
     }
 

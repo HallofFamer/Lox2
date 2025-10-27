@@ -1129,7 +1129,7 @@ static Ast* block(Parser* parser) {
 static Ast* awaitStatement(Parser* parser) {
     Token token = previousToken(parser);
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after awaiting promise.");
+    consumerTerminator(parser, "Expect semicolon or new line after awaiting statement.");
     return newAst(AST_STMT_AWAIT, token, 1, expr);
 }
 
@@ -1148,7 +1148,7 @@ static Ast* continueStatement(Parser* parser) {
 static Ast* expressionStatement(Parser* parser) {
     Token token = previousToken(parser);
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after expression.");
+    consumerTerminator(parser, "Expect semicolon or new line after expression statement.");
     return newAst(AST_STMT_EXPRESSION, token, 1, expr);
 }
 
@@ -1205,7 +1205,7 @@ static Ast* ifStatement(Parser* parser) {
 static Ast* requireStatement(Parser* parser) {
     Token token = previousToken(parser);
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after required file path.");
+    consumerTerminator(parser, "Expect semicolon or new line after required statement.");
     return newAst(AST_STMT_REQUIRE, token, 1, expr);
 }
 
@@ -1216,7 +1216,7 @@ static Ast* returnStatement(Parser* parser) {
     }
     else {
         Ast* expr = expression(parser);
-        consumerTerminator(parser, "Expect semicolon or new line after return value.");
+        consumerTerminator(parser, "Expect semicolon or new line after return statement.");
         return newAst(AST_STMT_RETURN, token, 1, expr);
     }
 }
@@ -1266,7 +1266,7 @@ static Ast* switchStatement(Parser* parser) {
 static Ast* throwStatement(Parser* parser) {
     Token token = previousToken(parser);
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after thrown exception.");
+    consumerTerminator(parser, "Expect semicolon or new line after throw statement.");
     return newAst(AST_STMT_THROW, token, 1, expr);
 }
 
@@ -1339,7 +1339,7 @@ static Ast* yieldStatement(Parser* parser) {
     }
 
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after yield value.");
+    consumerTerminator(parser, "Expect semicolon or new line after yield statement.");
     Ast* ast = newAst(AST_STMT_YIELD, token, 1, expr);
     ast->attribute.isYieldFrom = isYieldFrom;
     return ast;
