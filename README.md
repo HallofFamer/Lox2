@@ -71,7 +71,7 @@ https://github.com/munificent/craftinginterpreters
 ## Documentation
 [Lox2's documentation](https://mysidia-inc.gitbook.io/lox2) can be found on gitbook, which explores the features in Lox2 as well as some concrete example Lox2 programs. It is still a work in progress as the standard library reference and VM internals sections are still under construction. 
 
-At this moment only the web version is available, though in Lox2 v2.1.0 onwards, Lox2 may have PDF documentation to download for interested developers. 
+At this moment only the web version is available, though in Lox2 v2.2.0 onwards, Lox2 may have PDF documentation to download for interested developers. 
 
 
 ## Roadmap
@@ -136,7 +136,7 @@ println("Content: ${response.content}")
 
 #### Windows(with git, cmake and vcpkg, need to replace [$VCPKG_PATH] with installation path of vcpkg)
 ```
-git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.4 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 cmake -DCMAKE_TOOLCHAIN_FILE:STRING="[$VCPKG_PATH]/scripts/buildsystems/vcpkg.cmake" -S . -B ./build
 cmake --build ./build --config Release
@@ -145,7 +145,7 @@ cmake --build ./build --config Release
 
 #### Linux(with git, cmake, curl and libuv, need to install one of the libcurl4-dev and libuv1.dev packages)
 ```
-git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.4 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 mkdir build
 cmake -S . -B ./build
@@ -155,13 +155,13 @@ cmake --build ./build --config Release
 
 #### Docker(linux, need to replace [$LinuxDockerfile] by actual docker file name, ie. UbuntuDockerfile)
 ```
-git clone -b v2.0.3 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.0.4 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 docker build -t lox2:linux -f Docker/[$LinuxDockerfile] .
-docker run -w /Lox2-2.0.3/Lox2 -i -t lox2:linux
+docker run -w /Lox2-2.0.4/Lox2 -i -t lox2:linux
 ```
 
-Note: It is recommended to clone from the latest stable release branch("v2.0.3" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
+Note: It is recommended to clone from the latest stable release branch("v2.0.4" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
 
 
 ## Credits & Special Thanks

@@ -39,7 +39,7 @@ LOX_METHOD(Domain, getIPAddresses) {
 }
 
 LOX_METHOD(Domain, getIPAddressesAsync) {
-    ASSERT_ARG_COUNT("Domain::getIPAddressesAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("Domain::getIPAddressesAsync()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjPromise* promise = dnsGetDomainInfoAsync(vm, self, dnsOnGetAddrInfo);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.DomainHostException, "Failed to get IP Addresses from Domain.");
@@ -100,8 +100,8 @@ LOX_METHOD(HTTPClient, delete) {
 }
 
 LOX_METHOD(HTTPClient, deleteAsync) {
-    ASSERT_ARG_COUNT("HTTPClient::deleteAsync(url)", 1);
-    ASSERT_ARG_INSTANCE_OF_ANY("HTTPClient::deleteAsync(url)", 0, clox.std.lang.String, clox.std.net.URL);
+    ASSERT_ARG_COUNT_ASYNC("HTTPClient::deleteAsync(url)", 1);
+    ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::deleteAsync(url)", 0, clox.std.lang.String, clox.std.net.URL);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
 
@@ -132,9 +132,9 @@ LOX_METHOD(HTTPClient, download) {
 }
 
 LOX_METHOD(HTTPClient, downloadAsync) {
-    ASSERT_ARG_COUNT("HTTPClient::downloadAsync(src, dest)", 2);
-    ASSERT_ARG_INSTANCE_OF_ANY("HTTPClient::downloadAsync(src, dest)", 0, clox.std.lang.String, clox.std.net.URL);
-    ASSERT_ARG_TYPE("HttpClient::downloadAsync(src, dest)", 1, String);
+    ASSERT_ARG_COUNT_ASYNC("HTTPClient::downloadAsync(src, dest)", 2);
+    ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::downloadAsync(src, dest)", 0, clox.std.lang.String, clox.std.net.URL);
+    ASSERT_ARG_TYPE_ASYNC("HttpClient::downloadAsync(src, dest)", 1, String);
 
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* src = httpRawURL(vm, args[0]);
@@ -167,8 +167,8 @@ LOX_METHOD(HTTPClient, get) {
 }
 
 LOX_METHOD(HTTPClient, getAsync) {
-    ASSERT_ARG_COUNT("HTTPClient::getAsync(url)", 1);
-    ASSERT_ARG_INSTANCE_OF_ANY("HTTPClient::getAsync(url)", 0, clox.std.lang.String, clox.std.net.URL);
+    ASSERT_ARG_COUNT_ASYNC("HTTPClient::getAsync(url)", 1);
+    ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::getAsync(url)", 0, clox.std.lang.String, clox.std.net.URL);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
 
@@ -199,8 +199,8 @@ LOX_METHOD(HTTPClient, head) {
 }
 
 LOX_METHOD(HTTPClient, headAsync) {
-    ASSERT_ARG_COUNT("HTTPClient::headAsync(url)", 1);
-    ASSERT_ARG_INSTANCE_OF_ANY("HTTPClient::headAsync(url)", 0, clox.std.lang.String, clox.std.net.URL);
+    ASSERT_ARG_COUNT_ASYNC("HTTPClient::headAsync(url)", 1);
+    ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::headAsync(url)", 0, clox.std.lang.String, clox.std.net.URL);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
 
@@ -232,8 +232,8 @@ LOX_METHOD(HTTPClient, options) {
 }
 
 LOX_METHOD(HTTPClient, optionsAsync) {
-    ASSERT_ARG_COUNT("HTTPClient::optionsAsync(url)", 1);
-    ASSERT_ARG_INSTANCE_OF_ANY("HTTPClient::optionsAsync(url)", 0, clox.std.lang.String, clox.std.net.URL);
+    ASSERT_ARG_COUNT_ASYNC("HTTPClient::optionsAsync(url)", 1);
+    ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::optionsAsync(url)", 0, clox.std.lang.String, clox.std.net.URL);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
 
@@ -266,9 +266,9 @@ LOX_METHOD(HTTPClient, patch) {
 }
 
 LOX_METHOD(HTTPClient, patchAsync) {
-    ASSERT_ARG_COUNT("HTTPClient::patchAsync(url, data)", 2);
-    ASSERT_ARG_INSTANCE_OF_ANY("HTTPClient::patchAsync(url, data)", 0, clox.std.lang.String, clox.std.net.URL);
-    ASSERT_ARG_TYPE("HTTPClient::patchAsync(url, data)", 1, Dictionary);
+    ASSERT_ARG_COUNT_ASYNC("HTTPClient::patchAsync(url, data)", 2);
+    ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::patchAsync(url, data)", 0, clox.std.lang.String, clox.std.net.URL);
+    ASSERT_ARG_TYPE_ASYNC("HTTPClient::patchAsync(url, data)", 1, Dictionary);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
     ObjDictionary* data = AS_DICTIONARY(args[1]);
@@ -302,9 +302,9 @@ LOX_METHOD(HTTPClient, post) {
 }
 
 LOX_METHOD(HTTPClient, postAsync) {
-    ASSERT_ARG_COUNT("HTTPClient::postAsync(url, data)", 2);
-    ASSERT_ARG_INSTANCE_OF_ANY("HTTPClient::postAsync(url, data)", 0, clox.std.lang.String, clox.std.net.URL);
-    ASSERT_ARG_TYPE("HTTPClient::postAsync(url, data)", 1, Dictionary);
+    ASSERT_ARG_COUNT_ASYNC("HTTPClient::postAsync(url, data)", 2);
+    ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::postAsync(url, data)", 0, clox.std.lang.String, clox.std.net.URL);
+    ASSERT_ARG_TYPE_ASYNC("HTTPClient::postAsync(url, data)", 1, Dictionary);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
     ObjDictionary* data = AS_DICTIONARY(args[1]);
@@ -338,9 +338,9 @@ LOX_METHOD(HTTPClient, put) {
 }
 
 LOX_METHOD(HTTPClient, putAsync) {
-    ASSERT_ARG_COUNT("HTTPClient::putAsync(url, data)", 2);
-    ASSERT_ARG_INSTANCE_OF_ANY("HTTPClient::putAsync(url, data)", 0, clox.std.lang.String, clox.std.net.URL);
-    ASSERT_ARG_TYPE("HTTPClient::putAsync(url, data)", 1, Dictionary);
+    ASSERT_ARG_COUNT_ASYNC("HTTPClient::putAsync(url, data)", 2);
+    ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::putAsync(url, data)", 0, clox.std.lang.String, clox.std.net.URL);
+    ASSERT_ARG_TYPE_ASYNC("HTTPClient::putAsync(url, data)", 1, Dictionary);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
     ObjDictionary* data = AS_DICTIONARY(args[1]);
@@ -379,8 +379,8 @@ LOX_METHOD(HTTPClient, send) {
 }
 
 LOX_METHOD(HTTPClient, sendAsync) {
-    ASSERT_ARG_COUNT("HTTPClient::sendAsync(request)", 1);
-    ASSERT_ARG_INSTANCE_OF("HTTPClient::send(request)", 0, clox.std.net.HTTPRequest);
+    ASSERT_ARG_COUNT_ASYNC("HTTPClient::sendAsync(request)", 1);
+    ASSERT_ARG_INSTANCE_OF_ASYNC("HTTPClient::send(request)", 0, clox.std.net.HTTPRequest);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjInstance* request = AS_INSTANCE(args[0]);
 
@@ -472,7 +472,7 @@ LOX_METHOD(IPAddress, getDomain) {
 }
 
 LOX_METHOD(IPAddress, getDomainAsync) {
-    ASSERT_ARG_COUNT("IPAddress::getDomainAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("IPAddress::getDomainAsync()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjPromise* promise = dnsGetDomainFromIPAddressAsync(vm, self, dnsOnGetNameInfo);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.net.IPAddressException, "Failed to get domain name from IP Address.");

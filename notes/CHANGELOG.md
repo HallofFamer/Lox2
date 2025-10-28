@@ -1,11 +1,16 @@
 # Change Log
 
-### Lox2 v2.0.3(current version)
+### Lox2 v2.0.4(current version)
+- Add name resolution table in order to be able to typecheck invoke expressions like namespace.className(..args)
+- Modify typechecker to check if provided object is an instance of `TEnumerable` or `String` in for statement.
+- Fix async methods in package `clox.std.io` and `clox.std.net` to use the asynchronous version of assertion macros.
+
+### Lox2 v2.0.3(last version)
 - Add instance field `length` to class `Range` in package `clox.std.collection`, it now behaves correctly like a collection subclass.
 - Fix potential memory leak issue that AST is not properly freed when parser, resolver or typechecker fails with error.
 - Fix incorrect param types for initializer methods of `Behavior`, `Namespace` and `Trait`, as well as return types for methods in Comparable trait and Number class.
 
-### Lox2 v2.0.2(last version)
+### Lox2 v2.0.2
 - Fix buffer.h to include header for <stdlib.h>, which used to prevent Lox2 from compiling on certain platforms.
 - Fix CMakeLists.txt to find package libuv correctly on windows with vcpkg installation. 
 - Modify docker files to fetch latest stable version of Lox2 instead of from main branch directly.
