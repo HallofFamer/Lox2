@@ -117,6 +117,7 @@ void initResolver(VM* vm, Resolver* resolver, bool debugSymtab) {
     resolver->currentSymtab = NULL;
     resolver->globalSymtab = NULL;
     resolver->rootSymtab = NULL;
+    resolver->nametab = newNameTable();
 
     resolver->rootClass = syntheticToken("Object");
     resolver->thisVar = syntheticToken("this");
@@ -150,6 +151,7 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
 
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token) {
     ObjString* shortName = createSymbol(resolver, token);
+    ObjString* originalName = shortName;
     TypeInfo* type = typeTableGet(resolver->vm->typetab, shortName);
     ObjString* fullName = NULL;
 
@@ -158,8 +160,13 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token) {
         type = typeTableGet(resolver->vm->typetab, fullName);
 
         if (type == NULL) {
-            fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
-            type = typeTableGet(resolver->vm->typetab, fullName);
+            fullName = nameTableGet(resolver->nametab, originalName);
+            if (fullName != NULL) type = typeTableGet(resolver->vm->typetab, fullName);
+
+            if (type == NULL) {
+                fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
+                type = typeTableGet(resolver->vm->typetab, fullName);
+            }
         }
     }
     return type;
@@ -1012,11 +1019,13 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
         Ast* alias = astGetChild(ast, 1);
         alias->symtab = _namespace->symtab;
         insertSymbol(resolver, alias->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        nameTableSet(resolver->nametab, createSymbol(resolver, alias->token), fullName);
     }
     else {
         Ast* shortName = astLastChild(_namespace);
         shortName->symtab = _namespace->symtab;
         insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        nameTableSet(resolver->nametab, createSymbol(resolver, shortName->token), fullName);
     }
 }
 
@@ -1228,7 +1237,7 @@ void resolveChild(Resolver* resolver, Ast* ast, int index) {
     }
 }
 
-void resolve(Resolver* resolver, Ast* ast) {
+NameTable* resolve(Resolver* resolver, Ast* ast) {
     FunctionResolver functionResolver;
     initFunctionResolver(resolver, &functionResolver, syntheticToken("script"), 0);
     int symtabIndex = nextSymbolTableIndex(resolver);
@@ -1245,4 +1254,5 @@ void resolve(Resolver* resolver, Ast* ast) {
         symbolTableOutput(resolver->rootSymtab);
         symbolTableOutput(resolver->vm->symtab);
     }
+    return resolver->nametab;
 }

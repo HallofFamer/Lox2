@@ -1372,9 +1372,10 @@ ObjFunction* compile(VM* vm, const char* source) {
 
     Resolver resolver;
     initResolver(vm, &resolver, vm->config.debugSymtab);
-    resolve(&resolver, ast);
+    NameTable* nametab = resolve(&resolver, ast);
     if (resolver.hadError) {
         freeAst(ast, true);
+        freeNameTable(nametab);
         return NULL;
     }
 
@@ -1383,6 +1384,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     typeCheck(&typeChecker, ast);
     if (typeChecker.hadError) {
         freeAst(ast, true);
+        freeNameTable(nametab);
         return NULL;
     }
 
@@ -1392,6 +1394,7 @@ ObjFunction* compile(VM* vm, const char* source) {
     ObjFunction* function = endCompiler(&compiler);
 
     freeAst(ast, true);
+    freeNameTable(nametab);
     if (compiler.hadError) return NULL;
     return function;
 }
