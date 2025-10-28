@@ -15,6 +15,11 @@ class Box<T> {
     void setContent(T content) {
         this.content = content
     }
+
+    String toString() {
+        //return "Box<${T}>(${this.content})"
+        return "Box(${this.content})"
+    }
 }
 
 trait TBox<T> { 
@@ -39,6 +44,16 @@ class KeyedBox<S, T> extends Box<T> {
     }
 }
 
+Box<String> createBox() {
+    return Box<String>("Hello, World!")
+}
+
+println("Creating generic class Box: ")
 println(Box)
+
+val box = Box<Int>(42)
+println("Instantiating from generic class Box: ${box}")
+
+println("Creating generic trait TBox: ")
 println(TBox)
 println(KeyedBox)
