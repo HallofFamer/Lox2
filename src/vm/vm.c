@@ -165,7 +165,7 @@ void initVM(VM* vm) {
     vm->numSymtabs = 0;
     vm->symtab = newSymbolTable(vm->numSymtabs++, NULL, SYMBOL_SCOPE_GLOBAL, -1);
     vm->typetab = newTypeTable(0);
-    vm->tempTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+    vm->tempTypes = ALLOCATE_STRUCT(TypeInfoArray);
     TypeInfoArrayInit(vm->tempTypes);
 
     vm->initString = NULL;
@@ -332,6 +332,7 @@ static void createGeneratorFrame(VM* vm, ObjClosure* closure, int argCount) {
         .ip = closure->function->chunk.code,
         .slots = vm->stackTop - argCount - 1
     };
+
     ObjGenerator* generator = newGenerator(vm, newFrame(vm, &frame), vm->runningGenerator);
     vm->stackTop -= (size_t)argCount + 1;
     push(vm, OBJ_VAL(generator));

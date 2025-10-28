@@ -399,38 +399,6 @@ static Ast* binary(Parser* parser, Token token, Ast* left, bool canAssign) {
     return newAst(AST_EXPR_BINARY, token, 2, left, right);
 }
 
-static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
-    if(left->token.type != TOKEN_IDENTIFIER) return binary(parser, token, left, canAssign);
-    int index = parser->index;
-    Token current = parser->current;
-    int genericDepth = 1;
-
-    do {
-        advance(parser);
-        if (currentTokenType(parser) != TOKEN_IDENTIFIER && currentTokenType(parser) != TOKEN_VOID) {
-            resetIndex(parser, index, current, false);
-            break;
-        }
-        else if (nextTokenType(parser) == TOKEN_LESS) {
-            genericDepth++;
-            continue;
-        }
-        else if (nextTokenType(parser) == TOKEN_GREATER) {
-            genericDepth--;
-            if (genericDepth == 0) {
-                resetIndex(parser, index, current, false);
-                return type_(parser, false, false);
-            }
-        }
-        else if (nextTokenType(parser) != TOKEN_CLASS && nextTokenType(parser) != TOKEN_FUN && nextTokenType(parser) != TOKEN_GREATER && nextTokenType(parser) != TOKEN_LESS) {
-            resetIndex(parser, index, current, false);
-            break;
-        }
-    } while (match(parser, TOKEN_COMMA));
-
-    return binary(parser, token, left, canAssign);
-}
-
 static Ast* call(Parser* parser, Token token, Ast* left, bool canAssign) { 
     Ast* right = argumentList(parser);
     return newAst(AST_EXPR_CALL, token, 2, left, right);
@@ -692,6 +660,40 @@ static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
         parseErrorAtCurrent(parser, "Invalid type specified.");
         return NULL;
     }
+}
+
+static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
+    if (left->token.type != TOKEN_IDENTIFIER) return binary(parser, token, left, canAssign);
+    int index = parser->index;
+    Token current = parser->current;
+    Token previous2 = parser->tokens->elements[index - 2];
+    int genericDepth = 1;
+
+    do {
+        advance(parser);
+        if (previousTokenType(parser) != TOKEN_IDENTIFIER && previousTokenType(parser) != TOKEN_VOID) {
+            resetIndex(parser, index, current, false);
+            break;
+        }
+        else if (currentTokenType(parser) == TOKEN_LESS) {
+            genericDepth++;
+            continue;
+        }
+        else if (currentTokenType(parser) == TOKEN_GREATER) {
+            genericDepth--;
+            if (genericDepth == 0) {
+                free(left);
+                resetIndex(parser, index - 2, previous2, true);
+                return genericType(parser);
+            }
+        }
+        else if (nextTokenType(parser) != TOKEN_CLASS && nextTokenType(parser) != TOKEN_FUN && nextTokenType(parser) != TOKEN_GREATER && nextTokenType(parser) != TOKEN_LESS) {
+            resetIndex(parser, index, current, false);
+            break;
+        }
+    } while (match(parser, TOKEN_COMMA));
+
+    return binary(parser, token, left, canAssign);
 }
 
 static Ast* variable(Parser* parser, Token token, bool canAssign) {

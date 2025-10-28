@@ -262,6 +262,12 @@ static void bindTraitTypes(Resolver* resolver, Token currentClass, Ast* ast) {
     if (!astHasChild(ast)) return;
     for (int i = 0; i < ast->children->count; i++) {
         Ast* trait = astGetChild(ast, i);
+        if (trait->attribute.isFunction) {
+            semanticError(resolver, "A trait cannot be a callable type.");
+        }
+        else if (trait->attribute.isClass) {
+            semanticError(resolver, "A trait cannot be metclass type.");
+        }
         bindTraitType(resolver, currentClass, trait->token);
     }
 }

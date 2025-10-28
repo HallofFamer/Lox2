@@ -5,7 +5,7 @@ program: declaration* EOF;
 declaration: classDecl | funDecl | namespaceDecl | traitDecl | varDecl | statement;
 classDecl: CLASS IDENTIFIER classBody;
 fieldDecl: CLASS? (VAL | VAR) type? IDENTIFIER (EQ expression)? TERMINATOR;
-funDecl: (FUN | IDENTIFIER | VOID) function;
+funDecl: (FUN | type | VOID) function;
 namespaceDecl: NAMESPACE IDENTIFIER (DOT IDENTIFIER)*;
 traitDecl: TRAIT IDENTIFIER traitBody;
 varDecl: (VAL | VAR) IDENTIFIER (EQ expression)? TERMINATOR;
@@ -40,7 +40,7 @@ unary: ((BANG | MINUS) unary) | call;
 call: primary (LPAREN arguments? RPAREN | LSQUARE expression QUESTION? RSQUARE | DOT IDENTIFIER)*;
 primary: 'nil' | 'true' | 'false' | INT | FLOAT | STRING | IDENTIFIER | (LPAREN expression RPAREN) | (LSQUARE arguments? RSQUARE) | (expression DOTDOT expression) | (CLASS classBody) | (FUN functionBody) | (SUPER DOT IDENTIFIER) | (TRAIT traitBody);
 
-classBody: (EXTENDS IDENTIFIER)? (WITH parameters)? LBRACE fieldDecl* function* RBRACE;
+classBody: (EXTENDS IDENTIFIER | genericType)? (WITH parameters)? LBRACE fieldDecl* function* RBRACE;
 function: ASYNC? CLASS? type? IDENTIFIER functionBody;
 functionBody: LPAREN parameters? RPAREN block;
 traitBody: (WITH parameters)? LBRACE CLASS? function* RBRACE;
