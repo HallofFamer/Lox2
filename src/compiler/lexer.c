@@ -333,27 +333,27 @@ Token scanToken(Lexer* lexer) {
     if (isDigit(c)) return number(lexer);
 
     switch (c) {
-        case '(': return makeToken(lexer, TOKEN_LEFT_PAREN);
-        case ')': return makeToken(lexer, TOKEN_RIGHT_PAREN);
-        case '[': return makeToken(lexer, TOKEN_LEFT_BRACKET);
-        case ']': return makeToken(lexer, TOKEN_RIGHT_BRACKET);
-        case '{': return makeToken(lexer, TOKEN_LEFT_BRACE);
+        case '(': return makeToken(lexer, TOKEN_SYMBOL_LEFT_PAREN);
+        case ')': return makeToken(lexer, TOKEN_SYMBOL_RIGHT_PAREN);
+        case '[': return makeToken(lexer, TOKEN_SYMBOL_LEFT_BRACKET);
+        case ']': return makeToken(lexer, TOKEN_SYMBOL_RIGHT_BRACKET);
+        case '{': return makeToken(lexer, TOKEN_SYMBOL_LEFT_BRACE);
         case '}':
             if (lexer->interpolationDepth > 0) {
                 lexer->interpolationDepth--;
                 return string(lexer);
             }
-            return makeToken(lexer, TOKEN_RIGHT_BRACE);
-        case ';': return makeToken(lexer, TOKEN_SEMICOLON);
-        case ':': return makeToken(lexer, TOKEN_COLON);
-        case ',': return makeToken(lexer, TOKEN_COMMA);
-        case '?': return makeToken(lexer, TOKEN_QUESTION);
-        case '-': return makeToken(lexer, TOKEN_MINUS);
-        case '%': return makeToken(lexer, TOKEN_MODULO);
-        case '|': return makeToken(lexer, TOKEN_PIPE);
-        case '+': return makeToken(lexer, TOKEN_PLUS);
-        case '/': return makeToken(lexer, TOKEN_SLASH);
-        case '*': return makeToken(lexer, TOKEN_STAR);
+            return makeToken(lexer, TOKEN_SYMBOL_RIGHT_BRACE);
+        case ';': return makeToken(lexer, TOKEN_SYMBOL_SEMICOLON);
+        case ':': return makeToken(lexer, TOKEN_SYMBOL_COLON);
+        case ',': return makeToken(lexer, TOKEN_SYMBOL_COMMA);
+        case '?': return makeToken(lexer, TOKEN_SYMBOL_QUESTION);
+        case '-': return makeToken(lexer, TOKEN_SYMBOL_MINUS);
+        case '%': return makeToken(lexer, TOKEN_SYMBOL_MODULO);
+        case '|': return makeToken(lexer, TOKEN_SYMBOL_PIPE);
+        case '+': return makeToken(lexer, TOKEN_SYMBOL_PLUS);
+        case '/': return makeToken(lexer, TOKEN_SYMBOL_SLASH);
+        case '*': return makeToken(lexer, TOKEN_SYMBOL_STAR);
         case '!': 
             return makeToken(lexer, match(lexer, '=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
         case '=': 

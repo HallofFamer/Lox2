@@ -289,7 +289,7 @@ static void inferAstTypeFromUnary(TypeChecker* typeChecker, Ast* ast, SymbolItem
         case TOKEN_BANG:
             defineAstType(typeChecker, ast, "Bool", item);
             break;
-        case TOKEN_MINUS:
+        case TOKEN_SYMBOL_MINUS:
             if (!isSubtypeOfType(child->type, typeChecker->numberType)) {
                 typeError(typeChecker, "Unary negate expects operand to be an instance of Number but gets %s.", child->type->shortName->chars);
             }
@@ -331,7 +331,7 @@ static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolIte
     if (left->type == NULL || right->type == NULL) return;
 
     switch (ast->token.type) {
-        case TOKEN_PLUS:
+        case TOKEN_SYMBOL_PLUS:
             if (isSubtypeOfType(left->type, typeChecker->stringType) && isSubtypeOfType(right->type, typeChecker->stringType)) {
                 defineAstType(typeChecker, ast, "String", item);
                 return;
@@ -345,9 +345,9 @@ static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolIte
                 return;
             }
             break;
-        case TOKEN_MINUS:
-        case TOKEN_STAR:
-        case TOKEN_MODULO:
+        case TOKEN_SYMBOL_MINUS:
+        case TOKEN_SYMBOL_STAR:
+        case TOKEN_SYMBOL_MODULO:
             if (isSubtypeOfType(left->type, typeChecker->intType) && isSubtypeOfType(right->type, typeChecker->intType)) {
                 defineAstType(typeChecker, ast, "Int", item);
                 return;
@@ -357,7 +357,7 @@ static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolIte
                 return;
             }
             break;
-        case TOKEN_SLASH:
+        case TOKEN_SYMBOL_SLASH:
             if (isSubtypeOfType(left->type, typeChecker->numberType) && isSubtypeOfType(right->type, typeChecker->numberType)) {
                 defineAstType(typeChecker, ast, "Number", item);
                 return;

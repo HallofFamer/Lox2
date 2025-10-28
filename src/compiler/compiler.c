@@ -668,11 +668,11 @@ static void compileBinary(Compiler* compiler, Ast* ast) {
         case TOKEN_GREATER_EQUAL:     emitBytes(compiler, OP_LESS, OP_NOT); break;
         case TOKEN_LESS:              emitByte(compiler, OP_LESS); break;
         case TOKEN_LESS_EQUAL:        emitBytes(compiler, OP_GREATER, OP_NOT); break;
-        case TOKEN_PLUS:              emitByte(compiler, OP_ADD); break;
-        case TOKEN_MINUS:             emitByte(compiler, OP_SUBTRACT); break;
-        case TOKEN_STAR:              emitByte(compiler, OP_MULTIPLY); break;
-        case TOKEN_SLASH:             emitByte(compiler, OP_DIVIDE); break;
-        case TOKEN_MODULO:            emitByte(compiler, OP_MODULO); break;
+        case TOKEN_SYMBOL_PLUS:              emitByte(compiler, OP_ADD); break;
+        case TOKEN_SYMBOL_MINUS:             emitByte(compiler, OP_SUBTRACT); break;
+        case TOKEN_SYMBOL_STAR:              emitByte(compiler, OP_MULTIPLY); break;
+        case TOKEN_SYMBOL_SLASH:             emitByte(compiler, OP_DIVIDE); break;
+        case TOKEN_SYMBOL_MODULO:            emitByte(compiler, OP_MODULO); break;
         case TOKEN_DOT_DOT:           emitByte(compiler, OP_RANGE); break;
         default: return;
     }
@@ -768,8 +768,8 @@ static void compileLiteral(Compiler* compiler, Ast* ast) {
 static void compileNil(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
     compileChild(compiler, ast, 1);
-    if (ast->token.type == TOKEN_QUESTION) emitByte(compiler, OP_NIL_COALESCING);
-    else if (ast->token.type == TOKEN_COLON) emitByte(compiler, OP_ELVIS);
+    if (ast->token.type == TOKEN_SYMBOL_QUESTION) emitByte(compiler, OP_NIL_COALESCING);
+    else if (ast->token.type == TOKEN_SYMBOL_COLON) emitByte(compiler, OP_ELVIS);
     else compileError(compiler, "Invalid nil handling operator specified.");
 }
 
@@ -851,7 +851,7 @@ static void compileUnary(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
     switch (ast->token.type) {
         case TOKEN_BANG: emitByte(compiler, OP_NOT); break;
-        case TOKEN_MINUS: emitByte(compiler, OP_NEGATE); break;
+        case TOKEN_SYMBOL_MINUS: emitByte(compiler, OP_NEGATE); break;
         default: return;
     }
 }
