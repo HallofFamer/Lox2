@@ -138,7 +138,6 @@ AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullNam
 char* createCallableTypeName(CallableTypeInfo* callableType);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
-void freeAliasTypes(TypeInfoArray* aliasTypes);
 
 TypeTable* newTypeTable(int id);
 void freeTypeTable(TypeTable* typeTable);

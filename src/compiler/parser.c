@@ -892,14 +892,7 @@ static Ast* methods(Parser* parser, Token* name) {
 
 static Ast* superclass_(Parser* parser) {
     if (match(parser, TOKEN_EXTENDS)) {
-        Ast* _superclass = type_(parser, false, false);
-        if (_superclass->attribute.isFunction) {
-            parseErrorAtPrevious(parser, "Cannot use function type as superclass.");
-        }
-        else if (_superclass->attribute.isClass) {
-            parseErrorAtPrevious(parser, "Cannot use metaclass type as superclass.");
-        }
-        return _superclass;
+        return type_(parser, false, false);
     }
     return emptyAst(AST_EXPR_VARIABLE, parser->rootClass);
 }
@@ -916,12 +909,6 @@ static Ast* traits(Parser* parser, Token* name) {
         }
 
         Ast* trait = type_(parser, false, false);
-        if (trait->attribute.isFunction) {
-            parseErrorAtPrevious(parser, "Cannot use function type as trait.");
-        }
-        else if (trait->attribute.isClass) {
-            parseErrorAtPrevious(parser, "Cannot use metaclass type as superclass.");
-        }
         astAppendChild(traitList, trait);
     } while (match(parser, TOKEN_COMMA));
 

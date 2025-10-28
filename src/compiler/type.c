@@ -217,14 +217,6 @@ void freeTempTypes(TypeInfoArray* typeArray) {
     free(typeArray);
 }
 
-void freeAliasTypes(TypeInfoArray* aliasTypes) {
-    for (int i = 0; i < aliasTypes->count; i++) {
-        TypeInfo* type = aliasTypes->elements[i];
-        if (type != NULL) freeTypeInfo(type);
-    }
-    free(aliasTypes);
-}
-
 TypeTable* newTypeTable(int id) {
     TypeTable* typetab = (TypeTable*)malloc(sizeof(TypeTable));
     if (typetab != NULL) {

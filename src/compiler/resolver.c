@@ -580,6 +580,12 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
         else if (tokensEqual(&name, &superclass->token)) {
             semanticError(resolver, "A class cannot inherit from itself.");
         }
+        else if (superclass->attribute.isFunction) {
+            semanticError(resolver, "A class cannot inherit from a callable type.");
+        }
+        else if (superclass->attribute.isClass) {
+            semanticError(resolver, "A class cannot inherit from a metclass type.");
+        }
     }
 
     beginScope(resolver, ast, (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS);

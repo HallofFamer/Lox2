@@ -1273,9 +1273,14 @@ static void compileClassDeclaration(Compiler* compiler, Ast* ast) {
 
 static void compileFieldDeclaration(Compiler* compiler, Ast* ast) {
     uint8_t index = identifierConstant(compiler, &ast->token);
-    if (ast->attribute.isTyped && astNumChild(ast) == 2) compileChild(compiler, ast, 1);
-    else if (!ast->attribute.isTyped && astNumChild(ast) == 1) compileChild(compiler, ast, 0);
+    if (ast->attribute.isTyped && astNumChild(ast) == 2) {
+        compileChild(compiler, ast, 1);
+    }
+    else if (!ast->attribute.isTyped && astNumChild(ast) == 1) {
+        compileChild(compiler, ast, 0);
+    }
     else emitByte(compiler, OP_NIL);
+
     emitByte(compiler, OP_FIELD);
     emitByte(compiler, index);
     emitByte(compiler, ast->attribute.isClass ? 1 : 0);
