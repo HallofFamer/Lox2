@@ -266,7 +266,7 @@ static void bindTraitTypes(Resolver* resolver, Token currentClass, Ast* ast) {
             semanticError(resolver, "A trait cannot be a callable type.");
         }
         else if (trait->attribute.isClass) {
-            semanticError(resolver, "A trait cannot be metclass type.");
+            semanticError(resolver, "A trait cannot be metaclass type.");
         }
         bindTraitType(resolver, currentClass, trait->token);
     }
@@ -590,7 +590,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
             semanticError(resolver, "A class cannot inherit from a callable type.");
         }
         else if (superclass->attribute.isClass) {
-            semanticError(resolver, "A class cannot inherit from a metclass type.");
+            semanticError(resolver, "A class cannot inherit from a metaclass type.");
         }
     }
 
