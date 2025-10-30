@@ -502,6 +502,11 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
     return callableType;
 }
 
+static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
+    // to be implemented
+    return NULL;
+}
+
 static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
     ObjString* alias = createSymbol(resolver, ast->token);
     Ast* typeDef = astGetChild(ast, 0);
@@ -823,6 +828,10 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         resolveChild(resolver, ast, 0);
         resolveChild(resolver, ast, 1);
         insertCallableType(resolver, ast, false, false, ast->attribute.isVariadic, ast->attribute.isVoid);
+    }
+    else if (ast->attribute.isGeneric) {
+        resolveChild(resolver, ast, 0);
+        insertGenericType(resolver, ast);
     }
     else ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
 }

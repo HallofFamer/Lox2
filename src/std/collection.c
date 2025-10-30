@@ -1519,14 +1519,22 @@ LOX_METHOD(List, getAt) {
     ASSERT_ARG_COUNT("List::getAt(index)", 1);
     ASSERT_ARG_TYPE("List::getAt(index)", 0, Int);
     int position = AS_INT(args[0]);
-    Value index = INT_VAL(0);
-    Value nextMethod = getObjMethod(vm, receiver, "next");
-    Value nextValueMethod = getObjMethod(vm, receiver, "nextValue");
 
-    while (index != NIL_VAL) {
-        Value element = callReentrantMethod(vm, receiver, nextValueMethod, index);
-        if (index == position) RETURN_VAL(element);
-        index = callReentrantMethod(vm, receiver, nextMethod, index);
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+    Value currentIndexMethod = getObjMethod(vm, iterator, "currentIndex");
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value index = callReentrantMethod(vm, iterator, currentIndexMethod);
+        if (index == position) {
+            Value element = callReentrantMethod(vm, iterator, currentValueMethod);
+            RETURN_VAL(element);
+        }
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
     RETURN_NIL;
 }
