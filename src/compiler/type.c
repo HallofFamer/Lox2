@@ -138,6 +138,13 @@ AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullNam
     return aliasType;
 }
 
+static char* createParamTypeName(TypeInfo* paramType) {
+    if (IS_CALLABLE_TYPE(paramType)) return createCallableTypeName(AS_CALLABLE_TYPE(paramType));
+    else if (IS_GENERIC_TYPE(paramType)) return createGenericTypeName(AS_GENERIC_TYPE(paramType));
+    else return paramType->shortName->chars;
+
+}
+
 char* createCallableTypeName(CallableTypeInfo* callableType) {
     char* callableName = bufferNewCString(UINT16_MAX);
     size_t length = 0;
@@ -168,7 +175,7 @@ char* createCallableTypeName(CallableTypeInfo* callableType) {
             callableName[length++] = ' ';
         }
         if (paramType != NULL) {
-            char* paramTypeName = IS_CALLABLE_TYPE(paramType) ? createCallableTypeName(AS_CALLABLE_TYPE(paramType)) : paramType->shortName->chars;
+            char* paramTypeName = createParamTypeName(paramType);
             size_t paramTypeLength = strlen(paramTypeName);
             memcpy(callableName + length, paramTypeName, paramTypeLength);
             length += paramTypeLength;
@@ -183,6 +190,48 @@ char* createCallableTypeName(CallableTypeInfo* callableType) {
     callableName[length++] = ')';
     callableName[length] = '\0';
     return callableName;
+}
+
+char* createGenericTypeName(GenericTypeInfo* genericType) {
+    char* genericName = bufferNewCString(UINT16_MAX);
+    size_t length = 0;
+
+    if (genericType->rawType != NULL) {
+        char* rawTypeName = genericType->rawType->shortName->chars;
+        size_t rawTypeLength = strlen(genericType->rawType->fullName->chars);
+        memcpy(genericName, rawTypeName, rawTypeLength);
+        length += rawTypeLength;
+    }
+    else {
+        memcpy(genericName, "dynamic", 7);
+        length += 7;
+    }
+
+    memcpy(genericName + length, "<", 1);
+    length += 1;
+
+    for (int i = 0; i < genericType->parameters->count; i++) {
+        TypeInfo* paramType = genericType->parameters->elements[i];
+        if (i > 0) {
+            genericName[length++] = ',';
+            genericName[length++] = ' ';
+        }
+        if (paramType != NULL) {
+            char* paramTypeName = createParamTypeName(paramType);
+            size_t paramTypeLength = strlen(paramTypeName);
+            memcpy(genericName + length, paramTypeName, paramTypeLength);
+            length += paramTypeLength;
+            if (IS_CALLABLE_TYPE(paramType)) free(paramTypeName);
+        }
+        else {
+            memcpy(genericName + length, "dynamic", 7);
+            length += 7;
+        }
+    }
+
+    genericName[length++] = '>';
+    genericName[length] = '\0';
+    return genericName;
 }
 
 void freeTypeInfo(TypeInfo* type) {
