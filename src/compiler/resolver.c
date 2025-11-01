@@ -503,8 +503,27 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
 }
 
 static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
-    // to be implemented
-    return NULL;
+    TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false);
+    if (IS_FORMAL_TYPE(rawType) || IS_VOID_TYPE(rawType)) {
+        semanticError(resolver, "Cannot use a type parameter or 'void' as a generic type.");
+        return NULL;
+    }
+    GenericTypeInfo* genericType = newGenericTypeInfo(-1, rawType->shortName, rawType->fullName, rawType);
+
+    if (genericType != NULL) {
+        Ast* typeParams = astGetChild(ast, 0);
+        for (int i = 0; i < typeParams->children->count; i++) {
+            Ast* typeParam = typeParams->children->elements[i];
+            TypeInfoArrayAdd(genericType->parameters, typeParam->type);
+        }
+        ast->type = (TypeInfo*)genericType;
+
+        char* genericTypeName = createGenericTypeName(genericType);
+        ast->type->shortName = takeStringPerma(resolver->vm, genericTypeName, (int)strlen(genericTypeName));
+        ast->type->fullName = ast->type->shortName;
+        TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
+    }
+    return genericType;
 }
 
 static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
