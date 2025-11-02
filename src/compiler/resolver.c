@@ -594,6 +594,15 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     ClassResolver classResolver;
     initClassResolver(resolver, &classResolver, name, resolver->currentFunction->scopeDepth + 1, type);
     int childIndex = 0;
+    beginScope(resolver, ast, (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS);
+
+    if (ast->parent != NULL && ast->parent->kind == AST_DECL_CLASS && astNumChild(ast->parent) > 1) {
+        Ast* typeParams = astLastChild(ast->parent);
+        for (int i = 0; i < typeParams->children->count; i++) {
+            Ast* typeParam = astGetChild(typeParams, i);
+            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FIELD, SYMBOL_STATE_DEFINED, NULL, false);
+        }
+    }
 
     if (type == BEHAVIOR_CLASS) {
         Ast* superclass = astGetChild(ast, childIndex);
@@ -618,7 +627,6 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
         }
     }
 
-    beginScope(resolver, ast, (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS);
     Ast* traitList = astGetChild(ast, childIndex);
     traitList->symtab = ast->symtab;
     if (astNumChild(traitList) > 0) {
@@ -852,7 +860,9 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         resolveChild(resolver, ast, 0);
         insertGenericType(resolver, ast);
     }
-    else ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
+    else {
+        ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
+    }
 }
 
 static void resolveUnary(Resolver* resolver, Ast* ast) {

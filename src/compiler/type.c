@@ -149,7 +149,7 @@ char* createCallableTypeName(CallableTypeInfo* callableType) {
     size_t length = 0;
 
     if (callableType->returnType != NULL) {
-        char* returnTypeName = IS_CALLABLE_TYPE(callableType->returnType) ? createCallableTypeName(AS_CALLABLE_TYPE(callableType->returnType)) : callableType->returnType->shortName->chars;
+        char* returnTypeName = createParamTypeName(callableType->returnType);
         size_t returnTypeLength = strlen(returnTypeName);
         memcpy(callableName, returnTypeName, returnTypeLength);
         length += returnTypeLength;
