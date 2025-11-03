@@ -561,6 +561,11 @@ static void block(Resolver* resolver, Ast* ast) {
     }
 }
 
+static bool hasTypeParameters(Ast* ast) {
+    if (ast->kind != AST_EXPR_CLASS && ast->kind != AST_EXPR_TRAIT) return false;
+    return (ast->parent != NULL && astNumChild(ast->parent) > 1);
+}
+
 static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) {
     FunctionResolver functionResolver;
     initFunctionResolver(resolver, &functionResolver, ast->token, resolver->currentFunction->scopeDepth + 1);
@@ -596,7 +601,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     int childIndex = 0;
     beginScope(resolver, ast, (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS);
 
-    if (ast->parent != NULL && ast->parent->kind == AST_DECL_CLASS && astNumChild(ast->parent) > 1) {
+    if (hasTypeParameters(ast)) {
         Ast* typeParams = astLastChild(ast->parent);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);

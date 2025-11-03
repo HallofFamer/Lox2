@@ -138,7 +138,7 @@ AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullNam
     return aliasType;
 }
 
-static char* createParamTypeName(TypeInfo* paramType) {
+static char* createTempTypeName(TypeInfo* paramType) {
     if (IS_CALLABLE_TYPE(paramType)) return createCallableTypeName(AS_CALLABLE_TYPE(paramType));
     else if (IS_GENERIC_TYPE(paramType)) return createGenericTypeName(AS_GENERIC_TYPE(paramType));
     else return paramType->shortName->chars;
@@ -149,7 +149,7 @@ char* createCallableTypeName(CallableTypeInfo* callableType) {
     size_t length = 0;
 
     if (callableType->returnType != NULL) {
-        char* returnTypeName = createParamTypeName(callableType->returnType);
+        char* returnTypeName = createTempTypeName(callableType->returnType);
         size_t returnTypeLength = strlen(returnTypeName);
         memcpy(callableName, returnTypeName, returnTypeLength);
         length += returnTypeLength;
@@ -174,7 +174,7 @@ char* createCallableTypeName(CallableTypeInfo* callableType) {
             callableName[length++] = ' ';
         }
         if (paramType != NULL) {
-            char* paramTypeName = createParamTypeName(paramType);
+            char* paramTypeName = createTempTypeName(paramType);
             size_t paramTypeLength = strlen(paramTypeName);
             memcpy(callableName + length, paramTypeName, paramTypeLength);
             length += paramTypeLength;
@@ -216,7 +216,7 @@ char* createGenericTypeName(GenericTypeInfo* genericType) {
             genericName[length++] = ' ';
         }
         if (paramType != NULL) {
-            char* paramTypeName = createParamTypeName(paramType);
+            char* paramTypeName = createTempTypeName(paramType);
             size_t paramTypeLength = strlen(paramTypeName);
             memcpy(genericName + length, paramTypeName, paramTypeLength);
             length += paramTypeLength;
