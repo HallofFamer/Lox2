@@ -594,6 +594,21 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     endFunctionResolver(resolver);
 }
 
+static void checkSuperclass(Resolver* resolver, Ast* ast, Ast* superclass) {
+    if (tokensEqual(&ast->token, &resolver->rootClass)) {
+        semanticError(resolver, "Cannot redeclare root class Object.");
+    }
+    else if (tokensEqual(&ast->token, &superclass->token)) {
+        semanticError(resolver, "A class cannot inherit from itself.");
+    }
+    else if (superclass->attribute.isFunction) {
+        semanticError(resolver, "A class cannot inherit from a callable type.");
+    }
+    else if (superclass->attribute.isClass) {
+        semanticError(resolver, "A class cannot inherit from a metaclass type.");
+    }
+}
+
 static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     Token name = ast->token;
     ClassResolver classResolver;
@@ -615,21 +630,9 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
         classResolver.superClass = superclass->token;
 
         resolveChild(resolver, ast, childIndex);
-        if(!classResolver.isAnonymous) bindSuperclassType(resolver, resolver->currentClass->name, resolver->currentClass->superClass);
         childIndex++;
-
-        if (tokensEqual(&name, &resolver->rootClass)) {
-            semanticError(resolver, "Cannot redeclare root class Object.");
-        }
-        else if (tokensEqual(&name, &superclass->token)) {
-            semanticError(resolver, "A class cannot inherit from itself.");
-        }
-        else if (superclass->attribute.isFunction) {
-            semanticError(resolver, "A class cannot inherit from a callable type.");
-        }
-        else if (superclass->attribute.isClass) {
-            semanticError(resolver, "A class cannot inherit from a metaclass type.");
-        }
+        if(!classResolver.isAnonymous) bindSuperclassType(resolver, resolver->currentClass->name, resolver->currentClass->superClass);
+        checkSuperclass(resolver, ast, superclass);
     }
 
     Ast* traitList = astGetChild(ast, childIndex);
