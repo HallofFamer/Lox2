@@ -504,8 +504,8 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
 
 static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
     TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false);
-    if (IS_FORMAL_TYPE(rawType) || IS_VOID_TYPE(rawType)) {
-        semanticError(resolver, "Cannot use a type parameter or 'void' as a generic type.");
+    if (rawType == NULL || IS_VOID_TYPE(rawType) || IS_FORMAL_TYPE(rawType)) {
+        semanticError(resolver, "Cannot use dynamic type, void type or type parameter as a generic type.");
         return NULL;
     }
     GenericTypeInfo* genericType = newGenericTypeInfo(-1, rawType->shortName, rawType->fullName, rawType);
@@ -594,21 +594,6 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     endFunctionResolver(resolver);
 }
 
-static void checkSuperclass(Resolver* resolver, Ast* ast, Ast* superclass) {
-    if (tokensEqual(&ast->token, &resolver->rootClass)) {
-        semanticError(resolver, "Cannot redeclare root class Object.");
-    }
-    else if (tokensEqual(&ast->token, &superclass->token)) {
-        semanticError(resolver, "A class cannot inherit from itself.");
-    }
-    else if (superclass->attribute.isFunction) {
-        semanticError(resolver, "A class cannot inherit from a callable type.");
-    }
-    else if (superclass->attribute.isClass) {
-        semanticError(resolver, "A class cannot inherit from a metaclass type.");
-    }
-}
-
 static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     Token name = ast->token;
     ClassResolver classResolver;
@@ -631,8 +616,21 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
 
         resolveChild(resolver, ast, childIndex);
         childIndex++;
+
+        if (tokensEqual(&ast->token, &resolver->rootClass)) {
+            semanticError(resolver, "Cannot redeclare root class Object.");
+        }
+        else if (tokensEqual(&ast->token, &superclass->token)) {
+            semanticError(resolver, "A class cannot inherit from itself.");
+        }
+        else if (superclass->attribute.isFunction) {
+            semanticError(resolver, "A class cannot inherit from a callable type.");
+        }
+        else if (superclass->attribute.isClass) {
+            semanticError(resolver, "A class cannot inherit from a metaclass type.");
+        }
+
         if(!classResolver.isAnonymous) bindSuperclassType(resolver, resolver->currentClass->name, resolver->currentClass->superClass);
-        checkSuperclass(resolver, ast, superclass);
     }
 
     Ast* traitList = astGetChild(ast, childIndex);

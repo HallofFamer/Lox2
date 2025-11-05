@@ -353,8 +353,8 @@ void typeTableAddAll(TypeTable* from, TypeTable* to) {
         TypeEntry* entry = &from->entries[i];
         if (entry != NULL && entry->key != NULL) {
             FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);
-            FieldTypeInfo* fieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, fromFieldType->declaredType, fromFieldType->isMutable, fromFieldType->hasInitializer);
-            typeTableSet(to, entry->key, (TypeInfo*)fieldType);       
+            FieldTypeInfo* toFieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, fromFieldType->declaredType, fromFieldType->isMutable, fromFieldType->hasInitializer);
+            typeTableSet(to, entry->key, (TypeInfo*)toFieldType);       
         }
     }
 }
