@@ -562,8 +562,9 @@ static void block(Resolver* resolver, Ast* ast) {
 }
 
 static bool hasTypeParameters(Ast* ast) {
-    if (ast->kind != AST_EXPR_CLASS && ast->kind != AST_EXPR_TRAIT) return false;
-    return (ast->parent != NULL && astNumChild(ast->parent) > 1);
+    if (ast == NULL || ast->parent == NULL) return false;
+    if (ast->parent->kind != AST_DECL_CLASS && ast->parent->kind != AST_DECL_FUN && ast->parent->kind != AST_DECL_TRAIT) return false;
+    return (astNumChild(ast) > 1);
 }
 
 static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) {
@@ -578,6 +579,14 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
 
     SymbolScope scope = (ast->kind == AST_DECL_METHOD) ? SYMBOL_SCOPE_METHOD : SYMBOL_SCOPE_FUNCTION;
     beginScope(resolver, ast, scope);
+    if (hasTypeParameters(ast)) {
+        Ast* typeParams = astLastChild(ast->parent);
+        for (int i = 0; i < typeParams->children->count; i++) {
+            Ast* typeParam = astGetChild(typeParams, i);
+            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_LOCAL, SYMBOL_STATE_DEFINED, NULL, false);
+        }
+    }
+
     Ast* returnType = astGetChild(ast, 0);
     returnType->symtab = ast->symtab;
     resolveChild(resolver, ast, 0);
