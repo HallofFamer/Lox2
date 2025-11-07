@@ -562,9 +562,43 @@ static void block(Resolver* resolver, Ast* ast) {
 }
 
 static bool hasTypeParameters(Ast* ast) {
-    if (ast == NULL || ast->parent == NULL) return false;
-    if (ast->parent->kind != AST_DECL_CLASS && ast->parent->kind != AST_DECL_FUN && ast->parent->kind != AST_DECL_TRAIT) return false;
-    return (astNumChild(ast) > 1);
+    if (ast == NULL || ast->parent == NULL) {
+        return false;
+    }
+
+    switch (ast->category) {
+        case AST_CATEGORY_EXPR:
+            if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
+                return (astNumChild(ast->parent) > 1);
+            }
+            return false;
+        case AST_CATEGORY_DECL:
+            if (ast->kind == AST_DECL_METHOD) {
+                return (astNumChild(ast) > 3);
+            }
+            return false;
+        default:
+            return false;
+    }
+}
+
+static Ast* getTypeParameters(Ast* ast) {
+    if (ast == NULL || ast->parent == NULL) {
+        return NULL;
+    }
+
+    switch (ast->category) {
+        case AST_CATEGORY_EXPR:
+            if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
+                return astLastChild(ast->parent);
+            }
+        case AST_CATEGORY_DECL:
+            if (ast->kind == AST_DECL_METHOD) {
+                return astLastChild(ast);
+            }
+    }
+
+    return false;
 }
 
 static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) {
@@ -580,7 +614,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     SymbolScope scope = (ast->kind == AST_DECL_METHOD) ? SYMBOL_SCOPE_METHOD : SYMBOL_SCOPE_FUNCTION;
     beginScope(resolver, ast, scope);
     if (hasTypeParameters(ast)) {
-        Ast* typeParams = astLastChild(ast->parent);
+        Ast* typeParams = getTypeParameters(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
             insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_LOCAL, SYMBOL_STATE_DEFINED, NULL, false);
@@ -611,7 +645,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     beginScope(resolver, ast, (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS);
 
     if (hasTypeParameters(ast)) {
-        Ast* typeParams = astLastChild(ast->parent);
+        Ast* typeParams = getTypeParameters(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
             insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FIELD, SYMBOL_STATE_DEFINED, NULL, false);
