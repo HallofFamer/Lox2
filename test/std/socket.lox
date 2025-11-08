@@ -5,12 +5,11 @@ using clox.std.net.SocketAddress
 using clox.std.net.SocketClient
 using clox.std.net.SocketServer
 
-print("Using socket address: ")
 val socketAddress = SocketAddress("127.0.0.1", Socket.afINET, 2000)
-println(socketAddress.toString())
+println("Using socket address: ${socketAddress.toString()}")
 
 val server = SocketServer(Socket.afINET, Socket.sockSTREAM, Socket.protoIP)
-println("Creating " + server.toString())
+println("Creating ${server.toString()}")
 println("Binding Server to Socket Address.")
 server.bind(socketAddress)
 println("Starting to listen to Socket connections.")
@@ -18,4 +17,4 @@ server.listen()
 println("Now accepting connection from Socket Client...")
 server.accept()
 val message = server.receive()
-println("Receiving message: " + message)
+println("Receiving message: ${message}")

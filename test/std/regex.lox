@@ -2,13 +2,9 @@ namespace test.std
 using clox.std.util.Regex
 
 val regex = Regex("[Hh]ello [Ww]orld[!]?")
-print("Creating regular expression pattern: ")
-println(regex.toString())
+println("Creating regular expression pattern: ${regex.toString()}")
 
 val text = "ahem.. 'hello world!' .."
-print("Creating text: ")
-println(text)
-print("Text matches pattern: ")
-println(regex.match(text))
-print("Replace regular expression pattern: ")
-println(regex.replace(text, "my friend"))
+println("Creating text: ${text}")
+println("Text matches pattern: ${regex.match(text)}")
+println("Replace regular expression pattern: ${regex.replace(text, "my friend")}")
