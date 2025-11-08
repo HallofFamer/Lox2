@@ -243,7 +243,7 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Token sup
     BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
     TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassType->fullName));
     currentMetaclassType->superclassType = superMetaclassType;
-    typeTableAddAll(AS_BEHAVIOR_TYPE(superclassType)->fields, currentClassType->fields);
+    typeTableFieldsCopy(AS_BEHAVIOR_TYPE(superclassType)->fields, currentClassType->fields);
 }
 
 static void bindTraitType(Resolver* resolver, Token currentClass, Token trait) {

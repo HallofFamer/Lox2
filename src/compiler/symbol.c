@@ -145,6 +145,9 @@ static void symbolTableOutputCategory(SymbolCategory category) {
         case SYMBOL_CATEGORY_METHOD:
             printf("method");
             break;
+        case SYMBOL_CATEGORY_FORMAL:
+            printf("formal");
+            break;
         default:
             printf("none");
     }

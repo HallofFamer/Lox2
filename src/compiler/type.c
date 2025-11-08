@@ -348,7 +348,7 @@ bool typeTableSet(TypeTable* typetab, ObjString* key, TypeInfo* value) {
     return true;
 }
 
-void typeTableAddAll(TypeTable* from, TypeTable* to) {
+void typeTableFieldsCopy(TypeTable* from, TypeTable* to) {
     for (int i = 0; i < from->capacity; i++) {
         TypeEntry* entry = &from->entries[i];
         if (entry != NULL && entry->key != NULL) {
