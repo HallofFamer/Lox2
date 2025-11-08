@@ -134,11 +134,11 @@ static TokenSymbol checkKeyword(Lexer* lexer, int start, int length, const char*
     if (lexer->current - lexer->start == start + length && memcmp(lexer->start + start, rest, length) == 0) {
         return type;
     }
-    return TOKEN_IDENTIFIER;
+    return TOKEN_SYMBOL_IDENTIFIER;
 }
 
 static TokenSymbol identifierType(Lexer* lexer) {
-    if (lexer->start[-1] == '.') return TOKEN_IDENTIFIER;
+    if (lexer->start[-1] == '.') return TOKEN_SYMBOL_IDENTIFIER;
 
     switch (lexer->start[0]) {
         case 'a':
@@ -256,7 +256,7 @@ static TokenSymbol identifierType(Lexer* lexer) {
             break;
         case 'y': return checkKeyword(lexer, 1, 4, "ield", TOKEN_YIELD);
     }
-    return TOKEN_IDENTIFIER;
+    return TOKEN_SYMBOL_IDENTIFIER;
 }
 
 static Token identifier(Lexer* lexer) {
@@ -274,7 +274,7 @@ static Token keywordIdentifier(Lexer* lexer) {
 
     if (peek(lexer) == '`') {
         advance(lexer);
-        return makeToken(lexer, TOKEN_IDENTIFIER);
+        return makeToken(lexer, TOKEN_SYMBOL_IDENTIFIER);
     }
     else {
         return errorToken(lexer, "Keyword identifiers must end with a closing backtick.");
@@ -291,9 +291,9 @@ static Token number(Lexer* lexer) {
         while (isDigit(peek(lexer))) {
             advance(lexer);
         }
-        return makeToken(lexer, TOKEN_NUMBER);
+        return makeToken(lexer, TOKEN_SYMBOL_NUMBER);
     }
-    return makeToken(lexer, TOKEN_INT);
+    return makeToken(lexer, TOKEN_SYMBOL_INT);
 }
 
 static Token string(Lexer* lexer) {
@@ -306,7 +306,7 @@ static Token string(Lexer* lexer) {
             lexer->interpolationDepth++;
 
             advance(lexer);
-            Token token = makeToken(lexer, TOKEN_INTERPOLATION);
+            Token token = makeToken(lexer, TOKEN_SYMBOL_INTERPOLATION);
             advance(lexer);
             return token;
         }
@@ -315,7 +315,7 @@ static Token string(Lexer* lexer) {
 
     if (isAtEnd(lexer)) return errorToken(lexer, "Unterminated string.");
     advance(lexer);
-    return makeToken(lexer, TOKEN_STRING);
+    return makeToken(lexer, TOKEN_SYMBOL_STRING);
 }
 
 static Token newLine(Lexer* lexer) {
@@ -355,15 +355,15 @@ Token scanToken(Lexer* lexer) {
         case '/': return makeToken(lexer, TOKEN_SYMBOL_SLASH);
         case '*': return makeToken(lexer, TOKEN_SYMBOL_STAR);
         case '!': 
-            return makeToken(lexer, match(lexer, '=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
+            return makeToken(lexer, match(lexer, '=') ? TOKEN_SYMBOL_BANG_EQUAL : TOKEN_SYMBOL_BANG);
         case '=': 
-            return makeToken(lexer, match(lexer, '=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
+            return makeToken(lexer, match(lexer, '=') ? TOKEN_SYMBOL_EQUAL_EQUAL : TOKEN_SYMBOL_EQUAL);
         case '>':
-            return makeToken(lexer, match(lexer, '=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+            return makeToken(lexer, match(lexer, '=') ? TOKEN_SYMBOL_GREATER_EQUAL : TOKEN_SYMBOL_GREATER);
         case '<':
-            return makeToken(lexer, match(lexer, '=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
+            return makeToken(lexer, match(lexer, '=') ? TOKEN_SYMBOL_LESS_EQUAL : TOKEN_SYMBOL_LESS);
         case '.':
-            return makeToken(lexer, match(lexer, '.') ? TOKEN_DOT_DOT : TOKEN_DOT);
+            return makeToken(lexer, match(lexer, '.') ? TOKEN_SYMBOL_DOT_DOT : TOKEN_SYMBOL_DOT);
         case '`': 
             return keywordIdentifier(lexer);
         case '"':

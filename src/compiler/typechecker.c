@@ -286,7 +286,7 @@ static void inferAstTypeFromUnary(TypeChecker* typeChecker, Ast* ast, SymbolItem
     if (child->type == NULL) return;
 
     switch (ast->token.type) {
-        case TOKEN_BANG:
+        case TOKEN_SYMBOL_BANG:
             defineAstType(typeChecker, ast, "Bool", item);
             break;
         case TOKEN_SYMBOL_MINUS:
@@ -363,7 +363,7 @@ static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolIte
                 return;
             }
             break;
-        case TOKEN_DOT_DOT:
+        case TOKEN_SYMBOL_DOT_DOT:
             if (isSubtypeOfType(left->type, typeChecker->intType) && isSubtypeOfType(right->type, typeChecker->intType)) {
                 defineAstType(typeChecker, ast, "clox.std.collection.Range", item);
                 return;
@@ -702,7 +702,7 @@ static void typeCheckInterpolation(TypeChecker* typeChecker, Ast* ast) {
         bool isString = false;
         Ast* expr = astGetChild(exprs, count);
 
-        if (expr->kind == AST_EXPR_LITERAL && expr->token.type == TOKEN_STRING) {
+        if (expr->kind == AST_EXPR_LITERAL && expr->token.type == TOKEN_SYMBOL_STRING) {
             concatenate = true;
             isString = true;
             count++;

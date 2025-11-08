@@ -351,28 +351,28 @@ static Ast* argumentList(Parser* parser) {
 }
 
 static Ast* identifier(Parser* parser, const char* message) {
-    consume(parser, TOKEN_IDENTIFIER, message);
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, message);
     return emptyAst(AST_EXPR_VARIABLE, previousToken(parser));
 }
 
 static Token identifierToken(Parser* parser, const char* message) {
     switch (parser->current.type) {
-        case TOKEN_IDENTIFIER:
-        case TOKEN_EQUAL_EQUAL:
-        case TOKEN_GREATER:
-        case TOKEN_LESS:
+        case TOKEN_SYMBOL_IDENTIFIER:
+        case TOKEN_SYMBOL_EQUAL_EQUAL:
+        case TOKEN_SYMBOL_GREATER:
+        case TOKEN_SYMBOL_LESS:
         case TOKEN_SYMBOL_PLUS:
         case TOKEN_SYMBOL_MINUS:
         case TOKEN_SYMBOL_STAR:
         case TOKEN_SYMBOL_SLASH:
         case TOKEN_SYMBOL_MODULO:
-        case TOKEN_DOT_DOT:
+        case TOKEN_SYMBOL_DOT_DOT:
             advance(parser);
             return previousToken(parser);
         case TOKEN_SYMBOL_LEFT_BRACKET:
             advance(parser);
             if (match(parser, TOKEN_SYMBOL_RIGHT_BRACKET)) {
-                return syntheticToken(match(parser, TOKEN_EQUAL) ? "[]=" : "[]");
+                return syntheticToken(match(parser, TOKEN_SYMBOL_EQUAL) ? "[]=" : "[]");
             }
         case TOKEN_SYMBOL_LEFT_PAREN:
             advance(parser);
@@ -407,7 +407,7 @@ static Ast* call(Parser* parser, Token token, Ast* left, bool canAssign) {
 static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) { 
     Token property = identifierToken(parser, "Expect property name after '.'.");
 
-    if (canAssign && match(parser, TOKEN_EQUAL)) {
+    if (canAssign && match(parser, TOKEN_SYMBOL_EQUAL)) {
         Ast* right = expression(parser);
         return newAst(AST_EXPR_PROPERTY_SET, property, 2, left, right);
     }
@@ -435,7 +435,7 @@ static Ast* subscript(Parser* parser, Token token, Ast* left, bool canAssign) {
     Ast* index = expression(parser);
     consume(parser, TOKEN_SYMBOL_RIGHT_BRACKET, "Expect ']' after subscript.");
 
-    if (canAssign && match(parser, TOKEN_EQUAL)) {
+    if (canAssign && match(parser, TOKEN_SYMBOL_EQUAL)) {
         Ast* right = expression(parser);
         return newAst(AST_EXPR_SUBSCRIPT_SET, token, 3, left, index, right);
     }
@@ -447,7 +447,7 @@ static Ast* subscript(Parser* parser, Token token, Ast* left, bool canAssign) {
 static Ast* question(Parser* parser, Token token, Ast* left, bool canAssign) { 
     Ast* expr = NULL;
 
-    if (match(parser, TOKEN_DOT)) {
+    if (match(parser, TOKEN_SYMBOL_DOT)) {
         expr = dot(parser, token, left, canAssign);
     }
     else if (match(parser, TOKEN_SYMBOL_LEFT_BRACKET)) {
@@ -483,7 +483,7 @@ static Ast* string(Parser* parser, Token token, bool canAssign) {
         .length = length,
         .line = token.line,
         .start = str,
-        .type = TOKEN_STRING
+        .type = TOKEN_SYMBOL_STRING
     };
     return emptyAst(AST_EXPR_LITERAL, strToken);
 }
@@ -505,9 +505,9 @@ static Ast* interpolation(Parser* parser, Token token, bool canAssign) {
         Ast* expr = expression(parser);
         astAppendChild(exprs, expr);
         count++;
-    } while (match(parser, TOKEN_INTERPOLATION));
+    } while (match(parser, TOKEN_SYMBOL_INTERPOLATION));
 
-    consume(parser, TOKEN_STRING, "Expect end of string interpolation.");
+    consume(parser, TOKEN_SYMBOL_STRING, "Expect end of string interpolation.");
     if (previousToken(parser).length > 2) {
         Ast* str = string(parser, previousToken(parser), false);
         astAppendChild(exprs, str);
@@ -576,7 +576,7 @@ static Ast* lambda(Parser* parser, Token token, bool canAssign) {
 }
 
 static Ast* behaviorType(Parser* parser) {
-    consume(parser, TOKEN_IDENTIFIER, "Expect behavior type.");
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect behavior type.");
     return emptyAst(AST_EXPR_TYPE, previousToken(parser));
 }
 
@@ -597,7 +597,7 @@ static Ast* callableType(Parser* parser) {
     do {
         arity++;
         if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
-        if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+        if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
             paramType = callableType(parser);
             paramType->attribute.isFunction = true;
         }
@@ -612,7 +612,7 @@ static Ast* callableType(Parser* parser) {
 }
 
 static Ast* metaclassType(Parser* parser) {
-    consume(parser, TOKEN_IDENTIFIER, "Expect class name.");
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect class name.");
     Token token = previousToken(parser);
     consume(parser, TOKEN_CLASS, "Expect 'class' keyword after metaclass type declaration.");
     Ast* type = emptyAst(AST_EXPR_TYPE, token);
@@ -621,9 +621,9 @@ static Ast* metaclassType(Parser* parser) {
 }
 
 static Ast* genericType(Parser* parser) {
-    consume(parser, TOKEN_IDENTIFIER, "Expect generic type name.");
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect generic type name.");
     Token token = previousToken(parser);
-    consume(parser, TOKEN_LESS, "Expect '<' before generic parameter declaration.");
+    consume(parser, TOKEN_SYMBOL_LESS, "Expect '<' before generic parameter declaration.");
 
     Ast* paramTypes = emptyAst(AST_LIST_EXPR, previousToken(parser));
     Ast* paramType = NULL;
@@ -632,11 +632,11 @@ static Ast* genericType(Parser* parser) {
     do {
         arity++;
         if (arity > UINT4_MAX) parseErrorAtCurrent(parser, "Can't have more than 15 generic types.");
-        if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+        if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
             paramType = callableType(parser);
             paramType->attribute.isFunction = true;
         }
-        else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) {
+        else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
             paramType = genericType(parser);
             paramType->attribute.isGeneric = true;
         }
@@ -644,17 +644,17 @@ static Ast* genericType(Parser* parser) {
         astAppendChild(paramTypes, paramType);
     } while (match(parser, TOKEN_SYMBOL_COMMA));
 
-    consume(parser, TOKEN_GREATER, "Expect '>' after generic parameter declaration.");
+    consume(parser, TOKEN_SYMBOL_GREATER, "Expect '>' after generic parameter declaration.");
     Ast* type = newAst(AST_EXPR_TYPE, token, 1, paramTypes);
     type->attribute.isGeneric = true;
     return type;
 }
 
 static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
-    if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) return genericType(parser);
-    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) return metaclassType(parser);
-    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return callableType(parser);
-    else if ((checkParam && checkBoth(parser, TOKEN_IDENTIFIER)) || (!checkParam && check(parser, TOKEN_IDENTIFIER))) return behaviorType(parser);
+    if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) return genericType(parser);
+    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) return metaclassType(parser);
+    else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) return callableType(parser);
+    else if ((checkParam && checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) || (!checkParam && check(parser, TOKEN_SYMBOL_IDENTIFIER))) return behaviorType(parser);
     else if (allowEmpty) return emptyAst(AST_EXPR_TYPE, emptyToken());
     else {
         parseErrorAtCurrent(parser, "Invalid type specified.");
@@ -663,7 +663,7 @@ static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
 }
 
 static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
-    if (left->token.type != TOKEN_IDENTIFIER) return binary(parser, token, left, canAssign);
+    if (left->token.type != TOKEN_SYMBOL_IDENTIFIER) return binary(parser, token, left, canAssign);
     int index = parser->index;
     Token current = parser->current;
     Token previous2 = parser->tokens->elements[index - 2];
@@ -671,15 +671,15 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
 
     do {
         advance(parser);
-        if (previousTokenType(parser) != TOKEN_IDENTIFIER && previousTokenType(parser) != TOKEN_VOID) {
+        if (previousTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && previousTokenType(parser) != TOKEN_VOID) {
             resetIndex(parser, index, current, false);
             break;
         }
-        else if (currentTokenType(parser) == TOKEN_LESS) {
+        else if (currentTokenType(parser) == TOKEN_SYMBOL_LESS) {
             genericDepth++;
             continue;
         }
-        else if (currentTokenType(parser) == TOKEN_GREATER) {
+        else if (currentTokenType(parser) == TOKEN_SYMBOL_GREATER) {
             genericDepth--;
             if (genericDepth == 0) {
                 free(left);
@@ -687,7 +687,7 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
                 return genericType(parser);
             }
         }
-        else if (nextTokenType(parser) != TOKEN_CLASS && nextTokenType(parser) != TOKEN_FUN && nextTokenType(parser) != TOKEN_GREATER && nextTokenType(parser) != TOKEN_LESS) {
+        else if (nextTokenType(parser) != TOKEN_CLASS && nextTokenType(parser) != TOKEN_FUN && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
             resetIndex(parser, index, current, false);
             break;
         }
@@ -697,7 +697,7 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
 }
 
 static Ast* variable(Parser* parser, Token token, bool canAssign) {
-    if (canAssign && match(parser, TOKEN_EQUAL)) {
+    if (canAssign && match(parser, TOKEN_SYMBOL_EQUAL)) {
         Ast* expr = expression(parser);
         return newAst(AST_EXPR_ASSIGN, token, 1, expr);
     }
@@ -712,7 +712,7 @@ static Ast* variable(Parser* parser, Token token, bool canAssign) {
 static Ast* parameter(Parser* parser, bool isLambda, const char* message) {
     bool isMutable = match(parser, TOKEN_VAR);
     Ast* type = isLambda ? emptyAst(AST_EXPR_TYPE, emptyToken()) : type_(parser, true, true);
-    consume(parser, TOKEN_IDENTIFIER, message);
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, message);
 
     Ast* param = newAst(AST_EXPR_PARAM, previousToken(parser), 1, type);
     param->attribute.isMutable = isMutable;
@@ -724,7 +724,7 @@ static Ast* parameterList(Parser* parser, bool isLambda, Token token) {
     int arity = 0;
 
     if (match(parser, TOKEN_SYMBOL_RIGHT_PAREN)) return params;
-    if (match(parser, TOKEN_DOT_DOT)) {
+    if (match(parser, TOKEN_SYMBOL_DOT_DOT)) {
         Ast* param = parameter(parser, isLambda, "Expect variadic parameter name.");
         param->attribute.isVariadic = true;
         astAppendChild(params, param);
@@ -743,18 +743,18 @@ static Ast* parameterList(Parser* parser, bool isLambda, Token token) {
 
 static Ast* typeParameters(Parser* parser, Token token) {
     Ast* typeParams = emptyAst(AST_LIST_VAR, token);
-    consume(parser, TOKEN_LESS, "Expect '<' before type parameters.");
+    consume(parser, TOKEN_SYMBOL_LESS, "Expect '<' before type parameters.");
     int count = 0;
 
     do {
         count++;
         if (count > UINT4_MAX) parseErrorAtCurrent(parser, "Can't have more than 15 type parameters.");
-        consume(parser, TOKEN_IDENTIFIER, "Expect type parameter name.");
+        consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect type parameter name.");
         Ast* typeParam = emptyAst(AST_EXPR_TYPE, previousToken(parser));
         astAppendChild(typeParams, typeParam);
     } while (match(parser, TOKEN_SYMBOL_COMMA));
 
-    consume(parser, TOKEN_GREATER, "Expect '>' after type parameters.");
+    consume(parser, TOKEN_SYMBOL_GREATER, "Expect '>' after type parameters.");
     return typeParams;
 }
 
@@ -802,26 +802,26 @@ static Ast* fields(Parser* parser, Token* name) {
         advance(parser);
 
         Ast* fieldType = NULL;
-        if (checkBoth(parser, TOKEN_IDENTIFIER)) {
+        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) {
             hasFieldType = true;
             fieldType = behaviorType(parser);
         }
-        else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+        else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
             hasFieldType = true;
             fieldType = callableType(parser);
         }
-        else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
+        else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
             hasFieldType = true;
             fieldType = metaclassType(parser);
         }
-        else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) {
+        else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
             hasFieldType = true;
             fieldType = genericType(parser);
         }
 
         Token fieldName = identifierToken(parser, "Expect field name.");
         Ast* initializer = NULL;
-        if (match(parser, TOKEN_EQUAL)) {
+        if (match(parser, TOKEN_SYMBOL_EQUAL)) {
             hasInitializer = true;
             initializer = expression(parser);
         }
@@ -850,19 +850,19 @@ static Ast* methods(Parser* parser, Token* name) {
         if (match(parser, TOKEN_CLASS)) isClass = true;
         if (match(parser, TOKEN_VOID)) isVoid = true;
 
-        if (checkBoth(parser, TOKEN_IDENTIFIER) || (check(parser, TOKEN_IDENTIFIER) && tokenIsOperator(nextToken(parser)))) {
+        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER) || (check(parser, TOKEN_SYMBOL_IDENTIFIER) && tokenIsOperator(nextToken(parser)))) {
             hasReturnType = true;
             returnType = behaviorType(parser);
         }
-        else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+        else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
             hasReturnType = true;
             returnType = callableType(parser);
         }
-        else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
+        else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
             hasReturnType = true;
             returnType = metaclassType(parser);
         }
-        else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) {
+        else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
             hasReturnType = true;
             returnType = genericType(parser);
         }
@@ -873,7 +873,7 @@ static Ast* methods(Parser* parser, Token* name) {
             isInitializer = true;
         }
 
-        Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, methodName) : NULL;
+        Ast* typeParams = check(parser, TOKEN_SYMBOL_LESS) ? typeParameters(parser, methodName) : NULL;
         Ast* methodParams = functionParameters(parser);
         Ast* methodBody = block(parser);
         Ast* method = newAst(AST_DECL_METHOD, methodName, 3, returnType, methodParams, methodBody);
@@ -939,8 +939,8 @@ static Ast* trait(Parser* parser, Token token, bool canAssign) {
 }
 
 static Ast* super_(Parser* parser, Token token, bool canAssign) {
-    consume(parser, TOKEN_DOT, "Expect '.' after 'super'.");
-    consume(parser, TOKEN_IDENTIFIER, "Expect superclass method name.");
+    consume(parser, TOKEN_SYMBOL_DOT, "Expect '.' after 'super'.");
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect superclass method name.");
     Token method = previousToken(parser);
 
     if (match(parser, TOKEN_SYMBOL_LEFT_PAREN)) {
@@ -1008,21 +1008,21 @@ ParseRule parseRules[] = {
     [TOKEN_SYMBOL_SEMICOLON]      = {NULL,          NULL,        PREC_NONE,        true},
     [TOKEN_SYMBOL_SLASH]          = {NULL,          binary,      PREC_FACTOR,      false},
     [TOKEN_SYMBOL_STAR]           = {NULL,          binary,      PREC_FACTOR,      false},
-    [TOKEN_BANG]                  = {unary,         NULL,        PREC_NONE,        true},
-    [TOKEN_BANG_EQUAL]            = {NULL,          binary,      PREC_EQUALITY,    false},   
-    [TOKEN_EQUAL]                 = {NULL,          NULL,        PREC_NONE,        false},
-    [TOKEN_EQUAL_EQUAL]           = {NULL,          binary,      PREC_EQUALITY,    false},
-    [TOKEN_GREATER]               = {NULL,          binary,      PREC_COMPARISON,  false},
-    [TOKEN_GREATER_EQUAL]         = {NULL,          binary,      PREC_COMPARISON,  false},
-    [TOKEN_LESS]                  = {NULL,          lessThan,    PREC_COMPARISON,  false},
-    [TOKEN_LESS_EQUAL]            = {NULL,          binary,      PREC_COMPARISON,  false},
-    [TOKEN_DOT]                   = {NULL,          dot,         PREC_CALL,        false},
-    [TOKEN_DOT_DOT]               = {NULL,          binary,      PREC_CALL,        false},
-    [TOKEN_IDENTIFIER]            = {variable,      NULL,        PREC_NONE,        true},
-    [TOKEN_STRING]                = {string,        NULL,        PREC_NONE,        true},
-    [TOKEN_INTERPOLATION]         = {interpolation, NULL,        PREC_NONE,        true},
-    [TOKEN_NUMBER]                = {literal,       NULL,        PREC_NONE,        true},
-    [TOKEN_INT]                   = {literal,       NULL,        PREC_NONE,        true},
+    [TOKEN_SYMBOL_BANG]                  = {unary,         NULL,        PREC_NONE,        true},
+    [TOKEN_SYMBOL_BANG_EQUAL]            = {NULL,          binary,      PREC_EQUALITY,    false},   
+    [TOKEN_SYMBOL_EQUAL]                 = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_SYMBOL_EQUAL_EQUAL]           = {NULL,          binary,      PREC_EQUALITY,    false},
+    [TOKEN_SYMBOL_GREATER]               = {NULL,          binary,      PREC_COMPARISON,  false},
+    [TOKEN_SYMBOL_GREATER_EQUAL]         = {NULL,          binary,      PREC_COMPARISON,  false},
+    [TOKEN_SYMBOL_LESS]                  = {NULL,          lessThan,    PREC_COMPARISON,  false},
+    [TOKEN_SYMBOL_LESS_EQUAL]            = {NULL,          binary,      PREC_COMPARISON,  false},
+    [TOKEN_SYMBOL_DOT]                   = {NULL,          dot,         PREC_CALL,        false},
+    [TOKEN_SYMBOL_DOT_DOT]               = {NULL,          binary,      PREC_CALL,        false},
+    [TOKEN_SYMBOL_IDENTIFIER]            = {variable,      NULL,        PREC_NONE,        true},
+    [TOKEN_SYMBOL_STRING]                = {string,        NULL,        PREC_NONE,        true},
+    [TOKEN_SYMBOL_INTERPOLATION]         = {interpolation, NULL,        PREC_NONE,        true},
+    [TOKEN_SYMBOL_NUMBER]                = {literal,       NULL,        PREC_NONE,        true},
+    [TOKEN_SYMBOL_INT]                   = {literal,       NULL,        PREC_NONE,        true},
     [TOKEN_AND]                   = {NULL,          and_,        PREC_AND,         false},
     [TOKEN_AS]                    = {NULL,          NULL,        PREC_NONE,        false},
     [TOKEN_ASYNC]                 = {async,         NULL,        PREC_NONE,        true},
@@ -1083,7 +1083,7 @@ static Ast* parseInfix(Parser* parser, Precedence precedence, Ast* left, bool ca
         left = infixRule(parser, previousToken(parser), left, canAssign);
     }
 
-    if (!canAssign && match(parser, TOKEN_EQUAL)) {
+    if (!canAssign && match(parser, TOKEN_SYMBOL_EQUAL)) {
         parseErrorAtPrevious(parser, "Invalid assignment target.");
     }
     return left;
@@ -1267,7 +1267,7 @@ static Ast* tryStatement(Parser* parser) {
 
     if (match(parser, TOKEN_CATCH)) {
         consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after 'catch'");
-        consume(parser, TOKEN_IDENTIFIER, "Expect type name to catch");
+        consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect type name to catch");
         Token exceptionType = previousToken(parser);
         Ast* exceptionVar = identifier(parser, "Expect identifier after exception type.");
 
@@ -1296,14 +1296,14 @@ static Ast* usingStatement(Parser* parser) {
     Ast* alias = NULL;
 
     do {
-        consume(parser, TOKEN_IDENTIFIER, "Expect namespace identifier.");
+        consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect namespace identifier.");
         subNamespace = emptyAst(AST_EXPR_VARIABLE, previousToken(parser));
         astAppendChild(_namespace, subNamespace);
-    } while (match(parser, TOKEN_DOT));
+    } while (match(parser, TOKEN_SYMBOL_DOT));
     astAppendChild(stmt, _namespace);
 
     if (match(parser, TOKEN_AS)) {
-        consume(parser, TOKEN_IDENTIFIER, "Expect alias after 'as'.");
+        consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect alias after 'as'.");
         alias = emptyAst(AST_EXPR_VARIABLE, previousToken(parser));
         astAppendChild(stmt, alias);
     }
@@ -1384,7 +1384,7 @@ static Ast* statement(Parser* parser) {
 }
 
 static bool matchClassDeclaration(Parser* parser) {
-    if (check(parser, TOKEN_CLASS) && checkNext(parser, TOKEN_IDENTIFIER)) {
+    if (check(parser, TOKEN_CLASS) && checkNext(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         advance(parser);
         return true;
     }
@@ -1392,9 +1392,9 @@ static bool matchClassDeclaration(Parser* parser) {
 }
 
 static Ast* classDeclaration(Parser* parser) {
-    consume(parser, TOKEN_IDENTIFIER, "Expect class name.");
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect class name.");
     Token name = previousToken(parser);
-    Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
+    Ast* typeParams = check(parser, TOKEN_SYMBOL_LESS) ? typeParameters(parser, name) : NULL;
     Ast* superClass = superclass_(parser);
     Ast* traitList = traits(parser, &name);
 
@@ -1422,7 +1422,7 @@ static bool matchAsyncFunDeclaration(Parser* parser, bool* hasReturnType) {
         *hasReturnType = false;
         return true;
     }
-    else if (check(parser, TOKEN_IDENTIFIER)) {
+    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         *hasReturnType = true;
         return true;
     }
@@ -1437,7 +1437,7 @@ static bool matchHigherOrderFunDeclaration(Parser* parser, bool* isAsync, bool* 
 
     do {
         advance(parser);
-        if (currentTokenType(parser) != TOKEN_IDENTIFIER || nextTokenType(parser) == TOKEN_IDENTIFIER) {
+        if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER || nextTokenType(parser) == TOKEN_SYMBOL_IDENTIFIER) {
             return resetIndex(parser, index, current, false);
         }
     } while (match(parser, TOKEN_SYMBOL_COMMA));
@@ -1457,10 +1457,10 @@ static bool matchGenericFunDeclaration(Parser* parser, bool* isAsync, bool* hasR
     advance(parser);
     advance(parser);
 
-    if (currentTokenType(parser) != TOKEN_IDENTIFIER && currentTokenType(parser) != TOKEN_VOID) {
+    if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && currentTokenType(parser) != TOKEN_VOID) {
         return resetIndex(parser, index, current, false);
     }
-    else if (nextTokenType(parser) != TOKEN_CLASS && nextTokenType(parser) != TOKEN_FUN && nextTokenType(parser) != TOKEN_GREATER && nextTokenType(parser) != TOKEN_LESS) {
+    else if (nextTokenType(parser) != TOKEN_CLASS && nextTokenType(parser) != TOKEN_FUN && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
         return resetIndex(parser, index, current, false);
     }
 
@@ -1474,27 +1474,27 @@ static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnTy
         *isAsync = true;
         return matchAsyncFunDeclaration(parser, hasReturnType);
     }
-    else if (checkEither(parser, TOKEN_FUN, TOKEN_VOID) && checkNext(parser, TOKEN_IDENTIFIER)) {
+    else if (checkEither(parser, TOKEN_FUN, TOKEN_VOID) && checkNext(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         advance(parser);
         *isAsync = false;
         *hasReturnType = false;
         return true;
     }
-    else if (checkBoth(parser, TOKEN_IDENTIFIER)) {
+    else if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         *isAsync = false;
         *hasReturnType = true;
         return true;
     }
-    else if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+    else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
         *isAsync = false;
         return matchHigherOrderFunDeclaration(parser, isAsync, hasReturnType);
     }
-    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
+    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_CLASS)) {
         *isAsync = false;
         *hasReturnType = true;
         return true;
     }
-    else if (check(parser, TOKEN_IDENTIFIER) && checkNext(parser, TOKEN_LESS)) {
+    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
         *isAsync = false;
         *hasReturnType = true;
         return matchGenericFunDeclaration(parser, isAsync, hasReturnType);
@@ -1505,9 +1505,9 @@ static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnTy
 static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     bool isVoid = (previousTokenType(parser) == TOKEN_VOID);
     Ast* returnType = hasReturnType ? type_(parser, false, false) : emptyAst(AST_EXPR_TYPE, emptyToken());
-    consume(parser, TOKEN_IDENTIFIER, "Expect function name.");
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect function name.");
     Token name = previousToken(parser);
-    Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
+    Ast* typeParams = check(parser, TOKEN_SYMBOL_LESS) ? typeParameters(parser, name) : NULL;
     Ast* body = function(parser, returnType, isAsync, false, isVoid);
 
     Ast* ast = newAst(AST_DECL_FUN, name, 1, body);
@@ -1534,14 +1534,14 @@ static Ast* namespaceDeclaration(Parser* parser) {
         }
         astAppendChild(_namespace, identifier(parser, "Expect Namespace identifier."));
         namespaceDepth++;
-    } while (match(parser, TOKEN_DOT));
+    } while (match(parser, TOKEN_SYMBOL_DOT));
 
     consumerTerminator(parser, "Expect semicolon or new line after namespace declaration.");
     return newAst(AST_DECL_NAMESPACE, token, 1, _namespace);
 }
 
 static bool matchTraitDeclaration(Parser* parser) {
-    if (check(parser, TOKEN_TRAIT) && checkNext(parser, TOKEN_IDENTIFIER)) {
+    if (check(parser, TOKEN_TRAIT) && checkNext(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         advance(parser);
         return true;
     }
@@ -1549,7 +1549,7 @@ static bool matchTraitDeclaration(Parser* parser) {
 }
 
 static bool matchTypeDeclaration(Parser* parser) {
-    if (check(parser, TOKEN_TYPE_) && checkNext(parser, TOKEN_IDENTIFIER)) {
+    if (check(parser, TOKEN_TYPE_) && checkNext(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         advance(parser);
         return true;
     }
@@ -1557,9 +1557,9 @@ static bool matchTypeDeclaration(Parser* parser) {
 }
 
 static Ast* traitDeclaration(Parser* parser) {
-    consume(parser, TOKEN_IDENTIFIER, "Expect trait name.");
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect trait name.");
     Token name = previousToken(parser);
-    Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
+    Ast* typeParams = check(parser, TOKEN_SYMBOL_LESS) ? typeParameters(parser, name) : NULL;
     Ast* traitList = traits(parser, &name);
 
     consume(parser, TOKEN_SYMBOL_LEFT_BRACE, "Expect '{' before trait body.");
@@ -1576,10 +1576,10 @@ static Ast* traitDeclaration(Parser* parser) {
 }
 
 static Ast* typeDeclaration(Parser* parser) {
-    consume(parser, TOKEN_IDENTIFIER, "Expect type name.");
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect type name.");
     Token name = previousToken(parser);
-    Ast* typeParams = check(parser, TOKEN_LESS) ? typeParameters(parser, name) : NULL;
-    consume(parser, TOKEN_EQUAL, "Expect '=' after type name.");
+    Ast* typeParams = check(parser, TOKEN_SYMBOL_LESS) ? typeParameters(parser, name) : NULL;
+    consume(parser, TOKEN_SYMBOL_EQUAL, "Expect '=' after type name.");
     Ast* typeDef = type_(parser, false, true);
     consumerTerminator(parser, "Expect semicolon or new line after type declaration.");
 
@@ -1604,12 +1604,12 @@ static bool matchVarDeclaration(Parser* parser, bool* isMutable) {
 }
 
 static Ast* varDeclaration(Parser* parser, bool isMutable) {
-    consume(parser, TOKEN_IDENTIFIER, "Expect variable name.");
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect variable name.");
     Token identifier = previousToken(parser);
     Ast* varDecl = emptyAst(AST_DECL_VAR, identifier);
     varDecl->attribute.isMutable = isMutable;
 
-    if (match(parser, TOKEN_EQUAL)) {
+    if (match(parser, TOKEN_SYMBOL_EQUAL)) {
         Ast* expr = expression(parser);
         astAppendChild(varDecl, expr);
     }

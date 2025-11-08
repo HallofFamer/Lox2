@@ -230,12 +230,12 @@ static void astOutputExprLiteral(Ast* ast, int indentLevel) {
         case TOKEN_NIL:
         case TOKEN_TRUE:
         case TOKEN_FALSE:
-        case TOKEN_INT:
-        case TOKEN_NUMBER: {
+        case TOKEN_SYMBOL_INT:
+        case TOKEN_SYMBOL_NUMBER: {
             printf("%s\n", token);
             break;
         }
-        case TOKEN_STRING: {
+        case TOKEN_SYMBOL_STRING: {
             printf("\"%s\"\n", token);
             break;
         }

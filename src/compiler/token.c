@@ -6,37 +6,37 @@
 #include "../common/buffer.h"
 
 const char* tokenNames[] = {
-    [TOKEN_SYMBOL_LEFT_PAREN]     = "TOKEN_SYMBOL_LEFT_PAREN",
-    [TOKEN_SYMBOL_RIGHT_PAREN]    = "TOKEN_SYMBOL_RIGHT_PAREN",
-    [TOKEN_SYMBOL_LEFT_BRACKET]   = "TOKEN_SYMBOL_LEFT_BRACKET",
-    [TOKEN_SYMBOL_RIGHT_BRACKET]  = "TOKEN_SYMBOL_RIGHT_BRACKET",
-    [TOKEN_SYMBOL_LEFT_BRACE]     = "TOKEN_SYMBOL_LEFT_BRACE",
-    [TOKEN_SYMBOL_RIGHT_BRACE]    = "TOKEN_SYMBOL_RIGHT_BRACE",
-    [TOKEN_SYMBOL_COLON]          = "TOKEN_SYMBOL_COLON",
-    [TOKEN_SYMBOL_COMMA]          = "TOKEN_SYMBOL_COMMA",
-    [TOKEN_SYMBOL_MINUS]          = "TOKEN_SYMBOL_MINUS",
-    [TOKEN_SYMBOL_MODULO]         = "TOKEN_SYMBOL_MODULO",
-    [TOKEN_SYMBOL_PIPE]           = "TOKEN_SYMBOL_PIPE",
-    [TOKEN_SYMBOL_PLUS]           = "TOKEN_SYMBOL_PLUS",
-    [TOKEN_SYMBOL_QUESTION]       = "TOKEN_SYMBOL_QUESTION",
-    [TOKEN_SYMBOL_SEMICOLON]      = "TOKEN_SYMBOL_SEMICOLON",
-    [TOKEN_SYMBOL_SLASH]          = "TOKEN_SYMBOL_SLASH",
-    [TOKEN_SYMBOL_STAR]           = "TOKEN_SYMBOL_STAR", 
-    [TOKEN_BANG]           = "TOKEN_BANG",
-    [TOKEN_BANG_EQUAL]     = "TOKEN_BANG_EQUAL",
-    [TOKEN_EQUAL]          = "TOKEN_EQUAL",
-    [TOKEN_EQUAL_EQUAL]    = "TOKEN_EQUAL_EQUAL",
-    [TOKEN_GREATER]        = "TOKEN_GREATER",
-    [TOKEN_GREATER_EQUAL]  = "TOKEN_GREATER_EQUAL",
-    [TOKEN_LESS]           = "TOKEN_LESS",
-    [TOKEN_LESS_EQUAL]     = "TOKEN_LESS_EQUAL",
-    [TOKEN_DOT]            = "TOKEN_DOT",
-    [TOKEN_DOT_DOT]        = "TOKEN_DOT_DOT",
-    [TOKEN_IDENTIFIER]     = "TOKEN_IDENTIFIER",
-    [TOKEN_STRING]         = "TOKEN_STRING",
-    [TOKEN_INTERPOLATION]  = "TOKEN_INTERPOLATION",
-    [TOKEN_NUMBER]         = "TOKEN_NUMBER",
-    [TOKEN_INT]            = "TOKEN_INT",
+    [TOKEN_SYMBOL_LEFT_PAREN]     = "TOKEN_LEFT_PAREN",
+    [TOKEN_SYMBOL_RIGHT_PAREN]    = "TOKEN_RIGHT_PAREN",
+    [TOKEN_SYMBOL_LEFT_BRACKET]   = "TOKEN_LEFT_BRACKET",
+    [TOKEN_SYMBOL_RIGHT_BRACKET]  = "TOKEN_RIGHT_BRACKET",
+    [TOKEN_SYMBOL_LEFT_BRACE]     = "TOKEN_LEFT_BRACE",
+    [TOKEN_SYMBOL_RIGHT_BRACE]    = "TOKEN_RIGHT_BRACE",
+    [TOKEN_SYMBOL_COLON]          = "TOKEN_COLON",
+    [TOKEN_SYMBOL_COMMA]          = "TOKEN_COMMA",
+    [TOKEN_SYMBOL_MINUS]          = "TOKEN_MINUS",
+    [TOKEN_SYMBOL_MODULO]         = "TOKEN_MODULO",
+    [TOKEN_SYMBOL_PIPE]           = "TOKEN_PIPE",
+    [TOKEN_SYMBOL_PLUS]           = "TOKEN_PLUS",
+    [TOKEN_SYMBOL_QUESTION]       = "TOKEN_QUESTION",
+    [TOKEN_SYMBOL_SEMICOLON]      = "TOKEN_SEMICOLON",
+    [TOKEN_SYMBOL_SLASH]          = "TOKEN_SLASH",
+    [TOKEN_SYMBOL_STAR]           = "TOKEN_STAR", 
+    [TOKEN_SYMBOL_BANG]           = "TOKEN_BANG",
+    [TOKEN_SYMBOL_BANG_EQUAL]     = "TOKEN_BANG_EQUAL",
+    [TOKEN_SYMBOL_EQUAL]          = "TOKEN_EQUAL",
+    [TOKEN_SYMBOL_EQUAL_EQUAL]    = "TOKEN_EQUAL_EQUAL",
+    [TOKEN_SYMBOL_GREATER]        = "TOKEN_GREATER",
+    [TOKEN_SYMBOL_GREATER_EQUAL]  = "TOKEN_GREATER_EQUAL",
+    [TOKEN_SYMBOL_LESS]           = "TOKEN_LESS",
+    [TOKEN_SYMBOL_LESS_EQUAL]     = "TOKEN_LESS_EQUAL",
+    [TOKEN_SYMBOL_DOT]            = "TOKEN_DOT",
+    [TOKEN_SYMBOL_DOT_DOT]        = "TOKEN_DOT_DOT",
+    [TOKEN_SYMBOL_IDENTIFIER]     = "TOKEN_IDENTIFIER",
+    [TOKEN_SYMBOL_STRING]         = "TOKEN_STRING",
+    [TOKEN_SYMBOL_INTERPOLATION]  = "TOKEN_INTERPOLATION",
+    [TOKEN_SYMBOL_NUMBER]         = "TOKEN_NUMBER",
+    [TOKEN_SYMBOL_INT]            = "TOKEN_INT",
     [TOKEN_AND]            = "TOKEN_AND",
     [TOKEN_AS]             = "TOKEN_AS",
     [TOKEN_ASYNC]          = "TOKEN_ASYNC",
@@ -67,7 +67,7 @@ const char* tokenNames[] = {
     [TOKEN_TRAIT]          = "TOKEN_TRAIT",
     [TOKEN_TRUE]           = "TOKEN_TRUE",
     [TOKEN_TRY]            = "TOKEN_TRY",
-    [TOKEN_TYPE_]      = "TOKEN_TYPE",
+    [TOKEN_TYPE_]          = "TOKEN_TYPE",
     [TOKEN_USING]          = "TOKEN_USING",
     [TOKEN_VAL]            = "TOKEN_VAL",
     [TOKEN_VAR]            = "TOKEN_VAR", 
@@ -99,9 +99,9 @@ bool tokenIsLiteral(Token token) {
         case TOKEN_NIL:
         case TOKEN_TRUE:
         case TOKEN_FALSE:
-        case TOKEN_NUMBER:
-        case TOKEN_INT:
-        case TOKEN_STRING:
+        case TOKEN_SYMBOL_NUMBER:
+        case TOKEN_SYMBOL_INT:
+        case TOKEN_SYMBOL_STRING:
             return true;
         default:
             return false;
@@ -110,15 +110,15 @@ bool tokenIsLiteral(Token token) {
 
 bool tokenIsOperator(Token token) {
     switch (token.type) {
-        case TOKEN_EQUAL_EQUAL:
-        case TOKEN_GREATER:
-        case TOKEN_LESS:
+        case TOKEN_SYMBOL_EQUAL_EQUAL:
+        case TOKEN_SYMBOL_GREATER:
+        case TOKEN_SYMBOL_LESS:
         case TOKEN_SYMBOL_PLUS:
         case TOKEN_SYMBOL_MINUS:
         case TOKEN_SYMBOL_STAR:
         case TOKEN_SYMBOL_SLASH:
         case TOKEN_SYMBOL_MODULO:
-        case TOKEN_DOT_DOT:
+        case TOKEN_SYMBOL_DOT_DOT:
         case TOKEN_SYMBOL_LEFT_BRACKET:
             return true;
         default:
