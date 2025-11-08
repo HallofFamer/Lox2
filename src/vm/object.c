@@ -522,6 +522,7 @@ static void printType(ObjType* type) {
         }
         printf(")");
     }
+    else if (IS_FORMAL_TYPE(type)) printf("%s", type->name->chars);
     else if (IS_GENERIC_TYPE(type)) {
         printf("%s<", type->name->chars);
         for (int i = 0; i < type->parameters.count; i++) {

@@ -274,6 +274,24 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
     return (TypeInfo*)callableType;
 }
 
+TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* rawType, int numParams, ...) {
+    GenericTypeInfo* genericType = newGenericTypeInfo(-1, shortName, shortName, rawType);
+    va_list args;
+    va_start(args, numParams);
+
+    for (int i = 0; i < numParams; i++) {
+        TypeInfo* paramType = va_arg(args, TypeInfo*);
+        TypeInfoArrayAdd(genericType->parameters, paramType);
+        if (IS_GENERIC_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+    }
+    va_end(args);
+
+    char* name = createGenericTypeName(genericType);
+    genericType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
+    genericType->baseType.fullName = genericType->baseType.shortName;
+    return (TypeInfo*)genericType;
+}
+
 ObjClass* getNativeClass(VM* vm, const char* fullName) {
     Value klass;
     tableGet(&vm->classes, newStringPerma(vm, fullName), &klass);

@@ -171,7 +171,7 @@ void inheritSuperclass(VM* vm, ObjClass* subclass, ObjClass* superclass) {
         BehaviorTypeInfo* subclassType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, subclass->fullName));
         TypeInfo* superclassType = typeTableGet(vm->typetab, superclass->fullName);
         subclassType->superclassType = superclassType;
-        typeTableAddAll(AS_BEHAVIOR_TYPE(superclassType)->fields, subclassType->fields);
+        typeTableFieldsCopy(AS_BEHAVIOR_TYPE(superclassType)->fields, subclassType->fields);
     }
 
     if (superclass->behaviorType == BEHAVIOR_CLASS) {

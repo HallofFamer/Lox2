@@ -162,6 +162,7 @@ void initVM(VM* vm) {
     resetStack(vm);
     initConfiguration(vm);
     vm->currentModule = NULL;
+    vm->runningGenerator = NULL;
     vm->numSymtabs = 0;
     vm->symtab = newSymbolTable(vm->numSymtabs++, NULL, SYMBOL_SCOPE_GLOBAL, -1);
     vm->typetab = newTypeTable(0);
@@ -189,7 +190,6 @@ void initVM(VM* vm) {
     vm->initString = copyStringPerma(vm, "__init__", 8);
     vm->voidString = copyStringPerma(vm, "void", 4);
     typeTableSet(vm->typetab, vm->voidString, newTypeInfo(0, sizeof(TypeInfo), TYPE_CATEGORY_VOID, vm->voidString, vm->voidString));
-    vm->runningGenerator = NULL;
 
     registerLangPackage(vm);
     registerCollectionPackage(vm);

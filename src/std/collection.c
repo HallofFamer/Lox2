@@ -423,7 +423,7 @@ LOX_METHOD(Array, addAll) {
     ASSERT_ARG_COUNT("Array::addAll(array)", 1);
     ASSERT_ARG_TYPE("Array::addAll(array)", 0, Array);
     valueArrayAddAll(vm, &AS_ARRAY(args[0])->elements, &AS_ARRAY(receiver)->elements);
-    RETURN_OBJ(receiver);
+    RETURN_NIL;
 }
 
 LOX_METHOD(Array, clear) {
@@ -2179,7 +2179,7 @@ void registerCollectionPackage(VM* vm) {
     vm->arrayClass->classType = OBJ_ARRAY;
     DEF_INTERCEPTOR(vm->arrayClass, Array, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->arrayClass, Array, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
-    DEF_METHOD(vm->arrayClass, Array, addAll, 1, RETURN_TYPE(Bool), PARAM_TYPE(clox.std.collection.Collection));
+    DEF_METHOD(vm->arrayClass, Array, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
     DEF_METHOD(vm->arrayClass, Array, clear, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->arrayClass, Array, clone, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->arrayClass, Array, collect, 1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Object), 1, PARAM_TYPE(Object)));
