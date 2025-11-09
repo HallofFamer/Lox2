@@ -143,8 +143,12 @@ static bool isTempType(TypeInfo* type) {
 }
 
 static char* createTempTypeName(TypeInfo* paramType) {
-    if (IS_CALLABLE_TYPE(paramType)) return createCallableTypeName(AS_CALLABLE_TYPE(paramType));
-    else if (IS_GENERIC_TYPE(paramType)) return createGenericTypeName(AS_GENERIC_TYPE(paramType));
+    if (IS_CALLABLE_TYPE(paramType)) {
+        return createCallableTypeName(AS_CALLABLE_TYPE(paramType));
+    }
+    else if (IS_GENERIC_TYPE(paramType)) {
+        return createGenericTypeName(AS_GENERIC_TYPE(paramType));
+    }
     else return paramType->shortName->chars;
 }
 

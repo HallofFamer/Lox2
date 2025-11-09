@@ -910,6 +910,8 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         insertGenericType(resolver, ast);
     }
     else {
+        SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createSymbol(resolver, ast->token));
+        if (item != NULL && item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
         ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
     }
 }
