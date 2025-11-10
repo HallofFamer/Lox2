@@ -648,7 +648,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
         Ast* typeParams = getTypeParameters(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
-            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FIELD, SYMBOL_STATE_DEFINED, NULL, false);
+            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);
         }
     }
 
@@ -911,7 +911,9 @@ static void resolveType(Resolver* resolver, Ast* ast) {
     }
     else {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createSymbol(resolver, ast->token));
-        if (item != NULL && item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
+        if (item != NULL && item->category == SYMBOL_CATEGORY_FORMAL && item->state == SYMBOL_STATE_DEFINED) {
+            item->state = SYMBOL_STATE_ACCESSED;
+        }
         ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
     }
 }

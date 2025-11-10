@@ -276,7 +276,7 @@ ObjClass* getClassFromTypeInfo(VM* vm, TypeInfo* type) {
     else if (IS_GENERIC_TYPE(type)) {
         return getClassFromTypeInfo(vm, AS_GENERIC_TYPE(type)->rawType);
     }
-    else if (IS_ALIAS_TYPE(type)) {
+    else if (IS_FORMAL_TYPE(type) || IS_ALIAS_TYPE(type)) {
         return vm->typeClass;
     }
     else if (IS_VOID_TYPE(type)) {
