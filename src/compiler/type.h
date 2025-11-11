@@ -53,7 +53,6 @@ typedef struct {
     TypeInfoArray* traitTypes;
     TypeTable* fields;
     TypeTable* methods;
-    bool isGeneric;
 } BehaviorTypeInfo;
 
 typedef struct {

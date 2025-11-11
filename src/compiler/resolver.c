@@ -617,7 +617,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
         Ast* typeParams = getTypeParameters(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
-            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_LOCAL, SYMBOL_STATE_DEFINED, NULL, false);
+            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);
         }
     }
 
