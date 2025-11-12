@@ -45,6 +45,7 @@ struct TypeInfo {
     TypeCategory category;
     ObjString* shortName;
     ObjString* fullName;
+    TypeInfoArray* formalParameters;
 };
 
 typedef struct {

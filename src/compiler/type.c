@@ -16,6 +16,7 @@ TypeInfo* newTypeInfo(int id, size_t size, TypeCategory category, ObjString* sho
         type->category = category;
         type->shortName = shortName;
         type->fullName = fullName;
+        type->formalParameters = NULL;
     }
     return type;
 }
