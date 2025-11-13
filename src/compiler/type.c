@@ -15,8 +15,9 @@ TypeInfo* newTypeInfo(int id, size_t size, TypeCategory category, ObjString* sho
         type->id = id;
         type->category = category;
         type->shortName = shortName;
-        type->fullName = fullName;
-        type->formalParameters = NULL;
+        type->fullName = fullName;   
+        type->formalParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (type->formalParameters != NULL) TypeInfoArrayInit(type->formalParameters);
     }
     return type;
 }

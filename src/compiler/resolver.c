@@ -913,8 +913,9 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createSymbol(resolver, ast->token));
         if (item != NULL && item->category == SYMBOL_CATEGORY_FORMAL && item->state == SYMBOL_STATE_DEFINED) {
             item->state = SYMBOL_STATE_ACCESSED;
+            item->type = getNativeType(resolver->vm, "Type");
         }
-        ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
+        else ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
     }
 }
 
