@@ -45,13 +45,13 @@ struct TypeInfo {
     TypeCategory category;
     ObjString* shortName;
     ObjString* fullName;
-    TypeInfoArray* formalParameters;
 };
 
 typedef struct {
     TypeInfo baseType;
     TypeInfo* superclassType;
     TypeInfoArray* traitTypes;
+    TypeInfoArray* formalTypes;
     TypeTable* fields;
     TypeTable* methods;
 } BehaviorTypeInfo;

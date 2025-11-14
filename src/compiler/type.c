@@ -16,8 +16,6 @@ TypeInfo* newTypeInfo(int id, size_t size, TypeCategory category, ObjString* sho
         type->category = category;
         type->shortName = shortName;
         type->fullName = fullName;   
-        type->formalParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        if (type->formalParameters != NULL) TypeInfoArrayInit(type->formalParameters);
     }
     return type;
 }
@@ -29,6 +27,8 @@ BehaviorTypeInfo* newBehaviorTypeInfo(int id, TypeCategory category, ObjString* 
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
 
+        behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (behaviorType->formalTypes != NULL) TypeInfoArrayInit(behaviorType->formalTypes);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
     }
@@ -40,6 +40,8 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
     if (behaviorType != NULL) {
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (behaviorType->formalTypes != NULL) TypeInfoArrayInit(behaviorType->formalTypes);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 
@@ -65,6 +67,8 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
 
+        behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (behaviorType->formalTypes != NULL) TypeInfoArrayInit(behaviorType->formalTypes);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = methods;
     }
