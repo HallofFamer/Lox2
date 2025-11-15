@@ -60,6 +60,31 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
     return behaviorType;
 }
 
+BehaviorTypeInfo* newBehaviorTypeInfoWithFormalParameters(int id, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType, int numParameters, ...) {
+    BehaviorTypeInfo* behaviorType = (BehaviorTypeInfo*)newTypeInfo(id, sizeof(BehaviorTypeInfo), category, shortName, fullName);
+    if (behaviorType != NULL) {
+        behaviorType->superclassType = superclassType;
+        behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
+        behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        behaviorType->fields = newTypeTable(-1);
+        behaviorType->methods = newTypeTable(id);
+
+        if (behaviorType->formalTypes != NULL) {
+            TypeInfoArrayInit(behaviorType->formalTypes);
+            va_list args;
+            va_start(args, numParameters);
+
+            for (int i = 0; i < numParameters; i++) {
+                TypeInfo* type = va_arg(args, TypeInfo*);
+                TypeInfoArrayAdd(behaviorType->formalTypes, type);
+            }
+            va_end(args);
+        }
+    }
+    return behaviorType;
+}
+
 BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType, TypeTable* methods) {
     BehaviorTypeInfo* behaviorType = (BehaviorTypeInfo*)newTypeInfo(id, sizeof(BehaviorTypeInfo), category, shortName, fullName);
     if (behaviorType != NULL) {
