@@ -514,6 +514,10 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
         Ast* typeParams = astGetChild(ast, 0);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = typeParams->children->elements[i];
+            if (typeParam->type == NULL && astNumChild(typeParam) == 0) {
+                ObjString* typeParamName = createSymbol(resolver, typeParam->token);
+                typeParam->type = newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, typeParamName, typeParamName);
+            }
             TypeInfoArrayAdd(genericType->parameters, typeParam->type);
         }
         ast->type = (TypeInfo*)genericType;
@@ -907,7 +911,8 @@ static void resolveType(Resolver* resolver, Ast* ast) {
     }
     else if (ast->attribute.isGeneric) {
         resolveChild(resolver, ast, 0);
-        insertGenericType(resolver, ast);
+		TypeInfo* behaviorType = getTypeForSymbol(resolver, ast->token, false);
+        if (behaviorType != NULL) insertGenericType(resolver, ast);
     }
     else {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createSymbol(resolver, ast->token));
