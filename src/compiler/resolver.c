@@ -911,8 +911,17 @@ static void resolveType(Resolver* resolver, Ast* ast) {
     }
     else if (ast->attribute.isGeneric) {
         resolveChild(resolver, ast, 0);
-		TypeInfo* behaviorType = getTypeForSymbol(resolver, ast->token, false);
-        if (behaviorType != NULL) insertGenericType(resolver, ast);
+        Ast* typeParams = astGetChild(ast, 0);
+        bool hasInstantiatedParams = false;
+
+        for (int i = 0; i < typeParams->children->count; i++) {
+            Ast* typeParam = astGetChild(typeParams, i);
+            if (typeParam->type != NULL) {
+                hasInstantiatedParams = true;
+                break;
+            }
+        }
+        if (hasInstantiatedParams) insertGenericType(resolver, ast);
     }
     else {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createSymbol(resolver, ast->token));

@@ -236,7 +236,7 @@ char* createGenericTypeName(GenericTypeInfo* genericType) {
 
     if (genericType->rawType != NULL) {
         char* rawTypeName = genericType->rawType->shortName->chars;
-        size_t rawTypeLength = strlen(genericType->rawType->fullName->chars);
+        size_t rawTypeLength = strlen(genericType->rawType->shortName->chars);
         memcpy(genericName, rawTypeName, rawTypeLength);
         length += rawTypeLength;
     }
