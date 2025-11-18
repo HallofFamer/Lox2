@@ -818,11 +818,11 @@ static void resolveInvoke(Resolver* resolver, Ast* ast) {
 
 static void resolveLiteral(Resolver* resolver, Ast* ast) {
     switch (ast->token.type) {
-        case TOKEN_NIL: 
+        case TOKEN_SYMBOL_NIL: 
             insertLiteralType(resolver, ast, "Nil");
             break;
-        case TOKEN_TRUE:
-        case TOKEN_FALSE:
+        case TOKEN_SYMBOL_TRUE:
+        case TOKEN_SYMBOL_FALSE:
             insertLiteralType(resolver, ast, "Bool");
             break;
         case TOKEN_SYMBOL_INT:

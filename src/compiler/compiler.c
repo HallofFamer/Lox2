@@ -755,9 +755,9 @@ static void compileInvoke(Compiler* compiler, Ast* ast) {
 
 static void compileLiteral(Compiler* compiler, Ast* ast) {
     switch (ast->token.type) {
-        case TOKEN_NIL: emitByte(compiler, OP_NIL); break;
-        case TOKEN_TRUE: emitByte(compiler, OP_TRUE); break;
-        case TOKEN_FALSE: emitByte(compiler, OP_FALSE); break;
+        case TOKEN_SYMBOL_NIL: emitByte(compiler, OP_NIL); break;
+        case TOKEN_SYMBOL_TRUE: emitByte(compiler, OP_TRUE); break;
+        case TOKEN_SYMBOL_FALSE: emitByte(compiler, OP_FALSE); break;
         case TOKEN_SYMBOL_INT: integer(compiler, ast->token); break;
         case TOKEN_SYMBOL_NUMBER: number(compiler, ast->token); break;
         case TOKEN_SYMBOL_STRING: string(compiler, ast->token); break;

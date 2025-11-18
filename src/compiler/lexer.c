@@ -144,68 +144,68 @@ static TokenSymbol identifierType(Lexer* lexer) {
         case 'a':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
-                    case 'n': return checkKeyword(lexer, 2, 1, "d", TOKEN_AND);
+                    case 'n': return checkKeyword(lexer, 2, 1, "d", TOKEN_SYMBOL_AND);
                     case 's': {
-                        if (lexer->current - lexer->start > 2) return checkKeyword(lexer, 2, 3, "ync", TOKEN_ASYNC);
-                        else return checkKeyword(lexer, 2, 0, "", TOKEN_AS);
+                        if (lexer->current - lexer->start > 2) return checkKeyword(lexer, 2, 3, "ync", TOKEN_SYMBOL_ASYNC);
+                        else return checkKeyword(lexer, 2, 0, "", TOKEN_SYMBOL_AS);
                     }
-                    case 'w': return checkKeyword(lexer, 2, 3, "ait", TOKEN_AWAIT);
+                    case 'w': return checkKeyword(lexer, 2, 3, "ait", TOKEN_SYMBOL_AWAIT);
                 }
             }
-        case 'b': return checkKeyword(lexer, 1, 4, "reak", TOKEN_BREAK);
+        case 'b': return checkKeyword(lexer, 1, 4, "reak", TOKEN_SYMBOL_BREAK);
         case 'c':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
                     case 'a':
                         if (lexer->current - lexer->start > 2) {
                             switch (lexer->start[2]) {
-                                case 's': return checkKeyword(lexer, 3, 1, "e", TOKEN_CASE);
-                                case 't': return checkKeyword(lexer, 3, 2, "ch", TOKEN_CATCH);
+                                case 's': return checkKeyword(lexer, 3, 1, "e", TOKEN_SYMBOL_CASE);
+                                case 't': return checkKeyword(lexer, 3, 2, "ch", TOKEN_SYMBOL_CATCH);
                             }
                         }
-                    case 'l': return checkKeyword(lexer, 2, 3, "ass", TOKEN_CLASS);
-                    case 'o': return checkKeyword(lexer, 2, 6, "ntinue", TOKEN_CONTINUE);
+                    case 'l': return checkKeyword(lexer, 2, 3, "ass", TOKEN_SYMBOL_CLASS);
+                    case 'o': return checkKeyword(lexer, 2, 6, "ntinue", TOKEN_SYMBOL_CONTINUE);
                 }
             }
-        case 'd': return checkKeyword(lexer, 1, 6, "efault", TOKEN_DEFAULT);
+        case 'd': return checkKeyword(lexer, 1, 6, "efault", TOKEN_SYMBOL_DEFAULT);
         case 'e': 
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
-                    case 'l': return checkKeyword(lexer, 2, 2, "se", TOKEN_ELSE);
-                    case 'x': return checkKeyword(lexer, 2, 5, "tends", TOKEN_EXTENDS);
+                    case 'l': return checkKeyword(lexer, 2, 2, "se", TOKEN_SYMBOL_ELSE);
+                    case 'x': return checkKeyword(lexer, 2, 5, "tends", TOKEN_SYMBOL_EXTENDS);
                 }
             }
         case 'f':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
-                    case 'a': return checkKeyword(lexer, 2, 3, "lse", TOKEN_FALSE);
-                    case 'i': return checkKeyword(lexer, 2, 5, "nally", TOKEN_FINALLY);
-                    case 'o': return checkKeyword(lexer, 2, 1, "r", TOKEN_FOR);
-                    case 'r': return checkKeyword(lexer, 2, 2, "om", TOKEN_FROM);
-                    case 'u': return checkKeyword(lexer, 2, 1, "n", TOKEN_FUN);
+                    case 'a': return checkKeyword(lexer, 2, 3, "lse", TOKEN_SYMBOL_FALSE);
+                    case 'i': return checkKeyword(lexer, 2, 5, "nally", TOKEN_SYMBOL_FINALLY);
+                    case 'o': return checkKeyword(lexer, 2, 1, "r", TOKEN_SYMBOL_FOR);
+                    case 'r': return checkKeyword(lexer, 2, 2, "om", TOKEN_SYMBOL_FROM);
+                    case 'u': return checkKeyword(lexer, 2, 1, "n", TOKEN_SYMBOL_FUN);
                 }
             }
-        case 'i': return checkKeyword(lexer, 1, 1, "f", TOKEN_IF);
+        case 'i': return checkKeyword(lexer, 1, 1, "f", TOKEN_SYMBOL_IF);
         case 'n':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
-                    case 'a': return checkKeyword(lexer, 2, 7, "mespace", TOKEN_NAMESPACE);
-                    case 'i': return checkKeyword(lexer, 2, 1, "l", TOKEN_NIL);
+                    case 'a': return checkKeyword(lexer, 2, 7, "mespace", TOKEN_SYMBOL_NAMESPACE);
+                    case 'i': return checkKeyword(lexer, 2, 1, "l", TOKEN_SYMBOL_NIL);
                 }
             }
-        case 'o': return checkKeyword(lexer, 1, 1, "r", TOKEN_OR);
+        case 'o': return checkKeyword(lexer, 1, 1, "r", TOKEN_SYMBOL_OR);
         case 'r':
             if (lexer->current - lexer->start > 2 && lexer->start[1] == 'e') {
                 switch (lexer->start[2]) {
-                    case 'q': return checkKeyword(lexer, 3, 4, "uire", TOKEN_REQUIRE);
-                    case 't': return checkKeyword(lexer, 3, 3, "urn", TOKEN_RETURN);
+                    case 'q': return checkKeyword(lexer, 3, 4, "uire", TOKEN_SYMBOL_REQUIRE);
+                    case 't': return checkKeyword(lexer, 3, 3, "urn", TOKEN_SYMBOL_RETURN);
                 }
             }
         case 's':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
-                    case 'u': return checkKeyword(lexer, 2, 3, "per", TOKEN_SUPER);
-                    case 'w': return checkKeyword(lexer, 2, 4, "itch", TOKEN_SWITCH);
+                    case 'u': return checkKeyword(lexer, 2, 3, "per", TOKEN_SYMBOL_SUPER);
+                    case 'w': return checkKeyword(lexer, 2, 4, "itch", TOKEN_SYMBOL_SWITCH);
                 }
             }
         case 't':
@@ -214,47 +214,47 @@ static TokenSymbol identifierType(Lexer* lexer) {
                     case 'h':
                         if (lexer->current - lexer->start > 2) {
                             switch (lexer->start[2]) {
-                                case 'i': return checkKeyword(lexer, 3, 1, "s", TOKEN_THIS);
-                                case 'r': return checkKeyword(lexer, 3, 2, "ow", TOKEN_THROW);
+                                case 'i': return checkKeyword(lexer, 3, 1, "s", TOKEN_SYMBOL_THIS);
+                                case 'r': return checkKeyword(lexer, 3, 2, "ow", TOKEN_SYMBOL_THROW);
                             }
                         }
                    case 'r':
                         if (lexer->current - lexer->start > 2) {
                             switch (lexer->start[2]) {
-                                case 'a': return checkKeyword(lexer, 3, 2, "it", TOKEN_TRAIT);
-                                case 'u': return checkKeyword(lexer, 3, 1, "e", TOKEN_TRUE);
-                                case 'y': return checkKeyword(lexer, 3, 0, "", TOKEN_TRY);
+                                case 'a': return checkKeyword(lexer, 3, 2, "it", TOKEN_SYMBOL_TRAIT);
+                                case 'u': return checkKeyword(lexer, 3, 1, "e", TOKEN_SYMBOL_TRUE);
+                                case 'y': return checkKeyword(lexer, 3, 0, "", TOKEN_SYMBOL_TRY);
                             }
                         }
                    case 'y':
-                       return checkKeyword(lexer, 2, 2, "pe", TOKEN_TYPE_);
+                       return checkKeyword(lexer, 2, 2, "pe", TOKEN_SYMBOL_TYPE);
                 }
             }
             break;
-        case 'u': return checkKeyword(lexer, 1, 4, "sing", TOKEN_USING);
+        case 'u': return checkKeyword(lexer, 1, 4, "sing", TOKEN_SYMBOL_USING);
         case 'v':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
                     case 'a':
                         if (lexer->current - lexer->start > 2) {
                             switch (lexer->start[2]) {
-                                case 'l': return checkKeyword(lexer, 3, 0, "", TOKEN_VAL);
-                                case 'r': return checkKeyword(lexer, 3, 0, "", TOKEN_VAR);
+                                case 'l': return checkKeyword(lexer, 3, 0, "", TOKEN_SYMBOL_VAL);
+                                case 'r': return checkKeyword(lexer, 3, 0, "", TOKEN_SYMBOL_VAR);
                             }
                         }
-                    case 'o': return checkKeyword(lexer, 2, 2, "id", TOKEN_VOID);
+                    case 'o': return checkKeyword(lexer, 2, 2, "id", TOKEN_SYMBOL_VOID);
                 }
             }
             break;
         case 'w':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
-                    case 'h': return checkKeyword(lexer, 2, 3, "ile", TOKEN_WHILE);
-                    case 'i': return checkKeyword(lexer, 2, 2, "th", TOKEN_WITH);
+                    case 'h': return checkKeyword(lexer, 2, 3, "ile", TOKEN_SYMBOL_WHILE);
+                    case 'i': return checkKeyword(lexer, 2, 2, "th", TOKEN_SYMBOL_WITH);
                 }
             }
             break;
-        case 'y': return checkKeyword(lexer, 1, 4, "ield", TOKEN_YIELD);
+        case 'y': return checkKeyword(lexer, 1, 4, "ield", TOKEN_SYMBOL_YIELD);
     }
     return TOKEN_SYMBOL_IDENTIFIER;
 }
