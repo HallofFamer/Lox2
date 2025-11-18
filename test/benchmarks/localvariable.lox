@@ -25,7 +25,7 @@ fun benchmark(){
         sum = sum + zoo.aardvark + zoo.baboon + zoo.cat + zoo.donkey + zoo.elephant + zoo.fox
     }
     
-    print("Time taken for property access: ")
+    print("Time taken for local variable access: ")
     print(clock() - start)
     println(" seconds")
     println("Sum: " + sum.toString())

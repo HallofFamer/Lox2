@@ -24,8 +24,5 @@ while (sum < 10000000) {
     sum = sum + zoo.aardvark + zoo.baboon + zoo.cat + zoo.donkey + zoo.elephant + zoo.fox
 }
 
-print("Time taken for property access: ")
-print(clock() - start)
-println(" seconds")
-println("Sum: " + sum.toString())
-println("")
+println("Time taken for property access: ${clock() - start} seconds")
+println("Sum: ${sum}")

@@ -23,11 +23,8 @@ class Zoo {
       sum = sum + this.aardvark + this.baboon + this.cat + this.donkey + this.elephant + this.fox
     }
 	
-	print("Time taken for property access: ")
-    print(clock() - start)
-    println(" seconds")
-    println("Sum: " + sum.toString())
-    println("")
+	println("Time taken for property access: ${clock() - start} seconds")
+    println("Sum: ${sum}")
   }
 }
 
