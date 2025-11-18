@@ -71,6 +71,7 @@ typedef struct {
     TypeInfo baseType;
     TypeInfo* returnType;
     TypeInfoArray* paramTypes;
+    TypeInfoArray* formalTypes;
     CallableTypeAttribute attribute;
 } CallableTypeInfo;
 
@@ -162,6 +163,8 @@ static inline bool hasGenericParameters(TypeInfo* type) {
     if (type == NULL) return false;
     else if (IS_GENERIC_TYPE(type)) return true;
     else if (IS_BEHAVIOR_TYPE(type)) return AS_BEHAVIOR_TYPE(type)->formalTypes->count > 0;
+    else if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type)->formalTypes->count > 0;
+    else return false;
 }
 
 #endif // !clox_type_h

@@ -1301,7 +1301,7 @@ LOX_METHOD(LinkedList, __init__) {
 LOX_METHOD(LinkedList, add) {
     ASSERT_ARG_COUNT("LinkedList::add(element)", 1);
     linkAddLast(vm, AS_INSTANCE(receiver), args[0]);
-    RETURN_TRUE;
+    RETURN_OBJ(receiver);
 }
 
 LOX_METHOD(LinkedList, addAt) {
@@ -2159,7 +2159,7 @@ void registerCollectionPackage(VM* vm) {
     bindTrait(vm, collectionClass, iterableTrait);
     DEF_FIELD(collectionClass, length, Int, false, INT_VAL(0));
     DEF_INTERCEPTOR(collectionClass, Collection, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Collection));
-    DEF_METHOD(collectionClass, Collection, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(collectionClass, Collection, add, 1, RETURN_TYPE(clox.std.collection.Collection), PARAM_TYPE(Object));
     DEF_METHOD(collectionClass, Collection, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
     DEF_METHOD(collectionClass, Collection, collect, 1, RETURN_TYPE(clox.std.collection.Collection), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Object), 1, PARAM_TYPE(Object)));
     DEF_METHOD(collectionClass, Collection, detect, 1, RETURN_TYPE(Object), PARAM_TYPE_CALLABLE_N(RETURN_TYPE(Bool), 1, PARAM_TYPE(Object)));
@@ -2178,7 +2178,7 @@ void registerCollectionPackage(VM* vm) {
     bindSuperclass(vm, vm->arrayClass, listClass);
     vm->arrayClass->classType = OBJ_ARRAY;
     DEF_INTERCEPTOR(vm->arrayClass, Array, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Array));
-    DEF_METHOD(vm->arrayClass, Array, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->arrayClass, Array, add, 1, RETURN_TYPE(clox.std.collection.Array), PARAM_TYPE(Object));
     DEF_METHOD(vm->arrayClass, Array, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
     DEF_METHOD(vm->arrayClass, Array, clear, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->arrayClass, Array, clone, 0, RETURN_TYPE(clox.std.collection.Array));
@@ -2217,7 +2217,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_FIELD(linkedListClass, first, clox.std.collection.Node, true, NIL_VAL);
     DEF_FIELD(linkedListClass, last, clox.std.collection.Node, true, NIL_VAL);
     DEF_INTERCEPTOR(linkedListClass, LinkedList, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.LinkedList));
-    DEF_METHOD(linkedListClass, LinkedList, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(linkedListClass, LinkedList, add, 1, RETURN_TYPE(clox.std.collection.LinkedList), PARAM_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, addAt, 2, RETURN_TYPE(Object), PARAM_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, addFirst, 1, RETURN_TYPE(void), PARAM_TYPE(Object));
     DEF_METHOD(linkedListClass, LinkedList, addLast, 1, RETURN_TYPE(void), PARAM_TYPE(Object));
@@ -2328,7 +2328,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_FIELD(vm->rangeClass, from, Int, true, INT_VAL(0));
     DEF_FIELD(vm->rangeClass, to, Int, true, INT_VAL(0));
     DEF_INTERCEPTOR(vm->rangeClass, Range, INTERCEPTOR_INIT, __init__, 2, RETURN_TYPE(clox.std.collection.Range), PARAM_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(vm->rangeClass, Range, add, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(vm->rangeClass, Range, add, 1, RETURN_TYPE(clox.std.collection.Range), PARAM_TYPE(Object));
     DEF_METHOD(vm->rangeClass, Range, addAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Collection));
     DEF_METHOD(vm->rangeClass, Range, clone, 0, RETURN_TYPE(clox.std.collection.Range));
     DEF_METHOD(vm->rangeClass, Range, contains, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));

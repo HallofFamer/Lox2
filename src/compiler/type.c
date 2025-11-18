@@ -105,8 +105,11 @@ CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* 
     if (callableType != NULL) {
         callableType->returnType = returnType;
         callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        callableType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         callableType->attribute = callableTypeInitAttribute();
+
         if (callableType->paramTypes != NULL) TypeInfoArrayInit(callableType->paramTypes);
+        if (callableType->formalTypes != NULL) TypeInfoArrayInit(callableType->formalTypes);
     }
     return callableType;
 }
@@ -277,6 +280,7 @@ void freeTypeInfo(TypeInfo* type) {
     if (IS_BEHAVIOR_TYPE(type)) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
+        if (behaviorType->formalTypes != NULL) TypeInfoArrayFree(behaviorType->formalTypes);
         freeTypeTable(behaviorType->fields);
         freeTypeTable(behaviorType->methods);
         free(behaviorType);
@@ -284,6 +288,7 @@ void freeTypeInfo(TypeInfo* type) {
     else if (IS_CALLABLE_TYPE(type)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
         if (callableType->paramTypes != NULL) TypeInfoArrayFree(callableType->paramTypes);
+        if (callableType->formalTypes != NULL) TypeInfoArrayFree(callableType->formalTypes);
         free(callableType);
     }
     else if (IS_GENERIC_TYPE(type)) {

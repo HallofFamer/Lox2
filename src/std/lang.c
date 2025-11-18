@@ -1861,7 +1861,7 @@ LOX_METHOD(Type, __init__) {
     ASSERT_ARG_INSTANCE_OF("Type::__init__(name, behavior)", 1, Behavior);
     ObjType* self = AS_TYPE(receiver);
     self->name = AS_STRING(args[0]);
-    self->behavior = AS_CLASS(args[1]);
+    self->behavior = IS_TYPE(args[1]) ? AS_TYPE(args[1])->behavior : AS_CLASS(args[1]);
     RETURN_OBJ(self);
 }
 
