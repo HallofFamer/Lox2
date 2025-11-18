@@ -92,7 +92,7 @@ typedef struct {
 typedef struct {
     TypeInfo baseType;
     TypeInfo* rawType;
-    TypeInfoArray* parameters;
+    TypeInfoArray* actualParameters;
 } GenericTypeInfo;
 
 typedef struct {

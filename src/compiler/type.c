@@ -136,8 +136,8 @@ GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* ful
     GenericTypeInfo* genericType = (GenericTypeInfo*)newTypeInfo(id, sizeof(GenericTypeInfo), TYPE_CATEGORY_GENERIC, shortName, fullName);
     if (genericType != NULL) {
         genericType->rawType = rawType;
-        genericType->parameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        if (genericType->parameters != NULL) TypeInfoArrayInit(genericType->parameters);
+        genericType->actualParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (genericType->actualParameters != NULL) TypeInfoArrayInit(genericType->actualParameters);
     }
     return genericType;
 }
@@ -146,16 +146,16 @@ GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, 
     GenericTypeInfo* genericType = (GenericTypeInfo*)newTypeInfo(id, sizeof(GenericTypeInfo), TYPE_CATEGORY_GENERIC, shortName, fullName);
     if (genericType != NULL) {
         genericType->rawType = rawType;
-        genericType->parameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        genericType->actualParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         
-        if (genericType->parameters != NULL) {
-            TypeInfoArrayInit(genericType->parameters);
+        if (genericType->actualParameters != NULL) {
+            TypeInfoArrayInit(genericType->actualParameters);
             va_list args;
             va_start(args, numParameters);
 
             for (int i = 0; i < numParameters; i++) {
                 TypeInfo* type = va_arg(args, TypeInfo*);
-                TypeInfoArrayAdd(genericType->parameters, type);
+                TypeInfoArrayAdd(genericType->actualParameters, type);
             }
             va_end(args);
         }
@@ -248,8 +248,8 @@ char* createGenericTypeName(GenericTypeInfo* genericType) {
     memcpy(genericName + length, "<", 1);
     length += 1;
 
-    for (int i = 0; i < genericType->parameters->count; i++) {
-        TypeInfo* paramType = genericType->parameters->elements[i];
+    for (int i = 0; i < genericType->actualParameters->count; i++) {
+        TypeInfo* paramType = genericType->actualParameters->elements[i];
         if (i > 0) {
             genericName[length++] = ',';
             genericName[length++] = ' ';
@@ -288,7 +288,7 @@ void freeTypeInfo(TypeInfo* type) {
     }
     else if (IS_GENERIC_TYPE(type)) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
-        if (genericType->parameters != NULL) TypeInfoArrayFree(genericType->parameters);
+        if (genericType->actualParameters != NULL) TypeInfoArrayFree(genericType->actualParameters);
         free(genericType);
     }
     else {
@@ -565,10 +565,10 @@ static void typeTableOutputFunction(CallableTypeInfo* function) {
 
 static void typeTableOutputGeneric(GenericTypeInfo* generic) {
     printf("    generic type: %s\n", generic->rawType->shortName->chars);
-    if (generic->parameters != NULL && generic->parameters->count > 0) {
-        printf("    parameters: %s", generic->parameters->elements[0]->shortName->chars);
-        for (int i = 1; i < generic->parameters->count; i++) {
-            printf(", %s", generic->parameters->elements[i]->shortName->chars);
+    if (generic->actualParameters != NULL && generic->actualParameters->count > 0) {
+        printf("    parameters: %s", generic->actualParameters->elements[0]->shortName->chars);
+        for (int i = 1; i < generic->actualParameters->count; i++) {
+            printf(", %s", generic->actualParameters->elements[i]->shortName->chars);
         }
         printf("\n");
     }
@@ -627,10 +627,10 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     else if (IS_GENERIC_TYPE(type) && IS_GENERIC_TYPE(type2)) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
         GenericTypeInfo* genericType2 = AS_GENERIC_TYPE(type2);
-        if (genericType->parameters->count != genericType2->parameters->count) return false;
+        if (genericType->actualParameters->count != genericType2->actualParameters->count) return false;
 
-        for (int i = 0; i < genericType->parameters->count; i++) {
-            if (!isEqualType(genericType->parameters->elements[i], genericType2->parameters->elements[i])) return false;
+        for (int i = 0; i < genericType->actualParameters->count; i++) {
+            if (!isEqualType(genericType->actualParameters->elements[i], genericType2->actualParameters->elements[i])) return false;
         }
         return true;
     }

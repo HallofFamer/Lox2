@@ -281,7 +281,7 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* 
 
     for (int i = 0; i < numParams; i++) {
         TypeInfo* paramType = va_arg(args, TypeInfo*);
-        TypeInfoArrayAdd(genericType->parameters, paramType);
+        TypeInfoArrayAdd(genericType->actualParameters, paramType);
         if (IS_GENERIC_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
     }
     va_end(args);

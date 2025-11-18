@@ -518,7 +518,7 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
                 ObjString* typeParamName = createSymbol(resolver, typeParam->token);
                 typeParam->type = newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, typeParamName, typeParamName);
             }
-            TypeInfoArrayAdd(genericType->parameters, typeParam->type);
+            TypeInfoArrayAdd(genericType->actualParameters, typeParam->type);
         }
         ast->type = (TypeInfo*)genericType;
 

@@ -372,8 +372,8 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
     }
     else if (targetType != NULL && IS_GENERIC_TYPE(targetType)) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(targetType);
-        for (int i = 0; i < genericType->parameters->count; i++) {
-            TypeInfo* paramType = genericType->parameters->elements[i];
+        for (int i = 0; i < genericType->actualParameters->count; i++) {
+            TypeInfo* paramType = genericType->actualParameters->elements[i];
             valueArrayWrite(vm, &type->parameters, createTypeObjFromTypeInfo(vm, paramType));
         }
     }
