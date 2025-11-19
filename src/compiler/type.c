@@ -543,6 +543,14 @@ static void typeTableOutputBehavior(BehaviorTypeInfo* behavior) {
         printf("\n");
     }
 
+    if (behavior->formalTypes != NULL && behavior->formalTypes->count > 0) {
+        printf("    formal parameters: %s", behavior->formalTypes->elements[0]->shortName->chars);
+        for (int i = 1; i < behavior->formalTypes->count; i++) {
+            printf(", %s", behavior->formalTypes->elements[i]->shortName->chars);
+        }
+        printf("\n");
+    }
+
     if (behavior->fields != NULL && behavior->fields->count > 0) {
         typeTableOutputFields(behavior->fields);
     }

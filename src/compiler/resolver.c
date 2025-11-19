@@ -605,6 +605,20 @@ static Ast* getTypeParameters(Ast* ast) {
     return false;
 }
 
+static bool hasInstantiatedTypeParameters(Ast* ast) {
+    bool hasInstantiatedParams = false;
+
+    for (int i = 0; i < ast->children->count; i++) {
+        Ast* typeParam = astGetChild(ast, i);
+        if (typeParam->type != NULL) {
+            hasInstantiatedParams = true;
+            break;
+        }
+    }
+
+    return hasInstantiatedParams;
+}
+
 static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) {
     FunctionResolver functionResolver;
     initFunctionResolver(resolver, &functionResolver, ast->token, resolver->currentFunction->scopeDepth + 1);
@@ -911,17 +925,9 @@ static void resolveType(Resolver* resolver, Ast* ast) {
     }
     else if (ast->attribute.isGeneric) {
         resolveChild(resolver, ast, 0);
-        Ast* typeParams = astGetChild(ast, 0);
-        bool hasInstantiatedParams = false;
-
-        for (int i = 0; i < typeParams->children->count; i++) {
-            Ast* typeParam = astGetChild(typeParams, i);
-            if (typeParam->type != NULL) {
-                hasInstantiatedParams = true;
-                break;
-            }
+        if (hasInstantiatedTypeParameters(astGetChild(ast, 0))) {
+            insertGenericType(resolver, ast);
         }
-        if (hasInstantiatedParams) insertGenericType(resolver, ast);
     }
     else {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createSymbol(resolver, ast->token));
