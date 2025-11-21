@@ -502,6 +502,14 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
     return callableType;
 }
 
+static void insertTypeParameter(Resolver* resolver, Ast* ast, GenericTypeInfo* genericType) {
+    if (ast->type == NULL && astNumChild(ast) == 0) {
+        ObjString* typeParamName = createSymbol(resolver, ast->token);
+        ast->type = newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, typeParamName, typeParamName);
+    }
+    TypeInfoArrayAdd(genericType->actualParameters, ast->type);
+}
+
 static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
     TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false);
     if (rawType == NULL || IS_VOID_TYPE(rawType) || IS_FORMAL_TYPE(rawType)) {
@@ -514,11 +522,7 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
         Ast* typeParams = astGetChild(ast, 0);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = typeParams->children->elements[i];
-            if (typeParam->type == NULL && astNumChild(typeParam) == 0) {
-                ObjString* typeParamName = createSymbol(resolver, typeParam->token);
-                typeParam->type = newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, typeParamName, typeParamName);
-            }
-            TypeInfoArrayAdd(genericType->actualParameters, typeParam->type);
+			insertTypeParameter(resolver, typeParam, genericType);
         }
         ast->type = (TypeInfo*)genericType;
 

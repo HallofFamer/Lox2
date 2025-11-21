@@ -588,8 +588,17 @@ static void typeTableOutputFunction(CallableTypeInfo* function) {
     if (function->returnType == NULL) printf("dynamic ");
     else if (function->attribute.isVoid) printf("void ");
     else printf("%s ", function->returnType->shortName->chars);
-    printf("%s(", function->baseType.shortName->chars);
 
+    printf("%s", function->baseType.shortName->chars);
+	if (function->formalTypes != NULL && function->formalTypes->count > 0) {
+        printf("<%s", function->formalTypes->elements[0]->shortName->chars);
+        for (int i = 1; i < function->formalTypes->count; i++) {
+            printf(", %s", function->formalTypes->elements[i]->shortName->chars);
+        }
+        printf(">");
+    }
+
+    printf("(");
     if (function->paramTypes != NULL && function->paramTypes->count > 0) {
         printf("%s", (function->paramTypes->elements[0] != NULL) ? function->paramTypes->elements[0]->shortName->chars : "dynamic");
         for (int i = 1; i < function->paramTypes->count; i++) {
