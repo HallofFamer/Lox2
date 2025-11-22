@@ -11,6 +11,7 @@
 typedef struct {
     bool isAsync;
     bool isClassMethod;
+    bool isGeneric;
     bool isInitializer;
     bool isInstanceMethod;
     bool isLambda;
@@ -63,6 +64,7 @@ static ResolverAttribute resolverInitModifier() {
     return (ResolverAttribute) {
         .isAsync = false,
         .isClassMethod = false,
+        .isGeneric = false,
         .isInitializer = false,
         .isInstanceMethod = false,
         .isLambda = false,
@@ -179,6 +181,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
 static void setCallableTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
     callableType->attribute.isAsync = ast->attribute.isAsync;
     callableType->attribute.isClassMethod = ast->attribute.isClass;
+    callableType->attribute.isGeneric = ast->attribute.isGeneric;
     callableType->attribute.isInitializer = ast->attribute.isInitializer;
     callableType->attribute.isInstanceMethod = !ast->attribute.isClass;
     callableType->attribute.isLambda = ast->attribute.isLambda;

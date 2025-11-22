@@ -583,7 +583,7 @@ static void typeTableOutputBehavior(BehaviorTypeInfo* behavior) {
     }
 }
 
-static void typeTableOutputFunction(CallableTypeInfo* function) {
+static void typeTableOutputCallable(CallableTypeInfo* function) {
     printf("    signature: ");
     if (function->returnType == NULL) printf("dynamic ");
     else if (function->attribute.isVoid) printf("void ");
@@ -632,7 +632,7 @@ static void typeTableOutputEntry(TypeEntry* entry) {
     typeTableOutputCategory(entry->value->category);
 
     if (IS_BEHAVIOR_TYPE(entry->value)) typeTableOutputBehavior(AS_BEHAVIOR_TYPE(entry->value));
-    else if (IS_CALLABLE_TYPE(entry->value)) typeTableOutputFunction(AS_CALLABLE_TYPE(entry->value));
+    else if (IS_CALLABLE_TYPE(entry->value)) typeTableOutputCallable(AS_CALLABLE_TYPE(entry->value));
     else if (IS_GENERIC_TYPE(entry->value)) typeTableOutputGeneric(AS_GENERIC_TYPE(entry->value));
     else if (IS_ALIAS_TYPE(entry->value)) typeTableOutputAlias(AS_ALIAS_TYPE(entry->value));
     printf("\n");
