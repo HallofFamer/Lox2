@@ -195,10 +195,6 @@ AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullNam
     return aliasType;
 }
 
-static bool isTempType(TypeInfo* type) {
-    return IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type);
-}
-
 static char* createTempTypeName(TypeInfo* paramType) {
     if (IS_CALLABLE_TYPE(paramType)) {
         return createCallableTypeName(AS_CALLABLE_TYPE(paramType));

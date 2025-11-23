@@ -160,6 +160,10 @@ void typeTableOutput(TypeTable* typetab);
 bool isEqualType(TypeInfo* type, TypeInfo* type2);
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2);
 
+static inline bool isTempType(TypeInfo* type) {
+    return IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type);
+}
+
 static inline bool hasGenericParameters(TypeInfo* type) {
     if (type == NULL) return false;
     else if (IS_GENERIC_TYPE(type)) return true;
