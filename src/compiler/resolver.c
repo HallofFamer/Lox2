@@ -480,12 +480,13 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     }
 }
 
-static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isLambda, bool isVariadic, bool isVoid) {
+static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isGeneric, bool isLambda, bool isVariadic, bool isVoid) {
     Ast* returnType = astGetChild(ast, 0);
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
     
     if (callableType != NULL) {
         callableType->attribute.isAsync = isAsync;
+        callableType->attribute.isGeneric = isGeneric;
         callableType->attribute.isLambda = isLambda;
         callableType->attribute.isVariadic = isVariadic;
         callableType->attribute.isVoid = isVoid;
@@ -653,7 +654,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     Ast* params = astGetChild(ast, 1);
     params->symtab = ast->symtab;
     resolveChild(resolver, ast, 1);
-    insertCallableType(resolver, ast, functionResolver.attribute.isAsync, functionResolver.attribute.isLambda, functionResolver.attribute.isVariadic, functionResolver.attribute.isVoid);
+    insertCallableType(resolver, ast, functionResolver.attribute.isAsync, functionResolver.attribute.isGeneric, functionResolver.attribute.isLambda, functionResolver.attribute.isVariadic, functionResolver.attribute.isVoid);
 
     Ast* blk = astGetChild(ast, 2);
     blk->symtab = ast->symtab;
@@ -928,7 +929,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
     if (ast->attribute.isFunction) {
         resolveChild(resolver, ast, 0);
         resolveChild(resolver, ast, 1);
-        insertCallableType(resolver, ast, false, false, ast->attribute.isVariadic, ast->attribute.isVoid);
+        insertCallableType(resolver, ast, false, ast->attribute.isGeneric, false, ast->attribute.isVariadic, ast->attribute.isVoid);
     }
     else if (ast->attribute.isGeneric) {
         resolveChild(resolver, ast, 0);

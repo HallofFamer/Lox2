@@ -41,6 +41,7 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+
         if (behaviorType->formalTypes != NULL) TypeInfoArrayInit(behaviorType->formalTypes);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
@@ -66,6 +67,7 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithFormalParameters(int id, TypeCategory c
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
+
         behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
@@ -268,7 +270,7 @@ char* createGenericTypeName(GenericTypeInfo* genericType) {
     }
 
     memcpy(genericName + length, "<", 1);
-    length += 1;
+    length++;
 
     for (int i = 0; i < genericType->actualParameters->count; i++) {
         TypeInfo* paramType = genericType->actualParameters->elements[i];
@@ -296,6 +298,7 @@ char* createGenericTypeName(GenericTypeInfo* genericType) {
 
 void freeTypeInfo(TypeInfo* type) {
     if (type == NULL) return;
+
     if (IS_BEHAVIOR_TYPE(type)) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
