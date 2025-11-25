@@ -632,6 +632,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     initFunctionResolver(resolver, &functionResolver, ast->token, resolver->currentFunction->scopeDepth + 1);
     functionResolver.attribute.isAsync = isAsync;
     functionResolver.attribute.isClassMethod = ast->attribute.isClass;
+    functionResolver.attribute.isGeneric = false;
     functionResolver.attribute.isInitializer = ast->attribute.isInitializer;
     functionResolver.attribute.isInstanceMethod = !ast->attribute.isClass;
     functionResolver.attribute.isLambda = isLambda;
@@ -640,6 +641,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     SymbolScope scope = (ast->kind == AST_DECL_METHOD) ? SYMBOL_SCOPE_METHOD : SYMBOL_SCOPE_FUNCTION;
     beginScope(resolver, ast, scope);
     if (hasTypeParameters(ast)) {
+        functionResolver.attribute.isGeneric = true;
         Ast* typeParams = getTypeParameters(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
