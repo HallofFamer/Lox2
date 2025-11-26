@@ -650,11 +650,18 @@ void typeTableOutput(TypeTable* typetab) {
     printf("\n");
 }
 
+static TypeInfo* getTargetType(TypeInfo* type) {
+    if (IS_ALIAS_TYPE(type)) {
+        return AS_ALIAS_TYPE(type)->targetType;
+    }
+    return type;
+}
+
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (type == NULL || type2 == NULL) return true;
     if (IS_FORMAL_TYPE(type) && IS_FORMAL_TYPE(type2)) return true;
-    type = IS_ALIAS_TYPE(type) ? AS_ALIAS_TYPE(type)->targetType : type;
-    type2 = IS_ALIAS_TYPE(type2) ? AS_ALIAS_TYPE(type2)->targetType : type2;
+    type = getTargetType(type);
+    type2 = getTargetType(type);
 
     if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return (type->id == type2->id);
     else if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {

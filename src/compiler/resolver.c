@@ -26,6 +26,7 @@ struct ClassResolver {
     SymbolTable* symtab;
     int scopeDepth;
     bool isAnonymous;
+    bool isGeneric;
     BehaviorType type;
 };
 
@@ -79,6 +80,7 @@ static void initClassResolver(Resolver* resolver, ClassResolver* _class, Token n
     _class->symtab = NULL;
     _class->scopeDepth = scopeDepth;
     _class->isAnonymous = (name.length == 1 && name.start[0] == '@');
+    _class->isGeneric = false;
     _class->type = type;
     resolver->currentClass = _class;
 }
@@ -673,6 +675,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     beginScope(resolver, ast, (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS);
 
     if (hasTypeParameters(ast)) {
+        classResolver.isGeneric = true;
         Ast* typeParams = getTypeParameters(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
