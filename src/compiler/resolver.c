@@ -522,8 +522,8 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
         semanticError(resolver, "Cannot use dynamic type, void type or type parameter as a generic type.");
         return NULL;
     }
-    GenericTypeInfo* genericType = newGenericTypeInfo(-1, rawType->shortName, rawType->fullName, rawType);
 
+    GenericTypeInfo* genericType = newGenericTypeInfo(-1, rawType->shortName, rawType->fullName, rawType);
     if (genericType != NULL) {
         Ast* typeParams = astGetChild(ast, 0);
         for (int i = 0; i < typeParams->children->count; i++) {
