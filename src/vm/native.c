@@ -296,7 +296,7 @@ ObjClass* getNativeClass(VM* vm, const char* fullName) {
     Value klass;
     tableGet(&vm->classes, newStringPerma(vm, fullName), &klass);
     if (!IS_CLASS(klass)) {
-        runtimeError(vm, "Class %s is undefined.", fullName);
+        runtimeError(vm, "Class '%s' is undefined.", fullName);
         exit(70);
     }
     return AS_CLASS(klass);

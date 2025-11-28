@@ -40,12 +40,12 @@
 #define THROW_EXCEPTION_FMT(klass, message, ...) return OBJ_VAL(throwException(vm, getNativeClass(vm, #klass), message, __VA_ARGS__))
 
 #define RETURN_TYPE(type) getNativeType(vm, #type)
-#define RETURN_TYPE_CALLABLE(returnType) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, 0)
-#define RETURN_TYPE_CALLABLE_N(returnType, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
+#define RETURN_TYPE_CALLABLE_0(returnType) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, 0)
+#define RETURN_TYPE_CALLABLE(returnType, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
 #define RETURN_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), rawType, numParams, __VA_ARGS__);
 #define PARAM_TYPE(type) getNativeType(vm, #type)
-#define PARAM_TYPE_CALLABLE(returnType) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, 0)
-#define PARAM_TYPE_CALLABLE_N(returnType, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
+#define PARAM_TYPE_CALLABLE_0(returnType) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, 0)
+#define PARAM_TYPE_CALLABLE(returnType, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
 #define PARAM_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), rawType, numParams, __VA_ARGS__);
 
 ObjClass* defineNativeClass(VM* vm, const char* name);
