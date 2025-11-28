@@ -95,8 +95,7 @@ bool astHasChild(Ast* ast) {
 }
 
 Ast* astLastChild(Ast* ast) {
-    if (!astHasChild(ast)) return NULL;
-    return ast->children->elements[ast->children->count - 1];
+	return (astHasChild(ast)) ? ast->children->elements[ast->children->count - 1] : NULL;
 }
 
 int astNumChild(Ast* ast) {

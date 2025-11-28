@@ -422,8 +422,8 @@ void typeTableFieldsCopy(TypeTable* from, TypeTable* to) {
 }
 
 TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
-    if (type == NULL || !IS_BEHAVIOR_TYPE(type)) return NULL;
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+    if (type == NULL || !IS_BEHAVIOR_TYPE(type) || !IS_GENERIC_TYPE(type)) return NULL;
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(IS_GENERIC_TYPE(type) ? AS_GENERIC_TYPE(type)->rawType : type);
     TypeInfo* methodType = typeTableGet(behaviorType->methods, key);
     if (methodType != NULL) return methodType;
 

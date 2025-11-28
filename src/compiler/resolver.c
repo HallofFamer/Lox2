@@ -233,9 +233,22 @@ static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, Type
     ObjString* shortName = createSymbol(resolver, item->token);
     ObjString* fullName = getSymbolFullName(resolver, item->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
-    if (category == TYPE_CATEGORY_CLASS) item->type = (TypeInfo*)insertMetaclassType(resolver, shortName, fullName);
-    else if (category == TYPE_CATEGORY_METACLASS) item->type = getNativeType(resolver->vm, "Metaclass");
-    else if (category == TYPE_CATEGORY_TRAIT) item->type = getNativeType(resolver->vm, "Trait");
+
+    switch (category) {
+        case TYPE_CATEGORY_CLASS:
+            item->type = (TypeInfo*)insertMetaclassType(resolver, shortName, fullName);
+            break;
+        case TYPE_CATEGORY_METACLASS: {
+            item->type = getNativeType(resolver->vm, "Metaclass");
+            break;
+        }
+        case TYPE_CATEGORY_TRAIT:
+            item->type = getNativeType(resolver->vm, "Trait");
+            break;
+        default:
+            break;
+	}
+
     return item;
 }
 
@@ -585,15 +598,15 @@ static bool hasTypeParameters(Ast* ast) {
             if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
                 return (astNumChild(ast->parent) > 1);
             }
-            return false;
         case AST_CATEGORY_DECL:
             if (ast->kind == AST_DECL_METHOD) {
                 return (astNumChild(ast) > 3);
             }
-            return false;
         default:
-            return false;
+            break;
     }
+
+    return false;
 }
 
 static Ast* getTypeParameters(Ast* ast) {

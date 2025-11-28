@@ -76,4 +76,8 @@ static inline bool isFunctionScope(SymbolScope scope) {
     return (scope == SYMBOL_SCOPE_FUNCTION || scope == SYMBOL_SCOPE_METHOD);
 }
 
+static inline bool isGlobalScope(SymbolScope scope) {
+    return (scope == SYMBOL_SCOPE_GLOBAL || scope == SYMBOL_SCOPE_MODULE);
+}
+
 #endif // !clox_symbol_h
