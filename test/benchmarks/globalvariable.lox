@@ -24,5 +24,5 @@ while (sum < 10000000) {
     sum = sum + zoo.aardvark + zoo.baboon + zoo.cat + zoo.donkey + zoo.elephant + zoo.fox
 }
 
-println("Time taken for property access: ${clock() - start} seconds")
+println("Time taken for global variable access: ${clock() - start} seconds")
 println("Sum: ${sum}")
