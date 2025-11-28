@@ -219,6 +219,5 @@ void symbolTableOutput(SymbolTable* symtab) {
             symbolTableOutputEntry(entry);
         }
     }
-
     printf("\n");
 }

@@ -64,7 +64,7 @@ static Token makeToken(Lexer* lexer, TokenSymbol type) {
 
 static Token errorToken(Lexer* lexer, const char* message) {
     Token token = {
-        .type = TOKEN_ERROR,
+        .type = TOKEN_SYMBOL_ERROR,
         .start = message,
         .length = (int)strlen(message),
         .line = lexer->line
@@ -320,13 +320,13 @@ static Token string(Lexer* lexer) {
 
 static Token newLine(Lexer* lexer) {
     lexer->line++;
-    return makeToken(lexer, TOKEN_NEW_LINE);
+    return makeToken(lexer, TOKEN_SYMBOL_NEW_LINE);
 }
 
 Token scanToken(Lexer* lexer) {
     skipWhitespace(lexer);
     lexer->start = lexer->current;
-    if (isAtEnd(lexer)) return makeToken(lexer, TOKEN_EOF);
+    if (isAtEnd(lexer)) return makeToken(lexer, TOKEN_SYMBOL_EOF);
 
     char c = advance(lexer);
     if (isAlpha(c)) return identifier(lexer);
@@ -389,10 +389,10 @@ TokenStream* lex(Lexer* lexer) {
     while (!isAtEnd(lexer)) {
         previousToken = tokens->elements[tokens->count - 1];
         Token currentToken = scanToken(lexer);
-        if (currentToken.type == TOKEN_NEW_LINE && previousToken.type == TOKEN_NEW_LINE) continue;
+        if (currentToken.type == TOKEN_SYMBOL_NEW_LINE && previousToken.type == TOKEN_SYMBOL_NEW_LINE) continue;
         tokenStreamAdd(tokens, currentToken);
     }
-    tokenStreamAdd(tokens, makeToken(lexer, TOKEN_EOF));
+    tokenStreamAdd(tokens, makeToken(lexer, TOKEN_SYMBOL_EOF));
 
     if (lexer->debugToken) {
         outputTokenStream(tokens);

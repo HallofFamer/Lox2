@@ -550,7 +550,7 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
 
 static void behavior(Compiler* compiler, BehaviorType type, Ast* ast) {
     Token name = ast->token;
-    bool isAnonymous = (name.type == TOKEN_EMPTY && name.length == 1);
+    bool isAnonymous = (name.type == TOKEN_SYMBOL_EMPTY && name.length == 1);
     if (isAnonymous) {
         emitBytes(compiler, OP_ANONYMOUS, type);
         emitByte(compiler, OP_DUP);
