@@ -295,8 +295,9 @@ static void checkUnusedVariables(Resolver* resolver, int flag) {
         SymbolEntry* entry = &resolver->currentSymtab->entries[i];
         if (entry->key == NULL) continue;
         else if (entry->value->state == SYMBOL_STATE_DECLARED || entry->value->state == SYMBOL_STATE_DEFINED) {
-            if (flag == 1) semanticWarning(resolver, "Variable '%s' is never used.", entry->key->chars);
-            else if (flag == 2) semanticError(resolver, "Variable '%s' is never used.", entry->key->chars);
+			char* category = (entry->value->category == SYMBOL_CATEGORY_FORMAL) ? "Type Parameter" : "Variable";
+            if (flag == 1) semanticWarning(resolver, "%s '%s' is never used.", category, entry->key->chars);
+            else if (flag == 2) semanticError(resolver, "%s '%s' is never used.", category, entry->key->chars);
         }
     }
 }

@@ -651,10 +651,7 @@ void typeTableOutput(TypeTable* typetab) {
 }
 
 static TypeInfo* getAliasTargetType(TypeInfo* type) {
-    if (IS_ALIAS_TYPE(type)) {
-        return AS_ALIAS_TYPE(type)->targetType;
-    }
-    return type;
+	return (IS_ALIAS_TYPE(type)) ? AS_ALIAS_TYPE(type)->targetType : type;
 }
 
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
