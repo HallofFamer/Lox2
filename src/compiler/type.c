@@ -314,9 +314,7 @@ void freeTypeInfo(TypeInfo* type) {
         if (genericType->actualParameters != NULL) TypeInfoArrayFree(genericType->actualParameters);
         free(genericType);
     }
-    else {
-        free(type);
-    }
+    else free(type);
 }
 
 void freeTempTypes(TypeInfoArray* typeArray) {

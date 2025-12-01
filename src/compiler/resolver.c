@@ -643,6 +643,15 @@ static bool hasInstantiatedTypeParameters(Ast* ast) {
     return hasInstantiatedParams;
 }
 
+static void insertTypeParameters(Resolver* resolver, Ast* ast) {
+    Ast* typeParams = getTypeParameters(ast);
+    if (typeParams == NULL) return;
+    for (int i = 0; i < typeParams->children->count; i++) {
+        Ast* typeParam = astGetChild(typeParams, i);
+        resolveChild(resolver, typeParams, i);
+    }
+}
+
 static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) {
     FunctionResolver functionResolver;
     initFunctionResolver(resolver, &functionResolver, ast->token, resolver->currentFunction->scopeDepth + 1);
@@ -656,13 +665,9 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
 
     SymbolScope scope = (ast->kind == AST_DECL_METHOD) ? SYMBOL_SCOPE_METHOD : SYMBOL_SCOPE_FUNCTION;
     beginScope(resolver, ast, scope);
-    if (hasTypeParameters(ast)) {
+	if (hasTypeParameters(ast)) {
         functionResolver.attribute.isGeneric = true;
-        Ast* typeParams = getTypeParameters(ast);
-        for (int i = 0; i < typeParams->children->count; i++) {
-            Ast* typeParam = astGetChild(typeParams, i);
-            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);
-        }
+        insertTypeParameters(resolver, ast);
     }
 
     Ast* returnType = astGetChild(ast, 0);
