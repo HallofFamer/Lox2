@@ -164,6 +164,7 @@ GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* ful
     GenericTypeInfo* genericType = (GenericTypeInfo*)newTypeInfo(id, sizeof(GenericTypeInfo), TYPE_CATEGORY_GENERIC, shortName, fullName);
     if (genericType != NULL) {
         genericType->rawType = rawType;
+        genericType->isFullyInstantiated = false;
         genericType->actualParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (genericType->actualParameters != NULL) TypeInfoArrayInit(genericType->actualParameters);
     }
@@ -174,6 +175,7 @@ GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, 
     GenericTypeInfo* genericType = (GenericTypeInfo*)newTypeInfo(id, sizeof(GenericTypeInfo), TYPE_CATEGORY_GENERIC, shortName, fullName);
     if (genericType != NULL) {
         genericType->rawType = rawType;
+        genericType->isFullyInstantiated = false;
         genericType->actualParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         
         if (genericType->actualParameters != NULL) {
@@ -417,7 +419,8 @@ void typeTableFieldsCopy(TypeTable* from, TypeTable* to) {
 
 TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
     if (type == NULL || !IS_BEHAVIOR_TYPE(type) || !IS_GENERIC_TYPE(type)) return NULL;
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(IS_GENERIC_TYPE(type) ? AS_GENERIC_TYPE(type)->rawType : type);
+	type = IS_GENERIC_TYPE(type) ? AS_GENERIC_TYPE(type)->rawType : type;
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
     TypeInfo* methodType = typeTableGet(behaviorType->methods, key);
     if (methodType != NULL) return methodType;
 

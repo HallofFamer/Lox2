@@ -94,6 +94,7 @@ typedef struct {
     TypeInfo baseType;
     TypeInfo* rawType;
     TypeInfoArray* actualParameters;
+	bool isFullyInstantiated;
 } GenericTypeInfo;
 
 typedef struct {
