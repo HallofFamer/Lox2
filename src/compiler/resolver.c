@@ -253,8 +253,9 @@ static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, Type
 }
 
 static void bindSuperclassType(Resolver* resolver, Token currentClass, Token superclass) {
-    BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false));
-    TypeInfo* superclassType = getTypeForSymbol(resolver, superclass, false);
+	TypeInfo* baseType = getTypeForSymbol(resolver, currentClass, false);
+	BehaviorTypeInfo* currentClassType = IS_GENERIC_TYPE(baseType) ? AS_BEHAVIOR_TYPE(AS_GENERIC_TYPE(baseType)->rawType) : AS_BEHAVIOR_TYPE(baseType);
+    TypeInfo* superclassType = getTypeForSymbol(resolver, superclass, false);    
     if (superclassType == NULL) return;
     currentClassType->superclassType = superclassType;
 
