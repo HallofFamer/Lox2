@@ -175,10 +175,10 @@ GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, 
     GenericTypeInfo* genericType = (GenericTypeInfo*)newTypeInfo(id, sizeof(GenericTypeInfo), TYPE_CATEGORY_GENERIC, shortName, fullName);
     if (genericType != NULL) {
         genericType->rawType = rawType;
-        genericType->isFullyInstantiated = false;
+        genericType->isFullyInstantiated = true;
         genericType->actualParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         
-        int numInstantiated = 0;
+        
         if (genericType->actualParameters != NULL) {
             TypeInfoArrayInit(genericType->actualParameters);
             va_list args;
@@ -187,12 +187,10 @@ GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, 
             for (int i = 0; i < numParameters; i++) {
                 TypeInfo* type = va_arg(args, TypeInfo*);
                 TypeInfoArrayAdd(genericType->actualParameters, type);
-				if (!IS_FORMAL_TYPE(type)) numInstantiated++;
+                if (IS_FORMAL_TYPE(type)) genericType->isFullyInstantiated = false;
             }
             va_end(args);
         }
-
-		if (numInstantiated == numParameters) genericType->isFullyInstantiated = true;
     }
     return genericType;
 }

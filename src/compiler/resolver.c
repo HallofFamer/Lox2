@@ -253,8 +253,7 @@ static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, Type
 }
 
 static void bindSuperclassType(Resolver* resolver, Token currentClass, Token superclass) {
-	TypeInfo* baseType = getTypeForSymbol(resolver, currentClass, false);
-	BehaviorTypeInfo* currentClassType = IS_GENERIC_TYPE(baseType) ? AS_BEHAVIOR_TYPE(AS_GENERIC_TYPE(baseType)->rawType) : AS_BEHAVIOR_TYPE(baseType);
+	BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false));
     TypeInfo* superclassType = getTypeForSymbol(resolver, superclass, false);    
     if (superclassType == NULL) return;
     currentClassType->superclassType = superclassType;
@@ -409,7 +408,9 @@ static SymbolItem* findUpvalue(Resolver* resolver, Ast* ast) {
     do {
         if (functionResolver->enclosing == NULL) break;
         item = symbolTableGet(currentSymtab, symbol);
-        if (item != NULL && item->category != SYMBOL_CATEGORY_GLOBAL) return addUpvalue(resolver, item);
+        if (item != NULL && item->category != SYMBOL_CATEGORY_GLOBAL && item->category != SYMBOL_CATEGORY_FORMAL) {
+            return addUpvalue(resolver, item);
+        }
 
         if (currentSymtab->id == functionResolver->symtab->id) {
             functionResolver = functionResolver->enclosing;
@@ -534,7 +535,7 @@ static void insertTypeParameter(Resolver* resolver, Ast* ast, GenericTypeInfo* g
 static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
     TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false);
     if (rawType == NULL || IS_VOID_TYPE(rawType) || IS_FORMAL_TYPE(rawType)) {
-        semanticError(resolver, "Cannot use dynamic type, void type or type parameter as a generic type.");
+        semanticError(resolver, "Cannot use dynamic type, void type or type parameter as generic type.");
         return NULL;
     }
 
