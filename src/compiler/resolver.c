@@ -556,10 +556,14 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
     return genericType;
 }
 
+static TypeInfo* getAliasTargetType(TypeInfo* type) {
+    return (IS_ALIAS_TYPE(type)) ? AS_ALIAS_TYPE(type)->targetType : type;
+}
+
 static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
     ObjString* alias = createSymbol(resolver, ast->token);
     Ast* typeDef = astGetChild(ast, 0);
-    TypeInfo* targetType = IS_ALIAS_TYPE(typeDef->type) ? AS_ALIAS_TYPE(typeDef->type)->targetType : typeDef->type;
+	TypeInfo* targetType = getAliasTargetType(typeDef->type);
     return typeTableInsertAlias(resolver->vm->typetab, alias, alias, targetType);
 }
 

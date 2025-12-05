@@ -223,8 +223,32 @@ char* createCallableTypeName(CallableTypeInfo* callableType) {
         length += 7;
     }
 
-    memcpy(callableName + length, " fun(", 5);
-    length += 5;
+    memcpy(callableName + length, " fun", 4);
+    length += 4;
+    if (callableType->attribute.isGeneric) {
+        callableName[length++] = '<';
+        for (int i = 0; i < callableType->formalTypes->count; i++) {
+            TypeInfo* formalType = callableType->formalTypes->elements[i];
+            if (i > 0) {
+                callableName[length++] = ',';
+                callableName[length++] = ' ';
+            }
+            if (formalType != NULL) {
+                char* formalTypeName = createTempTypeName(formalType);
+                size_t formalTypeLength = strlen(formalTypeName);
+                memcpy(callableName + length, formalTypeName, formalTypeLength);
+                length += formalTypeLength;
+                if (isTempType(formalType)) free(formalTypeName);
+            }
+            else {
+                memcpy(callableName + length, "dynamic", 7);
+                length += 7;
+            }
+        }
+		callableName[length++] = '>';
+    }
+
+    callableName[length++] = '(';
     if (callableType->attribute.isVariadic) {
         memcpy(callableName + length, "...", 3);
         length += 3;
