@@ -174,4 +174,8 @@ static inline bool hasGenericParameters(TypeInfo* type) {
     else return false;
 }
 
+static inline TypeInfo* getAliasTargetType(TypeInfo* type) {
+    return (IS_ALIAS_TYPE(type)) ? AS_ALIAS_TYPE(type)->targetType : type;
+}
+
 #endif // !clox_type_h
