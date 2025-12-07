@@ -674,8 +674,7 @@ void typeTableOutput(TypeTable* typetab) {
 }
 
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
-    if (type == NULL || type2 == NULL) return true;
-    if (IS_FORMAL_TYPE(type) && IS_FORMAL_TYPE(type2)) return true;
+    if (type == NULL || type2 == NULL || (IS_FORMAL_TYPE(type) && IS_FORMAL_TYPE(type2))) return true;
     type = getAliasTargetType(type);
     type2 = getAliasTargetType(type);
 
