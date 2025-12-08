@@ -437,6 +437,16 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);
         TypeInfo* classType = getClassType(typeChecker, className, ast->symtab);
         if (classType == NULL) return;
+        
+		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(classType);
+        if (behaviorType->formalTypes->count > 0 ) {
+            if (!callee->attribute.isGeneric) typeError(typeChecker, "Class %s requires generic type parameters.", classType->shortName->chars);
+			Ast* genericTypes = astGetChild(callee, 1);
+            if (genericTypes->children->count != behaviorType->formalTypes->count) {
+                typeError(typeChecker, "Class %s expects to receive %d generic type parameters but gets %d.", 
+					classType->shortName->chars, behaviorType->formalTypes->count, genericTypes->children->count);
+            }
+        }
         inferAstTypeFromInitializer(typeChecker, ast, classType);
     }
 }

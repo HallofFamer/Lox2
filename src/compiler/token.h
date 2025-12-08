@@ -48,6 +48,7 @@ typedef struct {
 } TokenStream;
 
 Token syntheticToken(const char* text);
+Token syntheticTokenAtLine(const char* text, int line);
 bool tokensEqual(Token* token, Token* token2);
 bool tokenIsLiteral(Token token);
 bool tokenIsOperator(Token token);

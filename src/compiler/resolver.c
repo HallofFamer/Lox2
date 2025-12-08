@@ -101,9 +101,7 @@ static void initFunctionResolver(Resolver* resolver, FunctionResolver* function,
     function->scopeDepth = scopeDepth;
     function->attribute = resolverInitModifier();
     resolver->currentFunction = function;
-    if (resolver->currentFunction->enclosing != NULL) {
-        resolver->isTopLevel = false;
-    }
+    if (resolver->currentFunction->enclosing != NULL) resolver->isTopLevel = false;
 }
 
 static void endFunctionResolver(Resolver* resolver) {
@@ -1137,7 +1135,7 @@ static void resolveContinueStatement(Resolver* resolver, Ast* ast) {
 
 static void resolveDefaultStatement(Resolver* resolver, Ast* ast) {
     if (resolver->switchDepth == 0) {
-        semanticError(resolver, "Cannot use 'default' outside of switch statement.");
+        semanticError(resolver, "Cannot use 'default' outside of a switch statement.");
     }
     resolveChild(resolver, ast, 0);
 }

@@ -89,6 +89,15 @@ Token syntheticToken(const char* text) {
     };
 }
 
+Token syntheticTokenAtLine(const char* text, int line) {
+	return (Token) {
+        .type = TOKEN_SYMBOL_EMPTY, 
+        .start = text, 
+        .length = (int)strlen(text),
+        .line = line
+    };
+}
+
 bool tokensEqual(Token* token, Token* token2) {
     if (token->length != token2->length) return false;
     return memcmp(token->start, token2->start, token->length) == 0;

@@ -705,11 +705,15 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
     type = IS_ALIAS_TYPE(type) ? AS_ALIAS_TYPE(type)->targetType : type;
     type2 = IS_ALIAS_TYPE(type2) ? AS_ALIAS_TYPE(type2)->targetType : type2;
-
     if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
     if (memcmp(type2->shortName->chars, "Object", 3) == 0) return true;
-    if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (strcmp(type2->shortName->chars, "Function") == 0 || strcmp(type2->shortName->chars, "TCallable") == 0)) return true;
-    if (IS_GENERIC_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return isSubtypeOfType(AS_GENERIC_TYPE(type)->rawType, type2);
+
+    if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (strcmp(type2->shortName->chars, "Function") == 0 || strcmp(type2->shortName->chars, "TCallable") == 0)) {
+        return true;
+    } 
+    if (IS_GENERIC_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) {
+        return isSubtypeOfType(AS_GENERIC_TYPE(type)->rawType, type2);
+    }
     if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false;
    
     BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type);
