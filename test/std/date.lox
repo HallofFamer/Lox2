@@ -5,37 +5,33 @@ using clox.std.util.Duration
 
 val nowDate = Date.now
 println("Current Date is: ${nowDate}")
-println("Current Date's timestamp is: ${nowDate.getTimestamp()}")
-println("")
+println("Current Date's timestamp is: ${nowDate.getTimestamp()}\n")
 
 var birthday = Date.parse("1989-05-21")
 println("Birthday is: ${birthday}")
 println("Birthday's timestamp is: ${birthday.getTimestamp()}")
 println("Birthday is before current Date: ${(birthday < nowDate)}")
-println("Converting birthday to DateTime: ${birthday.toDateTime()}")
-println("");
+println("Converting birthday to DateTime: ${birthday.toDateTime()}\n")
 
 val nowDateTime = DateTime.now
 println("Current DateTime is: ${nowDateTime}")
 println("Current DateTime's timestamp is: ${nowDateTime.getTimestamp()}")
 println("Birthday is after current DateTime: ${(birthday.toDateTime() > nowDateTime)}")
-println("Difference in sec(s) between current DateTime and birthday: ${nowDateTime.diff(birthday.toDateTime())}")
-println("")
+println("Difference in sec(s) between current DateTime and birthday: ${nowDateTime.diff(birthday.toDateTime())}\n")
 
 println("current Date is instance of Date: ${nowDate.instanceOf(Date)}")
 println("current Date is instance of DateTime: ${nowDate.instanceOf(DateTime)}")
 println("current DateTime is instance of Date: ${nowDateTime.instanceOf(Date)}")
-println("current DateTime is instance of DateTime: ${nowDateTime.instanceOf(DateTime)}")
+println("current DateTime is instance of DateTime: ${nowDateTime.instanceOf(DateTime)}\n")
 
 val duration = Duration(1, 15, 80, 280)
 println("Creating Duration: ${duration}")
-println("Total number of seconds in Duration: ${duration.getTotalSeconds()}")
-println("")
+println("Total number of seconds in Duration: ${duration.getTotalSeconds()}\n")
 
 val duration2 = Duration.ofDays(1)
 println("Creating Duration 2: ${duration2}")
 println("Adding two durations: ${(duration + duration2)}")
-println("Subtracting two durations: ${(duration - duration2)}")
+println("Subtracting two durations: ${(duration - duration2)}\n")
 
 println("Tomorrow Date: ${(nowDate + duration2)}")
 println("Yesterday Date: ${(nowDate - duration2)}")

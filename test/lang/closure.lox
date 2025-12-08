@@ -26,8 +26,7 @@ println("")
 println("Class of function 'in()' is: ${in.getClassName()}")
 println("Name of function 'in()' is: ${in.name()}")
 println("function 'in()' is anonymous: ${in.isAnonymous()}")
-println("function 'in()' is native: ${in.isNative()}")
-println("")
+println("function 'in()' is native: ${in.isNative()}\n")
 
 val time = clock
 println("Assinging variable 'time' as native function 'clock'...")

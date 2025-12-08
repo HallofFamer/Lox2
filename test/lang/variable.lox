@@ -1,25 +1,24 @@
 namespace test.lang
 
 val x = 0
-println("Creating global immutable variable x: " + x.toString())
+println("Creating global immutable variable x: ${x}")
 // val x = 1
 //println("Setting global immutable variable x to 1, this should raise an error.")
 var y = true
-println("Creating global mutable variable y: " + y.toString())
+println("Creating global mutable variable y: ${y}")
 y = false
-println("Setting global mutable variable y to " + y.toString())
+println("Setting global mutable variable y to ${y}\n")
 //var y = nil
-//println("Redeclaring variable y, this should raise an error.")
-println("")
+//println("Redeclaring variable y, this should raise an error.\n")
 
 fun testLocals(){
     val x1 = 5
-    println("Creating immutable local variable x1: " + x1.toString())
+    println("Creating immutable local variable x1: ${x1}")
     var x2 = 10
-    println("Creating mutable local variable x2: " + x2.toString())
-    println("Sum of two variables is: " + (x1 + x2).toString())
+    println("Creating mutable local variable x2: ${x2}")
+    println("Sum of two variables is: ${x1 + x2}")
     x2 = 20
-    println("Setting local variable x2 to 20, and sum is: " + (x1 + x2).toString())
+    println("Setting local variable x2 to 20, and sum is: ${x1 + x2}")
     //x1 = 10
     //println("Setting local variable x1 to 10, this should raise an error.")
     println("")
@@ -28,14 +27,14 @@ testLocals()
 
 fun testUpvalues(){  
     val x1 = 5
-    println("Creating immutable captured upvalue x1: " + x1.toString())
+    println("Creating immutable captured upvalue x1: ${x1}")
     var x2 = 10
-    println("Creating mutable captured upvalue x2: " + x2.toString())
+    println("Creating mutable captured upvalue x2: ${x2}")
 
     fun testUpvalueInner(){ 
-        println("Sum of two variables is: " + (x1 + x2).toString())
+        println("Sum of two variables is: ${x1 + x2}")
         x2 = 20
-        println("Setting local variable x2 to 20, and sum is: " + (x1 + x2).toString())
+        println("Setting local variable x2 to 20, and sum is: ${x1 + x2}")
         //println("Setting local variable x1 to 10, this should raise an error.")
         //x1 = 10 
     }
@@ -45,16 +44,16 @@ fun testUpvalues(){
 testUpvalues()
 
 fun testParameters(a, var b){ 
-    println("Parameters a = " + a.toString() + ", b = " + b.toString())
+    println("Parameters a = ${a}, b = ${b}")
     //a = 5
     //println("Setting parameter a to 5, this should raise an error.")
     b = 10
-    println("Setting paramter b to 10, this should work normally. Now b = " + b.toString())
+    println("Setting paramter b to 10, this should work normally. Now b = ${b}")
 }
 testParameters(2, 3)
 
 fun testVariadic(..v){
-   println("Variadic parameter v = " + v.toString())
+   println("Variadic parameter v = ${v}")
    //v = 0
    //println("Setting variadic v to 0, this should raise an error.")
 }

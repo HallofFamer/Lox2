@@ -15,8 +15,7 @@ println("class of bound method 'topping': ${topping.getClassName()}")
 println("'topping' method's arity: ${topping.arity()}")
 println("'topping' method is native: ${topping.isNative()}")
 println("'topping' method's name: ${topping.name()}")
-println("'topping' method's receiver: ${topping.receiver}")
-println("")
+println("'topping' method's receiver: ${topping.receiver}\n")
 
 println("Testing bound native method: ")
 val toString = scone.toString
