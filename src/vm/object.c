@@ -453,7 +453,7 @@ Value getObjMethod(VM* vm, Value object, char* name) {
     ObjClass* klass = getObjClass(vm, object);
     Value method;
     if (!tableGet(&klass->methods, newStringPerma(vm, name), &method)) {
-        runtimeError(vm, "Method %s::%s does not exist for class %s.", klass->name->chars, name, klass->name->chars);
+        runtimeError(vm, "Method %s::%s does not exist in class %s.", klass->name->chars, name, klass->name->chars);
         exit(70);
     }
     return method;
@@ -626,7 +626,7 @@ void printObject(Value value) {
             break;
         case OBJ_RANGE: { 
             ObjRange* range = AS_RANGE(value);
-            printf("<%d..%d>", range->from, range->to);
+            printf("<range: %d..%d>", range->from, range->to);
             break;
         }
         case OBJ_RECORD:

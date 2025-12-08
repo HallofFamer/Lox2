@@ -111,9 +111,9 @@ ObjString* valueArrayToString(VM* vm, ValueArray* array) {
                 offset += length + 2;
             }
         }
-        string[offset] = ']';
-        string[offset + 1] = '\0';
-        return copyString(vm, string, (int)offset + 1);
+        string[offset++] = ']';
+        string[offset] = '\0';
+        return copyString(vm, string, (int)offset);
     }
 }
 

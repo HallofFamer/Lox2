@@ -154,7 +154,7 @@ static int parseConfiguration(void* data, const char* section, const char* name,
 static void initConfiguration(VM* vm) {
     Configuration config;
     int iniParsed = ini_parse("lox2.ini", parseConfiguration, &config);
-    ABORT_IFTRUE(iniParsed < 0, "Can't load 'lox2.ini' configuration file...\n");
+    ABORT_IFTRUE(iniParsed < 0, "Can't load \"lox2.ini\" configuration file...\n");
     vm->config = config;
 }
 
@@ -348,7 +348,7 @@ static bool callClosureAsync(VM* vm, ObjClosure* closure, int argCount) {
 
 bool callClosure(VM* vm, ObjClosure* closure, int argCount) {
     if (closure->function->arity > 0 && argCount != closure->function->arity) {
-        throwNativeException(vm, "clox.std.lang.IllegalArgumentException", "Expected %d argument but got %d.", closure->function->arity, argCount);
+        throwNativeException(vm, "clox.std.lang.IllegalArgumentException", "Expected %d argument(s) but got %d.", closure->function->arity, argCount);
         return false;
     }
 

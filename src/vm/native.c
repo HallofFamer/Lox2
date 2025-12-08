@@ -263,7 +263,7 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
         for (int i = 0; i < numParams; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
             TypeInfoArrayAdd(callableType->paramTypes, paramType);
-            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+            if (isTempType(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
         }
         va_end(args);
     }
@@ -282,7 +282,7 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* 
     for (int i = 0; i < numParams; i++) {
         TypeInfo* paramType = va_arg(args, TypeInfo*);
         TypeInfoArrayAdd(genericType->actualParameters, paramType);
-        if (IS_GENERIC_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+        if (isTempType(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
     }
     va_end(args);
 
