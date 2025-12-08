@@ -151,6 +151,7 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
         Ast* arg = astGetChild(args, i);
         Ast* param = astGetChild(params, i);
         if (param->attribute.isVariadic) return;
+
         if (param->type == NULL) {
             param->type = arg->type;
             TypeInfoArrayAdd(calleeType->paramTypes, arg->type);

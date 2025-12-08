@@ -53,7 +53,7 @@ static bool match(Lexer* lexer, char expected) {
     return true;
 }
 
-static Token makeToken(Lexer* lexer, TokenSymbol type) {
+static Token makeToken(Lexer* lexer, TokenKind type) {
     return (Token) {
         .type = type,
         .start = lexer->start,
@@ -130,14 +130,14 @@ static void skipWhitespace(Lexer* lexer) {
     }
 }
 
-static TokenSymbol checkKeyword(Lexer* lexer, int start, int length, const char* rest, TokenSymbol type) {
+static TokenKind checkKeyword(Lexer* lexer, int start, int length, const char* rest, TokenKind type) {
     if (lexer->current - lexer->start == start + length && memcmp(lexer->start + start, rest, length) == 0) {
         return type;
     }
     return TOKEN_SYMBOL_IDENTIFIER;
 }
 
-static TokenSymbol identifierType(Lexer* lexer) {
+static TokenKind identifierType(Lexer* lexer) {
     if (lexer->start[-1] == '.') return TOKEN_SYMBOL_IDENTIFIER;
 
     switch (lexer->start[0]) {

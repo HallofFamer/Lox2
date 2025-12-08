@@ -32,10 +32,10 @@ typedef enum {
     TOKEN_SYMBOL_VAL, TOKEN_SYMBOL_VAR, TOKEN_SYMBOL_VOID, TOKEN_SYMBOL_WHILE, TOKEN_SYMBOL_WITH, TOKEN_SYMBOL_YIELD,
 
     TOKEN_SYMBOL_ERROR, TOKEN_SYMBOL_EMPTY, TOKEN_SYMBOL_NEW_LINE, TOKEN_SYMBOL_EOF
-} TokenSymbol;
+} TokenKind;
 
 typedef struct {
-    TokenSymbol type;
+    TokenKind type;
     const char* start;
     int length;
     int line;

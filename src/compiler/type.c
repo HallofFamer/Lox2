@@ -178,7 +178,6 @@ GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, 
         genericType->isFullyInstantiated = true;
         genericType->actualParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         
-        
         if (genericType->actualParameters != NULL) {
             TypeInfoArrayInit(genericType->actualParameters);
             va_list args;
@@ -292,9 +291,8 @@ char* createGenericTypeName(GenericTypeInfo* genericType) {
         memcpy(genericName, "dynamic", 7);
         length += 7;
     }
+	genericName[length++] = '<';
 
-    memcpy(genericName + length, "<", 1);
-    length++;
 
     for (int i = 0; i < genericType->actualParameters->count; i++) {
         TypeInfo* paramType = genericType->actualParameters->elements[i];

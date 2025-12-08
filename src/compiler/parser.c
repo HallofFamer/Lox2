@@ -33,7 +33,7 @@ static Token currentToken(Parser* parser) {
     return parser->current;
 }
 
-static TokenSymbol currentTokenType(Parser* parser) {
+static TokenKind currentTokenType(Parser* parser) {
     return parser->current.type;
 }
 
@@ -43,7 +43,7 @@ static Token previousToken(Parser* parser) {
     return previousToken;
 }
 
-static TokenSymbol previousTokenType(Parser* parser) {
+static TokenKind previousTokenType(Parser* parser) {
     return previousToken(parser).type;
 }
 
@@ -53,7 +53,7 @@ static Token nextToken(Parser* parser) {
     return nextToken;
 }
 
-static TokenSymbol nextTokenType(Parser* parser) {
+static TokenKind nextTokenType(Parser* parser) {
     return nextToken(parser).type;
 }
 
@@ -108,7 +108,7 @@ static bool resetIndex(Parser* parser, int index, Token current, bool value) {
     return value;
 }
 
-static void consume(Parser* parser, TokenSymbol type, const char* message) {
+static void consume(Parser* parser, TokenKind type, const char* message) {
     if (parser->current.type == type) {
         advance(parser);
         return;
@@ -127,23 +127,23 @@ static void consumerTerminator(Parser* parser, const char* message) {
     parseErrorAtCurrent(parser, message);
 }
 
-static bool check(Parser* parser, TokenSymbol type) {
+static bool check(Parser* parser, TokenKind type) {
     return currentTokenType(parser) == type;
 }
 
-static bool checkNext(Parser* parser, TokenSymbol type) {
+static bool checkNext(Parser* parser, TokenKind type) {
     return nextTokenType(parser) == type;
 }
 
-static bool checkEither(Parser* parser, TokenSymbol type1, TokenSymbol type2) {
+static bool checkEither(Parser* parser, TokenKind type1, TokenKind type2) {
     return check(parser, type1) || check(parser, type2);
 }
 
-static bool checkBoth(Parser* parser, TokenSymbol type) {
+static bool checkBoth(Parser* parser, TokenKind type) {
     return check(parser, type) && checkNext(parser, type);
 }
 
-static bool match(Parser* parser, TokenSymbol type) {
+static bool match(Parser* parser, TokenKind type) {
     if (!check(parser, type)) return false;
     advance(parser);
     return true;
@@ -330,7 +330,7 @@ static Ast* block(Parser* parser);
 static Ast* function(Parser* parser, Ast* returnType, bool isAsync, bool isLambda, bool isVoid);
 static Ast* declaration(Parser* parser);
 static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType);
-static ParseRule* getRule(TokenSymbol type);
+static ParseRule* getRule(TokenKind type);
 static Ast* parsePrecedence(Parser* parser, Precedence precedence);
 
 static Ast* argumentList(Parser* parser) {
@@ -1096,7 +1096,7 @@ static Ast* parsePrecedence(Parser* parser, Precedence precedence) {
     return parseInfix(parser, precedence, left, canAssign);
 }
 
-static ParseRule* getRule(TokenSymbol type) {
+static ParseRule* getRule(TokenKind type) {
     return &parseRules[type];
 }
 
