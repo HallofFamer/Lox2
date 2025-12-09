@@ -349,8 +349,8 @@ ObjTimer* newTimer(VM* vm, ObjClosure* closure, int delay, int interval) {
 static Value createTypeObjFromTypeInfo(VM* vm, TypeInfo* type) {
     if (type == NULL) return NIL_VAL;
     ObjString* name = type->shortName;
-    if (IS_ALIAS_TYPE(type)) type = AS_ALIAS_TYPE(type)->targetType;
-    return OBJ_VAL(newType(vm, name, type));
+	TypeInfo* targetType = getAliasTargetType(type);
+    return OBJ_VAL(newType(vm, name, targetType));
 }
 
 ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
