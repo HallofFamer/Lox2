@@ -423,7 +423,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         TypeInfoArrayAdd(typeChecker->vm->tempTypes, callee->type);
         function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false);
     }
-    else if (isSubtypeOfType(callee->type, typeChecker->functionType)) {
+    else if (IS_CALLABLE_TYPE(callee->type)) {
         SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL || item->type == NULL || !IS_CALLABLE_TYPE(item->type)) return;
         CallableTypeInfo* functionType = AS_CALLABLE_TYPE(item->type);

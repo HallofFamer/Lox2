@@ -227,7 +227,7 @@ static BehaviorTypeInfo* insertMetaclassType(Resolver* resolver, ObjString* clas
     return typeTableInsertBehavior(resolver->vm->typetab, TYPE_CATEGORY_CLASS, metaclassShortName, metaclassFullName, NULL);
 }
 
-static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, TypeCategory category) {
+static BehaviorTypeInfo* insertBehaviorType(Resolver* resolver, SymbolItem* item, TypeCategory category) {
     ObjString* shortName = createSymbol(resolver, item->token);
     ObjString* fullName = getSymbolFullName(resolver, item->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
@@ -247,7 +247,7 @@ static SymbolItem* insertBehaviorType(Resolver* resolver, SymbolItem* item, Type
             break;
 	}
 
-    return item;
+    return behaviorType;
 }
 
 static void bindSuperclassType(Resolver* resolver, Token currentClass, Token superclass) {
