@@ -1356,7 +1356,16 @@ static void resolveStatement(Resolver* resolver, Ast* ast) {
 
 static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
-    insertBehaviorType(resolver, item, TYPE_CATEGORY_CLASS);
+    BehaviorTypeInfo* classType = insertBehaviorType(resolver, item, TYPE_CATEGORY_CLASS);
+    if (ast->attribute.isGeneric) {
+		Ast* typeParams = astLastChild(ast);
+		for (int i = 0; i < typeParams->children->count; i++) {
+            Ast* typeParam = astGetChild(typeParams, i);
+            resolveChild(resolver, typeParams, i);
+			ObjString* typeParamName = createSymbol(resolver, typeParam->token);
+			TypeInfoArrayAdd(classType->formalTypes, newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, typeParamName, typeParamName));
+        }
+    }
     resolveChild(resolver, ast, 0);
     item->state = SYMBOL_STATE_ACCESSED;
 }
@@ -1445,7 +1454,7 @@ static void resolveNamespaceDeclaration(Resolver* resolver, Ast* ast) {
 static void resolveTraitDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     item->type = getNativeType(resolver->vm, "Trait");
-    insertBehaviorType(resolver, item, TYPE_CATEGORY_TRAIT);
+    BehaviorTypeInfo* traitType = insertBehaviorType(resolver, item, TYPE_CATEGORY_TRAIT);
     resolveChild(resolver, ast, 0);
     item->state = SYMBOL_STATE_ACCESSED;
 }
