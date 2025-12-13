@@ -432,7 +432,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         inferAstTypeFromReturn(typeChecker, ast, functionType);
     }
     else if (IS_BEHAVIOR_TYPE(callee->type) || IS_GENERIC_TYPE(callee->type)) {
-        SymbolItem* item = symbolTableGet(ast->symtab, name);
+		SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL) return;
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);
         TypeInfo* classType = getClassType(typeChecker, className, ast->symtab);
