@@ -386,20 +386,36 @@ static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableT
     else ast->type = callableType->returnType;
 }
 
-static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* classType) {
+static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
+	Ast* callee = astGetChild(ast, 0);
     Ast* args = astGetChild(ast, 1);
     char classDesc[UINT8_MAX];
     ObjString* initializerName = newStringPerma(typeChecker->vm, "__init__");
-    TypeInfo* initializerType = typeTableMethodLookup(classType, initializerName);
+    TypeInfo* initializerType = typeTableMethodLookup(type, initializerName);
 
     if (initializerType != NULL) {
-        sprintf_s(classDesc, UINT8_MAX, "Class %s's initializer", classType->shortName->chars);
+        sprintf_s(classDesc, UINT8_MAX, "Class %s's initializer", type->shortName->chars);
         checkArguments(typeChecker, classDesc, args, AS_METHOD_TYPE(initializerType)->declaredType);
     }
     else if (astHasChild(args)) {
-        typeError(typeChecker, "Class %s's initializer expects to receive a total of 0 argument but gets %d.", classType->shortName->chars, astNumChild(args));
+        typeError(typeChecker, "Class %s's initializer expects to receive a total of 0 argument but gets %d.", type->shortName->chars, astNumChild(args));
     }
-    ast->type = classType;
+
+    if (callee->type != NULL && hasGenericParameters(type)) {
+        if (!callee->attribute.isGeneric) typeError(typeChecker, "Class %s requires generic type parameters.", type->shortName->chars);
+        else {
+            BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+            GenericTypeInfo* genericType = AS_GENERIC_TYPE(callee->type);
+            Ast* actualParameters = astGetChild(callee, 0);
+
+            if (actualParameters->children->count != behaviorType->formalTypes->count) {
+                typeError(typeChecker, "Class %s expects to receive %d generic type parameters but gets %d.",
+                    type->shortName->chars, behaviorType->formalTypes->count, actualParameters->children->count);
+            }
+            ast->type = (TypeInfo*)genericType;
+        }
+    }
+    else ast->type = type;
 }
 
 static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
@@ -437,18 +453,6 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);
         TypeInfo* classType = getClassType(typeChecker, className, ast->symtab);
         if (classType == NULL) return;
-        
-		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(classType);
-        if (behaviorType->formalTypes->count > 0) {
-            if (!callee->attribute.isGeneric) typeError(typeChecker, "Class %s requires generic type parameters.", classType->shortName->chars);
-            else {
-                Ast* genericTypes = astGetChild(callee, 0);
-                if (genericTypes->children->count != behaviorType->formalTypes->count) {
-                    typeError(typeChecker, "Class %s expects to receive %d generic type parameters but gets %d.",
-                        classType->shortName->chars, behaviorType->formalTypes->count, genericTypes->children->count);
-                }
-            }
-        }
         inferAstTypeFromInitializer(typeChecker, ast, classType);
     }
 }

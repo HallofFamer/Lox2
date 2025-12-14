@@ -227,27 +227,22 @@ static BehaviorTypeInfo* insertMetaclassType(Resolver* resolver, ObjString* clas
     return typeTableInsertBehavior(resolver->vm->typetab, TYPE_CATEGORY_CLASS, metaclassShortName, metaclassFullName, NULL);
 }
 
-static BehaviorTypeInfo* insertBehaviorType(Resolver* resolver, SymbolItem* item, TypeCategory category) {
-    ObjString* shortName = createSymbol(resolver, item->token);
-    ObjString* fullName = getSymbolFullName(resolver, item->token);
+static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory category) {
+    ObjString* shortName = createSymbol(resolver, ast->token);
+    ObjString* fullName = getSymbolFullName(resolver, ast->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
 
     switch (category) {
         case TYPE_CATEGORY_CLASS:
-            item->type = (TypeInfo*)insertMetaclassType(resolver, shortName, fullName);
-            break;
+            return (TypeInfo*)insertMetaclassType(resolver, shortName, fullName);
         case TYPE_CATEGORY_METACLASS: {
-            item->type = getNativeType(resolver->vm, "Metaclass");
-            break;
+            return getNativeType(resolver->vm, "Metaclass");
         }
         case TYPE_CATEGORY_TRAIT:
-            item->type = getNativeType(resolver->vm, "Trait");
-            break;
+            return getNativeType(resolver->vm, "Trait");
         default:
-            break;
+            return (TypeInfo*)behaviorType;
 	}
-
-    return behaviorType;
 }
 
 static void bindSuperclassType(Resolver* resolver, Token currentClass, Token superclass) {
@@ -1368,8 +1363,8 @@ static void bindFormalParameters(Resolver* resolver, Ast* ast, BehaviorTypeInfo*
 
 static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
-    BehaviorTypeInfo* classType = insertBehaviorType(resolver, item, TYPE_CATEGORY_CLASS);
-	bindFormalParameters(resolver, ast, classType);
+    item->type = insertBehaviorType(resolver, ast, TYPE_CATEGORY_CLASS);
+    bindFormalParameters(resolver, ast, AS_BEHAVIOR_TYPE(item->type));
     resolveChild(resolver, ast, 0);
     item->state = SYMBOL_STATE_ACCESSED;
 }
@@ -1457,8 +1452,7 @@ static void resolveNamespaceDeclaration(Resolver* resolver, Ast* ast) {
 
 static void resolveTraitDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
-    item->type = getNativeType(resolver->vm, "Trait");
-    BehaviorTypeInfo* traitType = insertBehaviorType(resolver, item, TYPE_CATEGORY_TRAIT);
+    item->type = insertBehaviorType(resolver, ast, TYPE_CATEGORY_TRAIT);
     resolveChild(resolver, ast, 0);
     item->state = SYMBOL_STATE_ACCESSED;
 }
