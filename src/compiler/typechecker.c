@@ -166,6 +166,17 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
     calleeType->baseType.fullName = calleeType->baseType.shortName;
 }
 
+static void checkTypeParameters(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+    GenericTypeInfo* genericType = AS_GENERIC_TYPE(ast->type);
+    Ast* actualParameters = astGetChild(ast, 0);
+
+    if (actualParameters->children->count != behaviorType->formalTypes->count) {
+        typeError(typeChecker, "Class %s expects to receive %d generic type parameters but gets %d.",
+            type->shortName->chars, behaviorType->formalTypes->count, actualParameters->children->count);
+    }
+}
+
 static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast* ast, CallableTypeInfo* callableType) {
     if (!callableType->attribute.isVariadic) {
         if (callableType->paramTypes->count != ast->children->count) {
@@ -404,15 +415,8 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     if (callee->type != NULL && hasGenericParameters(type)) {
         if (!callee->attribute.isGeneric) typeError(typeChecker, "Class %s requires generic type parameters.", type->shortName->chars);
         else {
-            BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
-            GenericTypeInfo* genericType = AS_GENERIC_TYPE(callee->type);
-            Ast* actualParameters = astGetChild(callee, 0);
-
-            if (actualParameters->children->count != behaviorType->formalTypes->count) {
-                typeError(typeChecker, "Class %s expects to receive %d generic type parameters but gets %d.",
-                    type->shortName->chars, behaviorType->formalTypes->count, actualParameters->children->count);
-            }
-            ast->type = (TypeInfo*)genericType;
+			checkTypeParameters(typeChecker, callee, type);
+            ast->type = callee->type;
         }
     }
     else ast->type = type;

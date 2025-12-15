@@ -232,6 +232,16 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
     ObjString* fullName = getSymbolFullName(resolver, ast->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
 
+    if (ast->attribute.isGeneric) {
+        Ast* typeParams = astLastChild(ast);
+        for (int i = 0; i < typeParams->children->count; i++) {
+            Ast* typeParam = astGetChild(typeParams, i);
+            resolveChild(resolver, typeParams, i);
+            ObjString* typeParamName = createSymbol(resolver, typeParam->token);
+            TypeInfoArrayAdd(behaviorType->formalTypes, newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, typeParamName, typeParamName));
+        }
+    }
+
     switch (category) {
         case TYPE_CATEGORY_CLASS:
             return (TypeInfo*)insertMetaclassType(resolver, shortName, fullName);
@@ -1364,9 +1374,8 @@ static void bindFormalParameters(Resolver* resolver, Ast* ast, BehaviorTypeInfo*
 static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     item->type = insertBehaviorType(resolver, ast, TYPE_CATEGORY_CLASS);
-    bindFormalParameters(resolver, ast, AS_BEHAVIOR_TYPE(item->type));
-    resolveChild(resolver, ast, 0);
     item->state = SYMBOL_STATE_ACCESSED;
+    resolveChild(resolver, ast, 0);
 }
 
 static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
@@ -1453,16 +1462,16 @@ static void resolveNamespaceDeclaration(Resolver* resolver, Ast* ast) {
 static void resolveTraitDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     item->type = insertBehaviorType(resolver, ast, TYPE_CATEGORY_TRAIT);
-    resolveChild(resolver, ast, 0);
     item->state = SYMBOL_STATE_ACCESSED;
+    resolveChild(resolver, ast, 0);
 }
 
 static void resolveTypeDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     item->type = getNativeType(resolver->vm, "Type");
+    item->state = SYMBOL_STATE_ACCESSED;
     resolveChild(resolver, ast, 0);
     insertAliasType(resolver, ast);
-    item->state = SYMBOL_STATE_ACCESSED;
 }
 
 static void resolveVarDeclaration(Resolver* resolver, Ast* ast) {
