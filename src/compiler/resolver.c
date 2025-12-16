@@ -172,6 +172,13 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
             if (type == NULL) {
                 fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
                 type = typeTableGet(resolver->vm->typetab, fullName);
+
+                if (type == NULL) {
+					SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
+                    if (item != NULL && item->category == SYMBOL_CATEGORY_FORMAL) {
+                        return newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, originalName, fullName);
+                    }
+                }
             }
         }
     }
@@ -972,7 +979,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
             item->state = SYMBOL_STATE_ACCESSED;
             item->type = getNativeType(resolver->vm, "Type");
         }
-        else ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
+        ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
     }
 }
 

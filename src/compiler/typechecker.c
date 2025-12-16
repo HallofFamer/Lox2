@@ -113,6 +113,40 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
+static TypeInfo* getInstantiatedParamType(TypeChecker* typeChecker, Ast* ast, TypeInfo* formalType, BehaviorTypeInfo* behaviorType) {
+    Ast* typeArgs = astGetChild(ast, 0);    
+    for (int i = 0; i < behaviorType->formalTypes->count; i++) {
+        if (formalType->shortName == behaviorType->formalTypes->elements[i]->shortName) {
+            Ast* typeArg = astGetChild(typeArgs, i);
+            return typeArg->type;
+        }
+    }
+    return NULL;
+}
+
+static CallableTypeInfo* getInstantiatedCallableType(TypeChecker* typeChecker, Ast* ast, TypeInfo* type, TypeInfo* type2) {
+    if (!hasGenericParameters(type) && !hasGenericParameters(type2)) {
+        return AS_METHOD_TYPE(type2)->declaredType;
+    }
+
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+    MethodTypeInfo* methodType = AS_METHOD_TYPE(type2);
+    CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, methodType->declaredType->baseType.shortName, methodType->declaredType->returnType);
+    callableType->formalTypes = methodType->declaredType->formalTypes;
+    
+    for (int i = 0; i < methodType->declaredType->paramTypes->count; i++) {
+        TypeInfo* paramType = methodType->declaredType->paramTypes->elements[i];
+        if (IS_FORMAL_TYPE(paramType)) paramType = getInstantiatedParamType(typeChecker, ast, paramType, behaviorType);
+        TypeInfoArrayAdd(callableType->paramTypes, paramType);
+    }
+    
+    TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)callableType);
+    char* callableTypeName = createCallableTypeName(callableType);
+    callableType->baseType.shortName = takeStringPerma(typeChecker->vm, callableTypeName, (int)strlen(callableTypeName));
+    callableType->baseType.fullName = callableType->baseType.shortName;
+    return callableType;
+}
+
 static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer);
 
 static void defineAstType(TypeChecker* typeChecker, Ast* ast, const char* name, SymbolItem* item) {
@@ -405,8 +439,9 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     TypeInfo* initializerType = typeTableMethodLookup(type, initializerName);
 
     if (initializerType != NULL) {
+        CallableTypeInfo* callableType = getInstantiatedCallableType(typeChecker, callee, type, initializerType);
         sprintf_s(classDesc, UINT8_MAX, "Class %s's initializer", type->shortName->chars);
-        checkArguments(typeChecker, classDesc, args, AS_METHOD_TYPE(initializerType)->declaredType);
+        checkArguments(typeChecker, classDesc, args, callableType);
     }
     else if (astHasChild(args)) {
         typeError(typeChecker, "Class %s's initializer expects to receive a total of 0 argument but gets %d.", type->shortName->chars, astNumChild(args));
