@@ -113,7 +113,7 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
-static TypeInfo* getInstantiatedParamType(TypeChecker* typeChecker, Ast* ast, TypeInfo* formalType, BehaviorTypeInfo* behaviorType) {
+static TypeInfo* getInstantiatedType(TypeChecker* typeChecker, Ast* ast, TypeInfo* formalType, BehaviorTypeInfo* behaviorType) {
     Ast* typeArgs = astGetChild(ast, 0);    
     for (int i = 0; i < behaviorType->formalTypes->count; i++) {
         if (formalType->shortName == behaviorType->formalTypes->elements[i]->shortName) {
@@ -132,11 +132,11 @@ static CallableTypeInfo* getInstantiatedCallableType(TypeChecker* typeChecker, A
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
     MethodTypeInfo* methodType = AS_METHOD_TYPE(type2);
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, methodType->declaredType->baseType.shortName, methodType->declaredType->returnType);
-    callableType->formalTypes = methodType->declaredType->formalTypes;
-    
+    callableType->formalTypes = methodType->declaredType->formalTypes;    
+
     for (int i = 0; i < methodType->declaredType->paramTypes->count; i++) {
         TypeInfo* paramType = methodType->declaredType->paramTypes->elements[i];
-        if (IS_FORMAL_TYPE(paramType)) paramType = getInstantiatedParamType(typeChecker, ast, paramType, behaviorType);
+        if (IS_FORMAL_TYPE(paramType)) paramType = getInstantiatedType(typeChecker, ast, paramType, behaviorType);
         TypeInfoArrayAdd(callableType->paramTypes, paramType);
     }
     

@@ -1366,18 +1366,6 @@ static void resolveStatement(Resolver* resolver, Ast* ast) {
     }
 }
 
-static void bindFormalParameters(Resolver* resolver, Ast* ast, BehaviorTypeInfo* behaviorType) {
-    if (ast->attribute.isGeneric) {
-        Ast* typeParams = astLastChild(ast);
-        for (int i = 0; i < typeParams->children->count; i++) {
-            Ast* typeParam = astGetChild(typeParams, i);
-            resolveChild(resolver, typeParams, i);
-            ObjString* typeParamName = createSymbol(resolver, typeParam->token);
-            TypeInfoArrayAdd(behaviorType->formalTypes, newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, typeParamName, typeParamName));
-        }
-    }
-}
-
 static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     item->type = insertBehaviorType(resolver, ast, TYPE_CATEGORY_CLASS);
