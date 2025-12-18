@@ -679,7 +679,7 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
             genericDepth++;
             continue;
         }
-        else if (currentTokenType(parser) == TOKEN_SYMBOL_GREATER) {
+        else if (currentTokenType(parser) == TOKEN_SYMBOL_COMMA || currentTokenType(parser) == TOKEN_SYMBOL_GREATER) {
             genericDepth--;
             if (genericDepth == 0) {
                 free(left);
@@ -1061,10 +1061,10 @@ ParseRule parseRules[] = {
     [TOKEN_SYMBOL_WHILE]          = {NULL,          NULL,        PREC_NONE,        false},
     [TOKEN_SYMBOL_WITH]           = {NULL,          NULL,        PREC_NONE,        false},
     [TOKEN_SYMBOL_YIELD]          = {yield,         NULL,        PREC_NONE,        true},
-    [TOKEN_SYMBOL_ERROR]                 = {NULL,          NULL,        PREC_NONE,        false},
-    [TOKEN_SYMBOL_EMPTY]                 = {NULL,          NULL,        PREC_NONE,        true},
-    [TOKEN_SYMBOL_NEW_LINE]              = {NULL,          NULL,        PREC_NONE,        true},
-    [TOKEN_SYMBOL_EOF]                   = {NULL,          NULL,        PREC_NONE,        true},
+    [TOKEN_SYMBOL_ERROR]          = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_SYMBOL_EMPTY]          = {NULL,          NULL,        PREC_NONE,        true},
+    [TOKEN_SYMBOL_NEW_LINE]       = {NULL,          NULL,        PREC_NONE,        true},
+    [TOKEN_SYMBOL_EOF]            = {NULL,          NULL,        PREC_NONE,        true},
 };
 
 static Ast* parsePrefix(Parser* parser, Precedence precedence, bool canAssign) {

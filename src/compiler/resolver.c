@@ -151,10 +151,10 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
     return takeStringPerma(resolver->vm, fullName, length);
 }
 
-static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass) {
+static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {
     ObjString* shortName = createSymbol(resolver, token);
     ObjString* originalName = shortName;
-    if (isMetaclass) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
+    if (isMetaclass && !checkFormalParam) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
     TypeInfo* type = typeTableGet(resolver->vm->typetab, shortName);
     ObjString* fullName = NULL;
 
@@ -173,7 +173,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
                 fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
                 type = typeTableGet(resolver->vm->typetab, fullName);
 
-                if (type == NULL) {
+                if (type == NULL && checkFormalParam) {
 					SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
                     if (item != NULL && item->category == SYMBOL_CATEGORY_FORMAL) {
                         return newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, originalName, fullName);
@@ -263,8 +263,8 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
 }
 
 static void bindSuperclassType(Resolver* resolver, Token currentClass, Token superclass) {
-	BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false));
-    TypeInfo* superclassType = getTypeForSymbol(resolver, superclass, false);    
+	BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false, false));
+    TypeInfo* superclassType = getTypeForSymbol(resolver, superclass, false, false);    
     if (superclassType == NULL) return;
     currentClassType->superclassType = superclassType;
 
@@ -275,8 +275,8 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Token sup
 }
 
 static void bindTraitType(Resolver* resolver, Token currentClass, Token trait) {
-    BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false));
-    TypeInfo* traitType = getTypeForSymbol(resolver, trait, false);
+    BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false, false));
+    TypeInfo* traitType = getTypeForSymbol(resolver, trait, false, false);
     if (traitType == NULL) return;
 
     for (int i = 0; i < currentClassType->traitTypes->count; i++) {
@@ -487,7 +487,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
         }
         case SYMBOL_SCOPE_METHOD: {
             if (!resolver->currentClass->isAnonymous) {
-                TypeInfo* baseType = getTypeForSymbol(resolver, resolver->currentClass->name, false);
+                TypeInfo* baseType = getTypeForSymbol(resolver, resolver->currentClass->name, false, false);
                 if (resolver->currentFunction->attribute.isClassMethod) {
                     ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, baseType->fullName);
                     baseType = typeTableGet(resolver->vm->typetab, metaclassName);
@@ -543,7 +543,7 @@ static void insertTypeParameter(Resolver* resolver, Ast* ast, GenericTypeInfo* g
 }
 
 static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
-    TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false);
+    TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false, true);
     if (rawType == NULL || IS_VOID_TYPE(rawType) || IS_FORMAL_TYPE(rawType)) {
         semanticError(resolver, "Cannot use dynamic type, void type or type parameter as generic type.");
         return NULL;
@@ -979,7 +979,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
             item->state = SYMBOL_STATE_ACCESSED;
             item->type = getNativeType(resolver->vm, "Type");
         }
-        ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass);
+        ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass, true);
     }
 }
 
@@ -1380,7 +1380,7 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
     }
 
     bool hasInitializer = (ast->attribute.isTyped && numChild == 2) || (!ast->attribute.isTyped && numChild == 1);
-    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false));
+    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false, false));
     if (ast->attribute.isClass) classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
     ObjString* name = createSymbol(resolver, ast->token);
 
@@ -1428,7 +1428,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
     item->state = SYMBOL_STATE_ACCESSED;
 
     if (!resolver->currentClass->isAnonymous) {
-        BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false));
+        BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false, false));
         if (ast->attribute.isClass) {
             _class = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, _class->baseType.fullName)));
         }

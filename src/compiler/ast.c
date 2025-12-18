@@ -170,8 +170,7 @@ static void astOutputExprBinary(Ast* ast, int indentLevel) {
 
 static void astOutputExprCall(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* attribute = ast->attribute.isOptional ? "?" : "";
-    printf("call%s\n", attribute);
+    printf("call%s\n", ast->attribute.isOptional ? "?" : "");
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
 }
@@ -275,9 +274,8 @@ static void astOutputExprParam(Ast* ast, int indentLevel) {
 
 static void astOutputExprPropertyGet(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* attribute = ast->attribute.isOptional ? "?" : "";
     char* prop = tokenToCString(ast->token);
-    printf("propertyGet %s.%s\n", attribute, prop);
+    printf("propertyGet %s.%s\n", ast->attribute.isOptional ? "?" : "", prop);
     astOutputChild(ast, indentLevel + 1, 0);
     free(prop);
 }
@@ -362,16 +360,14 @@ static void astOutputExprUnary(Ast* ast, int indentLevel) {
 
 static void astOutputExprVariable(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* attribute = ast->attribute.isMutable ? "var " : "";
     char* name = tokenToCString(ast->token);
-    printf("%s%s\n", attribute, name);
+    printf("%s%s\n", ast->attribute.isMutable ? "var " : "", name);
     free(name);
 }
 
 static void astOutputExprYield(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* attribute = ast->attribute.isYieldFrom ? " from" : "";
-    printf("yield%s\n", attribute);
+    printf("yield%s\n", ast->attribute.isYieldFrom ? " from" : "");
     if (astHasChild(ast)) {
         astOutputChild(ast, indentLevel + 1, 0);
     }
@@ -526,9 +522,7 @@ static void astOutputStmtWhile(Ast* ast, int indentLevel) {
 
 static void astOutputStmtYield(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* attribute = ast->attribute.isYieldFrom ? " from" : "";
-    printf("yieldStmt%s\n", attribute);
-
+    printf("yieldStmt%s\n", ast->attribute.isYieldFrom ? " from" : "");
     if (astHasChild(ast)) {
         astOutputChild(ast, indentLevel + 1, 0);
     }

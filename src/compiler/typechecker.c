@@ -113,38 +113,35 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
-static TypeInfo* getInstantiatedType(TypeChecker* typeChecker, Ast* ast, TypeInfo* formalType, BehaviorTypeInfo* behaviorType) {
-    Ast* typeArgs = astGetChild(ast, 0);    
+static TypeInfo* getInstantiatedType(TypeChecker* typeChecker, TypeInfo* formalType, GenericTypeInfo* genericType) {
+	BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(genericType->rawType);
     for (int i = 0; i < behaviorType->formalTypes->count; i++) {
         if (formalType->shortName == behaviorType->formalTypes->elements[i]->shortName) {
-            Ast* typeArg = astGetChild(typeArgs, i);
-            return typeArg->type;
+			return genericType->actualParameters->elements[i];
         }
     }
     return NULL;
 }
 
-static CallableTypeInfo* getInstantiatedCallableType(TypeChecker* typeChecker, Ast* ast, TypeInfo* type, TypeInfo* type2) {
-    if (!hasGenericParameters(type) && !hasGenericParameters(type2)) {
-        return AS_METHOD_TYPE(type2)->declaredType;
-    }
+static CallableTypeInfo* getInstantiatedCallableType(TypeChecker* typeChecker, GenericTypeInfo* genericBehaviorType, CallableTypeInfo* genericCallableType) {
+	TypeInfo* returnType = genericCallableType->returnType;
+    if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
+        returnType = getInstantiatedType(typeChecker, returnType, genericBehaviorType);
+	}
+    CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericCallableType->baseType.shortName, genericCallableType->returnType);
+    instantiatedCallableType->formalTypes = genericCallableType->formalTypes;    
 
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
-    MethodTypeInfo* methodType = AS_METHOD_TYPE(type2);
-    CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, methodType->declaredType->baseType.shortName, methodType->declaredType->returnType);
-    callableType->formalTypes = methodType->declaredType->formalTypes;    
-
-    for (int i = 0; i < methodType->declaredType->paramTypes->count; i++) {
-        TypeInfo* paramType = methodType->declaredType->paramTypes->elements[i];
-        if (IS_FORMAL_TYPE(paramType)) paramType = getInstantiatedType(typeChecker, ast, paramType, behaviorType);
-        TypeInfoArrayAdd(callableType->paramTypes, paramType);
+    for (int i = 0; i < genericCallableType->paramTypes->count; i++) {
+        TypeInfo* paramType = genericCallableType->paramTypes->elements[i];
+        if (paramType != NULL && IS_FORMAL_TYPE(paramType)) paramType = getInstantiatedType(typeChecker, paramType, genericBehaviorType);
+        TypeInfoArrayAdd(instantiatedCallableType->paramTypes, paramType);
     }
     
-    TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)callableType);
-    char* callableTypeName = createCallableTypeName(callableType);
-    callableType->baseType.shortName = takeStringPerma(typeChecker->vm, callableTypeName, (int)strlen(callableTypeName));
-    callableType->baseType.fullName = callableType->baseType.shortName;
-    return callableType;
+    TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedCallableType);
+    char* instantiatedCallableTypeName = createCallableTypeName(instantiatedCallableType);
+    instantiatedCallableType->baseType.shortName = takeStringPerma(typeChecker->vm, instantiatedCallableTypeName, (int)strlen(instantiatedCallableTypeName));
+    instantiatedCallableType->baseType.fullName = instantiatedCallableType->baseType.shortName;
+    return instantiatedCallableType;
 }
 
 static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer);
@@ -439,7 +436,9 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     TypeInfo* initializerType = typeTableMethodLookup(type, initializerName);
 
     if (initializerType != NULL) {
-        CallableTypeInfo* callableType = getInstantiatedCallableType(typeChecker, callee, type, initializerType);
+        CallableTypeInfo* callableType = hasGenericParameters(type) ? 
+            getInstantiatedCallableType(typeChecker, AS_GENERIC_TYPE(callee->type), AS_METHOD_TYPE(initializerType)->declaredType) :
+			AS_METHOD_TYPE(initializerType)->declaredType;
         sprintf_s(classDesc, UINT8_MAX, "Class %s's initializer", type->shortName->chars);
         checkArguments(typeChecker, classDesc, args, callableType);
     }

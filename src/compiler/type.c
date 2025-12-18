@@ -442,7 +442,7 @@ void typeTableFieldsCopy(TypeTable* from, TypeTable* to) {
 }
 
 TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
-    if (type == NULL || !IS_BEHAVIOR_TYPE(type) || !IS_GENERIC_TYPE(type)) return NULL;
+    if (type == NULL || (!IS_BEHAVIOR_TYPE(type) && !IS_GENERIC_TYPE(type))) return NULL;
 	type = IS_GENERIC_TYPE(type) ? AS_GENERIC_TYPE(type)->rawType : type;
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
     TypeInfo* methodType = typeTableGet(behaviorType->methods, key);
@@ -674,7 +674,7 @@ void typeTableOutput(TypeTable* typetab) {
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (type == NULL || type2 == NULL || (IS_FORMAL_TYPE(type) && IS_FORMAL_TYPE(type2))) return true;
     type = getAliasTargetType(type);
-    type2 = getAliasTargetType(type);
+    type2 = getAliasTargetType(type2);
 
     if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return (type->id == type2->id);
     else if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
