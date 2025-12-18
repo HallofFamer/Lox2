@@ -2177,7 +2177,7 @@ void registerLangPackage(VM* vm) {
     DEF_FIELD(vm->methodClass, behavior, Behavior, false, NIL_VAL);
     DEF_METHOD(vm->methodClass, Method, arity, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->methodClass, Method, behavior, 0, RETURN_TYPE(Behavior));
-    DEF_METHOD(vm->methodClass, Method, bind, 1, RETURN_TYPE(Object), PARAM_TYPE(Object));
+    DEF_METHOD(vm->methodClass, Method, bind, 1, RETURN_TYPE(BoundMethod), PARAM_TYPE(Object));
     DEF_METHOD(vm->methodClass, Method, clone, 0, RETURN_TYPE(Method));
     DEF_METHOD(vm->methodClass, Method, isAsync, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->methodClass, Method, isNative, 0, RETURN_TYPE(Bool));
@@ -2257,8 +2257,8 @@ void registerLangPackage(VM* vm) {
     insertGlobalSymbolTable(vm, "Bool", "Bool class");
 
     DEF_METHOD(comparableTrait, TComparable, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
-    DEF_METHOD(comparableTrait, TComparable, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
-    DEF_OPERATOR(comparableTrait, TComparable, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_METHOD(comparableTrait, TComparable, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_OPERATOR(comparableTrait, TComparable, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_OPERATOR(comparableTrait, TComparable, > , __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(comparableTrait, TComparable, < , __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     insertGlobalSymbolTable(vm, "TComparable", "Trait");
@@ -2294,7 +2294,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->numberClass, Number, tan, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, toInt, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->numberClass, Number, toString, 0, RETURN_TYPE(String));
-    DEF_OPERATOR(vm->numberClass, Number, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
     DEF_OPERATOR(vm->numberClass, Number, > , __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(vm->numberClass, Number, < , __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(vm->numberClass, Number, +, __add__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));

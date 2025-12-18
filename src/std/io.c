@@ -779,7 +779,7 @@ void registerIOPackage(VM* vm) {
 
     bindSuperclass(vm, writeStreamClass, ioStreamClass);
     DEF_INTERCEPTOR(writeStreamClass, WriteStream, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.io.WriteStream), PARAM_TYPE(Object));
-    DEF_METHOD(writeStreamClass, WriteStream, flush, 0, RETURN_TYPE(void));
+    DEF_METHOD(writeStreamClass, WriteStream, flush, 0, RETURN_TYPE(Bool));
     DEF_METHOD_ASYNC(writeStreamClass, WriteStream, flushAsync, 0, RETURN_TYPE(clox.std.util.Promise));
     DEF_METHOD(writeStreamClass, WriteStream, write, 1, RETURN_TYPE(void), PARAM_TYPE(Object));
 

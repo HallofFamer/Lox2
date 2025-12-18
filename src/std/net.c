@@ -904,7 +904,7 @@ void registerNetPackage(VM* vm) {
 
     bindSuperclass(vm, socketServerClass, socketClass);
     DEF_FIELD(socketServerClass, socketAddress, clox.std.net.SocketAddress, false, NIL_VAL);
-    DEF_METHOD(socketServerClass, SocketServer, accept, 0, RETURN_TYPE(void));
+    DEF_METHOD(socketServerClass, SocketServer, accept, 0, RETURN_TYPE(clox.std.net.SocketAddress));
     DEF_METHOD(socketServerClass, SocketServer, bind, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.net.SocketAddress));
     DEF_METHOD(socketServerClass, SocketServer, listen, 0, RETURN_TYPE(void));
 

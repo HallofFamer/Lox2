@@ -2360,7 +2360,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(stackClass, Stack, peek, 0, RETURN_TYPE(Object));
     DEF_METHOD(stackClass, Stack, pop, 0, RETURN_TYPE(Object));
     DEF_METHOD(stackClass, Stack, push, 1, RETURN_TYPE(void), PARAM_TYPE(Object));
-    DEF_METHOD(stackClass, Stack, search, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_METHOD(stackClass, Stack, search, 1, RETURN_TYPE(Int), PARAM_TYPE(Object));
     DEF_METHOD(stackClass, Stack, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(stackClass, Stack, toString, 0, RETURN_TYPE(String));
 
