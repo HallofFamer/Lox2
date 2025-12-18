@@ -124,10 +124,6 @@ static TypeInfo* getInstantiatedType(TypeChecker* typeChecker, TypeInfo* formalT
 }
 
 static CallableTypeInfo* getInstantiatedCallableType(TypeChecker* typeChecker, GenericTypeInfo* genericBehaviorType, CallableTypeInfo* genericCallableType) {
-	TypeInfo* returnType = genericCallableType->returnType;
-    if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
-        returnType = getInstantiatedType(typeChecker, returnType, genericBehaviorType);
-	}
     CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericCallableType->baseType.shortName, genericCallableType->returnType);
     instantiatedCallableType->formalTypes = genericCallableType->formalTypes;    
 
@@ -504,10 +500,14 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
 
     if (baseType != NULL) {
         MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
+        CallableTypeInfo* callableType = hasGenericParameters(receiver->type) ?
+            getInstantiatedCallableType(typeChecker, AS_GENERIC_TYPE(receiver->type), methodType->declaredType) :
+            methodType->declaredType;
+
         char methodDesc[UINT8_MAX];
         sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", receiver->type->shortName->chars, methodName->chars);
-        checkArguments(typeChecker, methodDesc, args, methodType->declaredType);
-        inferAstTypeFromReturn(typeChecker, ast, methodType->declaredType);
+        checkArguments(typeChecker, methodDesc, args, callableType);
+        inferAstTypeFromReturn(typeChecker, ast, callableType);
     }
     else if (receiver->type == typeChecker->namespaceType) {
         ObjString* _namespace = nameTableGet(typeChecker->nametab, createSymbol(typeChecker, receiver->token));

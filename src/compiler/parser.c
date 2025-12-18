@@ -671,16 +671,25 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
 
     do {
         advance(parser);
-        if (previousTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && previousTokenType(parser) != TOKEN_SYMBOL_VOID) {
+
+        if (currentTokenType(parser) == TOKEN_SYMBOL_COMMA) {
+            advance(parser);
+            continue;
+        }
+        else if (previousTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && previousTokenType(parser) != TOKEN_SYMBOL_VOID) {
             resetIndex(parser, index, current, false);
             break;
         }
         else if (currentTokenType(parser) == TOKEN_SYMBOL_LESS) {
             genericDepth++;
+            advance(parser);
             continue;
         }
-        else if (currentTokenType(parser) == TOKEN_SYMBOL_COMMA || currentTokenType(parser) == TOKEN_SYMBOL_GREATER) {
-            genericDepth--;
+        else if (currentTokenType(parser) == TOKEN_SYMBOL_GREATER) {
+            while (match(parser, TOKEN_SYMBOL_GREATER)) {
+                genericDepth--;
+            }
+
             if (genericDepth == 0) {
                 free(left);
                 resetIndex(parser, index - 2, previous2, true);
@@ -691,7 +700,7 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
             resetIndex(parser, index, current, false);
             break;
         }
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
+    } while (true);
 
     return binary(parser, token, left, canAssign);
 }
@@ -1460,7 +1469,7 @@ static bool matchGenericFunDeclaration(Parser* parser, bool* isAsync, bool* hasR
     if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && currentTokenType(parser) != TOKEN_SYMBOL_VOID) {
         return resetIndex(parser, index, current, false);
     }
-    else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
+    else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
         return resetIndex(parser, index, current, false);
     }
 

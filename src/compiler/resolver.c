@@ -527,8 +527,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
         ast->type = (TypeInfo*)callableType;
         
         char* callableTypeName = createCallableTypeName(callableType);
-        ast->type->shortName = takeStringPerma(resolver->vm, callableTypeName, (int)strlen(callableTypeName));
-        ast->type->fullName = ast->type->shortName;
+        ast->type->fullName = ast->type->shortName = takeStringPerma(resolver->vm, callableTypeName, (int)strlen(callableTypeName));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
     return callableType;
@@ -554,13 +553,12 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
         Ast* typeParams = astGetChild(ast, 0);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = typeParams->children->elements[i];
-			insertTypeParameter(resolver, typeParam, genericType);
+            insertTypeParameter(resolver, typeParam, genericType);
         }
         ast->type = (TypeInfo*)genericType;
 
         char* genericTypeName = createGenericTypeName(genericType);
-        ast->type->shortName = takeStringPerma(resolver->vm, genericTypeName, (int)strlen(genericTypeName));
-        ast->type->fullName = ast->type->shortName;
+        ast->type->fullName = ast->type->shortName = takeStringPerma(resolver->vm, genericTypeName, (int)strlen(genericTypeName));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
     return genericType;

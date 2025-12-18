@@ -21,7 +21,7 @@ void initClass(VM* vm, ObjClass* klass, ObjString* name, ObjClass* metaclass, Be
     klass->behaviorID = vm->behaviorCount++;
     klass->behaviorType = behaviorType;
     klass->classType = OBJ_INSTANCE;
-    klass->name = name != NULL ? name : emptyString(vm);
+    klass->name = (name != NULL) ? name : emptyString(vm);
     klass->namespace = vm->currentNamespace;
     klass->superclass = NULL;
     klass->isNative = false;
@@ -103,7 +103,9 @@ ObjString* getClassNameFromMetaclass(VM* vm, ObjString* metaclassName) {
 }
 
 ObjString* getMetaclassNameFromClass(VM* vm, ObjString* className) {
-    if (strstr(className->chars, " class") != NULL) return copyStringPerma(vm, "Metaclass", 9);
+    if (strstr(className->chars, " class") != NULL) {
+        return copyStringPerma(vm, "Metaclass", 9);
+    }
     return concatenateString(vm, className, newStringPerma(vm, "class"), " ");
 }
 
