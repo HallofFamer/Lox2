@@ -10,11 +10,9 @@ println(fileIn)
 println("Creating a read stream for input file.")
 
 val fileReader = FileReadStream(fileIn)
-println("The first character of the file is: ${fileReader.peek()}")
-println("")
+println("The first character of the file is: ${fileReader.peek()}\n")
 
-println("Now reading the entire file:")
-println("")
+println("Now reading the entire file:\n")
 while(!fileReader.isAtEnd()){
     print(fileReader.readLine())
 }
@@ -55,9 +53,8 @@ while(!binaryReader.isAtEnd()){
     print(" ")
 }
 binaryReader.close()
-println("")
+println("\n")
 
-println("")
 val fileBinaryOut = File("test/others/binary_output.bin")
 println(fileBinaryOut)
 fileBinaryOut.setWritable(true)

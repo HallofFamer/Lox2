@@ -5,8 +5,7 @@ using clox.std.util.Date
 val list = LinkedList()
 println("Testing class LinkedList...")
 println("Class for linked list object: ${list.getClassName()}")
-println("Linked list is currently empty: ${list.isEmpty()}")
-println("")
+println("Linked list is currently empty: ${list.isEmpty()}\n")
 
 list.add(2)
 list.add(3.5)
@@ -15,8 +14,7 @@ list.add(nil)
 list.add("Hello World")
 println("Initial elements in linked list: ${list.toString()}")
 println("Linked list contains element 3.5: ${list.contains(3.5)}")
-println("Element at index 3 of linked list: ${list.getAt(3)}")
-println("")
+println("Element at index 3 of linked list: ${list.getAt(3)}\n")
 
 println("Add a new element current date to the end of linked list: ")
 list.add(Date.now)
@@ -32,12 +30,11 @@ println("")
 list.remove()
 println("Removing first element from linked list: ${list.toString()}")
 list.removeLast()
-println("Removing last element from linked list: ${list.toString()}")
-println("")
+println("Removing last element from linked list: ${list.toString()}\n")
 
 println("Looping through elements in linked list...")
 for(val element : list){
-    println("Element: ${element.toString()}")
+    println("Element: ${element}")
 }
 println("")
 

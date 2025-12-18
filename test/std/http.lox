@@ -4,8 +4,7 @@ using clox.std.net.HTTPRequest
 using clox.std.net.URL
 
 val client = HTTPClient()
-println("Initializing HTTP Client: ${client}")
-println("")
+println("Initializing HTTP Client: ${client}\n")
 
 println("Sending get request to example.com: ")
 val response = client.get(URL.parse("https://example.com"))
