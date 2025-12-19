@@ -508,6 +508,11 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     }
 }
 
+static void insertAstTypeName(Resolver* resolver, Ast* ast, const char* typeName) {
+    ast->type->shortName = takeStringPerma(resolver->vm, typeName, (int)strlen(typeName));
+    ast->type->fullName = ast->type->shortName;
+}
+
 static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isGeneric, bool isLambda, bool isVariadic, bool isVoid) {
     Ast* returnType = astGetChild(ast, 0);
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
@@ -524,10 +529,9 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
             Ast* paramType = paramTypes->children->elements[i];
             TypeInfoArrayAdd(callableType->paramTypes, paramType->type);
         }
+
         ast->type = (TypeInfo*)callableType;
-        
-        char* callableTypeName = createCallableTypeName(callableType);
-        ast->type->fullName = ast->type->shortName = takeStringPerma(resolver->vm, callableTypeName, (int)strlen(callableTypeName));
+		insertAstTypeName(resolver, ast, createCallableTypeName(callableType));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
     return callableType;

@@ -124,7 +124,11 @@ static TypeInfo* getInstantiatedType(TypeChecker* typeChecker, TypeInfo* formalT
 }
 
 static CallableTypeInfo* getInstantiatedCallableType(TypeChecker* typeChecker, GenericTypeInfo* genericBehaviorType, CallableTypeInfo* genericCallableType) {
-    CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericCallableType->baseType.shortName, genericCallableType->returnType);
+	TypeInfo* returnType = genericCallableType->returnType;
+    if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
+        returnType = getInstantiatedType(typeChecker, returnType, genericBehaviorType);
+	}
+    CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericCallableType->baseType.shortName, returnType);
     instantiatedCallableType->formalTypes = genericCallableType->formalTypes;    
 
     for (int i = 0; i < genericCallableType->paramTypes->count; i++) {
