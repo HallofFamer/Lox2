@@ -179,7 +179,6 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
 static void setCallableTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
     callableType->attribute.isAsync = ast->attribute.isAsync;
     callableType->attribute.isClassMethod = ast->attribute.isClass;
-    callableType->attribute.isGenerator = false;
     callableType->attribute.isInitializer = ast->attribute.isInitializer;
     callableType->attribute.isInstanceMethod = !ast->attribute.isClass;
     callableType->attribute.isLambda = ast->attribute.isLambda;
@@ -251,6 +250,10 @@ static void bindTraitType(Resolver* resolver, Token currentClass, Token trait) {
     BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false));
     TypeInfo* traitType = getTypeForSymbol(resolver, trait, false);
     if (traitType == NULL) return;
+    for (int i = 0; i < currentClassType->traitTypes->count; i++) {
+        TypeInfo* existingTraitType = currentClassType->traitTypes->elements[i];
+        if (existingTraitType->id == traitType->id) return;
+    }
     TypeInfoArrayAdd(currentClassType->traitTypes, traitType);
 }
 

@@ -80,27 +80,6 @@ CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* 
     return callableType;
 }
 
-CallableTypeInfo* newCallableTypeInfoWithParams(int id, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...) {
-    CallableTypeInfo* callableType = (CallableTypeInfo*)newTypeInfo(id, sizeof(CallableTypeInfo), category, name, name);
-    if (callableType != NULL) {
-        callableType->returnType = returnType;
-        callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->attribute = callableTypeInitAttribute();
-
-        if (callableType->paramTypes != NULL) {
-            TypeInfoArrayInit(callableType->paramTypes);
-            va_list args;
-            va_start(args, numParams);
-            for (int i = 0; i < numParams; i++) {
-                TypeInfo* type = va_arg(args, TypeInfo*);
-                TypeInfoArrayAdd(callableType->paramTypes, type);
-            }
-            va_end(args);
-        }
-    }
-    return callableType;
-}
-
 FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer) {
     FieldTypeInfo* fieldType = (FieldTypeInfo*)newTypeInfo(id, sizeof(FieldTypeInfo), TYPE_CATEGORY_FIELD, name, name);
     if (fieldType != NULL) {
