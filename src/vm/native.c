@@ -254,8 +254,19 @@ ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass) 
     return exceptionClass;
 }
 
-TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType) {
+TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType, int numParams, ...) {
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, category, shortName, returnType);
+    if (numParams > 0) {
+        va_list args;
+        va_start(args, numParams);
+        for (int i = 0; i < numParams; i++) {
+            TypeInfo* paramType = va_arg(args, TypeInfo*);
+            TypeInfoArrayAdd(callableType->paramTypes, paramType);
+            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->callableTypes, paramType);
+        }
+        va_end(args);
+    }
+
     char* name = createCallableTypeName(callableType);
     callableType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
     callableType->baseType.fullName = callableType->baseType.shortName;

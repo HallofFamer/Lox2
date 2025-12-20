@@ -41,8 +41,8 @@
 
 #define RETURN_TYPE(type) getNativeType(vm, #type)
 #define PARAM_TYPE(type) getNativeType(vm, #type)
-#define PARAM_TYPE_CALLABLE(returnType) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType)
-#define PARAM_TYPE_CALLABLE_N(returnType, numParams, ...) (TypeInfo*)newCallableTypeInfoWithParams(-1, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
+#define PARAM_TYPE_CALLABLE(returnType) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, 0)
+#define PARAM_TYPE_CALLABLE_N(returnType, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
 
 ObjClass* defineNativeClass(VM* vm, const char* name);
 void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, NativeFunction function, ...);
@@ -52,7 +52,7 @@ void defineNativeInterceptor(VM* vm, ObjClass* klass, InterceptorType type, int 
 ObjClass* defineNativeTrait(VM* vm, const char* name);
 ObjNamespace* defineNativeNamespace(VM* vm, const char* name, ObjNamespace* enclosing);
 ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass);
-TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType);
+TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType, int numParams, ...);
 ObjClass* getNativeClass(VM* vm, const char* fullName);
 TypeInfo* getNativeType(VM* vm, const char* name);
 ObjNativeFunction* getNativeFunction(VM* vm, const char* name);
