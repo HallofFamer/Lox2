@@ -559,10 +559,9 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
             Ast* typeParam = typeParams->children->elements[i];
             insertTypeParameter(resolver, typeParam, genericType);
         }
-        ast->type = (TypeInfo*)genericType;
 
-        char* genericTypeName = createGenericTypeName(genericType);
-        ast->type->fullName = ast->type->shortName = takeStringPerma(resolver->vm, genericTypeName, (int)strlen(genericTypeName));
+        ast->type = (TypeInfo*)genericType;
+        insertAstTypeName(resolver, ast, createGenericTypeName(genericType));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
     return genericType;

@@ -439,7 +439,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
         CallableTypeInfo* callableType = hasGenericParameters(type) ? 
             getInstantiatedCallableType(typeChecker, AS_GENERIC_TYPE(callee->type), AS_METHOD_TYPE(initializerType)->declaredType) :
 			AS_METHOD_TYPE(initializerType)->declaredType;
-        sprintf_s(classDesc, UINT8_MAX, "Class %s's initializer", type->shortName->chars);
+        sprintf_s(classDesc, UINT8_MAX, "Class %s's initializer", (callee->type != NULL) ? callee->type->shortName->chars : type->shortName->chars);
         checkArguments(typeChecker, classDesc, args, callableType);
     }
     else if (astHasChild(args)) {
