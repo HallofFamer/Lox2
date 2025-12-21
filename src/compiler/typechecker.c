@@ -534,11 +534,14 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
     TypeInfo* baseType = typeTableMethodLookup(superType, methodName);
     if (baseType == NULL) return;
     MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
+    CallableTypeInfo* callableType = hasGenericParameters(superType) ?
+        getInstantiatedCallableType(typeChecker, AS_GENERIC_TYPE(superType), methodType->declaredType) :
+        methodType->declaredType;
 
     char methodDesc[UINT8_MAX];
     sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", superType->shortName->chars, methodName->chars);
-    checkArguments(typeChecker, methodDesc, args, methodType->declaredType);
-    inferAstTypeFromReturn(typeChecker, ast, methodType->declaredType);
+    checkArguments(typeChecker, methodDesc, args, callableType);
+    inferAstTypeFromReturn(typeChecker, ast, callableType);
 }
 
 static void inferAstTypeFromSubscriptGet(TypeChecker* typeChecker, Ast* ast) {
