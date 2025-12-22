@@ -34,7 +34,7 @@ LOX_METHOD(BinaryReadStream, read) {
 }
 
 LOX_METHOD(BinaryReadStream, readAsync) {
-    ASSERT_ARG_COUNT("BinaryReadStream::readAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("BinaryReadStream::readAsync()", 0);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot read the next byte because file is already closed.");
     loadFileRead(vm, file);
@@ -60,8 +60,8 @@ LOX_METHOD(BinaryReadStream, readBytes) {
 }
 
 LOX_METHOD(BinaryReadStream, readBytesAsync) {
-    ASSERT_ARG_COUNT("BinaryReadStream::readBytesAsync(length)", 1);
-    ASSERT_ARG_TYPE("BinaryReadStream::readBytesAsync(length)", 0, Int);
+    ASSERT_ARG_COUNT_ASYNC("BinaryReadStream::readBytesAsync(length)", 1);
+    ASSERT_ARG_TYPE_ASYNC("BinaryReadStream::readBytesAsync(length)", 0, Int);
     int length = AS_INT(args[0]);
     if (length < 0) RETURN_PROMISE_EX_FMT(clox.std.lang.IllegalArgumentException, "Method BinaryReadStream::readBytesAsync(length) expects argument 1 to be a positive integer but got %g.", length);
 
@@ -99,8 +99,8 @@ LOX_METHOD(BinaryWriteStream, write) {
 }
 
 LOX_METHOD(BinaryWriteStream, writeAsync) {
-    ASSERT_ARG_COUNT("BinaryWriteStream::writeAsync(byte)", 1);
-    ASSERT_ARG_TYPE("BinaryWriteStream::writeAsync(byte)", 0, Int);
+    ASSERT_ARG_COUNT_ASYNC("BinaryWriteStream::writeAsync(byte)", 1);
+    ASSERT_ARG_TYPE_ASYNC("BinaryWriteStream::writeAsync(byte)", 0, Int);
     int arg = AS_INT(args[0]);
     ASSERT_INDEX_WITHIN_BOUNDS("BinaryWriteStream::writeAsync(byte)", arg, 0, 255, 0);
 
@@ -127,8 +127,8 @@ LOX_METHOD(BinaryWriteStream, writeBytes) {
 }
 
 LOX_METHOD(BinaryWriteStream, writeBytesAsync) {
-    ASSERT_ARG_COUNT("BinaryWriteStream::writeBytesAsync(bytes)", 1);
-    ASSERT_ARG_TYPE("BinaryWriteStream::writeBytesAsync(bytes)", 0, Array);
+    ASSERT_ARG_COUNT_ASYNC("BinaryWriteStream::writeBytesAsync(bytes)", 1);
+    ASSERT_ARG_TYPE_ASYNC("BinaryWriteStream::writeBytesAsync(bytes)", 0, Array);
     ObjArray* bytes = AS_ARRAY(args[0]);
     if (bytes->elements.count == 0) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write empty byte array to stream.");
 
@@ -159,7 +159,7 @@ LOX_METHOD(File, create) {
 }
 
 LOX_METHOD(File, createAsync) {
-    ASSERT_ARG_COUNT("File::createAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("File::createAsync()", 0);
     ObjFile* self = AS_FILE(receiver);
     if (fileExists(vm, self)) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot create new file because it already exists");
     ObjPromise* promise = fileCreateAsync(vm, self, fileOnCreate);
@@ -175,7 +175,7 @@ LOX_METHOD(File, delete) {
 }
 
 LOX_METHOD(File, deleteAsync) {
-    ASSERT_ARG_COUNT("File::deleteAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("File::deleteAsync()", 0);
     ObjFile* self = AS_FILE(receiver);
     if (!fileExists(vm, self)) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot delete file because it does not exist.");
     ObjPromise* promise = fileDeleteAsync(vm, self, fileOnHandle);
@@ -257,7 +257,7 @@ LOX_METHOD(File, mkdir) {
 }
 
 LOX_METHOD(File, mkdirAsync) {
-    ASSERT_ARG_COUNT("File::mkdirAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("File::mkdirAsync()", 0);
     ObjFile* self = AS_FILE(receiver);
     if (fileExists(vm, self)) RETURN_PROMISE_EX(clox.std.lang.UnsupportedOperationException, "Cannot create directory as it already exists in the file system.");
     ObjPromise* promise = FileMkdirAsync(vm, self, fileOnHandle);
@@ -279,8 +279,8 @@ LOX_METHOD(File, rename) {
 }
 
 LOX_METHOD(File, renameAsync) {
-    ASSERT_ARG_COUNT("File::renameAsync(name)", 1);
-    ASSERT_ARG_TYPE("File::renameAsync(name)", 0, String);
+    ASSERT_ARG_COUNT_ASYNC("File::renameAsync(name)", 1);
+    ASSERT_ARG_TYPE_ASYNC("File::renameAsync(name)", 0, String);
     ObjFile* self = AS_FILE(receiver);
     if (!fileExists(vm, self)) RETURN_PROMISE_EX(clox.std.io.FileNotFoundException, "Cannot rename file as it does not exist.");
     ObjPromise* promise = fileRenameAsync(vm, self, AS_STRING(args[0]), fileOnHandle);
@@ -296,7 +296,7 @@ LOX_METHOD(File, rmdir) {
 }
 
 LOX_METHOD(File, rmdirAsync) {
-    ASSERT_ARG_COUNT("File::rmdirAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("File::rmdirAsync()", 0);
     ObjFile* self = AS_FILE(receiver);
     if (!loadFileStat(vm, self)) RETURN_PROMISE_EX(clox.std.io.FileNotFoundException, "Cannot remove directory as it does not exist.");
     ObjPromise* promise = fileRmdirAsync(vm, self, fileOnHandle);
@@ -371,9 +371,9 @@ LOX_METHOD(FileClass, open) {
 }
 
 LOX_METHOD(FileClass, openAsync) {
-    ASSERT_ARG_COUNT("File class::openAsync(pathname, mode)", 2);
-    ASSERT_ARG_TYPE("File class::openAsync(pathname, mode)", 0, String);
-    ASSERT_ARG_TYPE("File class::openAsync(pathname, mode)", 1, String);
+    ASSERT_ARG_COUNT_ASYNC("File class::openAsync(pathname, mode)", 2);
+    ASSERT_ARG_TYPE_ASYNC("File class::openAsync(pathname, mode)", 0, String);
+    ASSERT_ARG_TYPE_ASYNC("File class::openAsync(pathname, mode)", 1, String);
     char* mode = AS_CSTRING(args[1]);
 
     ObjFile* file = newFile(vm, AS_STRING(args[0]));
@@ -419,7 +419,7 @@ LOX_METHOD(FileReadStream, read) {
 }
 
 LOX_METHOD(FileReadStream, readAsync) {
-    ASSERT_ARG_COUNT("FileReadStream::readAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("FileReadStream::readAsync()", 0);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot read the next char because file is already closed.");
     loadFileRead(vm, file);
@@ -442,7 +442,7 @@ LOX_METHOD(FileReadStream, readLine) {
 }
 
 LOX_METHOD(FileReadStream, readLineAsync) {
-    ASSERT_ARG_COUNT("FileReadStream::readLineAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("FileReadStream::readLineAsync()", 0);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot read the next line because file is already closed.");
     loadFileRead(vm, file);
@@ -469,8 +469,8 @@ LOX_METHOD(FileReadStream, readString) {
 }
 
 LOX_METHOD(FileReadStream, readStringAsync) {
-    ASSERT_ARG_COUNT("FileReadStream::readStringAsync(length)", 1);
-    ASSERT_ARG_TYPE("FileReadStream::readString(length)", 0, Int);
+    ASSERT_ARG_COUNT_ASYNC("FileReadStream::readStringAsync(length)", 1);
+    ASSERT_ARG_TYPE_ASYNC("FileReadStream::readString(length)", 0, Int);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     int length = AS_INT(args[0]);
     if (length < 0) RETURN_PROMISE_EX_FMT(clox.std.lang.IllegalArgumentException, "Method FileReadStream::readStringAsync(length) expects argument 1 to be a positive integer but got %g.", length);
@@ -496,7 +496,7 @@ LOX_METHOD(FileReadStream, readToEnd) {
 }
 
 LOX_METHOD(FileReadStream, readToEndAsync) {
-    ASSERT_ARG_COUNT("FileReadStream::readToEndAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("FileReadStream::readToEndAsync()", 0);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot read to the end of file because file is already closed.");
     loadFileStat(vm, file);
@@ -533,8 +533,8 @@ LOX_METHOD(FileWriteStream, write) {
 }
 
 LOX_METHOD(FileWriteStream, writeAsync) {
-    ASSERT_ARG_COUNT("FileWriteStream::writeAsync(char)", 1);
-    ASSERT_ARG_TYPE("FileWriteStream::writeAsync(char)", 0, String);
+    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeAsync(char)", 1);
+    ASSERT_ARG_TYPE_ASYNC("FileWriteStream::writeAsync(char)", 0, String);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write character to stream because file is already closed.");
     loadFileWrite(vm, file);
@@ -555,7 +555,7 @@ LOX_METHOD(FileWriteStream, writeLine) {
 }
 
 LOX_METHOD(FileWriteStream, writeLineAsync) {
-    ASSERT_ARG_COUNT("FileWriteStream::writeLineAsync(char)", 0);
+    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeLineAsync(char)", 0);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write line to stream because file is already closed.");
     loadFileWrite(vm, file);
@@ -573,7 +573,7 @@ LOX_METHOD(FileWriteStream, writeSpace) {
 }
 
 LOX_METHOD(FileWriteStream, writeSpaceAsync) {
-    ASSERT_ARG_COUNT("FileWriteStream::writeSpaceAsync(char)", 0);
+    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeSpaceAsync(char)", 0);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write space to stream because file is already closed.");
     loadFileWrite(vm, file);
@@ -599,8 +599,8 @@ LOX_METHOD(FileWriteStream, writeString) {
 }
 
 LOX_METHOD(FileWriteStream, writeStringAsync) {
-    ASSERT_ARG_COUNT("FileWriteStream::writeStringAsync(char)", 1);
-    ASSERT_ARG_TYPE("FileWriteStream::writeStringAsync(char)", 0, String);
+    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeStringAsync(char)", 1);
+    ASSERT_ARG_TYPE_ASYNC("FileWriteStream::writeStringAsync(char)", 0, String);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write string to stream because file is already closed.");
     loadFileWrite(vm, file);
@@ -623,7 +623,7 @@ LOX_METHOD(IOStream, close) {
 }
 
 LOX_METHOD(IOStream, closeAsync) {
-    ASSERT_ARG_COUNT("IOStream::close()", 0);
+    ASSERT_ARG_COUNT_ASYNC("IOStream::close()", 0);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     ObjPromise* promise = fileCloseAsync(vm, file, fileOnClose);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.io.IOException, "Failed to close IO stream.");
@@ -698,7 +698,7 @@ LOX_METHOD(WriteStream, flush) {
 }
 
 LOX_METHOD(WriteStream, flushAsync) {
-    ASSERT_ARG_COUNT("WriteStream::flushAsync()", 0);
+    ASSERT_ARG_COUNT_ASYNC("WriteStream::flushAsync()", 0);
     ObjFile* file = getFileProperty(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot flush write stream because file is already closed.");
     loadFileWrite(vm, file);
