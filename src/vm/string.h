@@ -3,6 +3,7 @@
 #define clox_string_h
 
 #include "object.h"
+#include "../compiler/token.h"
 #include "../inc/utf8.h"
 
 #define ALLOCATE_STRING(length, stringClass) (ObjString*)allocateObject(vm, sizeof(ObjString) + length + 1, OBJ_STRING, stringClass, GC_GENERATION_TYPE_EDEN)
@@ -37,5 +38,9 @@ ObjString* utf8StringFromByte(VM* vm, uint8_t byte);
 ObjString* utf8StringFromCodePoint(VM* vm, int codePoint);
 int utf8CodePointOffset(VM* vm, const char* string, int index);
 ObjString* utf8CodePointAtIndex(VM* vm, const char* string, int index);
+
+static inline ObjString* createStringFromToken(VM* vm, Token token) {
+	return copyStringPerma(vm, token.start, token.length);
+}
 
 #endif // !clox_string_h
