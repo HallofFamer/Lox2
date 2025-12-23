@@ -86,10 +86,6 @@ void initTypeChecker(VM* vm, TypeChecker* typeChecker, NameTable* nametab, bool 
     typeChecker->voidType = getNativeType(vm, "void");
 }
 
-static ObjString* createSymbol(TypeChecker* typeChecker, Token token) {
-    return copyStringPerma(typeChecker->vm, token.start, token.length);
-}
-
 static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, SymbolTable* symtab) {
     if (shortName == NULL) return NULL;
     TypeInfo* type = typeTableGet(typeChecker->vm->typetab, shortName);
@@ -186,7 +182,7 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
         if (param->type == NULL) {
             param->type = arg->type;
             TypeInfoArrayAdd(calleeType->paramTypes, arg->type);
-            SymbolItem* item = symbolTableLookup(callee->symtab, createSymbol(typeChecker, param->token));
+            SymbolItem* item = symbolTableLookup(callee->symtab, createStringFromToken(typeChecker->vm, param->token));
             item->type = arg->type;
         }
         else TypeInfoArrayAdd(calleeType->paramTypes, param->type);
@@ -245,7 +241,7 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
 }
 
 static void checkMethodSignatures(TypeChecker* typeChecker, CallableTypeInfo* subclassMethod, CallableTypeInfo* superclassMethod) {
-    ObjString* className = createSymbol(typeChecker, typeChecker->currentClass->name);
+    ObjString* className = createStringFromToken(typeChecker->vm, typeChecker->currentClass->name);
     if (!subclassMethod->attribute.isVoid && superclassMethod->attribute.isVoid) {
         typeError(typeChecker, "Method %s::%s expects return type to be void.", className->chars, subclassMethod->baseType.shortName->chars);
     }
@@ -293,7 +289,7 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
 
     for (int i = 0; i < traitList->children->count; i++) {
         Ast* trait = astGetChild(traitList, 0);
-        ObjString* name = createSymbol(typeChecker, trait->token);
+        ObjString* name = createStringFromToken(typeChecker->vm, trait->token);
         TypeInfo* type = getClassType(typeChecker, name, traitList->symtab);
 
         if (type == NULL) continue;
@@ -460,7 +456,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
     Ast* callee = astGetChild(ast, 0);
     if (callee->type == NULL) return;
     Ast* args = astGetChild(ast, 1);
-    ObjString* name = createSymbol(typeChecker, callee->token);
+    ObjString* name = createStringFromToken(typeChecker->vm, callee->token);
     char calleeDesc[UINT8_MAX];
 
     if (callee->kind == AST_EXPR_FUNCTION) {
@@ -499,7 +495,7 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
     if (receiver->type == NULL) return;
     Ast* args = astGetChild(ast, 1);
-    ObjString* methodName = createSymbol(typeChecker, ast->token);
+    ObjString* methodName = createStringFromToken(typeChecker->vm, ast->token);
     TypeInfo* baseType = typeTableMethodLookup(receiver->type, methodName);
 
     if (baseType != NULL) {
@@ -514,7 +510,7 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
         inferAstTypeFromReturn(typeChecker, ast, callableType);
     }
     else if (receiver->type == typeChecker->namespaceType) {
-        ObjString* _namespace = nameTableGet(typeChecker->nametab, createSymbol(typeChecker, receiver->token));
+        ObjString* _namespace = nameTableGet(typeChecker->nametab, createStringFromToken(typeChecker->vm, receiver->token));
         if (_namespace == NULL) return;
         ObjString* fullName = concatenateString(typeChecker->vm, _namespace, methodName, ".");
 
@@ -530,7 +526,7 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
     if (superType == NULL) return;
     Ast* args = astGetChild(ast, 0);
 
-    ObjString* methodName = createSymbol(typeChecker, ast->token);
+    ObjString* methodName = createStringFromToken(typeChecker->vm, ast->token);
     TypeInfo* baseType = typeTableMethodLookup(superType, methodName);
     if (baseType == NULL) return;
     MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
@@ -811,7 +807,7 @@ static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
     if (receiver->type == NULL) return;
 
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
-    ObjString* fieldName = createSymbol(typeChecker, ast->token);
+    ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
     TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
     if (fieldType != NULL) ast->type = AS_FIELD_TYPE(fieldType)->declaredType;
 }
@@ -823,7 +819,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     if (receiver->type == NULL) return;
     
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
-    ObjString* fieldName = createSymbol(typeChecker, ast->token);
+    ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
     TypeInfo* type = typeTableGet(receiverType->fields, fieldName);
     if (type == NULL) return;
     Ast* value = astGetChild(ast, 1);
@@ -881,7 +877,7 @@ static void typeCheckSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckThis(TypeChecker* typeChecker, Ast* ast) {
     if (typeChecker->currentClass->type) {
         if (typeChecker->currentFunction->isClass) {
-            ObjString* className = getClassFullName(typeChecker->vm, createSymbol(typeChecker, typeChecker->currentClass->name), typeChecker->currentNamespace);
+            ObjString* className = getClassFullName(typeChecker->vm, createStringFromToken(typeChecker->vm, typeChecker->currentClass->name), typeChecker->currentNamespace);
             ObjString* metaclassName = getMetaclassNameFromClass(typeChecker->vm, className);
             ast->type = typeTableGet(typeChecker->vm->typetab, metaclassName);
         }
@@ -899,7 +895,7 @@ static void typeCheckUnary(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckVariable(TypeChecker* typeChecker, Ast* ast) {
-    ObjString* name = createSymbol(typeChecker, ast->token);
+    ObjString* name = createStringFromToken(typeChecker->vm, ast->token);
     SymbolItem* item = symbolTableLookup(ast->symtab, name);
     ast->type = item->type;
 }
@@ -1068,10 +1064,10 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
 
     if (!isSubtypeOfType(actualType, expectedType)) {
         char calleeDesc[UINT8_MAX];
-        ObjString* calleeName = createSymbol(typeChecker, typeChecker->currentFunction->name);
+        ObjString* calleeName = createStringFromToken(typeChecker->vm, typeChecker->currentFunction->name);
 
         if (typeChecker->currentFunction->isMethod) {
-            ObjString* className = createSymbol(typeChecker, typeChecker->currentClass->name);
+            ObjString* className = createStringFromToken(typeChecker->vm, typeChecker->currentClass->name);
             sprintf_s(calleeDesc, UINT8_MAX, "Method %s%s::%s", className->chars, typeChecker->currentFunction->isClass ? " class" : "", calleeName->chars);
         }
         else sprintf_s(calleeDesc, UINT8_MAX, "Function %s", calleeName->chars);
@@ -1207,7 +1203,7 @@ static void typeCheckStatement(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckClassDeclaration(TypeChecker* typeChecker, Ast* ast) {
-    ObjString* className = createSymbol(typeChecker, ast->token);
+    ObjString* className = createStringFromToken(typeChecker->vm, ast->token);
     ObjString* metaclassName = getMetaclassNameFromClass(typeChecker->vm, className);
     TypeInfo* metaclassType = getClassType(typeChecker, metaclassName, ast->symtab);
 
@@ -1227,7 +1223,7 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
     }
     
     if (!typeChecker->currentClass->isAnonymous) {
-        ObjString* name = createSymbol(typeChecker, ast->token);
+        ObjString* name = createStringFromToken(typeChecker->vm, ast->token);
         BehaviorTypeInfo* behaviorType = typeChecker->currentClass->type;
         TypeInfo* type = typeTableGet(typeChecker->currentClass->type->fields, name);
         if (type == NULL) return;
@@ -1252,14 +1248,14 @@ static void typeCheckFunDeclaration(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckMethodDeclaration(TypeChecker* typeChecker, Ast* ast) {
-    SymbolItem* item = symbolTableLookup(ast->symtab, createSymbol(typeChecker, ast->token));
+    SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(typeChecker->vm, ast->token));
     ObjString* name = copyStringPerma(typeChecker->vm, item->token.start, item->token.length);
     defineAstType(typeChecker, ast, "Method", item);
 
     if (!typeChecker->currentClass->isAnonymous) {
         BehaviorTypeInfo* classType = NULL;
         if (ast->attribute.isClass) {
-            ObjString* className = getClassFullName(typeChecker->vm, createSymbol(typeChecker, typeChecker->currentClass->name), typeChecker->currentNamespace);
+            ObjString* className = getClassFullName(typeChecker->vm, createStringFromToken(typeChecker->vm, typeChecker->currentClass->name), typeChecker->currentNamespace);
             ObjString* metaclassName = getMetaclassNameFromClass(typeChecker->vm, className);
             classType = AS_BEHAVIOR_TYPE(typeTableGet(typeChecker->vm->typetab, metaclassName));
         }
@@ -1273,13 +1269,13 @@ static void typeCheckMethodDeclaration(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckNamespaceDeclaration(TypeChecker* typeChecker, Ast* ast) {
     Ast* identifiers = astGetChild(ast, 0);
     Ast* identifier = astGetChild(identifiers, 0);
-    SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, identifier->token));
+    SymbolItem* item = symbolTableGet(ast->symtab, createStringFromToken(typeChecker->vm, identifier->token));
     defineAstType(typeChecker, ast, "Namespace", item);
     typeChecker->currentNamespace = astCreateQualifiedName(typeChecker->vm, ast);
 }
 
 static void typeCheckTraitDeclaration(TypeChecker* typeChecker, Ast* ast) {
-    SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
+    SymbolItem* item = symbolTableGet(ast->symtab, createStringFromToken(typeChecker->vm, ast->token));
     defineAstType(typeChecker, ast, "Trait", item);
     Ast* trait = astGetChild(ast, 0);
     trait->type = ast->type;
@@ -1287,7 +1283,7 @@ static void typeCheckTraitDeclaration(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckTypeDeclaration(TypeChecker* typeChecker, Ast* ast) {
-    ObjString* typeName = createSymbol(typeChecker, ast->token);
+    ObjString* typeName = createStringFromToken(typeChecker->vm, ast->token);
     SymbolItem* item = symbolTableGet(ast->symtab, typeName);
     TypeInfo* aliasType = typeTableGet(typeChecker->vm->typetab, typeName);
     ast->type = (TypeInfo*)aliasType;
@@ -1296,7 +1292,7 @@ static void typeCheckTypeDeclaration(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckVarDeclaration(TypeChecker* typeChecker, Ast* ast) {
-    SymbolItem* item = symbolTableGet(ast->symtab, createSymbol(typeChecker, ast->token));
+    SymbolItem* item = symbolTableGet(ast->symtab, createStringFromToken(typeChecker->vm, ast->token));
     if (astHasChild(ast)) {
         typeCheckChild(typeChecker, ast, 0);
         if (!ast->attribute.isMutable) inferAstTypeFromChild(ast, 0, item);
