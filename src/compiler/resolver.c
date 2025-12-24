@@ -127,7 +127,6 @@ void initResolver(VM* vm, Resolver* resolver, bool debugSymtab) {
     resolver->loopDepth = 0;
     resolver->switchDepth = 0;
     resolver->tryDepth = 0;
-
     resolver->isTopLevel = true;
     resolver->debugSymtab = debugSymtab;
     resolver->hadError = false;
@@ -161,7 +160,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
         if (type == NULL) {
             fullName = nameTableGet(resolver->nametab, originalName);
             if (fullName != NULL) {
-                if(isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
+                if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
                 type = typeTableGet(resolver->vm->typetab, fullName);
             }
 
@@ -170,7 +169,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
                 type = typeTableGet(resolver->vm->typetab, fullName);
 
                 if (type == NULL && checkFormalParam) {
-					SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
+                    SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
                     if (item != NULL && item->category == SYMBOL_CATEGORY_FORMAL) {
                         return newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, originalName, fullName);
                     }
@@ -426,6 +425,7 @@ static SymbolItem* findUpvalue(Resolver* resolver, Ast* ast) {
         }
         currentSymtab = currentSymtab->parent;
     } while (currentSymtab != NULL);
+
     return NULL;
 }
 
@@ -718,7 +718,6 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
         Ast* superclass = astGetChild(ast, childIndex);
         superclass->symtab = ast->symtab;
         classResolver.superClass = superclass->token;
-
         resolveChild(resolver, ast, childIndex);
         childIndex++;
 
@@ -911,7 +910,9 @@ static void resolveParam(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
     item->state = (resolver->currentFunction->attribute.isLambda) ? SYMBOL_STATE_ACCESSED : SYMBOL_STATE_DEFINED;
     insertParamType(resolver, ast, astHasChild(ast));
-    if (ast->attribute.isVariadic) resolver->currentFunction->attribute.isVariadic = true;
+    if (ast->attribute.isVariadic) {
+        resolver->currentFunction->attribute.isVariadic = true;
+    }
 }
 
 static void resolvePropertyGet(Resolver* resolver, Ast* ast) {

@@ -597,9 +597,13 @@ static void inferAstTypeFromSubscriptSet(TypeChecker* typeChecker, Ast* ast) {
         TypeInfo* baseType = typeTableMethodLookup(receiver->type, newStringPerma(typeChecker->vm, "[]="));
         if (baseType == NULL) return;
         MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-        if (methodType->declaredType->paramTypes->count == 0) return;
-        TypeInfo* paramType = methodType->declaredType->paramTypes->elements[0];
-        TypeInfo* paramType2 = methodType->declaredType->paramTypes->elements[1];
+        CallableTypeInfo* callableType = hasGenericParameters(receiver->type) ?
+            getInstantiatedCallableType(typeChecker, AS_GENERIC_TYPE(receiver->type), methodType->declaredType) :
+            methodType->declaredType;
+
+        if (callableType->paramTypes->count == 0) return;
+        TypeInfo* paramType = callableType->paramTypes->elements[0];
+        TypeInfo* paramType2 = callableType->paramTypes->elements[1];
 
         if (!isSubtypeOfType(index->type, paramType)) {
             typeError(typeChecker, "Method %s::[]= expects argument 0 to be an instance of %s but gets %s.",
@@ -609,7 +613,7 @@ static void inferAstTypeFromSubscriptSet(TypeChecker* typeChecker, Ast* ast) {
             typeError(typeChecker, "Method %s::[]= expects argument 1 to be an instance of %s but gets %s.",
                 receiver->type->shortName->chars, paramType2->shortName->chars, value->type->shortName->chars);
         }
-        inferAstTypeFromReturn(typeChecker, ast, methodType->declaredType);
+        inferAstTypeFromReturn(typeChecker, ast, callableType);
     }
 }
 
