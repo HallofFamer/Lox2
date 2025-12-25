@@ -507,7 +507,8 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     }
 }
 
-static void insertAstTypeName(Resolver* resolver, Ast* ast, char* typeName) {
+static void insertAstTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char* typeName) {
+    ast->type = type;
     ast->type->shortName = takeStringPerma(resolver->vm, typeName, (int)strlen(typeName));
     ast->type->fullName = ast->type->shortName;
 }
@@ -528,9 +529,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
             Ast* paramType = paramTypes->children->elements[i];
             TypeInfoArrayAdd(callableType->paramTypes, paramType->type);
         }
-
-        ast->type = (TypeInfo*)callableType;
-		insertAstTypeName(resolver, ast, createCallableTypeName(callableType));
+		insertAstTempType(resolver, ast, (TypeInfo*)callableType, createCallableTypeName(callableType));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
     return callableType;
@@ -558,9 +557,7 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
             Ast* typeParam = typeParams->children->elements[i];
             insertTypeParameter(resolver, typeParam, genericType);
         }
-
-        ast->type = (TypeInfo*)genericType;
-        insertAstTypeName(resolver, ast, createGenericTypeName(genericType));
+        insertAstTempType(resolver, ast, (TypeInfo*)genericType, createGenericTypeName(genericType));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
     return genericType;

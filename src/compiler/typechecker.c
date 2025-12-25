@@ -417,7 +417,6 @@ static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolIte
 
 static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* callableType) {
     if (callableType == NULL || callableType->returnType == NULL) return;
-
     if (callableType->returnType->category == TYPE_CATEGORY_VOID) {
         ast->type = typeChecker->voidType;
     }
@@ -609,6 +608,7 @@ static void inferAstTypeFromSubscriptSet(TypeChecker* typeChecker, Ast* ast) {
             typeError(typeChecker, "Method %s::[]= expects argument 0 to be an instance of %s but gets %s.",
                 receiver->type->shortName->chars, paramType->shortName->chars, index->type->shortName->chars);
         }
+
         if (!isSubtypeOfType(value->type, paramType2)) {
             typeError(typeChecker, "Method %s::[]= expects argument 1 to be an instance of %s but gets %s.",
                 receiver->type->shortName->chars, paramType2->shortName->chars, value->type->shortName->chars);
