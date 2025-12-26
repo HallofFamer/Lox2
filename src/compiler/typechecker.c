@@ -442,11 +442,8 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     }
 
     if (callee->type != NULL && hasGenericParameters(type)) {
-        if (!callee->attribute.isGeneric) typeError(typeChecker, "Class %s requires generic type parameters.", type->shortName->chars);
-        else {
-			checkTypeParameters(typeChecker, callee, type);
-            ast->type = callee->type;
-        }
+        if(astNumChild(callee) > 0) checkTypeParameters(typeChecker, callee, type);
+        ast->type = callee->type;
     }
     else ast->type = type;
 }

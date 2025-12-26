@@ -491,10 +491,11 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
                     ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, baseType->fullName);
                     baseType = typeTableGet(resolver->vm->typetab, metaclassName);
                 }
-                BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(baseType);
 
+                BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(baseType);
                 ObjString* methodName = createStringFromToken(resolver->vm, resolver->currentFunction->name);
-                MethodTypeInfo* methodType = AS_METHOD_TYPE(typeTableGet(behaviorType->methods, methodName));        
+                MethodTypeInfo* methodType = AS_METHOD_TYPE(typeTableGet(behaviorType->methods, methodName));
+
                 if (methodType != NULL && methodType->declaredType->paramTypes != NULL) {
                     TypeInfoArrayAdd(methodType->declaredType->paramTypes, ast->type);
                     if (ast->attribute.isVariadic) methodType->declaredType->attribute.isVariadic = true;
@@ -513,8 +514,23 @@ static void insertAstTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char
     ast->type->fullName = ast->type->shortName;
 }
 
+static TypeInfo* findCallableFormalType(Resolver* resolver, Ast* ast, Token* token) {
+    Ast* typeParams = ast->sibling;
+    for (int i = 0; i < astNumChild(typeParams); i++) {
+        Ast* typeParam = astGetChild(typeParams, i);
+        if (tokensEqual(token, &typeParam->token)) {
+            ObjString* formalType = createStringFromToken(resolver->vm, typeParam->token);
+            return newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, formalType, formalType);
+        }
+    }
+    return NULL;
+}
+
 static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isGeneric, bool isLambda, bool isVariadic, bool isVoid) {
     Ast* returnType = astGetChild(ast, 0);
+    if (isGeneric && returnType->type == NULL) {
+        returnType->type = findCallableFormalType(resolver, ast, &returnType->token);
+    }
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
     
     if (callableType != NULL) {
@@ -524,11 +540,16 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
         callableType->attribute.isVariadic = isVariadic;
         callableType->attribute.isVoid = isVoid;
 
-        Ast* paramTypes = astGetChild(ast, 1);
-        for (int i = 0; i < paramTypes->children->count; i++) {
-            Ast* paramType = paramTypes->children->elements[i];
-            TypeInfoArrayAdd(callableType->paramTypes, paramType->type);
+        Ast* params = astGetChild(ast, 1);
+        for (int i = 0; i < params->children->count; i++) {
+            Ast* param = params->children->elements[i];
+            if (isGeneric && param->type == NULL && astHasChild(param)) {
+                Ast* paramType = astGetChild(param, 0);
+                param->type = paramType->type = findCallableFormalType(resolver, ast, &paramType->token);
+            }
+            TypeInfoArrayAdd(callableType->paramTypes, param->type);
         }
+
 		insertAstTempType(resolver, ast, (TypeInfo*)callableType, createCallableTypeName(callableType));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
@@ -1405,17 +1426,10 @@ static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
     item->state = SYMBOL_STATE_ACCESSED;
     ObjString* name = createStringFromToken(resolver->vm, item->token);
     resolveChild(resolver, ast, 0);
-    Ast* function = astGetChild(ast, 0);
-    Ast* returnType = astGetChild(function, 0);
 
+    Ast* function = astGetChild(ast, 0);
     if (function->type != NULL && IS_CALLABLE_TYPE(function->type)) {
-        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(function->type);
-        CallableTypeInfo* functionType = typeTableInsertCallable(resolver->vm->typetab, TYPE_CATEGORY_FUNCTION, name, callableType->returnType);
-        for (int i = 0; i < callableType->paramTypes->count; i++) {
-            TypeInfo* paramType = callableType->paramTypes->elements[i];
-            TypeInfoArrayAdd(functionType->paramTypes, paramType);
-        }
-        item->type = (TypeInfo*)function->type;
+        item->type = function->type;
     }
 }
 
