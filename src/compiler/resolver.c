@@ -516,7 +516,9 @@ static void insertAstTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char
 
 static TypeInfo* findCallableFormalType(Resolver* resolver, Ast* ast, Token* token) {
     Ast* typeParams = ast->sibling;
-    for (int i = 0; i < astNumChild(typeParams); i++) {
+    int numChild = astNumChild(typeParams);
+
+    for (int i = 0; i < numChild; i++) {
         Ast* typeParam = astGetChild(typeParams, i);
         if (tokensEqual(token, &typeParam->token)) {
             ObjString* formalType = createStringFromToken(resolver->vm, typeParam->token);

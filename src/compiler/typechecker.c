@@ -354,14 +354,17 @@ static void inferAstTypeFromBinaryOperator(TypeChecker* typeChecker, Ast* ast, S
     if (baseType == NULL) return;
 
     MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-    if (methodType->declaredType->paramTypes->count == 0) return;
-    TypeInfo* paramType = methodType->declaredType->paramTypes->elements[0];
+    CallableTypeInfo* callableType = hasGenericParameters(receiver->type) ?
+        getInstantiatedCallableType(typeChecker, AS_GENERIC_TYPE(receiver->type), methodType->declaredType) :
+        methodType->declaredType;
+    if (callableType->paramTypes->count == 0) return;
+    TypeInfo* paramType = callableType->paramTypes->elements[0];
 
     if (!isSubtypeOfType(arg->type, paramType)) {
         typeError(typeChecker, "Method %s::%s expects argument 0 to be an instance of %s but gets %s.",
             receiver->type->shortName->chars, methodName->chars, paramType->shortName->chars, arg->type->shortName->chars);
     }
-    ast->type = methodType->declaredType->returnType;
+    ast->type = callableType->returnType;
 }
 
 static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolItem* item) {
