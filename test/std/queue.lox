@@ -4,8 +4,7 @@ using clox.std.collection.Queue
 val queue = Queue()
 println("Testing class Queue...")
 println("Class for queue object: ${queue.getClassName()}")
-println("Queue is currently empty: ${queue.isEmpty()}")
-println("")
+println("Queue is currently empty: ${queue.isEmpty()}\n")
 
 println("Now adding elements to queue...")
 queue.enqueue(2)
@@ -16,8 +15,7 @@ queue.enqueue("Hello World")
 println("Initial elements in Queue: ${queue.toString()}")
 println("Queue is now empty: ${queue.isEmpty()}")
 println("Length of queue: ${queue.length}")
-println("Converting Queue to array: ${queue.toArray()}")
-println("")
+println("Converting Queue to array: ${queue.toArray()}\n")
 
 println("Now iterating over queue...")
 while(!queue.isEmpty()){

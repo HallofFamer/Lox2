@@ -5,8 +5,7 @@ using clox.std.util.Date
 val set = Set()
 println("Testing class Set...")
 println("Class for set object: ${set.getClassName()}")
-println("Set is currently empty: ${set.isEmpty()}")
-println("")
+println("Set is currently empty: ${set.isEmpty()}\n")
 
 println("Now adding elements to set...")
 set.add(2)

@@ -4,8 +4,7 @@ using clox.std.collection.Stack
 val stack = Stack()
 println("Testing class Stack...")
 println("Class for stack object: ${stack.getClassName()}")
-println("Stack is currently empty: ${stack.isEmpty()}")
-println("")
+println("Stack is currently empty: ${stack.isEmpty()}\n")
 
 println("Now adding elements to stack...")
 stack.push(2)
@@ -17,8 +16,7 @@ println("Initial elements in stack: ${stack.toString()}")
 println("Stack is now empty: ${stack.isEmpty()}")
 println("Length of stack: ${stack.length}")
 println("Index of element true: ${stack.search(3.5)}")
-println("Converting Stack to array: ${stack.toArray()}")
-println("")
+println("Converting Stack to array: ${stack.toArray()}\n")
 
 println("Now iterating over stack...")
 while(!stack.isEmpty()){

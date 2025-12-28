@@ -1,6 +1,18 @@
 namespace test.types
+using clox.std.util.UUID
 
-class Box<T> {
+trait TBox<T> { 
+    
+    T getContent() {
+        throw NotImplementedException("Not implemented, subclass responsibility")
+    }
+
+    void setContent(T content) {
+        throw NotImplementedException("Not implemented, subclass responsibility")
+    }
+}
+
+class Box<T> with TBox<T>{
 
     var T content
 
@@ -20,10 +32,6 @@ class Box<T> {
         //return "Box<${T}>(${this.content})"
         return "Box(${this.content})"
     }
-}
-
-trait TBox<T> { 
-    
 }
 
 T identity<T>(T arg) {
@@ -53,7 +61,14 @@ println(Box)
 
 val box = Box<Int>(42)
 println("Instantiating from generic class Box: ${box}")
+box.setContent(100)
+//box.setContent("Hello World")
+println("Box new content: ${box.getContent()}")
 
 println("Creating generic trait TBox: ")
 println(TBox)
 println(KeyedBox)
+
+val id = identity<UUID>(UUID())
+println(id.toString())
+//throw Exception(id)
