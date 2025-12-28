@@ -351,6 +351,25 @@ void freeTempTypes(TypeInfoArray* typeArray) {
     free(typeArray);
 }
 
+TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
+    if (type == NULL) return NULL;
+    else if (IS_BEHAVIOR_TYPE(type)) {
+        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+        for (int i = 0; i < behaviorType->formalTypes->count; i++) {
+            TypeInfo* formalType = behaviorType->formalTypes->elements[i];
+            if (formalType != NULL && formalType->shortName == name) return formalType;
+        }
+    }
+    else if (IS_CALLABLE_TYPE(type)) {
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
+        for (int i = 0; i < callableType->formalTypes->count; i++) {
+            TypeInfo* formalType = callableType->formalTypes->elements[i];
+            if (formalType != NULL && formalType->shortName == name) return formalType;
+        }
+    }
+    return NULL;
+}
+
 TypeTable* newTypeTable(int id) {
     TypeTable* typetab = (TypeTable*)malloc(sizeof(TypeTable));
     if (typetab != NULL) {

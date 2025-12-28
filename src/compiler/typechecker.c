@@ -119,6 +119,37 @@ static TypeInfo* getInstantiatedType(TypeChecker* typeChecker, TypeInfo* formalT
     return NULL;
 }
 
+static TypeInfo* getInstantiatedType2(TypeChecker* typeChecker, TypeInfo* formalType, GenericTypeInfo* genericType) {
+    CallableTypeInfo* callableType = AS_CALLABLE_TYPE(genericType->rawType);
+    for (int i = 0; i < callableType->formalTypes->count; i++) {
+        if (formalType->shortName == callableType->formalTypes->elements[i]->shortName) {
+            return genericType->actualParameters->elements[i];
+        }
+    }
+    return NULL;
+}
+
+static CallableTypeInfo* getInstantiatedFunctionType(TypeChecker* typeChecker, GenericTypeInfo* genericFunctionType) {
+	CallableTypeInfo* functionType = AS_CALLABLE_TYPE(genericFunctionType->rawType);
+    TypeInfo* returnType = functionType->returnType;
+    if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
+        returnType = getInstantiatedType2(typeChecker, returnType, genericFunctionType);
+    }
+    CallableTypeInfo* instantiatedFunctionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, genericFunctionType->baseType.shortName, returnType);
+    instantiatedFunctionType->formalTypes = functionType->formalTypes;
+    for (int i = 0; i < functionType->paramTypes->count; i++) {
+        TypeInfo* paramType = functionType->paramTypes->elements[i];
+        if (paramType != NULL && IS_FORMAL_TYPE(paramType)) paramType = getInstantiatedType2(typeChecker, paramType, genericFunctionType);
+        TypeInfoArrayAdd(instantiatedFunctionType->paramTypes, paramType);
+    }
+    
+    TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedFunctionType);
+    char* instantiatedFunctionTypeName = createCallableTypeName(instantiatedFunctionType);
+    instantiatedFunctionType->baseType.shortName = takeStringPerma(typeChecker->vm, instantiatedFunctionTypeName, (int)strlen(instantiatedFunctionTypeName));
+    instantiatedFunctionType->baseType.fullName = instantiatedFunctionType->baseType.shortName;
+    return instantiatedFunctionType;
+}
+
 static CallableTypeInfo* getInstantiatedCallableType(TypeChecker* typeChecker, GenericTypeInfo* genericBehaviorType, CallableTypeInfo* genericCallableType) {
 	TypeInfo* returnType = genericCallableType->returnType;
     if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
@@ -457,6 +488,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
     Ast* args = astGetChild(ast, 1);
     ObjString* name = createStringFromToken(typeChecker->vm, callee->token);
     char calleeDesc[UINT8_MAX];
+	TypeInfo* rawType = IS_GENERIC_TYPE(callee->type) ? AS_GENERIC_TYPE(callee->type)->rawType : callee->type;
 
     if (callee->kind == AST_EXPR_FUNCTION) {
         Ast* params = astGetChild(callee, 1);
@@ -472,15 +504,19 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         TypeInfoArrayAdd(typeChecker->vm->tempTypes, callee->type);
         function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false);
     }
-    else if (IS_CALLABLE_TYPE(callee->type)) {
+    else if (IS_CALLABLE_TYPE(rawType)) {
         SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL || item->type == NULL || !IS_CALLABLE_TYPE(item->type)) return;
         CallableTypeInfo* functionType = AS_CALLABLE_TYPE(item->type);
+        CallableTypeInfo* callableType = hasGenericParameters(item->type)
+            ? getInstantiatedFunctionType(typeChecker, AS_GENERIC_TYPE(callee->type))
+            : functionType;
+
         sprintf_s(calleeDesc, UINT8_MAX, "Function %s", name->chars);
-        checkArguments(typeChecker, calleeDesc, args, functionType);
-        inferAstTypeFromReturn(typeChecker, ast, functionType);
+        checkArguments(typeChecker, calleeDesc, args, callableType);
+        inferAstTypeFromReturn(typeChecker, ast, callableType);
     }
-    else if (IS_BEHAVIOR_TYPE(callee->type) || IS_GENERIC_TYPE(callee->type)) {
+    else if (IS_BEHAVIOR_TYPE(rawType)) {
 		SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL) return;
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);

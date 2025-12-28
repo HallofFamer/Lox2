@@ -168,10 +168,13 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
                 fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
                 type = typeTableGet(resolver->vm->typetab, fullName);
 
-                if (type == NULL && checkFormalParam) {
+                if (type == NULL) {
                     SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
-                    if (item != NULL && item->category == SYMBOL_CATEGORY_FORMAL) {
-                        return newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, originalName, fullName);
+                    if (item != NULL) {
+                        if (checkFormalParam && item->category == SYMBOL_CATEGORY_FORMAL) {
+                            return newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, originalName, fullName);
+                        }
+                        else type = item->type;
                     }
                 }
             }
@@ -550,6 +553,16 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
                 param->type = paramType->type = findCallableFormalType(resolver, ast, &paramType->token);
             }
             TypeInfoArrayAdd(callableType->paramTypes, param->type);
+        }
+
+        if (ast->parent != NULL && ast->parent->kind == AST_DECL_FUN && ast->parent->attribute.isGeneric) {
+            Ast* typeParams = ast->sibling;
+            for (int i = 0; i < typeParams->children->count; i++) {
+                Ast* typeParam = astGetChild(typeParams, i);
+                resolveChild(resolver, typeParams, i);
+                ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
+                TypeInfoArrayAdd(callableType->formalTypes, newTypeInfo(-1, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, typeParamName, typeParamName));
+            }
         }
 
 		insertAstTempType(resolver, ast, (TypeInfo*)callableType, createCallableTypeName(callableType));

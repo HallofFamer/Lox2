@@ -886,6 +886,7 @@ static Ast* methods(Parser* parser, Token* name) {
         Ast* methodParams = functionParameters(parser);
         Ast* methodBody = block(parser);
         Ast* method = newAst(AST_DECL_METHOD, methodName, 3, returnType, methodParams, methodBody);
+
         if (typeParams != NULL) {
             method->attribute.isGeneric = true;
             astAppendChild(method, typeParams);
@@ -942,6 +943,7 @@ static Ast* trait(Parser* parser, Token token, bool canAssign) {
     Token traitName = syntheticToken("@");
     Ast* traitList = traits(parser, &traitName);
     consume(parser, TOKEN_SYMBOL_LEFT_BRACE, "Expect '{' before trait body.");
+
     Ast* methodList = methods(parser, &traitName);
     consume(parser, TOKEN_SYMBOL_RIGHT_BRACE, "Expect '}' after trait body.");
     return newAst(AST_EXPR_TRAIT, traitName, 2, traitList, methodList);
@@ -1575,8 +1577,8 @@ static Ast* traitDeclaration(Parser* parser) {
     Ast* methodList = methods(parser, &name);
     consume(parser, TOKEN_SYMBOL_RIGHT_BRACE, "Expect '}' after trait body.");
     Ast* trait = newAst(AST_EXPR_TRAIT, name, 2, traitList, methodList);
-
     Ast* ast = newAst(AST_DECL_TRAIT, name, 1, trait);
+
     if (typeParams != NULL) {
         ast->attribute.isGeneric = true;
         astAppendChild(ast, typeParams);
@@ -1589,10 +1591,11 @@ static Ast* typeDeclaration(Parser* parser) {
     Token name = previousToken(parser);
     Ast* typeParams = check(parser, TOKEN_SYMBOL_LESS) ? typeParameters(parser, name) : NULL;
     consume(parser, TOKEN_SYMBOL_EQUAL, "Expect '=' after type name.");
+
     Ast* typeDef = type_(parser, false, true);
     consumerTerminator(parser, "Expect semicolon or new line after type declaration.");
-
     Ast* ast = newAst(AST_DECL_TYPE, name, 1, typeDef);
+
     if (typeParams != NULL) {
         ast->attribute.isGeneric = true;
         astAppendChild(ast, typeParams);

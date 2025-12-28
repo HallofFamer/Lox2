@@ -143,6 +143,7 @@ char* createCallableTypeName(CallableTypeInfo* callableType);
 char* createGenericTypeName(GenericTypeInfo* genericType);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
+TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name);
 
 TypeTable* newTypeTable(int id);
 void freeTypeTable(TypeTable* typeTable);
