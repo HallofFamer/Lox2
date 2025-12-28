@@ -458,7 +458,9 @@ static void astOutputStmtRequire(Ast* ast, int indentLevel) {
 static void astOutputStmtReturn(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     printf("returnStmt\n");
-    if (astHasChild(ast)) astOutputChild(ast, indentLevel + 1, 0);
+    if (astHasChild(ast)) {
+        astOutputChild(ast, indentLevel + 1, 0);
+    }
 }
 
 static void astOutputStmtSwitch(Ast* ast, int indentLevel) {
@@ -561,7 +563,9 @@ static void astOutputDeclFun(Ast* ast, int indentLevel) {
     printf("funDecl %s%s%s\n", async, _void, funName);
 
     astOutputChild(ast, indentLevel + 1, 0);
-    if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
+    if (astNumChild(ast) > 1) {
+        astOutputChild(ast, indentLevel + 1, 1);
+    }
     free(funName);
 }
 
@@ -601,7 +605,10 @@ static void astOutputDeclTrait(Ast* ast, int indentLevel) {
     char* traitName = tokenToCString(ast->token);
     printf("traitDecl %s\n", traitName);
     astOutputChild(ast, indentLevel + 1, 0);
-    if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
+
+    if (astNumChild(ast) > 1) {
+        astOutputChild(ast, indentLevel + 1, 1);
+    }
     free(traitName);
 }
 

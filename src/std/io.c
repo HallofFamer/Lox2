@@ -553,7 +553,7 @@ LOX_METHOD(FileWriteStream, writeLine) {
 }
 
 LOX_METHOD(FileWriteStream, writeLineAsync) {
-    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeLineAsync(char)", 0);
+    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeLineAsync()", 0);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write line to stream because file is already closed.");
     loadFileWrite(vm, file);
@@ -571,7 +571,7 @@ LOX_METHOD(FileWriteStream, writeSpace) {
 }
 
 LOX_METHOD(FileWriteStream, writeSpaceAsync) {
-    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeSpaceAsync(char)", 0);
+    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeSpaceAsync()", 0);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write space to stream because file is already closed.");
     loadFileWrite(vm, file);
@@ -597,8 +597,8 @@ LOX_METHOD(FileWriteStream, writeString) {
 }
 
 LOX_METHOD(FileWriteStream, writeStringAsync) {
-    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeStringAsync(char)", 1);
-    ASSERT_ARG_TYPE_ASYNC("FileWriteStream::writeStringAsync(char)", 0, String);
+    ASSERT_ARG_COUNT_ASYNC("FileWriteStream::writeStringAsync(string)", 1);
+    ASSERT_ARG_TYPE_ASYNC("FileWriteStream::writeStringAsync(string)", 0, String);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write string to stream because file is already closed.");
     loadFileWrite(vm, file);

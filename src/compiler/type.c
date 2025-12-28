@@ -160,6 +160,10 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
     return methodType;
 }
 
+TypeInfo* newFormalTypeInfo(int id, ObjString* name) {
+    return newTypeInfo(id, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, name, name);
+}
+
 GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType) {
     GenericTypeInfo* genericType = (GenericTypeInfo*)newTypeInfo(id, sizeof(GenericTypeInfo), TYPE_CATEGORY_GENERIC, shortName, fullName);
     if (genericType != NULL) {

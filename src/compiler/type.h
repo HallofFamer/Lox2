@@ -136,6 +136,7 @@ CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* 
 CallableTypeInfo* newCallableTypeInfoWithFormalParameters(int id, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParameters, ...);
 FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer);
+TypeInfo* newFormalTypeInfo(int id, ObjString* name);
 GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType);
 GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType, int numParameters, ...);
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
