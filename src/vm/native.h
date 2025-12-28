@@ -49,6 +49,7 @@
 #define PARAM_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), rawType, numParams, __VA_ARGS__);
 
 ObjClass* defineNativeClass(VM* vm, const char* name);
+ObjClass* defineNativeGenericClass(VM* vm, const char* name, int numParams, ...);
 void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, NativeFunction function, ...);
 void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type, bool isMutable, Value defaultValue);
 void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bool isAsync, NativeMethod method, ...);
@@ -58,6 +59,7 @@ ObjNamespace* defineNativeNamespace(VM* vm, const char* name, ObjNamespace* encl
 ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass);
 TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType, int numParams, ...);
 TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* rawType, int numParams, ...);
+
 ObjClass* getNativeClass(VM* vm, const char* fullName);
 TypeInfo* getNativeType(VM* vm, const char* name);
 ObjNativeFunction* getNativeFunction(VM* vm, const char* name);

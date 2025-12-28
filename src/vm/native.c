@@ -87,6 +87,20 @@ ObjClass* defineNativeClass(VM* vm, const char* name) {
     return nativeClass;
 }
 
+ObjClass* defineNativeGenericClass(VM* vm, const char* name, int numParams, ...) {
+	ObjClass* _class = defineNativeClass(vm, name);
+	BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, _class->fullName));
+    va_list args;
+    va_start(args, numParams);
+    for (int i = 0; i < numParams; i++) {
+        ObjString* formalTypeName = newStringPerma(vm, va_arg(args, char*));
+		TypeInfo* formalType = newFormalTypeInfo(i, formalTypeName);
+        TypeInfoArrayAdd(classType->formalTypes, formalType);
+    }
+    va_end(args);
+	return _class;
+}
+
 void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, NativeFunction function, ...) {
     ObjString* functionName = newStringPerma(vm, name);
     ObjNativeFunction* nativeFunction = newNativeFunction(vm, functionName, arity, isAsync, function);
