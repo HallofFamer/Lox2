@@ -109,7 +109,7 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
-static TypeInfo* getInstantiatedType(TypeChecker* typeChecker, TypeInfo* formalType, GenericTypeInfo* genericType) {
+static TypeInfo* getInstantiatedBehaviorType(TypeChecker* typeChecker, TypeInfo* formalType, GenericTypeInfo* genericType) {
 	BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(genericType->rawType);
     for (int i = 0; i < behaviorType->formalTypes->count; i++) {
         if (formalType->shortName == behaviorType->formalTypes->elements[i]->shortName) {
@@ -119,7 +119,7 @@ static TypeInfo* getInstantiatedType(TypeChecker* typeChecker, TypeInfo* formalT
     return NULL;
 }
 
-static TypeInfo* getInstantiatedType2(TypeChecker* typeChecker, TypeInfo* formalType, GenericTypeInfo* genericType) {
+static TypeInfo* getInstantiatedCallableType(TypeChecker* typeChecker, TypeInfo* formalType, GenericTypeInfo* genericType) {
     CallableTypeInfo* callableType = AS_CALLABLE_TYPE(genericType->rawType);
     for (int i = 0; i < callableType->formalTypes->count; i++) {
         if (formalType->shortName == callableType->formalTypes->elements[i]->shortName) {
@@ -133,13 +133,13 @@ static CallableTypeInfo* getInstantiatedFunctionType(TypeChecker* typeChecker, G
 	CallableTypeInfo* functionType = AS_CALLABLE_TYPE(genericFunctionType->rawType);
     TypeInfo* returnType = functionType->returnType;
     if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
-        returnType = getInstantiatedType2(typeChecker, returnType, genericFunctionType);
+        returnType = getInstantiatedCallableType(typeChecker, returnType, genericFunctionType);
     }
     CallableTypeInfo* instantiatedFunctionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, genericFunctionType->baseType.shortName, returnType);
     instantiatedFunctionType->formalTypes = functionType->formalTypes;
     for (int i = 0; i < functionType->paramTypes->count; i++) {
         TypeInfo* paramType = functionType->paramTypes->elements[i];
-        if (paramType != NULL && IS_FORMAL_TYPE(paramType)) paramType = getInstantiatedType2(typeChecker, paramType, genericFunctionType);
+        if (paramType != NULL && IS_FORMAL_TYPE(paramType)) paramType = getInstantiatedCallableType(typeChecker, paramType, genericFunctionType);
         TypeInfoArrayAdd(instantiatedFunctionType->paramTypes, paramType);
     }
     
@@ -153,14 +153,16 @@ static CallableTypeInfo* getInstantiatedFunctionType(TypeChecker* typeChecker, G
 static CallableTypeInfo* getInstantiatedMethodType(TypeChecker* typeChecker, GenericTypeInfo* genericBehaviorType, CallableTypeInfo* genericMethodType) {
 	TypeInfo* returnType = genericMethodType->returnType;
     if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
-        returnType = getInstantiatedType(typeChecker, returnType, genericBehaviorType);
+        returnType = getInstantiatedBehaviorType(typeChecker, returnType, genericBehaviorType);
 	}
     CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericMethodType->baseType.shortName, returnType);
     instantiatedMethodType->formalTypes = genericMethodType->formalTypes;    
 
     for (int i = 0; i < genericMethodType->paramTypes->count; i++) {
         TypeInfo* paramType = genericMethodType->paramTypes->elements[i];
-        if (paramType != NULL && IS_FORMAL_TYPE(paramType)) paramType = getInstantiatedType(typeChecker, paramType, genericBehaviorType);
+        if (paramType != NULL && IS_FORMAL_TYPE(paramType)) {
+            paramType = getInstantiatedBehaviorType(typeChecker, paramType, genericBehaviorType);
+        }
         TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
     }
     
