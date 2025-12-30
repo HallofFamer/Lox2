@@ -582,9 +582,14 @@ static void insertTypeParameter(Resolver* resolver, Ast* ast, int index, Generic
 }
 
 static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
+    ObjString* typeName = createStringFromToken(resolver->vm, ast->token);
     TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false, true);
-    if (rawType == NULL || IS_VOID_TYPE(rawType) || IS_FORMAL_TYPE(rawType)) {
-        semanticError(resolver, "Cannot use dynamic type, void type or type parameter as generic type.");
+    if (rawType == NULL) {
+        semanticError(resolver, "Cannot find type %s as generic type.", typeName->chars);
+        return NULL;
+    }
+    else if (IS_VOID_TYPE(rawType) || IS_FORMAL_TYPE(rawType)) {
+        semanticError(resolver, "Cannot use void type or type parameter as generic type.");
         return NULL;
     }
 
@@ -943,7 +948,7 @@ static void resolveOr(Resolver* resolver, Ast* ast) {
 
 static void resolveParam(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
-    item->state = (resolver->currentFunction->attribute.isLambda) ? SYMBOL_STATE_ACCESSED : SYMBOL_STATE_DEFINED;
+    item->state = resolver->currentFunction->attribute.isLambda ? SYMBOL_STATE_ACCESSED : SYMBOL_STATE_DEFINED;
     insertParamType(resolver, ast, astHasChild(ast));
     if (ast->attribute.isVariadic) {
         resolver->currentFunction->attribute.isVariadic = true;
@@ -1466,6 +1471,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
         setCallableTypeModifier(ast, methodType->declaredType);
         free(methodType->declaredType);
         methodType->declaredType = AS_CALLABLE_TYPE(ast->type);
+        item->type = (TypeInfo*)methodType;
     }
 }
 
