@@ -584,12 +584,8 @@ static void insertTypeParameter(Resolver* resolver, Ast* ast, int index, Generic
 static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
     ObjString* typeName = createStringFromToken(resolver->vm, ast->token);
     TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false, true);
-    if (rawType == NULL) {
-        semanticError(resolver, "Cannot find type %s as generic type.", typeName->chars);
-        return NULL;
-    }
-    else if (IS_VOID_TYPE(rawType) || IS_FORMAL_TYPE(rawType)) {
-        semanticError(resolver, "Cannot use void type or type parameter as generic type.");
+    if (!hasGenericParameters(rawType)) {
+        semanticError(resolver, "Type %s cannot accept generic parameters.", typeName->chars);
         return NULL;
     }
 

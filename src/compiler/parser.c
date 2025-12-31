@@ -135,6 +135,20 @@ static bool checkNext(Parser* parser, TokenKind type) {
     return nextTokenType(parser) == type;
 }
 
+static bool checkNextN(Parser* parser, int length, TokenKind type) {
+    int offset = 1;
+	for (int i = 1; i <= length; i++) {
+        Token token = parser->tokens->elements[parser->index + offset];
+        if (token.type == TOKEN_SYMBOL_NEW_LINE) {
+            offset++;
+			token = parser->tokens->elements[parser->index + offset];
+        }
+		if (i == length && token.type == type) return true;
+        offset++;
+    }
+    return false;
+}
+
 static bool checkEither(Parser* parser, TokenKind type1, TokenKind type2) {
     return check(parser, type1) || check(parser, type2);
 }
@@ -859,7 +873,10 @@ static Ast* methods(Parser* parser, Token* name) {
         if (match(parser, TOKEN_SYMBOL_CLASS)) isClass = true;
         if (match(parser, TOKEN_SYMBOL_VOID)) isVoid = true;
 
-        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER) || (check(parser, TOKEN_SYMBOL_IDENTIFIER) && tokenIsOperator(nextToken(parser)))) {
+        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER) || 
+            (check(parser, TOKEN_SYMBOL_IDENTIFIER) && tokenIsOperator(nextToken(parser)) && checkNextN(parser, 2, TOKEN_SYMBOL_LEFT_PAREN))
+        )
+        {
             hasReturnType = true;
             returnType = behaviorType(parser);
         }
