@@ -846,7 +846,7 @@ static void typeCheckParam(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     Ast* receiver = astGetChild(ast, 0);
-    if (receiver->type == NULL) return;
+    if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
 
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
@@ -858,7 +858,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     typeCheckChild(typeChecker, ast, 1);
     Ast* receiver = astGetChild(ast, 0);
-    if (receiver->type == NULL) return;
+    if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
     
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
@@ -1276,8 +1276,10 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
         else if (!ast->attribute.isTyped && numChild == 1) initializer = astGetChild(ast, 0);
         
         TypeInfo* initializerType = (initializer == NULL) ? NULL : initializer->type;
-        if (!isSubtypeOfType(initializerType, fieldType->declaredType)) {
-            typeError(typeChecker, "Initial value for instance field must be a subtype of %s.", fieldType->declaredType->shortName->chars);
+		if (initializerType == NULL) return;
+        else if (!isSubtypeOfType(initializerType, fieldType->declaredType)) {
+            typeError(typeChecker, "Initial value for instance field must be a subtype of %s but gets %s.", 
+                fieldType->declaredType->shortName->chars, initializerType->shortName->chars);
         }
     }
 
