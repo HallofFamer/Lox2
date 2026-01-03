@@ -263,16 +263,17 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
 	}
 }
 
-static void bindSuperclassType(Resolver* resolver, Token currentClass, Token superclass) {
+static void bindSuperclassType(Resolver* resolver, Token currentClass, Ast* superclass) {
 	BehaviorTypeInfo* currentClassType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, currentClass, false, false));
-    TypeInfo* superclassType = getTypeForSymbol(resolver, superclass, false, false);    
+    TypeInfo* superclassType = (superclass->type != NULL) ? superclass->type : getTypeForSymbol(resolver, superclass->token, false, false);    
     if (superclassType == NULL) return;
     currentClassType->superclassType = superclassType;
+    BehaviorTypeInfo* superclassRawType = IS_GENERIC_TYPE(superclassType) ? AS_BEHAVIOR_TYPE(AS_GENERIC_TYPE(superclassType)->rawType) : AS_BEHAVIOR_TYPE(superclassType);
 
     BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
-    TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassType->fullName));
+    TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassRawType->baseType.fullName));
     currentMetaclassType->superclassType = superMetaclassType;
-    typeTableFieldsCopy(AS_BEHAVIOR_TYPE(superclassType)->fields, currentClassType->fields);
+    typeTableFieldsCopy(superclassRawType->fields, currentClassType->fields);
 }
 
 static void bindTraitType(Resolver* resolver, Token currentClass, Token trait) {
@@ -778,7 +779,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
             semanticError(resolver, "A class cannot inherit from a metaclass type.");
         }
 
-        if(!classResolver.isAnonymous) bindSuperclassType(resolver, resolver->currentClass->name, resolver->currentClass->superClass);
+        if(!classResolver.isAnonymous) bindSuperclassType(resolver, resolver->currentClass->name, superclass);
     }
 
     Ast* traitList = astGetChild(ast, childIndex);

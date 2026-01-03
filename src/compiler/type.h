@@ -176,6 +176,13 @@ static inline bool hasGenericParameters(TypeInfo* type) {
     else return false;
 }
 
+static inline TypeInfo* getGenericRawType(TypeInfo* type) {
+    if (IS_GENERIC_TYPE(type)) {
+        return AS_GENERIC_TYPE(type)->rawType;
+    }
+    return type;
+}
+
 static inline TypeInfo* getAliasTargetType(TypeInfo* type) {
     return (IS_ALIAS_TYPE(type)) ? AS_ALIAS_TYPE(type)->targetType : type;
 }
