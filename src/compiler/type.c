@@ -714,6 +714,7 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     else if (IS_GENERIC_TYPE(type) && IS_GENERIC_TYPE(type2)) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
         GenericTypeInfo* genericType2 = AS_GENERIC_TYPE(type2);
+		if (!isEqualType(genericType->rawType, genericType2->rawType)) return false;
         if (genericType->actualParameters->count != genericType2->actualParameters->count) return false;
 
         for (int i = 0; i < genericType->actualParameters->count; i++) {
