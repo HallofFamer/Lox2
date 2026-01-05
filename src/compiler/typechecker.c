@@ -135,6 +135,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
     if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
         returnType = instantiateFromGenericCallableType(typeChecker, returnType, genericFunctionType);
     }
+
     CallableTypeInfo* instantiatedFunctionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, genericFunctionType->baseType.shortName, returnType);
     instantiatedFunctionType->formalTypes = functionType->formalTypes;
     for (int i = 0; i < functionType->paramTypes->count; i++) {
@@ -490,7 +491,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
     Ast* args = astGetChild(ast, 1);
     ObjString* name = createStringFromToken(typeChecker->vm, callee->token);
     char calleeDesc[UINT8_MAX];
-	TypeInfo* rawType = IS_GENERIC_TYPE(callee->type) ? AS_GENERIC_TYPE(callee->type)->rawType : callee->type;
+    TypeInfo* rawType = getGenericRawType(callee->type);
 
     if (callee->kind == AST_EXPR_FUNCTION) {
         Ast* params = astGetChild(callee, 1);

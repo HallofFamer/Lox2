@@ -268,7 +268,7 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Ast* supe
     TypeInfo* superclassType = (superclass->type != NULL) ? superclass->type : getTypeForSymbol(resolver, superclass->token, false, false);    
     if (superclassType == NULL) return;
     currentClassType->superclassType = superclassType;
-    BehaviorTypeInfo* superclassRawType = IS_GENERIC_TYPE(superclassType) ? AS_BEHAVIOR_TYPE(AS_GENERIC_TYPE(superclassType)->rawType) : AS_BEHAVIOR_TYPE(superclassType);
+    BehaviorTypeInfo* superclassRawType = AS_BEHAVIOR_TYPE(getGenericRawType(superclassType));
 
     BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
     TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassRawType->baseType.fullName));
