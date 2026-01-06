@@ -216,7 +216,8 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
         if (param->type == NULL) {
             param->type = arg->type;
             TypeInfoArrayAdd(calleeType->paramTypes, arg->type);
-            SymbolItem* item = symbolTableLookup(callee->symtab, createStringFromToken(typeChecker->vm, param->token));
+			ObjString* typeName = createStringFromToken(typeChecker->vm, param->token);
+            SymbolItem* item = symbolTableLookup(callee->symtab, typeName);
             item->type = arg->type;
         }
         else TypeInfoArrayAdd(calleeType->paramTypes, param->type);

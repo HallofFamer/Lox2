@@ -466,14 +466,13 @@ void typeTableFieldsCopy(TypeTable* from, TypeTable* to) {
 
 TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
     if (type == NULL || (!IS_BEHAVIOR_TYPE(type) && !IS_GENERIC_TYPE(type))) return NULL;
-	type = IS_GENERIC_TYPE(type) ? AS_GENERIC_TYPE(type)->rawType : type;
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(getGenericRawType(type));
     TypeInfo* methodType = typeTableGet(behaviorType->methods, key);
     if (methodType != NULL) return methodType;
 
     if (behaviorType->traitTypes != NULL) {
         for (int i = 0; i < behaviorType->traitTypes->count; i++) {
-            BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(behaviorType->traitTypes->elements[i]);
+            BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(getGenericRawType(behaviorType->traitTypes->elements[i]));
             methodType = typeTableGet(traitType->methods, key);
             if (methodType != NULL) return methodType;
         }
@@ -727,8 +726,8 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
-    type = IS_ALIAS_TYPE(type) ? AS_ALIAS_TYPE(type)->targetType : type;
-    type2 = IS_ALIAS_TYPE(type2) ? AS_ALIAS_TYPE(type2)->targetType : type2;
+    type = getAliasTargetType(type);
+    type2 = getAliasTargetType(type2);
     if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
     if (memcmp(type2->shortName->chars, "Object", 3) == 0) return true;
 
@@ -745,7 +744,7 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     TypeInfo* superclassType = subtype->superclassType;
     while (superclassType != NULL) {
         if (superclassType->id == type2->id) return true;
-        superclassType = AS_BEHAVIOR_TYPE(superclassType)->superclassType;
+        superclassType = AS_BEHAVIOR_TYPE(getGenericRawType(superclassType))->superclassType;
     }
 
     if (subtype->traitTypes != NULL && subtype->traitTypes->count > 0) {
