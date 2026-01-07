@@ -371,6 +371,16 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
             if (formalType != NULL && formalType->shortName == name) return formalType;
         }
     }
+	else if (IS_GENERIC_TYPE(type)) {
+        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
+        if (genericType->isFullyInstantiated) {
+            for (int i = 0; i < genericType->actualParameters->count; i++) {
+                TypeInfo* formalType = genericType->actualParameters->elements[i];
+				if (formalType == NULL || !IS_FORMAL_TYPE(formalType)) continue;
+                if (formalType->shortName == name) return formalType;
+            }
+        }
+    }
     return NULL;
 }
 

@@ -1427,7 +1427,9 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
 
     bool hasInitializer = (ast->attribute.isTyped && numChild == 2) || (!ast->attribute.isTyped && numChild == 1);
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false, false));
-    if (ast->attribute.isClass) classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
+    if (ast->attribute.isClass) {
+        classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
+    }
     ObjString* name = createStringFromToken(resolver->vm, ast->token);
 
     TypeInfo* fieldTypeInfo = NULL;
