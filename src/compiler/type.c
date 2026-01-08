@@ -384,6 +384,16 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
     return NULL;
 }
 
+TypeInfo* instantiateFormalType(TypeInfo* formalType, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
+    for (int i = 0; i < formalParams->count; i++) {
+        TypeInfo* formalTypeParam = formalParams->elements[i];
+        if (formalTypeParam != NULL && formalTypeParam->shortName == formalType->shortName) {
+            return actualParams->elements[i];
+        }
+    }
+    return NULL;
+}
+
 TypeTable* newTypeTable(int id) {
     TypeTable* typetab = (TypeTable*)malloc(sizeof(TypeTable));
     if (typetab != NULL) {
@@ -463,28 +473,44 @@ bool typeTableSet(TypeTable* typetab, ObjString* key, TypeInfo* value) {
     return true;
 }
 
-void typeTableFieldsCopy(TypeTable* from, TypeTable* to) {
+
+static void typeTableFieldsInheritBehavior(TypeTable* from, TypeTable* to) {
     for (int i = 0; i < from->capacity; i++) {
         TypeEntry* entry = &from->entries[i];
         if (entry != NULL && entry->key != NULL) {
             FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);
             FieldTypeInfo* toFieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, fromFieldType->declaredType, fromFieldType->isMutable, fromFieldType->hasInitializer);
-            typeTableSet(to, entry->key, (TypeInfo*)toFieldType);       
+            typeTableSet(to, entry->key, (TypeInfo*)toFieldType);
         }
     }
 }
 
-TypeInfo* typeTableFieldLookup(TypeInfo* type, ObjString* key) {
-    if (type == NULL || (!IS_BEHAVIOR_TYPE(type) && !IS_GENERIC_TYPE(type))) return NULL;
+static void typeTableFieldsInheritGeneric(TypeTable* from, TypeTable* to, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
+    for (int i = 0; i < from->capacity; i++) {
+        TypeEntry* entry = &from->entries[i];
+        if (entry != NULL && entry->key != NULL) {
+            FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);
+            if (fromFieldType->declaredType != NULL && IS_FORMAL_TYPE(fromFieldType->declaredType)) {
+                TypeInfo* instantiatedType = instantiateFormalType(fromFieldType->declaredType, formalParams, actualParams);
+                FieldTypeInfo* toFieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, instantiatedType, fromFieldType->isMutable, fromFieldType->hasInitializer);
+            }
 
-    do {
-        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(getGenericRawType(type));
-        TypeInfo* fieldType = typeTableGet(behaviorType->fields, key);
-        if (fieldType != NULL) return fieldType;
-        type = behaviorType->superclassType;
-    } while (type != NULL);
+            FieldTypeInfo* toFieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, fromFieldType->declaredType, fromFieldType->isMutable, fromFieldType->hasInitializer);
+            typeTableSet(to, entry->key, (TypeInfo*)toFieldType);
+        }
+    }
+}
 
-    return NULL;
+void typeTableFieldsInherit(BehaviorTypeInfo* subclassType, TypeInfo* superclassType) {
+    if (superclassType == NULL) return;
+    else if (IS_BEHAVIOR_TYPE(superclassType)) {
+        typeTableFieldsInheritBehavior(AS_BEHAVIOR_TYPE(superclassType)->fields, subclassType->fields);
+    }
+    else if (IS_GENERIC_TYPE(superclassType)) {
+        GenericTypeInfo* genericType = AS_GENERIC_TYPE(superclassType);
+        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(genericType->rawType);
+        typeTableFieldsInheritGeneric(behaviorType->fields, subclassType->fields, behaviorType->formalTypes, genericType->actualParameters);
+    }
 }
 
 TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {

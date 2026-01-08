@@ -273,7 +273,7 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Ast* supe
     BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
     TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassRawType->baseType.fullName));
     currentMetaclassType->superclassType = superMetaclassType;
-    typeTableFieldsCopy(superclassRawType->fields, currentClassType->fields);
+    typeTableFieldsInherit(currentClassType, superclassType);
 }
 
 static void bindTraitType(Resolver* resolver, Token currentClass, Token trait) {
@@ -729,7 +729,8 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
 
     Ast* returnType = astGetChild(ast, 0);
     returnType->symtab = ast->symtab;
-    resolveChild(resolver, ast, 0);
+    if (!ast->attribute.isVoid) resolveChild(resolver, ast, 0);
+    else returnType->type = typeTableGet(resolver->vm->typetab, resolver->vm->voidString);
 
     Ast* params = astGetChild(ast, 1);
     params->symtab = ast->symtab;
