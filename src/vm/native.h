@@ -10,8 +10,8 @@
 
 #define LOX_FUNCTION(name) static Value name##NativeFunction(VM* vm, int argCount, Value* args)
 #define LOX_METHOD(className, name) static Value name##NativeMethodFor##className(VM* vm, Value receiver, int argCount, Value* args)
-#define DEF_FUNCTION(name, arity, ...) defineNativeFunction(vm, #name, arity, false, name##NativeFunction, __VA_ARGS__)
-#define DEF_FUNCTION_ASYNC(name, arity, ...) defineNativeFunction(vm, #name, arity, true, name##NativeFunction, __VA_ARGS__)
+#define DEF_FUNCTION(name, returnType, arity, ...) defineNativeFunction(vm, #name, arity, false, returnType, name##NativeFunction, __VA_ARGS__)
+#define DEF_FUNCTION_ASYNC(name, returnType, arity, ...) defineNativeFunction(vm, #name, arity, true, returnType, name##NativeFunction, __VA_ARGS__)
 #define DEF_FIELD(klass, name, type, isMutable, defaultValue) defineNativeField(vm, klass, #name, getNativeType(vm, #type), isMutable, defaultValue)
 #define DEF_METHOD(klass, className, name, arity, ...) defineNativeMethod(vm, klass, #name, arity, false, name##NativeMethodFor##className, __VA_ARGS__)
 #define DEF_METHOD_ASYNC(klass, className, name, arity, ...) defineNativeMethod(vm, klass, #name, arity, true, name##NativeMethodFor##className, __VA_ARGS__)
@@ -48,9 +48,14 @@
 #define PARAM_TYPE_CALLABLE(returnType, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
 #define PARAM_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), rawType, numParams, __VA_ARGS__);
 
+#define NATIVE_TYPE_BEHAVIOR(type) getNativeType(vm, #type)
+#define NATIVE_TYPE_CALLABLE_0(type) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), type, 0)
+#define NATIVE_TYPE_CALLABLE(type, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), type, numParams, __VA_ARGS__)
+#define NATIVE_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, rawType->shortName, rawType, numParams, __VA_ARGS__);
+
 ObjClass* defineNativeClass(VM* vm, const char* name);
 ObjClass* defineNativeGenericClass(VM* vm, const char* name, int numParams, ...);
-void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, NativeFunction function, ...);
+void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, TypeInfo* returnType, NativeFunction function, ...);
 void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type, bool isMutable, Value defaultValue);
 void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bool isAsync, NativeMethod method, ...);
 void defineNativeInterceptor(VM* vm, ObjClass* klass, InterceptorType type, int arity, NativeMethod method, ...);

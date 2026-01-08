@@ -101,7 +101,7 @@ ObjClass* defineNativeGenericClass(VM* vm, const char* name, int numParams, ...)
 	return _class;
 }
 
-void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, NativeFunction function, ...) {
+void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, TypeInfo* returnType, NativeFunction function, ...) {
     ObjString* functionName = newStringPerma(vm, name);
     ObjNativeFunction* nativeFunction = newNativeFunction(vm, functionName, arity, isAsync, function);
     push(vm, OBJ_VAL(nativeFunction));
@@ -109,13 +109,12 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Nat
     pop(vm);
 
     SymbolItem* item = insertGlobalSymbolTable(vm, name, NULL);
-    va_list args;
-    va_start(args, function);
-    TypeInfo* returnType = va_arg(args, TypeInfo*);
     CallableTypeInfo* functionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, functionName, returnType);
     functionType->attribute.isAsync = isAsync;
     functionType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
+    va_list args;
+    va_start(args, function);
     for (int i = 0; i < arity; i++) {
         TypeInfo* paramType = va_arg(args, TypeInfo*);
         TypeInfoArrayAdd(functionType->paramTypes, paramType);
@@ -384,11 +383,11 @@ void loadSourceFile(VM* vm, const char* filePath) {
 }
 
 void registerNativeFunctions(VM* vm){
-    DEF_FUNCTION(assert, 2, RETURN_TYPE(void), PARAM_TYPE(Object), PARAM_TYPE(String));
-    DEF_FUNCTION(clock, 0, RETURN_TYPE(Number));
-    DEF_FUNCTION(error, 1, RETURN_TYPE(void), PARAM_TYPE(String));
-    DEF_FUNCTION(gc, 1, RETURN_TYPE(void), PARAM_TYPE(Int));
-    DEF_FUNCTION(print, 1, RETURN_TYPE(void), PARAM_TYPE(Object));
-    DEF_FUNCTION(println, 1, RETURN_TYPE(void), PARAM_TYPE(Object));
-    DEF_FUNCTION(read, 0, RETURN_TYPE(String));
+    DEF_FUNCTION(assert, RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(String));
+    DEF_FUNCTION(clock, RETURN_TYPE(Number), 0);
+    DEF_FUNCTION(error, RETURN_TYPE(void), 1, PARAM_TYPE(String));
+    DEF_FUNCTION(gc, RETURN_TYPE(void), 1, PARAM_TYPE(Int));
+    DEF_FUNCTION(print, RETURN_TYPE(void), 1, PARAM_TYPE(Object));
+    DEF_FUNCTION(println, RETURN_TYPE(void), 1, PARAM_TYPE(Object));
+    DEF_FUNCTION(read, RETURN_TYPE(String), 0);
 }

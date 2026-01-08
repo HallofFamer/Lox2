@@ -419,7 +419,9 @@ void setObjField(VM* vm, ObjInstance* object, char* name, Value value) {
     int index;
     push(vm, OBJ_VAL(key));
 
-    if (idMapGet(idMap, key, &index)) object->fields.values[index] = value;
+    if (idMapGet(idMap, key, &index)) {
+        object->fields.values[index] = value;
+    }
     else {
         transitionShapeForObject(vm, &object->obj, key);
         valueArrayWrite(vm, &object->fields, value);

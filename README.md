@@ -87,11 +87,11 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 - Enhanced type system with basic support for generics/parametric polymorphism.
 - `type` keyword used as declaration of type alias, useful for complex generic types.
 - Capability of saving bytecode into disk as .loxo file, which can be loaded later for faster compilation.
-- Refactor classes in the existing standard library to use generics(in `clox.std` parent package), such as `Array<T>` and `Promise<T>`.
+- Refactor classes in the existing standard library to use generics(in `clox.std` parent package), such as `Array<E>` and `Promise<T>`.
 
 ### Lox2 v2.3.0
 - Additional type system enhancement for union types, with `|` operator on types such as `String | Number`.
-- Type ascription using `as` keyword, allowing userland to specify the type of an expression rather than inferred by compiler.
+- Type ascription using `as` keyword, allowing userland to coerce/cast the type of an expression rather than directly inferred by compiler.
 - Trailing closure similar to Kotlin and Swift which allows last lambda argument to be placed outside of parenthesis.
 - Add new namespace `clox.ext` which may be optionally enabled/disabled in lox2.ini, add new package `clox.ext.text` for text processing.
 
@@ -103,21 +103,27 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 
 ### Lox2 v2.5.0
 - C# style property accessor syntax which provides a flexible way to access and modify the value of instance fields. 
-- Support for "this type" in method declarations using `this` or `this class`, which allows returning the same type as the class in which methods are declared. 
+- Support for self type in method declarations using `this` or `this class`, which allows returning the same type as the class in which methods are declared. 
 - Implement a profiler which can identify the "Hotspots" of the program and how long they execute, prerequiste for future JIT. 
 - Add new package `clox.ext.sql` which supports database connections and queries for mysql/mariadb, postgres, sqlite, etc.
 
 ### Lox2 v2.6.0
 - Initial implementation of tracing JIT compiler that optimizes hot loops, only for x64 architecture. 
 - Object literal syntax similar to Javascript which can be good for configuration objects. 
-- Refine `if` and `match` as expressions, with the value produced being the last expression/statement of the expression body.
+- Refine `if` and `match` as expressions, with value produced being the last expression/statement of a expression body.
 - Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
 
 ### Lox2 v2.7.0
-- Add control flow graph (CFG) and data flow analysis in the compiler, which can be used for constant propagation, dead code elimination and other optimizations.
-- Improvement of JIT compiler with further optimizations made possible from Lox2's new CFG and data  flow analysis.
+- Add control flow graph (CFG) and data flow analysis in the compiler, which can be used for constant propagation and other optimizations.
+- Improvement of JIT compiler with further optimizations made possible from Lox2's new CFG and preliminary data flow analysis.
 - First class continuation with keyword `thisContext`, enabling manipulation of call stack in userland.
 - Add new package `clox.ext.gui` which supports writing GUI applications using gtk binding for Lox2.
+
+### Lox2 v2.8.0
+- Extension methods which allow adding new methods to existing classes without modifying their source code.
+- Further improvement of JIT compiler with introduction of SSA IR form that enables more optimiation for generated native code.
+- Function and Method parameter labels similar to Smalltalk, Objective C and Swift using `label:` notation.
+- Introduction of Lox2's package manager(name to be determined) which allows installing Lox2 packages from a central repository.
 
 
 ## Example

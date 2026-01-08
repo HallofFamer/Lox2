@@ -269,8 +269,7 @@ ObjClass* getClassFromTypeInfo(VM* vm, TypeInfo* type) {
     if (IS_BEHAVIOR_TYPE(type)) {
         Value value;
         bool result = tableGet(&vm->classes, type->fullName, &value);
-        if (!result) return NULL;
-        return AS_CLASS(value);
+		return result ? AS_CLASS(value) : NULL;
     }
     else if (IS_CALLABLE_TYPE(type)) {
         return vm->functionClass;
