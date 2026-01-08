@@ -1,5 +1,4 @@
 namespace test.types
-using clox.std.util.UUID
 
 trait TBox<T> { 
     
@@ -12,7 +11,7 @@ trait TBox<T> {
     }
 }
 
-class Box<T> with TBox<T>{
+class Box<T> with TBox<T> {
 
     var T content
 
@@ -34,10 +33,6 @@ class Box<T> with TBox<T>{
     }
 }
 
-T identity<T>(T arg) {
-    return arg
-}
-
 class KeyedBox<S, T> extends Box<T> { 
 
     val S key
@@ -52,23 +47,17 @@ class KeyedBox<S, T> extends Box<T> {
     }
 }
 
-Box<String> createBox() {
-    return Box<String>("Hello, World!")
-}
+println("Creating generic trait TBox: ")
+println(TBox)
 
 println("Creating generic class Box: ")
 println(Box)
+
+println("Creating generic class KeyedBox: ")
+println(KeyedBox)
 
 val box = Box<Int>(42)
 println("Instantiating from generic class Box: ${box}")
 box.setContent(100)
 //box.setContent("Hello World")
 println("Box new content: ${box.getContent()}")
-
-println("Creating generic trait TBox: ")
-println(TBox)
-println(KeyedBox)
-
-val id = identity<UUID>(UUID())
-println(id.toString())
-//throw Exception(id)

@@ -3,24 +3,20 @@ namespace test.std
 val str = "Hello World"
 println("printing string 'Hello World': ${str}")
 println("Class of string is: ${str.getClassName()}")
-println("length of string is: ${str.length}")
-println("")
+println("length of string is: ${str.length}\n")
 
 println("String contains 'Hello': ${str.contains("Hello")}")
 println("String index for 'Wo': ${str.indexOf("Wo")}")
-println("Replace 'World' in String by 'My Friend': ${str.replace("World", "My Friend")}")
-println("")
+println("Replace 'World' in String by 'My Friend': ${str.replace("World", "My Friend")}\n")
 
 println("String starts with 'Hello': ${str.startsWith("Hello")}")
 println("String ends with World: ${str.endsWith("World")}")
 println("String character at position 4: ${str.getCodePoint(4)}")
-println("String subscript at position 2: ${str[2]}")
-println("")
+println("String subscript at position 2: ${str[2]}\n")
 
 println("Getting substring at index 3 and 8: ${str.subString(3, 8)}")
 println("Reversing String: ${str.reverse()}")
-println("Trim String ' Hello World  ': ${" Hello World  ".trim()}")
-println("")
+println("Trim String ' Hello World  ': ${" Hello World  ".trim()}\n")
 
 println("'Hello World' to upper case: ${"Hello World".toUppercase()}")
 println("'Hello World' to lower case: ${"Hello World".toLowercase()}")

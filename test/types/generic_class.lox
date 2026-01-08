@@ -1,0 +1,76 @@
+namespace test.types
+using clox.std.collection.Array;
+
+class Model {
+	
+	val Int id
+	
+	__init__(Int id) {
+		this.id = id
+	}
+}
+
+class User extends Model {
+	
+	val String username
+	val String email
+	
+	__init__(Int id, String username, String email) {
+	    super.__init__(id)
+		this.username = username
+		this.email = email
+	}
+}
+
+class Repository<T> {
+	
+	val Array<T> models = []
+
+	void add(T model) {
+		this.models.add(model)
+	}
+
+	void addAll(Array<T> models) {
+	    this.models.addAll(models)
+	}
+
+    T get(Bool fun(T) predicate) {
+		for (val model : this.models) {
+			if (predicate(model)) {
+				return model
+			}
+		}
+		return nil
+	}
+
+	T getById(Int id) {
+	    return this.get({|m| m.id == id })
+	}
+
+	Array<T> getAll() {
+		return this.models
+	}
+
+	void remove(T model) {
+		this.models.remove(model)
+	}
+}
+
+class UserRepository extends Repository<User> {
+	
+	User getByUsername(String username) {
+		return this.get({|u| u.username == username })
+	}
+
+	User getByEmail(String email) {
+		return this.get({|u| u.email == email })
+	}
+}
+
+val userRepo = UserRepository()
+userRepo.add(User(1, "john_doe", "johndoe@gmail.com"))
+userRepo.add(User(2, "jane_doe", "janedoe@outlook.com"))
+val user = userRepo.getByUsername("john_doe")
+val user2 = userRepo.get({|m| m.id == 2})
+println("User 1: ${user.username}, Email: ${user.email}")
+println("User 2: ${user2.username}, Email: ${user2.email}")

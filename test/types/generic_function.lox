@@ -1,0 +1,42 @@
+namespace test.types
+using clox.std.util.UUID
+
+class Box<T> {
+
+    var T content
+
+    __init__(T content) {
+        this.content = content
+    }
+
+    T getContent() {
+        return this.content
+    }
+
+    void setContent(T content) {
+        this.content = content
+    }
+
+    String toString() {
+        //return "Box<${T}>(${this.content})"
+        return "Box(${this.content})"
+    }
+}
+
+T identity<T>(T arg) {
+    return arg
+}
+
+Box<String> createBox() {
+    return Box<String>("Hello, World!")
+}
+
+val id = identity<UUID>(UUID())
+println(id.toString())
+//throw Exception(id)
+
+val box = createBox()
+println(box)
+val content = box.getContent()
+println(content)
+//throw content

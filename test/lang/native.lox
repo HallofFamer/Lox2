@@ -1,5 +1,6 @@
 namespace test.lang
 
+assert(5 > 3, "There's something about 5 that beats 3")
 val start = clock()
 println("Current time is: ${start}")
 println("Enter any text: ")
