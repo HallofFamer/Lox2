@@ -852,7 +852,7 @@ static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
 
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
-    TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
+    TypeInfo* fieldType = typeTableFieldLookup(receiver->type, fieldName);
     if (fieldType != NULL) ast->type = AS_FIELD_TYPE(fieldType)->declaredType;
 }
 
@@ -864,7 +864,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
-    TypeInfo* type = typeTableGet(receiverType->fields, fieldName);
+	TypeInfo* type = typeTableFieldLookup(receiver->type, fieldName);
     if (type == NULL) return;
     Ast* value = astGetChild(ast, 1);
 
@@ -1269,7 +1269,7 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
     if (!typeChecker->currentClass->isAnonymous) {
         ObjString* name = createStringFromToken(typeChecker->vm, ast->token);
         BehaviorTypeInfo* behaviorType = typeChecker->currentClass->type;
-        TypeInfo* type = typeTableGet(typeChecker->currentClass->type->fields, name);
+        TypeInfo* type = typeTableFieldLookup((TypeInfo*)typeChecker->currentClass->type, name);
         if (type == NULL) return;
 
         FieldTypeInfo* fieldType = AS_FIELD_TYPE(type);

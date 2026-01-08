@@ -1441,7 +1441,7 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
     typeTableInsertField(classType->fields, name, fieldTypeInfo, ast->attribute.isMutable, hasInitializer);
 
     if (classType->superclassType != NULL) {
-        BehaviorTypeInfo* superclass = AS_BEHAVIOR_TYPE(classType->superclassType);
+        BehaviorTypeInfo* superclass = AS_BEHAVIOR_TYPE(getGenericRawType(classType->superclassType));
         TypeInfo* fieldSuperType = typeTableGet(superclass->fields, name);
         if (fieldSuperType != NULL) {
             semanticError(resolver, "Cannot redeclare inherited instance field %s from superclass.", name->chars);

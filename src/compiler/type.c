@@ -474,6 +474,19 @@ void typeTableFieldsCopy(TypeTable* from, TypeTable* to) {
     }
 }
 
+TypeInfo* typeTableFieldLookup(TypeInfo* type, ObjString* key) {
+    if (type == NULL || (!IS_BEHAVIOR_TYPE(type) && !IS_GENERIC_TYPE(type))) return NULL;
+
+    do {
+        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(getGenericRawType(type));
+        TypeInfo* fieldType = typeTableGet(behaviorType->fields, key);
+        if (fieldType != NULL) return fieldType;
+        type = behaviorType->superclassType;
+    } while (type != NULL);
+
+    return NULL;
+}
+
 TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
     if (type == NULL || (!IS_BEHAVIOR_TYPE(type) && !IS_GENERIC_TYPE(type))) return NULL;
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(getGenericRawType(type));

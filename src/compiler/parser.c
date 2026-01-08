@@ -923,7 +923,7 @@ static Ast* superclass_(Parser* parser) {
     if (match(parser, TOKEN_SYMBOL_EXTENDS)) {
         return type_(parser, false, false);
     }
-    return emptyAst(AST_EXPR_VARIABLE, parser->rootClass);
+    return emptyAst(AST_EXPR_TYPE, parser->rootClass);
 }
 
 static Ast* traits(Parser* parser, Token* name) {
