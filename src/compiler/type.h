@@ -145,7 +145,8 @@ char* createGenericTypeName(GenericTypeInfo* genericType);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
 TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name);
-TypeInfo* instantiateFormalType(TypeInfo* formalType, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
+TypeInfo* instantiateFormalType(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
+TypeInfo* instantiateGenericType(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
 
 TypeTable* newTypeTable(int id);
 void freeTypeTable(TypeTable* typeTable);

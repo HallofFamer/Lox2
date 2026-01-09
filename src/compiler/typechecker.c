@@ -109,16 +109,6 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
-static TypeInfo* instantiateFromGenericBehaviorType(TypeChecker* typeChecker, TypeInfo* formalType, GenericTypeInfo* genericType) {
-	BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(genericType->rawType);
-    for (int i = 0; i < behaviorType->formalTypes->count; i++) {
-        if (formalType->shortName == behaviorType->formalTypes->elements[i]->shortName) {
-			return genericType->actualParameters->elements[i];
-        }
-    }
-    return NULL;
-}
-
 static TypeInfo* instantiateFromGenericCallableType(TypeChecker* typeChecker, TypeInfo* formalType, GenericTypeInfo* genericType) {
     CallableTypeInfo* callableType = AS_CALLABLE_TYPE(genericType->rawType);
     for (int i = 0; i < callableType->formalTypes->count; i++) {
@@ -152,9 +142,10 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
 }
 
 static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, GenericTypeInfo* genericBehaviorType, CallableTypeInfo* genericMethodType) {
-	TypeInfo* returnType = genericMethodType->returnType;
+	BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(genericBehaviorType->rawType);
+    TypeInfo* returnType = genericMethodType->returnType;
     if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
-        returnType = instantiateFromGenericBehaviorType(typeChecker, returnType, genericBehaviorType);
+        returnType = instantiateFormalType(returnType, behaviorType->formalTypes, genericBehaviorType->actualParameters);
 	}
     CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericMethodType->baseType.shortName, returnType);
     instantiatedMethodType->formalTypes = genericMethodType->formalTypes;    
@@ -162,7 +153,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     for (int i = 0; i < genericMethodType->paramTypes->count; i++) {
         TypeInfo* paramType = genericMethodType->paramTypes->elements[i];
         if (paramType != NULL && IS_FORMAL_TYPE(paramType)) {
-            paramType = instantiateFromGenericBehaviorType(typeChecker, paramType, genericBehaviorType);
+            paramType = instantiateFormalType(paramType, behaviorType->formalTypes, genericBehaviorType->actualParameters);
         }
         TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
     }
