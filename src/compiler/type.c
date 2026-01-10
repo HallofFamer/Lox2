@@ -384,14 +384,51 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
     return NULL;
 }
 
-TypeInfo* instantiateFormalType(TypeInfo* formalType, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
+TypeInfo* instantiateFormalType(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
     for (int i = 0; i < formalParams->count; i++) {
         TypeInfo* formalTypeParam = formalParams->elements[i];
-        if (formalTypeParam != NULL && formalTypeParam->shortName == formalType->shortName) {
+        if (formalTypeParam != NULL && formalTypeParam->shortName == type->shortName) {
             return actualParams->elements[i];
         }
     }
     return NULL;
+}
+
+TypeInfo* instantiateGenericType(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
+    if (IS_BEHAVIOR_TYPE(type)){
+		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+		GenericTypeInfo* genericType = newGenericTypeInfo(-1, behaviorType->baseType.shortName, behaviorType->baseType.fullName, type);
+		
+        for (int i = 0; i < behaviorType->formalTypes->count; i++) {
+            TypeInfo* formalTypeParam = behaviorType->formalTypes->elements[i];
+            if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
+                TypeInfo* instantiatedType = instantiateFormalType(formalTypeParam, formalParams, actualParams);
+				TypeInfoArrayAdd(genericType->actualParameters, instantiatedType);
+            }
+        }
+
+        if (genericType->actualParameters->count == behaviorType->formalTypes->count) {
+            genericType->isFullyInstantiated = true;
+		}
+        return (TypeInfo*)genericType;
+    }
+    else if (IS_CALLABLE_TYPE(type)) {
+		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
+        GenericTypeInfo* genericType = newGenericTypeInfo(-1, callableType->baseType.shortName, callableType->baseType.fullName, type);
+        
+        for (int i = 0; i < callableType->formalTypes->count; i++) {
+            TypeInfo* formalTypeParam = callableType->formalTypes->elements[i];
+            if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
+                TypeInfo* instantiatedType = instantiateFormalType(formalTypeParam, formalParams, actualParams);
+                TypeInfoArrayAdd(genericType->actualParameters, instantiatedType);
+            }
+        }
+        if (genericType->actualParameters->count == callableType->formalTypes->count) {
+            genericType->isFullyInstantiated = true;
+        }
+        return (TypeInfo*)genericType;
+    }
+	return type;
 }
 
 TypeTable* newTypeTable(int id) {

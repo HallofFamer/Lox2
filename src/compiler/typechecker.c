@@ -109,35 +109,25 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
-static TypeInfo* instantiateFromGenericCallableType(TypeChecker* typeChecker, TypeInfo* formalType, GenericTypeInfo* genericType) {
-    CallableTypeInfo* callableType = AS_CALLABLE_TYPE(genericType->rawType);
-    for (int i = 0; i < callableType->formalTypes->count; i++) {
-        if (formalType->shortName == callableType->formalTypes->elements[i]->shortName) {
-            return genericType->actualParameters->elements[i];
-        }
-    }
-    return NULL;
-}
-
 static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker, GenericTypeInfo* genericFunctionType) {
 	CallableTypeInfo* functionType = AS_CALLABLE_TYPE(genericFunctionType->rawType);
     TypeInfo* returnType = functionType->returnType;
     if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
-        returnType = instantiateFromGenericCallableType(typeChecker, returnType, genericFunctionType);
+		returnType = instantiateFormalType(returnType, functionType->formalTypes, genericFunctionType->actualParameters);
     }
 
     CallableTypeInfo* instantiatedFunctionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, genericFunctionType->baseType.shortName, returnType);
     instantiatedFunctionType->formalTypes = functionType->formalTypes;
     for (int i = 0; i < functionType->paramTypes->count; i++) {
         TypeInfo* paramType = functionType->paramTypes->elements[i];
-        if (paramType != NULL && IS_FORMAL_TYPE(paramType)) paramType = instantiateFromGenericCallableType(typeChecker, paramType, genericFunctionType);
+		if (paramType != NULL && IS_FORMAL_TYPE(paramType)) paramType = instantiateFormalType(paramType, functionType->formalTypes, genericFunctionType->actualParameters);
         TypeInfoArrayAdd(instantiatedFunctionType->paramTypes, paramType);
     }
     
     TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedFunctionType);
     char* instantiatedFunctionTypeName = createCallableTypeName(instantiatedFunctionType);
-    instantiatedFunctionType->baseType.shortName = takeStringPerma(typeChecker->vm, instantiatedFunctionTypeName, (int)strlen(instantiatedFunctionTypeName));
-    instantiatedFunctionType->baseType.fullName = instantiatedFunctionType->baseType.shortName;
+    instantiatedFunctionType->baseType.fullName = instantiatedFunctionType->baseType.shortName = 
+        takeStringPerma(typeChecker->vm, instantiatedFunctionTypeName, (int)strlen(instantiatedFunctionTypeName));
     return instantiatedFunctionType;
 }
 
@@ -160,8 +150,8 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     
     TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedMethodType);
     char* instantiatedCallableTypeName = createCallableTypeName(instantiatedMethodType);
-    instantiatedMethodType->baseType.shortName = takeStringPerma(typeChecker->vm, instantiatedCallableTypeName, (int)strlen(instantiatedCallableTypeName));
-    instantiatedMethodType->baseType.fullName = instantiatedMethodType->baseType.shortName;
+    instantiatedMethodType->baseType.fullName = instantiatedMethodType->baseType.shortName = 
+        takeStringPerma(typeChecker->vm, instantiatedCallableTypeName, (int)strlen(instantiatedCallableTypeName));
     return instantiatedMethodType;
 }
 
