@@ -112,8 +112,13 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
 static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker, GenericTypeInfo* genericFunctionType) {
 	CallableTypeInfo* functionType = AS_CALLABLE_TYPE(genericFunctionType->rawType);
     TypeInfo* returnType = functionType->returnType;
-    if (returnType != NULL && IS_FORMAL_TYPE(returnType)) {
-		returnType = instantiateFormalType(returnType, functionType->formalTypes, genericFunctionType->actualParameters);
+    if (returnType != NULL) {
+        if (IS_FORMAL_TYPE(returnType)) {
+            returnType = instantiateFormalType(returnType, functionType->formalTypes, genericFunctionType->actualParameters);
+        }
+		else if (hasGenericParameters(returnType)) {
+            returnType = instantiateGenericType(returnType, functionType->formalTypes, genericFunctionType->actualParameters);
+        }
     }
 
     CallableTypeInfo* instantiatedFunctionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, genericFunctionType->baseType.shortName, returnType);

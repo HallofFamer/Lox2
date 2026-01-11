@@ -1019,6 +1019,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         if (hasInstantiatedTypeParameters(astGetChild(ast, 0))) {
             insertGenericType(resolver, ast);
         }
+        else ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass, true);
     }
     else {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createStringFromToken(resolver->vm, ast->token));
@@ -1435,7 +1436,6 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
 
     TypeInfo* fieldTypeInfo = NULL;
     if (ast->attribute.isTyped) {
-        resolveChild(resolver, ast, 0);
         Ast* fieldType = astGetChild(ast, 0);
         fieldTypeInfo = fieldType->type;
     }
