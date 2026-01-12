@@ -384,7 +384,7 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
     return NULL;
 }
 
-TypeInfo* instantiateFormalType(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
+static TypeInfo* instantiateFormalTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
     for (int i = 0; i < formalParams->count; i++) {
         TypeInfo* formalTypeParam = formalParams->elements[i];
         if (formalTypeParam != NULL && formalTypeParam->shortName == type->shortName) {
@@ -394,16 +394,20 @@ TypeInfo* instantiateFormalType(TypeInfo* type, TypeInfoArray* formalParams, Typ
     return NULL;
 }
 
-TypeInfo* instantiateGenericType(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
-    if (IS_BEHAVIOR_TYPE(type)){
+TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
+	if (type == NULL) return NULL;
+	else if (IS_FORMAL_TYPE(type)) {
+        return instantiateFormalTypeParameter(type, formalParams, actualParams);
+    }
+    else if (IS_BEHAVIOR_TYPE(type)){
 		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
 		GenericTypeInfo* genericType = newGenericTypeInfo(-1, behaviorType->baseType.shortName, behaviorType->baseType.fullName, type);
 		
         for (int i = 0; i < behaviorType->formalTypes->count; i++) {
             TypeInfo* formalTypeParam = behaviorType->formalTypes->elements[i];
             if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
-                TypeInfo* instantiatedType = instantiateFormalType(formalTypeParam, formalParams, actualParams);
-				TypeInfoArrayAdd(genericType->actualParameters, instantiatedType);
+                TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
+                TypeInfoArrayAdd(genericType->actualParameters, instantiatedType);
             }
         }
 
@@ -419,7 +423,7 @@ TypeInfo* instantiateGenericType(TypeInfo* type, TypeInfoArray* formalParams, Ty
         for (int i = 0; i < callableType->formalTypes->count; i++) {
             TypeInfo* formalTypeParam = callableType->formalTypes->elements[i];
             if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
-                TypeInfo* instantiatedType = instantiateFormalType(formalTypeParam, formalParams, actualParams);
+                TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
                 TypeInfoArrayAdd(genericType->actualParameters, instantiatedType);
             }
         }
@@ -528,7 +532,7 @@ static void typeTableFieldsInheritGeneric(TypeTable* from, TypeTable* to, TypeIn
         if (entry != NULL && entry->key != NULL) {
             FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);
             if (fromFieldType->declaredType != NULL && IS_FORMAL_TYPE(fromFieldType->declaredType)) {
-                TypeInfo* instantiatedType = instantiateFormalType(fromFieldType->declaredType, formalParams, actualParams);
+                TypeInfo* instantiatedType = instantiateFormalTypeParameter(fromFieldType->declaredType, formalParams, actualParams);
                 FieldTypeInfo* toFieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, instantiatedType, fromFieldType->isMutable, fromFieldType->hasInitializer);
             }
 

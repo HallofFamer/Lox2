@@ -145,8 +145,7 @@ char* createGenericTypeName(GenericTypeInfo* genericType);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
 TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name);
-TypeInfo* instantiateFormalType(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
-TypeInfo* instantiateGenericType(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
+TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
 
 TypeTable* newTypeTable(int id);
 void freeTypeTable(TypeTable* typeTable);
@@ -171,7 +170,7 @@ static inline bool isTempType(TypeInfo* type) {
 
 static inline bool hasGenericParameters(TypeInfo* type) {
     if (type == NULL) return false;
-    else if (IS_GENERIC_TYPE(type)) return true;
+    else if (IS_FORMAL_TYPE(type) || IS_GENERIC_TYPE(type)) return true;
     else if (IS_BEHAVIOR_TYPE(type)) return AS_BEHAVIOR_TYPE(type)->formalTypes->count > 0;
     else if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type)->formalTypes->count > 0;
     else if (IS_METHOD_TYPE(type)) return AS_METHOD_TYPE(type)->declaredType->formalTypes->count > 0;
