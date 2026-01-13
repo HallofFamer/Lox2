@@ -814,33 +814,65 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     else return false;
 }
 
-bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
-    if (isEqualType(type, type2)) return true;
-    type = getAliasTargetType(type);
-    type2 = getAliasTargetType(type2);
-    if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
-    if (memcmp(type2->shortName->chars, "Object", 3) == 0) return true;
-
-    if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (strcmp(type2->shortName->chars, "Function") == 0 || strcmp(type2->shortName->chars, "TCallable") == 0)) {
-        return true;
-    } 
-    if (IS_GENERIC_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) {
-        return isSubtypeOfType(AS_GENERIC_TYPE(type)->rawType, type2);
-    }
-    if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false;
-   
-    BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type);
-    BehaviorTypeInfo* supertype = AS_BEHAVIOR_TYPE(type2);
+static bool isBehaviorSubtypeOfType(BehaviorTypeInfo* subtype, BehaviorTypeInfo* supertype) {
     TypeInfo* superclassType = subtype->superclassType;
     while (superclassType != NULL) {
-        if (superclassType->id == type2->id) return true;
+        if (superclassType->id == supertype->baseType.id) return true;
         superclassType = AS_BEHAVIOR_TYPE(getGenericRawType(superclassType))->superclassType;
     }
 
     if (subtype->traitTypes != NULL && subtype->traitTypes->count > 0) {
         for (int i = 0; i < subtype->traitTypes->count; i++) {
-            if (subtype->traitTypes->elements[i]->id == type2->id) return true;
+            if (subtype->traitTypes->elements[i]->id == supertype->baseType.id) return true;
         }
     }
     return false;
+}
+
+static bool isCallableSubtypeOfType(CallableTypeInfo* type, TypeInfo* type2) {
+    if (IS_BEHAVIOR_TYPE(type2)) {
+        CallableTypeInfo* callableSupertype = AS_CALLABLE_TYPE(type2);
+        if (memcmp(type2->shortName->chars, "Function", 8) == 0) return TRUE;
+        else if (memcmp(type2->shortName->chars, "TCallable", 9) == 0) return TRUE;
+    }
+    return FALSE;
+}
+
+static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
+	if (isEqualType(type->rawType, type2)) return true;
+    else if (IS_BEHAVIOR_TYPE(type->rawType)) {
+        BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type->rawType);
+        if (IS_BEHAVIOR_TYPE(type2)) return isBehaviorSubtypeOfType(subtype, AS_BEHAVIOR_TYPE(type2));
+        else if (IS_GENERIC_TYPE(type2)) {
+            GenericTypeInfo* genericSupertype = AS_GENERIC_TYPE(type2);
+            if (!IS_BEHAVIOR_TYPE(genericSupertype->rawType)) return FALSE;
+            else {
+                BehaviorTypeInfo* behaviorSupertype = AS_BEHAVIOR_TYPE(genericSupertype->rawType);
+                if (!isBehaviorSubtypeOfType(subtype, behaviorSupertype)) return FALSE;
+                for (int i = 0; i < type->actualParameters->count; i++) {
+                    if (!isEqualType(type->actualParameters->elements[i], genericSupertype->actualParameters->elements[i])) return FALSE;
+                }
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
+    if (isEqualType(type, type2)) return true;
+    if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
+    if (memcmp(type2->shortName->chars, "Object", 3) == 0) return true;
+    if (IS_ALIAS_TYPE(type) || IS_ALIAS_TYPE(type2)) return isSubtypeOfType(getAliasTargetType(type), getAliasTargetType(type2));
+
+    if (IS_CALLABLE_TYPE(type)) {
+        return isCallableSubtypeOfType(AS_CALLABLE_TYPE(type), type2);
+    } 
+    if (IS_GENERIC_TYPE(type)) {
+        return isGenericSubtypeOfType(AS_GENERIC_TYPE(type), type2);
+    }
+    if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) {
+        return false;
+    }
+    return isBehaviorSubtypeOfType(AS_BEHAVIOR_TYPE(type), AS_BEHAVIOR_TYPE(type2));
 }
