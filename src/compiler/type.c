@@ -531,8 +531,8 @@ static void typeTableFieldsInheritGeneric(TypeTable* from, TypeTable* to, TypeIn
         TypeEntry* entry = &from->entries[i];
         if (entry != NULL && entry->key != NULL) {
             FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);
-            if (fromFieldType->declaredType != NULL && IS_FORMAL_TYPE(fromFieldType->declaredType)) {
-                TypeInfo* instantiatedType = instantiateFormalTypeParameter(fromFieldType->declaredType, formalParams, actualParams);
+            if (fromFieldType->declaredType != NULL && hasGenericParameters(fromFieldType->declaredType)) {
+                TypeInfo* instantiatedType = instantiateTypeParameter(fromFieldType->declaredType, formalParams, actualParams);
                 FieldTypeInfo* toFieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, instantiatedType, fromFieldType->isMutable, fromFieldType->hasInitializer);
             }
 
@@ -784,9 +784,10 @@ void typeTableOutput(TypeTable* typetab) {
 }
 
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
-    if (type == NULL || type2 == NULL || (IS_FORMAL_TYPE(type) && IS_FORMAL_TYPE(type2))) return true;
-    type = getAliasTargetType(type);
-    type2 = getAliasTargetType(type2);
+    if (type == NULL || type2 == NULL) return true;
+	if (IS_VOID_TYPE(type) && IS_VOID_TYPE(type2)) return true;
+    if (IS_FORMAL_TYPE(type) && IS_FORMAL_TYPE(type2)) return true;
+    if (IS_ALIAS_TYPE(type) || IS_ALIAS_TYPE(type2)) return isEqualType(getAliasTargetType(type), getAliasTargetType(type2));
 
     if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return (type->id == type2->id);
     else if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
