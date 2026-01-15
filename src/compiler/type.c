@@ -783,6 +783,24 @@ void typeTableOutput(TypeTable* typetab) {
     printf("\n");
 }
 
+static bool isCallableEqualType(CallableTypeInfo* type, CallableTypeInfo* type2) {
+    if (!isEqualType(type->returnType, type2->returnType)) return false;
+    if (type->paramTypes->count != type2->paramTypes->count) return false;
+    for (int i = 0; i < type->paramTypes->count; i++) {
+        if (!isEqualType(type->paramTypes->elements[i], type2->paramTypes->elements[i])) return false;
+    }
+    return true;
+}
+
+static bool isGenericEqualType(GenericTypeInfo* type, GenericTypeInfo* type2) {
+    if (!isEqualType(type->rawType, type2->rawType)) return false;
+    if (type->actualParameters->count != type2->actualParameters->count) return false;
+    for (int i = 0; i < type->actualParameters->count; i++) {
+        if (!isEqualType(type->actualParameters->elements[i], type2->actualParameters->elements[i])) return false;
+    }
+    return true;
+}
+
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (type == NULL || type2 == NULL) return true;
 	if (IS_VOID_TYPE(type) && IS_VOID_TYPE(type2)) return true;
@@ -791,26 +809,10 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 
     if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return (type->id == type2->id);
     else if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
-        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
-        CallableTypeInfo* callableType2 = AS_CALLABLE_TYPE(type2);
-        if (!isEqualType(callableType->returnType, callableType2->returnType)) return false;
-        if (callableType->paramTypes->count != callableType2->paramTypes->count) return false;
-
-        for (int i = 0; i < callableType->paramTypes->count; i++) {
-            if (!isEqualType(callableType->paramTypes->elements[i], callableType2->paramTypes->elements[i])) return false;
-        }
-        return true;
+		return isCallableEqualType(AS_CALLABLE_TYPE(type), AS_CALLABLE_TYPE(type2));
     }
-    else if (IS_GENERIC_TYPE(type) && IS_GENERIC_TYPE(type2)) {
-        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
-        GenericTypeInfo* genericType2 = AS_GENERIC_TYPE(type2);
-		if (!isEqualType(genericType->rawType, genericType2->rawType)) return false;
-        if (genericType->actualParameters->count != genericType2->actualParameters->count) return false;
-
-        for (int i = 0; i < genericType->actualParameters->count; i++) {
-            if (!isEqualType(genericType->actualParameters->elements[i], genericType2->actualParameters->elements[i])) return false;
-        }
-        return true;
+	else if (IS_GENERIC_TYPE(type) && IS_GENERIC_TYPE(type2)) {
+        return isGenericEqualType(AS_GENERIC_TYPE(type), AS_GENERIC_TYPE(type2));
     }
     else return false;
 }
@@ -836,6 +838,7 @@ static bool isCallableSubtypeOfType(CallableTypeInfo* type, TypeInfo* type2) {
         if (memcmp(type2->shortName->chars, "Function", 8) == 0) return TRUE;
         else if (memcmp(type2->shortName->chars, "TCallable", 9) == 0) return TRUE;
     }
+    else if (IS_CALLABLE_TYPE(type2)) return isCallableEqualType(type, AS_CALLABLE_TYPE(type2));
     return FALSE;
 }
 
@@ -856,6 +859,22 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
                 return TRUE;
             }
         }
+    }
+	else if (IS_CALLABLE_TYPE(type->rawType)) {
+        CallableTypeInfo* subtype = AS_CALLABLE_TYPE(type->rawType);
+		if (IS_CALLABLE_TYPE(type2)) return isCallableSubtypeOfType(subtype, type2);
+        else if (IS_GENERIC_TYPE(type2)) {
+            GenericTypeInfo* genericSupertype = AS_GENERIC_TYPE(type2);
+            if (!IS_CALLABLE_TYPE(genericSupertype->rawType)) return FALSE;
+            else {
+                CallableTypeInfo* callableSupertype = AS_CALLABLE_TYPE(genericSupertype->rawType);
+                if (!isCallableSubtypeOfType(subtype, (TypeInfo*)callableSupertype)) return FALSE;
+                for (int i = 0; i < type->actualParameters->count; i++) {
+                    if (!isEqualType(type->actualParameters->elements[i], genericSupertype->actualParameters->elements[i])) return FALSE;
+                }
+                return TRUE;
+            }
+		}
     }
     return FALSE;
 }

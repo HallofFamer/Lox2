@@ -282,27 +282,29 @@ static void checkMethodSignatures(TypeChecker* typeChecker, CallableTypeInfo* su
     }
 }
 
-static void inheritGenericSuperclassMethods(BehaviorTypeInfo* subclass, GenericTypeInfo* superclass) {
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(superclass->rawType);
+static void inheritGenericSupertypeMethods(BehaviorTypeInfo* subtype, GenericTypeInfo* supertype) {
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(supertype->rawType);
     for (int i = 0; i < behaviorType->methods->capacity; i++) {
         TypeEntry* entry = &behaviorType->methods->entries[i];
         if (entry != NULL && entry->key != NULL) {
+			if (typeTableGet(subtype->methods, entry->key) != NULL) continue;
+
             MethodTypeInfo* superMethodType = AS_METHOD_TYPE(entry->value);
             MethodTypeInfo* subMethodType = newMethodTypeInfo(i, superMethodType->baseType.shortName, superMethodType->declaredType->returnType, superMethodType->isClass, superMethodType->isInitializer);
             subMethodType->declaredType->attribute = superMethodType->declaredType->attribute;
             TypeInfo* returnType = superMethodType->declaredType->returnType;
             if (hasGenericParameters(returnType)) {
-                subMethodType->declaredType->returnType = instantiateTypeParameter(returnType, behaviorType->formalTypes, superclass->actualParameters);
+                subMethodType->declaredType->returnType = instantiateTypeParameter(returnType, behaviorType->formalTypes, supertype->actualParameters);
             }
 
             for (int i = 0; i < superMethodType->declaredType->paramTypes->count; i++) {
                 TypeInfo* paramType = superMethodType->declaredType->paramTypes->elements[i];
                 if (hasGenericParameters(paramType)) {
-                    paramType = instantiateTypeParameter(paramType, behaviorType->formalTypes, superclass->actualParameters);
+                    paramType = instantiateTypeParameter(paramType, behaviorType->formalTypes, supertype->actualParameters);
                 }
                 TypeInfoArrayAdd(subMethodType->declaredType->paramTypes, paramType);
             }
-            typeTableSet(subclass->methods, superMethodType->baseType.shortName, (TypeInfo*)subMethodType);
+            typeTableSet(subtype->methods, superMethodType->baseType.shortName, (TypeInfo*)subMethodType);
         }
     }
 }
@@ -323,7 +325,7 @@ static void checkInheritingSuperclass(TypeChecker* typeChecker, TypeInfo* supert
     }
 
     checkInheritingSuperclass(typeChecker, superclassType->superclassType);
-    if (IS_GENERIC_TYPE(supertype)) inheritGenericSuperclassMethods(typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
+    if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
 }
 
 static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
@@ -334,26 +336,27 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
     for (int i = 0; i < traitList->children->count; i++) {
         Ast* trait = astGetChild(traitList, 0);
         ObjString* name = createStringFromToken(typeChecker->vm, trait->token);
-        TypeInfo* type = getClassType(typeChecker, name, traitList->symtab);
+        TypeInfo* supertype = (trait->type != NULL) ? trait->type : getClassType(typeChecker, name, traitList->symtab);
 
-        if (type == NULL) continue;
+        if (supertype == NULL) continue;
         else {
-            BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(type);
+            BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(getGenericRawType(supertype));
             for (int j = 0; j < traitType->methods->capacity; j++) {
-                TypeEntry* methodEntry = &traitType->methods->entries[i];
+                TypeEntry* methodEntry = &traitType->methods->entries[j];
                 if (methodEntry == NULL || methodEntry->key == NULL) continue;
                 MethodTypeInfo* methodType = AS_METHOD_TYPE(methodEntry->value);
 
                 TypeInfo* subclassMethodType = typeTableGet(typeChecker->currentClass->type->methods, methodEntry->key);
                 if (subclassMethodType != NULL && subclassMethodType->shortName != typeChecker->vm->initString) {
-                    checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, methodType->declaredType, type);
+                    checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, methodType->declaredType, supertype);
                 }
 
                 TypeInfo* superclassMethodType = typeTableGet(superclassType->methods, methodEntry->key);
                 if (superclassMethodType != NULL && superclassMethodType->shortName != typeChecker->vm->initString) {
-                    checkMethodSignatures(typeChecker, methodType->declaredType, AS_METHOD_TYPE(superclassMethodType)->declaredType, type);
+                    checkMethodSignatures(typeChecker, methodType->declaredType, AS_METHOD_TYPE(superclassMethodType)->declaredType, supertype);
                 }
             }
+            if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
         }
     }
 }
