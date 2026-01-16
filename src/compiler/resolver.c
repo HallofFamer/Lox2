@@ -517,7 +517,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     }
 }
 
-static void insertAstTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char* typeName) {
+static void astInsertTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char* typeName) {
     ast->type = type;
     ast->type->shortName = takeStringPerma(resolver->vm, typeName, (int)strlen(typeName));
     ast->type->fullName = ast->type->shortName;
@@ -575,7 +575,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
             }
         }
 
-		insertAstTempType(resolver, ast, (TypeInfo*)callableType, createCallableTypeName(callableType));
+		astInsertTempType(resolver, ast, (TypeInfo*)callableType, createCallableTypeName(callableType));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
     return callableType;
@@ -605,7 +605,7 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
             Ast* typeParam = typeParams->children->elements[i];
             insertTypeParameter(resolver, typeParam, i, genericType);
         }
-        insertAstTempType(resolver, ast, (TypeInfo*)genericType, createGenericTypeName(genericType));
+        astInsertTempType(resolver, ast, (TypeInfo*)genericType, createGenericTypeName(genericType));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
     return genericType;
@@ -646,7 +646,7 @@ static void block(Resolver* resolver, Ast* ast) {
     }
 }
 
-static bool hasTypeParameters(Ast* ast) {
+static bool astHasTypeParameters(Ast* ast) {
     if (ast == NULL || ast->parent == NULL) {
         return false;
     }
@@ -667,7 +667,7 @@ static bool hasTypeParameters(Ast* ast) {
     return false;
 }
 
-static Ast* getTypeParameters(Ast* ast) {
+static Ast* astGetTypeParameters(Ast* ast) {
     if (ast == NULL || ast->parent == NULL) {
         return NULL;
     }
@@ -701,7 +701,7 @@ static bool hasInstantiatedTypeParameters(Ast* ast) {
 }
 
 static void insertTypeParameters(Resolver* resolver, Ast* ast) {
-    Ast* typeParams = getTypeParameters(ast);
+    Ast* typeParams = astGetTypeParameters(ast);
     if (typeParams == NULL) return;
     for (int i = 0; i < typeParams->children->count; i++) {
         Ast* typeParam = astGetChild(typeParams, i);
@@ -722,7 +722,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
 
     SymbolScope scope = (ast->kind == AST_DECL_METHOD) ? SYMBOL_SCOPE_METHOD : SYMBOL_SCOPE_FUNCTION;
     beginScope(resolver, ast, scope);
-	if (hasTypeParameters(ast)) {
+	if (astHasTypeParameters(ast)) {
         functionResolver.attribute.isGeneric = true;
         insertTypeParameters(resolver, ast);
     }
@@ -751,9 +751,9 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     int childIndex = 0;
     beginScope(resolver, ast, (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS);
 
-    if (hasTypeParameters(ast)) {
+    if (astHasTypeParameters(ast)) {
         classResolver.isGeneric = true;
-        Ast* typeParams = getTypeParameters(ast);
+        Ast* typeParams = astGetTypeParameters(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
             insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);

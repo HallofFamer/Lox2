@@ -109,11 +109,21 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
+static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
+	TypeInfo* instantiatedType = instantiateTypeParameter(type, formalParams, actualParams);
+    if (IS_GENERIC_TYPE(instantiatedType)) {
+		char* instantiatedTypeName = createGenericTypeName(AS_GENERIC_TYPE(instantiatedType));
+		instantiatedType->fullName = instantiatedType->shortName = takeStringPerma(typeChecker->vm, instantiatedTypeName, (int)strlen(instantiatedTypeName));
+        TypeInfoArrayAdd(typeChecker->vm->tempTypes, instantiatedType);
+    }
+	return instantiatedType;
+}
+
 static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker, GenericTypeInfo* genericFunctionType) {
 	CallableTypeInfo* functionType = AS_CALLABLE_TYPE(genericFunctionType->rawType);
     TypeInfo* returnType = functionType->returnType;
     if (hasGenericParameters(returnType)) {
-        returnType = instantiateTypeParameter(returnType, functionType->formalTypes, genericFunctionType->actualParameters);
+        returnType = instantiateTypeParameterWithName(typeChecker, returnType, functionType->formalTypes, genericFunctionType->actualParameters);
     }
 
     CallableTypeInfo* instantiatedFunctionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, genericFunctionType->baseType.shortName, returnType);
@@ -121,7 +131,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
     for (int i = 0; i < functionType->paramTypes->count; i++) {
         TypeInfo* paramType = functionType->paramTypes->elements[i];
         if (hasGenericParameters(paramType)) {
-            paramType = instantiateTypeParameter(paramType, functionType->formalTypes, genericFunctionType->actualParameters);
+            paramType = instantiateTypeParameterWithName(typeChecker, paramType, functionType->formalTypes, genericFunctionType->actualParameters);
         }
         TypeInfoArrayAdd(instantiatedFunctionType->paramTypes, paramType);
     }
@@ -137,7 +147,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
 	BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(genericBehaviorType->rawType);
     TypeInfo* returnType = genericMethodType->returnType;
     if (hasGenericParameters(returnType)) {
-        returnType = instantiateTypeParameter(returnType, behaviorType->formalTypes, genericBehaviorType->actualParameters);
+        returnType = instantiateTypeParameterWithName(typeChecker, returnType, behaviorType->formalTypes, genericBehaviorType->actualParameters);
 	}
     CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericMethodType->baseType.shortName, returnType);
     instantiatedMethodType->formalTypes = genericMethodType->formalTypes;    
@@ -145,7 +155,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     for (int i = 0; i < genericMethodType->paramTypes->count; i++) {
         TypeInfo* paramType = genericMethodType->paramTypes->elements[i];
         if (hasGenericParameters(paramType)) {
-            paramType = instantiateTypeParameter(paramType, behaviorType->formalTypes, genericBehaviorType->actualParameters);
+            paramType = instantiateTypeParameterWithName(typeChecker, paramType, behaviorType->formalTypes, genericBehaviorType->actualParameters);
         }
         TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
     }
@@ -282,7 +292,7 @@ static void checkMethodSignatures(TypeChecker* typeChecker, CallableTypeInfo* su
     }
 }
 
-static void inheritGenericSupertypeMethods(BehaviorTypeInfo* subtype, GenericTypeInfo* supertype) {
+static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTypeInfo* subtype, GenericTypeInfo* supertype) {
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(supertype->rawType);
     for (int i = 0; i < behaviorType->methods->capacity; i++) {
         TypeEntry* entry = &behaviorType->methods->entries[i];
@@ -294,13 +304,13 @@ static void inheritGenericSupertypeMethods(BehaviorTypeInfo* subtype, GenericTyp
             subMethodType->declaredType->attribute = superMethodType->declaredType->attribute;
             TypeInfo* returnType = superMethodType->declaredType->returnType;
             if (hasGenericParameters(returnType)) {
-                subMethodType->declaredType->returnType = instantiateTypeParameter(returnType, behaviorType->formalTypes, supertype->actualParameters);
+                subMethodType->declaredType->returnType = instantiateTypeParameterWithName(typeChecker, returnType, behaviorType->formalTypes, supertype->actualParameters);
             }
 
             for (int i = 0; i < superMethodType->declaredType->paramTypes->count; i++) {
                 TypeInfo* paramType = superMethodType->declaredType->paramTypes->elements[i];
                 if (hasGenericParameters(paramType)) {
-                    paramType = instantiateTypeParameter(paramType, behaviorType->formalTypes, supertype->actualParameters);
+                    paramType = instantiateTypeParameterWithName(typeChecker, paramType, behaviorType->formalTypes, supertype->actualParameters);
                 }
                 TypeInfoArrayAdd(subMethodType->declaredType->paramTypes, paramType);
             }
@@ -325,7 +335,7 @@ static void checkInheritingSuperclass(TypeChecker* typeChecker, TypeInfo* supert
     }
 
     checkInheritingSuperclass(typeChecker, superclassType->superclassType);
-    if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
+    if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker, typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
 }
 
 static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
@@ -356,7 +366,7 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
                     checkMethodSignatures(typeChecker, methodType->declaredType, AS_METHOD_TYPE(superclassMethodType)->declaredType, supertype);
                 }
             }
-            if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
+            if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker, typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
         }
     }
 }
