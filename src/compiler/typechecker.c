@@ -143,11 +143,14 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
     return instantiatedFunctionType;
 }
 
-static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, GenericTypeInfo* genericBehaviorType, CallableTypeInfo* genericMethodType) {
-	BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(genericBehaviorType->rawType);
+static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, TypeInfo* behaviorType, CallableTypeInfo* genericMethodType) {
+	if (!IS_GENERIC_TYPE(behaviorType)) return genericMethodType;
+    GenericTypeInfo* genericBehaviorType = AS_GENERIC_TYPE(behaviorType);
+    BehaviorTypeInfo* rawBehaviorType = AS_BEHAVIOR_TYPE(genericBehaviorType->rawType);
+    
     TypeInfo* returnType = genericMethodType->returnType;
     if (hasGenericParameters(returnType)) {
-        returnType = instantiateTypeParameterWithName(typeChecker, returnType, behaviorType->formalTypes, genericBehaviorType->actualParameters);
+        returnType = instantiateTypeParameterWithName(typeChecker, returnType, rawBehaviorType->formalTypes, genericBehaviorType->actualParameters);
 	}
     CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericMethodType->baseType.shortName, returnType);
     instantiatedMethodType->formalTypes = genericMethodType->formalTypes;    
@@ -155,7 +158,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     for (int i = 0; i < genericMethodType->paramTypes->count; i++) {
         TypeInfo* paramType = genericMethodType->paramTypes->elements[i];
         if (hasGenericParameters(paramType)) {
-            paramType = instantiateTypeParameterWithName(typeChecker, paramType, behaviorType->formalTypes, genericBehaviorType->actualParameters);
+            paramType = instantiateTypeParameterWithName(typeChecker, paramType, rawBehaviorType->formalTypes, genericBehaviorType->actualParameters);
         }
         TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
     }
@@ -411,9 +414,7 @@ static void inferAstTypeFromBinaryOperator(TypeChecker* typeChecker, Ast* ast, S
     if (baseType == NULL) return;
 
     MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-    CallableTypeInfo* callableType = IS_GENERIC_TYPE(receiver->type) ?
-        instantiateGenericMethodType(typeChecker, AS_GENERIC_TYPE(receiver->type), methodType->declaredType) :
-        methodType->declaredType;
+    CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, methodType->declaredType);
     if (callableType->paramTypes->count == 0) return;
     TypeInfo* paramType = callableType->paramTypes->elements[0];
 
@@ -491,9 +492,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     TypeInfo* initializerType = typeTableMethodLookup(type, initializerName);
 
     if (initializerType != NULL) {
-        CallableTypeInfo* callableType = IS_GENERIC_TYPE(callee->type) ?
-            instantiateGenericMethodType(typeChecker, AS_GENERIC_TYPE(callee->type), AS_METHOD_TYPE(initializerType)->declaredType) :
-			AS_METHOD_TYPE(initializerType)->declaredType;
+        CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, callee->type, AS_METHOD_TYPE(initializerType)->declaredType);
         sprintf_s(classDesc, UINT8_MAX, "Class %s's initializer", (callee->type != NULL) ? callee->type->shortName->chars : type->shortName->chars);
         checkArguments(typeChecker, classDesc, args, callableType);
     }
@@ -561,10 +560,7 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
 
     if (baseType != NULL) {
         MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-        CallableTypeInfo* callableType = IS_GENERIC_TYPE(receiver->type) ?
-            instantiateGenericMethodType(typeChecker, AS_GENERIC_TYPE(receiver->type), methodType->declaredType) :
-            methodType->declaredType;
-
+        CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, methodType->declaredType);
         char methodDesc[UINT8_MAX];
         sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", receiver->type->shortName->chars, methodName->chars);
         checkArguments(typeChecker, methodDesc, args, callableType);
@@ -591,9 +587,7 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
     TypeInfo* baseType = typeTableMethodLookup(superType, methodName);
     if (baseType == NULL) return;
     MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-    CallableTypeInfo* callableType = IS_GENERIC_TYPE(superType) ?
-        instantiateGenericMethodType(typeChecker, AS_GENERIC_TYPE(superType), methodType->declaredType) :
-        methodType->declaredType;
+    CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, superType, methodType->declaredType);
 
     char methodDesc[UINT8_MAX];
     sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", superType->shortName->chars, methodName->chars);
@@ -622,10 +616,8 @@ static void inferAstTypeFromSubscriptGet(TypeChecker* typeChecker, Ast* ast) {
         TypeInfo* baseType = typeTableMethodLookup(receiver->type, newStringPerma(typeChecker->vm, "[]"));
         if (baseType == NULL) return;
         MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-        CallableTypeInfo* callableType = IS_GENERIC_TYPE(receiver->type) ?
-            instantiateGenericMethodType(typeChecker, AS_GENERIC_TYPE(receiver->type), methodType->declaredType) :
-            methodType->declaredType;
-
+        CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, methodType->declaredType);
+        
         if (callableType->paramTypes->count == 0) return;
         TypeInfo* paramType = callableType->paramTypes->elements[0];
         if (!isSubtypeOfType(index->type, paramType)) {
@@ -658,9 +650,7 @@ static void inferAstTypeFromSubscriptSet(TypeChecker* typeChecker, Ast* ast) {
         TypeInfo* baseType = typeTableMethodLookup(receiver->type, newStringPerma(typeChecker->vm, "[]="));
         if (baseType == NULL) return;
         MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-        CallableTypeInfo* callableType = IS_GENERIC_TYPE(receiver->type) ?
-            instantiateGenericMethodType(typeChecker, AS_GENERIC_TYPE(receiver->type), methodType->declaredType) :
-            methodType->declaredType;
+        CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, methodType->declaredType);
 
         if (callableType->paramTypes->count == 0) return;
         TypeInfo* paramType = callableType->paramTypes->elements[0];
