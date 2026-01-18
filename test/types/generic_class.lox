@@ -22,9 +22,28 @@ class User extends Model {
 	}
 }
 
-class Repository<T> {
+trait TRepository<T> {
 	
-	val Array<T> models = []
+	void add(T model) {
+	    throw NotImplementedException("Subclass Responsibility.")
+	} 
+
+    void addAll(Array<T> models) {
+	    throw NotImplementedException("Subclass Responsibility.")
+	}
+
+	void remove(T model) {
+	    throw NotImplementedException("Subclass Responsibility.")
+	}
+}
+
+class Repository<T> with TRepository<T> {
+	
+	val Array<T> models
+
+	__init__() {
+		this.models = Array<T>()
+	}
 
 	void add(T model) {
 		this.models.add(model)
@@ -48,7 +67,7 @@ class Repository<T> {
 	}
 
 	Array<T> getAll() {
-		return this.models
+		return this.modelS
 	}
 
 	void remove(T model) {

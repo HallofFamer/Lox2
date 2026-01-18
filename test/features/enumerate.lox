@@ -5,8 +5,7 @@ println("Iterating over Int 5: ")
 println("")
 println("Iterating from Int 5 to 10: ")
 5.upTo(10, {|i| print("${i} ") })
-println("")
-println("")
+println("\n")
 
 val array = [2, 3.5, true, "Hello World"]
 println("Enumerating array with each method: ")

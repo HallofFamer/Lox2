@@ -6,29 +6,25 @@ println("Creating empty dictionary: ${dict}")
 println("Dictionary is empty: ${dict.isEmpty()}")
 val dict2 = ["US": "United States", "CA": "Canada", "EU": "Europe", "JP": "Japan", "RU": "Russia"]
 println("Creating a dictionary using literals: ${dict2}")
-println("The two dictionaries are equal: ${dict.equals(dict2)}")
-println("")
+println("The two dictionaries are equal: ${dict.equals(dict2)}\n")
 
 dict.putAt("name", "Joe Doe")
 dict.putAt("age", 40)
 dict["isAdmin"] = false
 println("Adding entries to the dictionary: ${dict}")
 println("Dictionary contains key 'age': ${dict.containsKey("age")}")
-println("Dictionary contains value true: ${dict.containsValue(true)}")
-println("")
+println("Dictionary contains value true: ${dict.containsValue(true)}\n")
 
 println("Getting value at key 'name': ${dict.getAt("name")}")
 println("Getting value at key 'age': ${dict["age"]}")
 println("Getting a nonexistent key: ${dict["gender"]}")
-println("Current Length of the dictionary is: ${dict.length()}")
-println("")
+println("Current Length of the dictionary is: ${dict.length()}\n")
 
 dict.removeAt("isAdmin")
 println("Removing key 'isAdmin': ${dict}")
 println("New Length of the dictionary is: ${dict.length()}")
 dict.clear()
-println("Clearing dictionary: ${dict}")
-println("")
+println("Clearing dictionary: ${dict}\n")
 
 print("Testing dictionary with non-string keys: ")
 val dict3 = [2: 3.5, true: nil, false: "Hello World"]

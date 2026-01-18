@@ -4,8 +4,7 @@ using clox.std.collection.Array
 val array = []
 println("Creating empty array: ${array}")
 val array2 = Array()
-println("Two empty arrays are equal: ${array.equals(array2)}")
-println("")
+println("Two empty arrays are equal: ${array.equals(array2)}\n")
 
 print("Adding elements 2, 3.5, true and 'Hello World': ")
 array.add(2)
@@ -22,13 +21,11 @@ println(array.equals(array3))
 println("")
 
 println("Getting element at index 3: ${array.getAt(3)}")
-println("Index of element 'true': ${array.indexOf(true)}")
-println("")
+println("Index of element 'true': ${array.indexOf(true)}\n")
 array[2] = false
 println("Setting element false at index 2: ${array}")
 array.insertAt(3, nil)
-println("Inserting element nil at index 3: ${array}")
-println("")
+println("Inserting element nil at index 3: ${array}\n")
 
 val element = array.removeAt(1)
 println("Remove element at index 1: ${element}")

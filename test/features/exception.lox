@@ -4,15 +4,14 @@ using test.features.Fraction
 println("Testing handling user defined exceptions: ")
 try {  
     val frac = Fraction(3, 0)
-    println("Try statement executed successfully.")
+    println("Try statement executed successfully.\n")
 }
 catch(RuntimeException e) { 
-    println("Caught ${e.getClassName()} with message: ${e.message}")
+    println("Caught ${e.getClassName()} with message: ${e.message}\n")
 }
 finally { 
-    println("Finally clean up...")
+    println("Finally clean up...\n")
 }
-println("")
 
 println("Testing handling native exception: ")
 try { 
