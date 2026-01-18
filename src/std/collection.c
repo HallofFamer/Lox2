@@ -2135,24 +2135,32 @@ void registerCollectionPackage(VM* vm) {
     ObjNamespace* collectionNamespace = defineNativeNamespace(vm, "collection", vm->stdNamespace);
     vm->currentNamespace = collectionNamespace;
 
+	TypeInfo* elementType = newFormalTypeInfo(0, newString(vm, "E"));
+    TypeInfoArrayAdd(vm->tempTypes, elementType);
     ObjClass* iterableTrait = getNativeClass(vm, "clox.std.lang.TIterable");
-    ObjClass* collectionClass = defineNativeClass(vm, "Collection");
-    ObjClass* listClass = defineNativeClass(vm, "List");
-    vm->arrayClass = defineNativeClass(vm, "Array");
+	ObjClass* collectionClass = defineNativeGenericClass(vm, "Collection", 1, elementType);
+    ObjClass* listClass = defineNativeGenericClass(vm, "List", 1, elementType);
+    vm->arrayClass = defineNativeGenericClass(vm, "Array", 1, elementType);
     ObjClass* arrayIteratorClass = defineNativeClass(vm, "ArrayIterator");
-    ObjClass* linkedListClass = defineNativeClass(vm, "LinkedList");
+    ObjClass* linkedListClass = defineNativeGenericClass(vm, "LinkedList", 1, elementType);
     ObjClass* linkedListIteratorClass = defineNativeClass(vm, "LinkedListIterator");
-    vm->nodeClass = defineNativeClass(vm, "Node");
-    vm->dictionaryClass = defineNativeClass(vm, "Dictionary");
+    vm->nodeClass = defineNativeGenericClass(vm, "Node", 1, elementType);
+
+	TypeInfo* keyType = newFormalTypeInfo(0, newString(vm, "K"));
+	TypeInfo* valueType = newFormalTypeInfo(1, newString(vm, "V"));
+    TypeInfoArrayAdd(vm->tempTypes, keyType);
+    TypeInfoArrayAdd(vm->tempTypes, valueType);
+    vm->dictionaryClass = defineNativeGenericClass(vm, "Dictionary", 2, keyType, valueType);
     ObjClass* dictionaryIteratorClass = defineNativeClass(vm, "DictionaryIterator");
-    vm->entryClass = defineNativeClass(vm, "Entry");
-    ObjClass* setClass = defineNativeClass(vm, "Set");
+    vm->entryClass = defineNativeGenericClass(vm, "Entry", 2, keyType, valueType);
+
+    ObjClass* setClass = defineNativeGenericClass(vm, "Set", 1, elementType);
     ObjClass* setIteratorClass = defineNativeClass(vm, "SetIterator");
     vm->rangeClass = defineNativeClass(vm, "Range");
     ObjClass* rangeIteratorClass = defineNativeClass(vm, "RangeIterator");
-    ObjClass* stackClass = defineNativeClass(vm, "Stack");
+    ObjClass* stackClass = defineNativeGenericClass(vm, "Stack", 1, elementType);
     ObjClass* stackIteratorClass = defineNativeClass(vm, "StackIterator");
-    ObjClass* queueClass = defineNativeClass(vm, "Queue");
+    ObjClass* queueClass = defineNativeGenericClass(vm, "Queue", 1, elementType);
     ObjClass* queueIteratorClass = defineNativeClass(vm, "QueueIterator");
 
     bindSuperclass(vm, collectionClass, vm->objectClass);

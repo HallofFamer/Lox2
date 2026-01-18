@@ -92,10 +92,10 @@ ObjClass* defineNativeGenericClass(VM* vm, const char* name, int numParams, ...)
 	BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, _class->fullName));
     va_list args;
     va_start(args, numParams);
+
     for (int i = 0; i < numParams; i++) {
-        ObjString* formalTypeName = newStringPerma(vm, va_arg(args, char*));
-		TypeInfo* formalType = newFormalTypeInfo(i, formalTypeName);
-        TypeInfoArrayAdd(classType->formalTypes, formalType);
+        TypeInfo* formalType = va_arg(args, TypeInfo*);
+        TypeInfoArrayAdd(classType->formalTypeParams, formalType);
     }
     va_end(args);
 	return _class;
@@ -294,7 +294,7 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* 
 
     for (int i = 0; i < numParams; i++) {
         TypeInfo* paramType = va_arg(args, TypeInfo*);
-        TypeInfoArrayAdd(genericType->actualParameters, paramType);
+        TypeInfoArrayAdd(genericType->actualTypeParams, paramType);
         if (isTempType(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
     }
     va_end(args);

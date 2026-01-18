@@ -27,3 +27,15 @@ I am well aware of the controversy surrounding async/await as well as its shortc
 
 ## What are the reasons to switch to the `extends` keyword?
 The original Lox2 implementation uses `<` sign, but trait are implemented using `with` keyword, which feels a little odd and inconsistent(Robert Nystrom did mention he would not want to introduce another keyword near the end of the book). More importantly, this decision simplifies future work on parsing Generics which will use angle bracket syntax.
+
+## Why use type before variable name notation in type declaration?
+Lox2's type declaration syntax is inspired by C/C++/Java/C#/Dart. Although languages like Typescript and Kotlin use variable name before type notation, I believe type before variable name notation is more readable and familiar to people coming from mainstream languages. On the other hand, I'd love a little challenge implementing a parser that supports infinite look-ahead and backtrace.
+
+## Why use angle bracket syntax (<>) for generics?
+Angle bracket syntax is widely used in mainstream languages such as C++, Java, C#, Dart, Kotlin, Typescript and Rust. It is actually quite easy to read for humans, despite making the parser quite a bit more complex. As classes/types are first class objects in Lox2, the square bracket syntax won't make it much easier for the parser as it cannot disambiguate between array indexing and generic type parameterization easily anyway.
+
+## How does Lox2's reified generics work?
+Lox2's generics are reified, meaning that generic type information is available at runtime. This is achieved by passing type arguments as hidden parameters to generic functions/methods so they may be accessed as normal parameters. Generic classes, on the other hand, store type arguments as hidden instance fields. This allows Lox2 to use and inspect generic type information at runtime without using reflection.
+
+## What does partial reification mean in Lox2's generics?
+Lox2's generics are partially reified at this moment, as type parameters are reified as class or trait objects without additional type information for higher order types. For example, if `T` is `List<String>`, it will be be reified to `List` class object as runtime, and it is not possible to tell that `T` is a list of strings instead of a list of integers. This is a compromise to reduce runtime overhead.

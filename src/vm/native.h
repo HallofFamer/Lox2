@@ -42,11 +42,11 @@
 #define RETURN_TYPE(type) getNativeType(vm, #type)
 #define RETURN_TYPE_CALLABLE_0(returnType) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, 0)
 #define RETURN_TYPE_CALLABLE(returnType, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
-#define RETURN_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), rawType, numParams, __VA_ARGS__);
+#define RETURN_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), getNativeType(vm, #rawType), numParams, __VA_ARGS__)
 #define PARAM_TYPE(type) getNativeType(vm, #type)
 #define PARAM_TYPE_CALLABLE_0(returnType) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, 0)
 #define PARAM_TYPE_CALLABLE(returnType, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
-#define PARAM_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), rawType, numParams, __VA_ARGS__);
+#define PARAM_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), getNativeType(vm, #rawType), numParams, __VA_ARGS__)
 
 #define NATIVE_TYPE_BEHAVIOR(type) getNativeType(vm, #type)
 #define NATIVE_TYPE_CALLABLE_0(type) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), type, 0)
