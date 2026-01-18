@@ -245,7 +245,7 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
             resolveChild(resolver, typeParams, i);
             ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
             TypeInfo* formalType = newFormalTypeInfo(i, typeParamName);
-            TypeInfoArrayAdd(behaviorType->formalTypes, formalType);
+            TypeInfoArrayAdd(behaviorType->formalTypeParams, formalType);
 			TypeInfoArrayAdd(resolver->vm->tempTypes, formalType);
         }
     }
@@ -570,7 +570,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
                 resolveChild(resolver, typeParams, i);
                 ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
 				TypeInfo* formalType = newFormalTypeInfo(i, typeParamName);
-                TypeInfoArrayAdd(callableType->formalTypes, formalType);
+                TypeInfoArrayAdd(callableType->formalTypeParams, formalType);
 				TypeInfoArrayAdd(resolver->vm->tempTypes, formalType);
             }
         }
@@ -587,7 +587,7 @@ static void insertTypeParameter(Resolver* resolver, Ast* ast, int index, Generic
         ast->type = newFormalTypeInfo(index, typeParamName);
 		TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
     }
-    TypeInfoArrayAdd(genericType->actualParameters, ast->type);
+    TypeInfoArrayAdd(genericType->actualTypeParams, ast->type);
 }
 
 static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {

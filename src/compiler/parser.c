@@ -803,6 +803,7 @@ static Ast* function(Parser* parser, Ast* returnType, bool isAsync, bool isLambd
     Ast* params = isLambda ? lambdaParameters(parser) : functionParameters(parser);
     Ast* body = block(parser);
     Ast* func = newAst(AST_EXPR_FUNCTION, token, 3, returnType, params, body);
+    
     func->attribute.isAsync = isAsync;
     func->attribute.isLambda = isLambda;
     func->attribute.isVoid = isVoid;
@@ -873,10 +874,7 @@ static Ast* methods(Parser* parser, Token* name) {
         if (match(parser, TOKEN_SYMBOL_CLASS)) isClass = true;
         if (match(parser, TOKEN_SYMBOL_VOID)) isVoid = true;
 
-        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER) || 
-            (check(parser, TOKEN_SYMBOL_IDENTIFIER) && tokenIsOperator(nextToken(parser)) && checkNextN(parser, 2, TOKEN_SYMBOL_LEFT_PAREN))
-        )
-        {
+        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER) || (check(parser, TOKEN_SYMBOL_IDENTIFIER) && tokenIsOperator(nextToken(parser)) && checkNextN(parser, 2, TOKEN_SYMBOL_LEFT_PAREN))) {
             hasReturnType = true;
             returnType = behaviorType(parser);
         }
@@ -1534,6 +1532,7 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     bool isVoid = (previousTokenType(parser) == TOKEN_SYMBOL_VOID);
     Ast* returnType = hasReturnType ? type_(parser, false, false) : emptyAst(AST_EXPR_TYPE, emptyToken());
     consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect function name.");
+
     Token name = previousToken(parser);
     Ast* typeParams = check(parser, TOKEN_SYMBOL_LESS) ? typeParameters(parser, name) : NULL;
     Ast* body = function(parser, returnType, isAsync, false, isVoid);

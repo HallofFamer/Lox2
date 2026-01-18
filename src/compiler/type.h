@@ -51,7 +51,7 @@ typedef struct {
     TypeInfo baseType;
     TypeInfo* superclassType;
     TypeInfoArray* traitTypes;
-    TypeInfoArray* formalTypes;
+    TypeInfoArray* formalTypeParams;
     TypeTable* fields;
     TypeTable* methods;
 } BehaviorTypeInfo;
@@ -71,7 +71,7 @@ typedef struct {
     TypeInfo baseType;
     TypeInfo* returnType;
     TypeInfoArray* paramTypes;
-    TypeInfoArray* formalTypes;
+    TypeInfoArray* formalTypeParams;
     CallableTypeAttribute attribute;
 } CallableTypeInfo;
 
@@ -93,7 +93,7 @@ typedef struct {
 typedef struct {
     TypeInfo baseType;
     TypeInfo* rawType;
-    TypeInfoArray* actualParameters;
+    TypeInfoArray* actualTypeParams;
 	bool isFullyInstantiated;
 } GenericTypeInfo;
 
@@ -171,9 +171,9 @@ static inline bool isTempType(TypeInfo* type) {
 static inline bool hasGenericParameters(TypeInfo* type) {
     if (type == NULL) return false;
     else if (IS_FORMAL_TYPE(type) || IS_GENERIC_TYPE(type)) return true;
-    else if (IS_BEHAVIOR_TYPE(type)) return AS_BEHAVIOR_TYPE(type)->formalTypes->count > 0;
-    else if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type)->formalTypes->count > 0;
-    else if (IS_METHOD_TYPE(type)) return AS_METHOD_TYPE(type)->declaredType->formalTypes->count > 0;
+    else if (IS_BEHAVIOR_TYPE(type)) return AS_BEHAVIOR_TYPE(type)->formalTypeParams->count > 0;
+    else if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type)->formalTypeParams->count > 0;
+    else if (IS_METHOD_TYPE(type)) return AS_METHOD_TYPE(type)->declaredType->formalTypeParams->count > 0;
     else return false;
 }
 

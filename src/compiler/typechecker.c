@@ -123,15 +123,15 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
 	CallableTypeInfo* functionType = AS_CALLABLE_TYPE(genericFunctionType->rawType);
     TypeInfo* returnType = functionType->returnType;
     if (hasGenericParameters(returnType)) {
-        returnType = instantiateTypeParameterWithName(typeChecker, returnType, functionType->formalTypes, genericFunctionType->actualParameters);
+        returnType = instantiateTypeParameterWithName(typeChecker, returnType, functionType->formalTypeParams, genericFunctionType->actualTypeParams);
     }
 
     CallableTypeInfo* instantiatedFunctionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, genericFunctionType->baseType.shortName, returnType);
-    instantiatedFunctionType->formalTypes = functionType->formalTypes;
+    instantiatedFunctionType->formalTypeParams = functionType->formalTypeParams;
     for (int i = 0; i < functionType->paramTypes->count; i++) {
         TypeInfo* paramType = functionType->paramTypes->elements[i];
         if (hasGenericParameters(paramType)) {
-            paramType = instantiateTypeParameterWithName(typeChecker, paramType, functionType->formalTypes, genericFunctionType->actualParameters);
+            paramType = instantiateTypeParameterWithName(typeChecker, paramType, functionType->formalTypeParams, genericFunctionType->actualTypeParams);
         }
         TypeInfoArrayAdd(instantiatedFunctionType->paramTypes, paramType);
     }
@@ -150,15 +150,15 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     
     TypeInfo* returnType = genericMethodType->returnType;
     if (hasGenericParameters(returnType)) {
-        returnType = instantiateTypeParameterWithName(typeChecker, returnType, rawBehaviorType->formalTypes, genericBehaviorType->actualParameters);
+        returnType = instantiateTypeParameterWithName(typeChecker, returnType, rawBehaviorType->formalTypeParams, genericBehaviorType->actualTypeParams);
 	}
     CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericMethodType->baseType.shortName, returnType);
-    instantiatedMethodType->formalTypes = genericMethodType->formalTypes;    
+    instantiatedMethodType->formalTypeParams = genericMethodType->formalTypeParams;    
 
     for (int i = 0; i < genericMethodType->paramTypes->count; i++) {
         TypeInfo* paramType = genericMethodType->paramTypes->elements[i];
         if (hasGenericParameters(paramType)) {
-            paramType = instantiateTypeParameterWithName(typeChecker, paramType, rawBehaviorType->formalTypes, genericBehaviorType->actualParameters);
+            paramType = instantiateTypeParameterWithName(typeChecker, paramType, rawBehaviorType->formalTypeParams, genericBehaviorType->actualTypeParams);
         }
         TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
     }
@@ -227,11 +227,11 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
 static void checkTypeParameters(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
     GenericTypeInfo* genericType = AS_GENERIC_TYPE(ast->type);
-    Ast* actualParameters = astGetChild(ast, 0);
+    Ast* actualTypeParams = astGetChild(ast, 0);
 
-    if (actualParameters->children->count != behaviorType->formalTypes->count) {
+    if (actualTypeParams->children->count != behaviorType->formalTypeParams->count) {
         typeError(typeChecker, "Class %s expects to receive %d generic type parameters but gets %d.",
-            type->shortName->chars, behaviorType->formalTypes->count, actualParameters->children->count);
+            type->shortName->chars, behaviorType->formalTypeParams->count, actualTypeParams->children->count);
     }
 }
 
@@ -307,13 +307,13 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
             subMethodType->declaredType->attribute = superMethodType->declaredType->attribute;
             TypeInfo* returnType = superMethodType->declaredType->returnType;
             if (hasGenericParameters(returnType)) {
-                subMethodType->declaredType->returnType = instantiateTypeParameterWithName(typeChecker, returnType, behaviorType->formalTypes, supertype->actualParameters);
+                subMethodType->declaredType->returnType = instantiateTypeParameterWithName(typeChecker, returnType, behaviorType->formalTypeParams, supertype->actualTypeParams);
             }
 
             for (int i = 0; i < superMethodType->declaredType->paramTypes->count; i++) {
                 TypeInfo* paramType = superMethodType->declaredType->paramTypes->elements[i];
                 if (hasGenericParameters(paramType)) {
-                    paramType = instantiateTypeParameterWithName(typeChecker, paramType, behaviorType->formalTypes, supertype->actualParameters);
+                    paramType = instantiateTypeParameterWithName(typeChecker, paramType, behaviorType->formalTypeParams, supertype->actualTypeParams);
                 }
                 TypeInfoArrayAdd(subMethodType->declaredType->paramTypes, paramType);
             }

@@ -27,8 +27,8 @@ BehaviorTypeInfo* newBehaviorTypeInfo(int id, TypeCategory category, ObjString* 
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
 
-        behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        if (behaviorType->formalTypes != NULL) TypeInfoArrayInit(behaviorType->formalTypes);
+        behaviorType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (behaviorType->formalTypeParams != NULL) TypeInfoArrayInit(behaviorType->formalTypeParams);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
     }
@@ -40,9 +40,9 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
     if (behaviorType != NULL) {
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        behaviorType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
 
-        if (behaviorType->formalTypes != NULL) TypeInfoArrayInit(behaviorType->formalTypes);
+        if (behaviorType->formalTypeParams != NULL) TypeInfoArrayInit(behaviorType->formalTypeParams);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 
@@ -68,18 +68,18 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithFormalParameters(int id, TypeCategory c
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
 
-        behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        behaviorType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 
-        if (behaviorType->formalTypes != NULL) {
-            TypeInfoArrayInit(behaviorType->formalTypes);
+        if (behaviorType->formalTypeParams != NULL) {
+            TypeInfoArrayInit(behaviorType->formalTypeParams);
             va_list args;
             va_start(args, numParameters);
 
             for (int i = 0; i < numParameters; i++) {
                 TypeInfo* type = va_arg(args, TypeInfo*);
-                TypeInfoArrayAdd(behaviorType->formalTypes, type);
+                TypeInfoArrayAdd(behaviorType->formalTypeParams, type);
             }
             va_end(args);
         }
@@ -94,8 +94,8 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
 
-        behaviorType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        if (behaviorType->formalTypes != NULL) TypeInfoArrayInit(behaviorType->formalTypes);
+        behaviorType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (behaviorType->formalTypeParams != NULL) TypeInfoArrayInit(behaviorType->formalTypeParams);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = methods;
     }
@@ -107,11 +107,11 @@ CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* 
     if (callableType != NULL) {
         callableType->returnType = returnType;
         callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        callableType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         callableType->attribute = callableTypeInitAttribute();
 
         if (callableType->paramTypes != NULL) TypeInfoArrayInit(callableType->paramTypes);
-        if (callableType->formalTypes != NULL) TypeInfoArrayInit(callableType->formalTypes);
+        if (callableType->formalTypeParams != NULL) TypeInfoArrayInit(callableType->formalTypeParams);
     }
     return callableType;
 }
@@ -121,17 +121,17 @@ CallableTypeInfo* newCallableTypeInfoWithFormalParameters(int id, TypeCategory c
     if (callableType != NULL) {
         callableType->returnType = returnType;
         callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->formalTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        callableType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         callableType->attribute = callableTypeInitAttribute();
         if (callableType->paramTypes != NULL) TypeInfoArrayInit(callableType->paramTypes);
 
-        if (callableType->formalTypes != NULL) {
-            TypeInfoArrayInit(callableType->formalTypes);
+        if (callableType->formalTypeParams != NULL) {
+            TypeInfoArrayInit(callableType->formalTypeParams);
             va_list args;
             va_start(args, numParameters);
             for (int i = 0; i < numParameters; i++) {
                 TypeInfo* type = va_arg(args, TypeInfo*);
-                TypeInfoArrayAdd(callableType->formalTypes, type);
+                TypeInfoArrayAdd(callableType->formalTypeParams, type);
             }
             va_end(args);
         }
@@ -169,8 +169,8 @@ GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* ful
     if (genericType != NULL) {
         genericType->rawType = rawType;
         genericType->isFullyInstantiated = false;
-        genericType->actualParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        if (genericType->actualParameters != NULL) TypeInfoArrayInit(genericType->actualParameters);
+        genericType->actualTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (genericType->actualTypeParams != NULL) TypeInfoArrayInit(genericType->actualTypeParams);
     }
     return genericType;
 }
@@ -180,16 +180,16 @@ GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, 
     if (genericType != NULL) {
         genericType->rawType = rawType;
         genericType->isFullyInstantiated = true;
-        genericType->actualParameters = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        genericType->actualTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         
-        if (genericType->actualParameters != NULL) {
-            TypeInfoArrayInit(genericType->actualParameters);
+        if (genericType->actualTypeParams != NULL) {
+            TypeInfoArrayInit(genericType->actualTypeParams);
             va_list args;
             va_start(args, numParameters);
 
             for (int i = 0; i < numParameters; i++) {
                 TypeInfo* type = va_arg(args, TypeInfo*);
-                TypeInfoArrayAdd(genericType->actualParameters, type);
+                TypeInfoArrayAdd(genericType->actualTypeParams, type);
                 if (IS_FORMAL_TYPE(type)) genericType->isFullyInstantiated = false;
             }
             va_end(args);
@@ -230,8 +230,8 @@ char* createCallableTypeName(CallableTypeInfo* callableType) {
     length += 4;
     if (callableType->attribute.isGeneric) {
         callableName[length++] = '<';
-        for (int i = 0; i < callableType->formalTypes->count; i++) {
-            TypeInfo* formalType = callableType->formalTypes->elements[i];
+        for (int i = 0; i < callableType->formalTypeParams->count; i++) {
+            TypeInfo* formalType = callableType->formalTypeParams->elements[i];
             if (i > 0) {
                 callableName[length++] = ',';
                 callableName[length++] = ' ';
@@ -298,8 +298,8 @@ char* createGenericTypeName(GenericTypeInfo* genericType) {
 	genericName[length++] = '<';
 
 
-    for (int i = 0; i < genericType->actualParameters->count; i++) {
-        TypeInfo* paramType = genericType->actualParameters->elements[i];
+    for (int i = 0; i < genericType->actualTypeParams->count; i++) {
+        TypeInfo* paramType = genericType->actualTypeParams->elements[i];
         if (i > 0) {
             genericName[length++] = ',';
             genericName[length++] = ' ';
@@ -328,7 +328,7 @@ void freeTypeInfo(TypeInfo* type) {
     if (IS_BEHAVIOR_TYPE(type)) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
-        if (behaviorType->formalTypes != NULL) TypeInfoArrayFree(behaviorType->formalTypes);
+        if (behaviorType->formalTypeParams != NULL) TypeInfoArrayFree(behaviorType->formalTypeParams);
         freeTypeTable(behaviorType->fields);
         freeTypeTable(behaviorType->methods);
         free(behaviorType);
@@ -336,12 +336,12 @@ void freeTypeInfo(TypeInfo* type) {
     else if (IS_CALLABLE_TYPE(type)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
         if (callableType->paramTypes != NULL) TypeInfoArrayFree(callableType->paramTypes);
-        if (callableType->formalTypes != NULL) TypeInfoArrayFree(callableType->formalTypes);
+        if (callableType->formalTypeParams != NULL) TypeInfoArrayFree(callableType->formalTypeParams);
         free(callableType);
     }
     else if (IS_GENERIC_TYPE(type)) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
-        if (genericType->actualParameters != NULL) TypeInfoArrayFree(genericType->actualParameters);
+        if (genericType->actualTypeParams != NULL) TypeInfoArrayFree(genericType->actualTypeParams);
         free(genericType);
     }
     else free(type);
@@ -359,23 +359,23 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
     if (type == NULL) return NULL;
     else if (IS_BEHAVIOR_TYPE(type)) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
-        for (int i = 0; i < behaviorType->formalTypes->count; i++) {
-            TypeInfo* formalType = behaviorType->formalTypes->elements[i];
+        for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
+            TypeInfo* formalType = behaviorType->formalTypeParams->elements[i];
             if (formalType != NULL && formalType->shortName == name) return formalType;
         }
     }
     else if (IS_CALLABLE_TYPE(type)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
-        for (int i = 0; i < callableType->formalTypes->count; i++) {
-            TypeInfo* formalType = callableType->formalTypes->elements[i];
+        for (int i = 0; i < callableType->formalTypeParams->count; i++) {
+            TypeInfo* formalType = callableType->formalTypeParams->elements[i];
             if (formalType != NULL && formalType->shortName == name) return formalType;
         }
     }
 	else if (IS_GENERIC_TYPE(type)) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
         if (genericType->isFullyInstantiated) {
-            for (int i = 0; i < genericType->actualParameters->count; i++) {
-                TypeInfo* formalType = genericType->actualParameters->elements[i];
+            for (int i = 0; i < genericType->actualTypeParams->count; i++) {
+                TypeInfo* formalType = genericType->actualTypeParams->elements[i];
 				if (formalType == NULL || !IS_FORMAL_TYPE(formalType)) continue;
                 if (formalType->shortName == name) return formalType;
             }
@@ -403,15 +403,15 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
 		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
 		GenericTypeInfo* genericType = newGenericTypeInfo(-1, behaviorType->baseType.shortName, behaviorType->baseType.fullName, type);
 		
-        for (int i = 0; i < behaviorType->formalTypes->count; i++) {
-            TypeInfo* formalTypeParam = behaviorType->formalTypes->elements[i];
+        for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
+            TypeInfo* formalTypeParam = behaviorType->formalTypeParams->elements[i];
             if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
                 TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
-                TypeInfoArrayAdd(genericType->actualParameters, instantiatedType);
+                TypeInfoArrayAdd(genericType->actualTypeParams, instantiatedType);
             }
         }
 
-        if (genericType->actualParameters->count == behaviorType->formalTypes->count) {
+        if (genericType->actualTypeParams->count == behaviorType->formalTypeParams->count) {
             genericType->isFullyInstantiated = true;
 		}
         return (TypeInfo*)genericType;
@@ -420,14 +420,14 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
 		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
         GenericTypeInfo* genericType = newGenericTypeInfo(-1, callableType->baseType.shortName, callableType->baseType.fullName, type);
         
-        for (int i = 0; i < callableType->formalTypes->count; i++) {
-            TypeInfo* formalTypeParam = callableType->formalTypes->elements[i];
+        for (int i = 0; i < callableType->formalTypeParams->count; i++) {
+            TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];
             if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
                 TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
-                TypeInfoArrayAdd(genericType->actualParameters, instantiatedType);
+                TypeInfoArrayAdd(genericType->actualTypeParams, instantiatedType);
             }
         }
-        if (genericType->actualParameters->count == callableType->formalTypes->count) {
+        if (genericType->actualTypeParams->count == callableType->formalTypeParams->count) {
             genericType->isFullyInstantiated = true;
         }
         return (TypeInfo*)genericType;
@@ -550,7 +550,7 @@ void typeTableFieldsInherit(BehaviorTypeInfo* subclassType, TypeInfo* superclass
     else if (IS_GENERIC_TYPE(superclassType)) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(superclassType);
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(genericType->rawType);
-        typeTableFieldsInheritGeneric(behaviorType->fields, subclassType->fields, behaviorType->formalTypes, genericType->actualParameters);
+        typeTableFieldsInheritGeneric(behaviorType->fields, subclassType->fields, behaviorType->formalTypeParams, genericType->actualTypeParams);
     }
 }
 
@@ -698,10 +698,10 @@ static void typeTableOutputBehavior(BehaviorTypeInfo* behavior) {
         printf("\n");
     }
 
-    if (behavior->formalTypes != NULL && behavior->formalTypes->count > 0) {
-        printf("    formal parameters: %s", behavior->formalTypes->elements[0]->shortName->chars);
-        for (int i = 1; i < behavior->formalTypes->count; i++) {
-            printf(", %s", behavior->formalTypes->elements[i]->shortName->chars);
+    if (behavior->formalTypeParams != NULL && behavior->formalTypeParams->count > 0) {
+        printf("    formal parameters: %s", behavior->formalTypeParams->elements[0]->shortName->chars);
+        for (int i = 1; i < behavior->formalTypeParams->count; i++) {
+            printf(", %s", behavior->formalTypeParams->elements[i]->shortName->chars);
         }
         printf("\n");
     }
@@ -722,10 +722,10 @@ static void typeTableOutputCallable(CallableTypeInfo* function) {
     else printf("%s ", function->returnType->shortName->chars);
 
     printf("%s", function->baseType.shortName->chars);
-	if (function->formalTypes != NULL && function->formalTypes->count > 0) {
-        printf("<%s", function->formalTypes->elements[0]->shortName->chars);
-        for (int i = 1; i < function->formalTypes->count; i++) {
-            printf(", %s", function->formalTypes->elements[i]->shortName->chars);
+	if (function->formalTypeParams != NULL && function->formalTypeParams->count > 0) {
+        printf("<%s", function->formalTypeParams->elements[0]->shortName->chars);
+        for (int i = 1; i < function->formalTypeParams->count; i++) {
+            printf(", %s", function->formalTypeParams->elements[i]->shortName->chars);
         }
         printf(">");
     }
@@ -742,10 +742,10 @@ static void typeTableOutputCallable(CallableTypeInfo* function) {
 
 static void typeTableOutputGeneric(GenericTypeInfo* generic) {
     printf("    generic type: %s\n", generic->rawType->shortName->chars);
-    if (generic->actualParameters != NULL && generic->actualParameters->count > 0) {
-        printf("    parameters: %s", generic->actualParameters->elements[0]->shortName->chars);
-        for (int i = 1; i < generic->actualParameters->count; i++) {
-            printf(", %s", generic->actualParameters->elements[i]->shortName->chars);
+    if (generic->actualTypeParams != NULL && generic->actualTypeParams->count > 0) {
+        printf("    parameters: %s", generic->actualTypeParams->elements[0]->shortName->chars);
+        for (int i = 1; i < generic->actualTypeParams->count; i++) {
+            printf(", %s", generic->actualTypeParams->elements[i]->shortName->chars);
         }
         printf("\n");
     }
@@ -794,9 +794,9 @@ static bool isCallableEqualType(CallableTypeInfo* type, CallableTypeInfo* type2)
 
 static bool isGenericEqualType(GenericTypeInfo* type, GenericTypeInfo* type2) {
     if (!isEqualType(type->rawType, type2->rawType)) return false;
-    if (type->actualParameters->count != type2->actualParameters->count) return false;
-    for (int i = 0; i < type->actualParameters->count; i++) {
-        if (!isEqualType(type->actualParameters->elements[i], type2->actualParameters->elements[i])) return false;
+    if (type->actualTypeParams->count != type2->actualTypeParams->count) return false;
+    for (int i = 0; i < type->actualTypeParams->count; i++) {
+        if (!isEqualType(type->actualTypeParams->elements[i], type2->actualTypeParams->elements[i])) return false;
     }
     return true;
 }
@@ -853,8 +853,8 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
             else {
                 BehaviorTypeInfo* behaviorSupertype = AS_BEHAVIOR_TYPE(genericSupertype->rawType);
                 if (!isBehaviorSubtypeOfType(subtype, behaviorSupertype)) return FALSE;
-                for (int i = 0; i < type->actualParameters->count; i++) {
-                    if (!isEqualType(type->actualParameters->elements[i], genericSupertype->actualParameters->elements[i])) return FALSE;
+                for (int i = 0; i < type->actualTypeParams->count; i++) {
+                    if (!isEqualType(type->actualTypeParams->elements[i], genericSupertype->actualTypeParams->elements[i])) return FALSE;
                 }
                 return TRUE;
             }
@@ -869,8 +869,8 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
             else {
                 CallableTypeInfo* callableSupertype = AS_CALLABLE_TYPE(genericSupertype->rawType);
                 if (!isCallableSubtypeOfType(subtype, (TypeInfo*)callableSupertype)) return FALSE;
-                for (int i = 0; i < type->actualParameters->count; i++) {
-                    if (!isEqualType(type->actualParameters->elements[i], genericSupertype->actualParameters->elements[i])) return FALSE;
+                for (int i = 0; i < type->actualTypeParams->count; i++) {
+                    if (!isEqualType(type->actualTypeParams->elements[i], genericSupertype->actualTypeParams->elements[i])) return FALSE;
                 }
                 return TRUE;
             }
