@@ -200,7 +200,30 @@ GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, 
 
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType) {
     AliasTypeInfo* aliasType = (AliasTypeInfo*)newTypeInfo(id, sizeof(AliasTypeInfo), TYPE_CATEGORY_ALIAS, shortName, fullName);
-    if (aliasType != NULL) aliasType->targetType = targetType;
+    if (aliasType != NULL) {
+        aliasType->targetType = targetType;
+        aliasType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (aliasType->formalTypeParams != NULL) TypeInfoArrayInit(aliasType->formalTypeParams);
+    }
+    return aliasType;
+}
+
+AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType, int numParameters, ...) {
+    AliasTypeInfo* aliasType = (AliasTypeInfo*)newTypeInfo(id, sizeof(AliasTypeInfo), TYPE_CATEGORY_ALIAS, shortName, fullName);
+    if (aliasType != NULL) {
+        aliasType->targetType = targetType;
+        aliasType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (aliasType->formalTypeParams != NULL) {
+            TypeInfoArrayInit(aliasType->formalTypeParams);
+			va_list args;
+            va_start(args, numParameters);
+            for (int i = 0; i < numParameters; i++) {
+                TypeInfo* type = va_arg(args, TypeInfo*);
+                TypeInfoArrayAdd(aliasType->formalTypeParams, type);
+            }
+			va_end(args);
+        }
+    }
     return aliasType;
 }
 
@@ -344,6 +367,11 @@ void freeTypeInfo(TypeInfo* type) {
         if (genericType->actualTypeParams != NULL) TypeInfoArrayFree(genericType->actualTypeParams);
         free(genericType);
     }
+    else if (IS_ALIAS_TYPE(type)) {
+        AliasTypeInfo* aliasType = AS_ALIAS_TYPE(type);
+        if (aliasType->formalTypeParams != NULL) TypeInfoArrayFree(aliasType->formalTypeParams);
+        free(aliasType);
+	}
     else free(type);
 }
 
@@ -699,7 +727,7 @@ static void typeTableOutputBehavior(BehaviorTypeInfo* behavior) {
     }
 
     if (behavior->formalTypeParams != NULL && behavior->formalTypeParams->count > 0) {
-        printf("    formal parameters: %s", behavior->formalTypeParams->elements[0]->shortName->chars);
+        printf("    formal type parameters: %s", behavior->formalTypeParams->elements[0]->shortName->chars);
         for (int i = 1; i < behavior->formalTypeParams->count; i++) {
             printf(", %s", behavior->formalTypeParams->elements[i]->shortName->chars);
         }
@@ -743,7 +771,7 @@ static void typeTableOutputCallable(CallableTypeInfo* function) {
 static void typeTableOutputGeneric(GenericTypeInfo* generic) {
     printf("    generic type: %s\n", generic->rawType->shortName->chars);
     if (generic->actualTypeParams != NULL && generic->actualTypeParams->count > 0) {
-        printf("    parameters: %s", generic->actualTypeParams->elements[0]->shortName->chars);
+        printf("    actual type parameters: %s", generic->actualTypeParams->elements[0]->shortName->chars);
         for (int i = 1; i < generic->actualTypeParams->count; i++) {
             printf(", %s", generic->actualTypeParams->elements[i]->shortName->chars);
         }
@@ -754,6 +782,13 @@ static void typeTableOutputGeneric(GenericTypeInfo* generic) {
 static void typeTableOutputAlias(AliasTypeInfo* alias) {
     if (alias->targetType != NULL) {
         printf("    target: %s\n", alias->targetType->shortName->chars);
+		if (alias->formalTypeParams != NULL && alias->formalTypeParams->count > 0) {
+            printf("    formal type parameters: %s", alias->formalTypeParams->elements[0]->shortName->chars);
+            for (int i = 1; i < alias->formalTypeParams->count; i++) {
+                printf(", %s", alias->formalTypeParams->elements[i]->shortName->chars);
+            }
+            printf("\n");
+        }
     }
 }
 

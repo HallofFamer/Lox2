@@ -118,6 +118,60 @@ ObjString* astCreateQualifiedName(VM* vm, Ast* ast) {
     return copyStringPerma(vm, start, length);
 }
 
+Ast* astGetTypeParameters(Ast* ast) {
+    if (ast == NULL || ast->parent == NULL) {
+        return NULL;
+    }
+
+    switch (ast->category) {
+    case AST_CATEGORY_EXPR:
+        if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
+            return astLastChild(ast->parent);
+        }
+    case AST_CATEGORY_DECL:
+        if (ast->kind == AST_DECL_METHOD) {
+            return astLastChild(ast);
+        }
+    }
+
+    return false;
+}
+
+bool astHasTypeParameters(Ast* ast) {
+    if (ast == NULL || ast->parent == NULL) {
+        return false;
+    }
+
+    switch (ast->category) {
+    case AST_CATEGORY_EXPR:
+        if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
+            return (astNumChild(ast->parent) > 1);
+        }
+    case AST_CATEGORY_DECL:
+        if (ast->kind == AST_DECL_METHOD) {
+            return (astNumChild(ast) > 3);
+        }
+    default:
+        break;
+    }
+
+    return false;
+}
+
+bool astHasInstantiatedTypeParameters(Ast* ast) {
+    bool hasInstantiatedParams = false;
+
+    for (int i = 0; i < ast->children->count; i++) {
+        Ast* typeParam = astGetChild(ast, i);
+        if (typeParam->type != NULL && !IS_FORMAL_TYPE(typeParam->type)) {
+            hasInstantiatedParams = true;
+            break;
+        }
+    }
+
+    return hasInstantiatedParams;
+}
+
 static void astOutputIndent(int indentLevel) {
     printf("%*s", indentLevel * 2, "");
 }

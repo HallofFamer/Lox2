@@ -100,6 +100,7 @@ typedef struct {
 typedef struct {
     TypeInfo baseType;
     TypeInfo* targetType;
+	TypeInfoArray* formalTypeParams;
 } AliasTypeInfo;
 
 typedef struct {
@@ -140,6 +141,7 @@ TypeInfo* newFormalTypeInfo(int id, ObjString* name);
 GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType);
 GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType, int numParameters, ...);
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
+AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType, int numParameters, ...);
 char* createCallableTypeName(CallableTypeInfo* callableType);
 char* createGenericTypeName(GenericTypeInfo* genericType);
 void freeTypeInfo(TypeInfo* type);
