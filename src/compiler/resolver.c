@@ -523,7 +523,7 @@ static void astInsertTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char
     ast->type->fullName = ast->type->shortName;
 }
 
-static TypeInfo* findCallableFormalType(Resolver* resolver, Ast* ast, Token* token) {
+static TypeInfo* findCallableTypeParams(Resolver* resolver, Ast* ast, Token* token) {
     Ast* typeParams = ast->sibling;
     int numChild = astNumChild(typeParams);
 
@@ -542,7 +542,7 @@ static TypeInfo* findCallableFormalType(Resolver* resolver, Ast* ast, Token* tok
 static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isGeneric, bool isLambda, bool isVariadic, bool isVoid) {
     Ast* returnType = astGetChild(ast, 0);
     if (isGeneric && returnType->type == NULL) {
-        returnType->type = findCallableFormalType(resolver, ast, &returnType->token);
+        returnType->type = findCallableTypeParams(resolver, ast, &returnType->token);
     }
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
     
@@ -558,7 +558,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
             Ast* param = params->children->elements[i];
             if (isGeneric && param->type == NULL && astHasChild(param)) {
                 Ast* paramType = astGetChild(param, 0);
-                param->type = paramType->type = findCallableFormalType(resolver, ast, &paramType->token);
+                param->type = paramType->type = findCallableTypeParams(resolver, ast, &paramType->token);
             }
             TypeInfoArrayAdd(callableType->paramTypes, param->type);
         }
