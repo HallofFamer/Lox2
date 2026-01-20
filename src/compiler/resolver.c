@@ -614,6 +614,10 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
 static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
     ObjString* alias = createStringFromToken(resolver->vm, ast->token);
     Ast* typeDef = astGetChild(ast, 0);
+    if (typeDef->type == NULL) {
+        semanticError(resolver, "Alias type '%s' must have a valid target type.", alias->chars);
+        return NULL;
+    }
 	TypeInfo* targetType = getAliasTargetType(typeDef->type);
     return typeTableInsertAlias(resolver->vm->typetab, alias, alias, targetType);
 }

@@ -646,6 +646,13 @@ static void inferAstTypeFromSubscriptSet(TypeChecker* typeChecker, Ast* ast) {
         if (!isSubtypeOfType(index->type, typeChecker->intType)) {
             typeError(typeChecker, "Array's index must be an instance of Int, but gets %s.", index->type->shortName->chars);
         }
+		MethodTypeInfo* methodType = AS_METHOD_TYPE(typeTableMethodLookup(receiver->type, newStringPerma(typeChecker->vm, "[]=")));
+		CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, methodType->declaredType);
+        
+        if (!isSubtypeOfType(value->type, callableType->paramTypes->elements[1])) {
+            typeError(typeChecker, "%s's value must be an instance of %s but gets %s.",
+                receiver->type->shortName->chars, callableType->paramTypes->elements[1]->shortName->chars, value->type->shortName->chars);
+        }
         ast->type = typeChecker->nilType;
     }
     else {
