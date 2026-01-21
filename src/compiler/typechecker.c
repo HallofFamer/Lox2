@@ -871,7 +871,7 @@ static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
     if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
 
-    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
+    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(getGenericRawType(receiver->type));
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
     TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
     if (fieldType != NULL) ast->type = AS_FIELD_TYPE(fieldType)->declaredType;
@@ -883,7 +883,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
     if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
     
-    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(receiver->type);
+    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(getGenericRawType(receiver->type));
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
 	TypeInfo* type = typeTableGet(receiverType->fields, fieldName);
     if (type == NULL) return;
@@ -1351,7 +1351,7 @@ static void typeCheckTraitDeclaration(TypeChecker* typeChecker, Ast* ast) {
 
 static void typeCheckTypeDeclaration(TypeChecker* typeChecker, Ast* ast) {
     ObjString* typeName = createStringFromToken(typeChecker->vm, ast->token);
-    SymbolItem* item = symbolTableGet(ast->symtab, typeName);
+    SymbolItem* item = symbolTableLookup(ast->symtab, typeName);
     TypeInfo* aliasType = typeTableGet(typeChecker->vm->typetab, typeName);
     ast->type = (TypeInfo*)aliasType;
     item->type = ast->type;

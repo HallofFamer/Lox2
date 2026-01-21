@@ -594,7 +594,7 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
     ObjString* typeName = createStringFromToken(resolver->vm, ast->token);
     TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false, true);
     if (!hasGenericParameters(rawType)) {
-        semanticError(resolver, "Type %s cannot accept generic parameters.", typeName->chars);
+        if(rawType != NULL) semanticError(resolver, "Type %s cannot accept generic parameters.", typeName->chars);
         return NULL;
     }
 
@@ -1458,8 +1458,20 @@ static void resolveTypeDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     item->type = getNativeType(resolver->vm, "Type");
     item->state = SYMBOL_STATE_ACCESSED;
+    
+	beginScope(resolver, ast, SYMBOL_SCOPE_BLOCK);
+    if (astHasTypeParameters(ast)) {
+		Ast* typeParams = astGetTypeParameters(ast);
+        for (int i = 0; i < typeParams->children->count; i++) {
+            Ast* typeParam = astGetChild(typeParams, i);
+			ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
+            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);
+		}
+    }
+
     resolveChild(resolver, ast, 0);
     insertAliasType(resolver, ast);
+    endScope(resolver);
 }
 
 static void resolveVarDeclaration(Resolver* resolver, Ast* ast) {
