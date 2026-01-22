@@ -412,6 +412,28 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
     return NULL;
 }
 
+TypeInfo* getGenericRawType(TypeInfo* type) {
+    return IS_GENERIC_TYPE(type) ? AS_GENERIC_TYPE(type)->rawType : type;
+}
+
+TypeInfo* getAliasTargetType(TypeInfo* type) {
+    if (IS_ALIAS_TYPE(type)) {
+        return getAliasTargetType(AS_ALIAS_TYPE(type)->targetType);
+	}
+    return type;
+}
+
+TypeInfo* getInnerBaseType(TypeInfo* type) {
+    if (type == NULL) return NULL;
+    else if (IS_GENERIC_TYPE(type)) {
+        return getInnerBaseType(AS_GENERIC_TYPE(type)->rawType);
+    }
+    else if (IS_ALIAS_TYPE(type)) {
+        return getInnerBaseType(AS_ALIAS_TYPE(type)->targetType);
+    }
+    else return type;
+}
+
 static TypeInfo* instantiateFormalTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
     for (int i = 0; i < formalParams->count; i++) {
         TypeInfo* formalTypeParam = formalParams->elements[i];
@@ -584,13 +606,13 @@ void typeTableFieldsInherit(BehaviorTypeInfo* subclassType, TypeInfo* superclass
 
 TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
     if (type == NULL || (!IS_BEHAVIOR_TYPE(type) && !IS_GENERIC_TYPE(type))) return NULL;
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(getGenericRawType(type));
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(getInnerBaseType(type));
     TypeInfo* methodType = typeTableGet(behaviorType->methods, key);
     if (methodType != NULL) return methodType;
 
     if (behaviorType->traitTypes != NULL) {
         for (int i = 0; i < behaviorType->traitTypes->count; i++) {
-            BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(getGenericRawType(behaviorType->traitTypes->elements[i]));
+            BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(getInnerBaseType(behaviorType->traitTypes->elements[i]));
             methodType = typeTableGet(traitType->methods, key);
             if (methodType != NULL) return methodType;
         }
@@ -856,7 +878,7 @@ static bool isBehaviorSubtypeOfType(BehaviorTypeInfo* subtype, BehaviorTypeInfo*
     TypeInfo* superclassType = subtype->superclassType;
     while (superclassType != NULL) {
         if (superclassType->id == supertype->baseType.id) return true;
-        superclassType = AS_BEHAVIOR_TYPE(getGenericRawType(superclassType))->superclassType;
+        superclassType = AS_BEHAVIOR_TYPE(getInnerBaseType(superclassType))->superclassType;
     }
 
     if (subtype->traitTypes != NULL && subtype->traitTypes->count > 0) {

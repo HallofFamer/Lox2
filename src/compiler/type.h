@@ -147,6 +147,9 @@ char* createGenericTypeName(GenericTypeInfo* genericType);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
 TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name);
+TypeInfo* getGenericRawType(TypeInfo* type);
+TypeInfo* getAliasTargetType(TypeInfo* type);
+TypeInfo* getInnerBaseType(TypeInfo* type);
 TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
 
 TypeTable* newTypeTable(int id);
@@ -177,17 +180,6 @@ static inline bool hasGenericParameters(TypeInfo* type) {
     else if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type)->formalTypeParams->count > 0;
     else if (IS_METHOD_TYPE(type)) return AS_METHOD_TYPE(type)->declaredType->formalTypeParams->count > 0;
     else return false;
-}
-
-static inline TypeInfo* getGenericRawType(TypeInfo* type) {
-    if (IS_GENERIC_TYPE(type)) {
-        return AS_GENERIC_TYPE(type)->rawType;
-    }
-    return type;
-}
-
-static inline TypeInfo* getAliasTargetType(TypeInfo* type) {
-    return (IS_ALIAS_TYPE(type)) ? AS_ALIAS_TYPE(type)->targetType : type;
 }
 
 #endif // !clox_type_h
