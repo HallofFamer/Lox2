@@ -268,10 +268,10 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Ast* supe
     TypeInfo* superclassType = (superclass->type != NULL) ? superclass->type : getTypeForSymbol(resolver, superclass->token, false, false);    
     if (superclassType == NULL) return;
     currentClassType->superclassType = superclassType;
-    BehaviorTypeInfo* superclassRawType = AS_BEHAVIOR_TYPE(getGenericRawType(superclassType));
+    BehaviorTypeInfo* superclassBehaviorType = AS_BEHAVIOR_TYPE(getInnerBaseType(superclassType));
 
     BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
-    TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassRawType->baseType.fullName));
+    TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassBehaviorType->baseType.fullName));
     currentMetaclassType->superclassType = superMetaclassType;
     typeTableFieldsInherit(currentClassType, superclassType);
 }
@@ -1392,7 +1392,7 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
     typeTableInsertField(classType->fields, name, fieldTypeInfo, ast->attribute.isMutable, hasInitializer);
 
     if (classType->superclassType != NULL) {
-        BehaviorTypeInfo* superclass = AS_BEHAVIOR_TYPE(getGenericRawType(classType->superclassType));
+        BehaviorTypeInfo* superclass = AS_BEHAVIOR_TYPE(getInnerBaseType(classType->superclassType));
         TypeInfo* fieldSuperType = typeTableGet(superclass->fields, name);
         if (fieldSuperType != NULL) {
             semanticError(resolver, "Cannot redeclare inherited instance field %s from superclass.", name->chars);

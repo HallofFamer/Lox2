@@ -324,7 +324,7 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
 
 static void checkInheritingSuperclass(TypeChecker* typeChecker, TypeInfo* supertype) {
     if (typeChecker->currentClass->type == NULL || supertype == NULL) return;
-    BehaviorTypeInfo* superclassType = AS_BEHAVIOR_TYPE(getGenericRawType(supertype));
+    BehaviorTypeInfo* superclassType = AS_BEHAVIOR_TYPE(getInnerBaseType(supertype));
 
     for (int i = 0; i < superclassType->methods->capacity; i++) {
         TypeEntry* methodEntry = &superclassType->methods->entries[i];
@@ -353,7 +353,7 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
 
         if (supertype == NULL) continue;
         else {
-            BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(getGenericRawType(supertype));
+            BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(getInnerBaseType(supertype));
             for (int j = 0; j < traitType->methods->capacity; j++) {
                 TypeEntry* methodEntry = &traitType->methods->entries[j];
                 if (methodEntry == NULL || methodEntry->key == NULL) continue;
@@ -513,7 +513,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
     Ast* args = astGetChild(ast, 1);
     ObjString* name = createStringFromToken(typeChecker->vm, callee->token);
     char calleeDesc[UINT8_MAX];
-    TypeInfo* rawType = getGenericRawType(callee->type);
+    TypeInfo* rawType = getInnerBaseType(callee->type);
 
     if (callee->kind == AST_EXPR_FUNCTION) {
         Ast* params = astGetChild(callee, 1);
@@ -871,7 +871,7 @@ static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
     if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
 
-    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(getGenericRawType(receiver->type));
+    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(getInnerBaseType(receiver->type));
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
     TypeInfo* fieldType = typeTableGet(receiverType->fields, fieldName);
     if (fieldType != NULL) ast->type = AS_FIELD_TYPE(fieldType)->declaredType;
@@ -883,7 +883,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
     if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
     
-    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(getGenericRawType(receiver->type));
+    BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(getInnerBaseType(receiver->type));
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
 	TypeInfo* type = typeTableGet(receiverType->fields, fieldName);
     if (type == NULL) return;
