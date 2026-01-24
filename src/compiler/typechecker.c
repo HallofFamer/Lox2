@@ -747,9 +747,16 @@ static void yield(TypeChecker* typeChecker, Ast* ast) {
 static void await(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     Ast* child = astGetChild(ast, 0);
+    if (child->type == NULL) return;
+
     if (!isSubtypeOfType(child->type, getNativeType(typeChecker->vm, "clox.std.util.Promise"))) {
         typeError(typeChecker, "'await' expects expression to be an instance of Promise but gets %s.", child->type->shortName->chars);
     }
+    else if (ast->kind == AST_EXPR_AWAIT && IS_GENERIC_TYPE(child->type)) {
+        GenericTypeInfo* promiseType = AS_GENERIC_TYPE(child->type);
+        ast->type = promiseType->actualTypeParams->elements[0];
+    }
+    else if (ast->kind == AST_STMT_AWAIT) ast->type = typeChecker->nilType;
 }
 
 static void typeCheckAnd(TypeChecker* typeChecker, Ast* ast) {
