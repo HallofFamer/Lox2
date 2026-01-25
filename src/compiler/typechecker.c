@@ -24,6 +24,7 @@ struct FunctionTypeChecker {
     bool isAsync;
     bool isClass;
     bool isInitializer;
+    bool isLambda;
     bool isMethod;
 };
 
@@ -49,13 +50,14 @@ static void endClassTypeChecker(TypeChecker* typeChecker) {
     typeChecker->currentClass = typeChecker->currentClass->enclosing;
 }
 
-static void initFunctionTypeChecker(TypeChecker* typeChecker, FunctionTypeChecker* function, Token name, CallableTypeInfo* type, bool isAsync, bool isClass, bool isInitializer, bool isMethod) {
+static void initFunctionTypeChecker(TypeChecker* typeChecker, FunctionTypeChecker* function, Token name, CallableTypeInfo* type, bool isAsync, bool isClass, bool isInitializer, bool isLambda, bool isMethod) {
     function->enclosing = typeChecker->currentFunction;
     function->name = name;
     function->type = type;
     function->isAsync = isAsync;
     function->isClass = isClass;
     function->isInitializer = isInitializer;
+	function->isLambda = isLambda;
     function->isMethod = isMethod;
     typeChecker->currentFunction = function;
 }
@@ -170,7 +172,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     return instantiatedMethodType;
 }
 
-static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer);
+static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer, bool isLambda);
 
 static void defineAstType(TypeChecker* typeChecker, Ast* ast, const char* name, SymbolItem* item) {
     ObjString* typeName = newStringPerma(typeChecker->vm, name);
@@ -255,7 +257,7 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
                 CallableTypeInfo* paramCallableType = AS_CALLABLE_TYPE(paramType);
                 if (arg->type == NULL) arg->type = paramType;
                 else deriveCallableType(typeChecker, arg, paramCallableType);
-                function(typeChecker, arg, paramCallableType, paramCallableType->attribute.isAsync, false, false);
+                function(typeChecker, arg, paramCallableType, paramCallableType->attribute.isAsync, false, false, paramCallableType->attribute.isLambda);
             }
         }
     }
@@ -527,7 +529,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         deriveCalleeType(typeChecker, ast, calleeType);       
         callee->type = (TypeInfo*)calleeType;
         TypeInfoArrayAdd(typeChecker->vm->tempTypes, callee->type);
-        function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false);
+        function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false, calleeType->attribute.isLambda);
     }
     else if (IS_CALLABLE_TYPE(rawType)) {
         SymbolItem* item = symbolTableLookup(ast->symtab, name);
@@ -685,10 +687,10 @@ static void block(TypeChecker* typeChecker, Ast* ast) {
     }
 }
 
-static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer) {
+static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer, bool isLambda) {
     if (calleeType == NULL) calleeType = AS_CALLABLE_TYPE(ast->type);
     FunctionTypeChecker functionTypeChecker;
-    initFunctionTypeChecker(typeChecker, &functionTypeChecker, ast->token, calleeType, isAsync, isClass, isInitializer, ast->kind == AST_DECL_METHOD);
+    initFunctionTypeChecker(typeChecker, &functionTypeChecker, ast->token, calleeType, isAsync, isClass, isInitializer, isLambda, ast->kind == AST_DECL_METHOD);
     functionTypeChecker.symtab = ast->symtab;
 
     typeCheckChild(typeChecker, ast, 0);
@@ -817,7 +819,7 @@ static void typeCheckDictionary(TypeChecker* typeChecker, Ast* ast) {
 
 static void typeCheckFunction(TypeChecker* typeChecker, Ast* ast) {
     if (ast->parent != NULL && ast->parent->kind == AST_DECL_FUN) {
-        function(typeChecker, ast, NULL, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
+        function(typeChecker, ast, NULL, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer, ast->attribute.isLambda);
     }
 }
 
@@ -912,7 +914,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     else if (fieldType->declaredType != NULL && value->type != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(fieldType->declaredType);
         deriveCallableType(typeChecker, value, AS_CALLABLE_TYPE(fieldType->declaredType));
-        function(typeChecker, value, callableType, callableType->attribute.isAsync, false, false);
+        function(typeChecker, value, callableType, callableType->attribute.isAsync, false, false, callableType->attribute.isLambda);
     }
     defineAstType(typeChecker, ast, "Nil", NULL);
 }
@@ -1150,7 +1152,7 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
     else if (IS_CALLABLE_TYPE(expectedType) && returnValue->kind == AST_EXPR_FUNCTION) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(expectedType);
         deriveCallableType(typeChecker, returnValue, callableType);
-        function(typeChecker, returnValue, callableType, callableType->attribute.isAsync, false, false);
+        function(typeChecker, returnValue, callableType, callableType->attribute.isAsync, false, false, callableType->attribute.isLambda);
     }
 }
 
@@ -1336,7 +1338,7 @@ static void typeCheckMethodDeclaration(TypeChecker* typeChecker, Ast* ast) {
         else classType = typeChecker->currentClass->type;
 
         MethodTypeInfo* methodType = AS_METHOD_TYPE(typeTableGet(classType->methods, name));
-        function(typeChecker, ast, methodType->declaredType, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
+        function(typeChecker, ast, methodType->declaredType, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer, ast->attribute.isLambda);
     }
 }
 
@@ -1435,7 +1437,7 @@ void typeCheckChild(TypeChecker* typeChecker, Ast* ast, int index) {
 
 void typeCheck(TypeChecker* typeChecker, Ast* ast) {
     FunctionTypeChecker functionTypeChecker;
-    initFunctionTypeChecker(typeChecker, &functionTypeChecker, syntheticToken("script"), NULL, ast->attribute.isAsync, false, false, false);
+    initFunctionTypeChecker(typeChecker, &functionTypeChecker, syntheticToken("script"), NULL, ast->attribute.isAsync, false, false, false, false);
     typeCheckAst(typeChecker, ast);
 
     endFunctionTypeChecker(typeChecker);
