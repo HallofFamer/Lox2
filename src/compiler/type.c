@@ -482,6 +482,11 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
         }
         return (TypeInfo*)genericType;
     }
+    else if (IS_ALIAS_TYPE(type)) {
+		TypeInfo* targetType = getInnerBaseType(type);
+		formalParams = IS_CALLABLE_TYPE(targetType) ? AS_CALLABLE_TYPE(targetType)->formalTypeParams : AS_BEHAVIOR_TYPE(targetType)->formalTypeParams;
+		return instantiateTypeParameter(targetType, formalParams, actualParams);
+    }
 	return type;
 }
 

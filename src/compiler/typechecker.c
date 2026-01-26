@@ -66,6 +66,18 @@ static void endFunctionTypeChecker(TypeChecker* typeChecker) {
     typeChecker->currentFunction = typeChecker->currentFunction->enclosing;
 }
 
+static FunctionTypeChecker* getCurrentMethodTypeChecker(TypeChecker* typeChecker) {
+	if (typeChecker->currentFunction == NULL) return NULL;
+    FunctionTypeChecker* functionTypeChecker = typeChecker->currentFunction;
+    while (functionTypeChecker != NULL) {
+        if (functionTypeChecker->isMethod) {
+            return functionTypeChecker;
+        }
+        functionTypeChecker = functionTypeChecker->enclosing;
+    }
+	return NULL;
+}
+
 void initTypeChecker(VM* vm, TypeChecker* typeChecker, NameTable* nametab, bool debugTypetab) {
     typeChecker->vm = vm;
     typeChecker->currentNamespace = emptyString(vm);
@@ -1130,7 +1142,8 @@ static void typeCheckRequireStatement(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
-    TypeInfo* expectedType = (typeChecker->currentFunction->type != NULL) ? typeChecker->currentFunction->type->returnType : NULL;
+	FunctionTypeChecker* currentFunction = typeChecker->currentFunction->isLambda ? getCurrentMethodTypeChecker(typeChecker) : typeChecker->currentFunction;
+    TypeInfo* expectedType = (currentFunction->type != NULL) ? currentFunction->type->returnType : NULL;
     if (expectedType == NULL || !astHasChild(ast)) return;
     typeCheckChild(typeChecker, ast, 0);
     Ast* returnValue = astGetChild(ast, 0);
@@ -1138,11 +1151,11 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
 
     if (!isSubtypeOfType(actualType, expectedType)) {
         char calleeDesc[UINT8_MAX];
-        ObjString* calleeName = createStringFromToken(typeChecker->vm, typeChecker->currentFunction->name);
+        ObjString* calleeName = createStringFromToken(typeChecker->vm, currentFunction->name);
 
         if (typeChecker->currentFunction->isMethod) {
             ObjString* className = createStringFromToken(typeChecker->vm, typeChecker->currentClass->name);
-            sprintf_s(calleeDesc, UINT8_MAX, "Method %s%s::%s", className->chars, typeChecker->currentFunction->isClass ? " class" : "", calleeName->chars);
+            sprintf_s(calleeDesc, UINT8_MAX, "Method %s%s::%s", className->chars, currentFunction->isClass ? " class" : "", calleeName->chars);
         }
         else sprintf_s(calleeDesc, UINT8_MAX, "Function %s", calleeName->chars);
 
