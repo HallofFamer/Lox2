@@ -610,8 +610,10 @@ void typeTableFieldsInherit(BehaviorTypeInfo* subclassType, TypeInfo* superclass
 }
 
 TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
-    if (type == NULL || (!IS_BEHAVIOR_TYPE(type) && !IS_GENERIC_TYPE(type))) return NULL;
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(getInnerBaseType(type));
+    if (type == NULL) return NULL;
+	TypeInfo* baseType = getInnerBaseType(type);
+	if (!IS_BEHAVIOR_TYPE(baseType)) return NULL;
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(baseType);
     TypeInfo* methodType = typeTableGet(behaviorType->methods, key);
     if (methodType != NULL) return methodType;
 
