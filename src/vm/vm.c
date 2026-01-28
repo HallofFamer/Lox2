@@ -959,11 +959,11 @@ InterpretResult run(VM* vm) {
             }
             case OP_GREATER:
                 if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(BOOL_VAL, > );
-                else OVERLOAD_OP(> , 1);
+                else OVERLOAD_OP(>, 1);
                 break;
             case OP_LESS:
                 if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(BOOL_VAL, < );
-                else OVERLOAD_OP(< , 1);
+                else OVERLOAD_OP(<, 1);
                 break;
             case OP_ADD: {
                 if (IS_STRING(peek(vm, 0)) && IS_STRING(peek(vm, 1))) {

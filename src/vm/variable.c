@@ -236,7 +236,7 @@ static bool getAndPushGenericInstanceVariableByName(VM* vm, Obj* object, ObjStri
 
     int index = getIndexFromObjectShape(vm, object, name);
     if (index == -1) {
-        runtimeError(vm, "Undefined field %s on Object %s", name->chars, object->klass->fullName->chars);
+        runtimeError(vm, "Undefined field '%s' on Object %s", name->chars, object->klass->fullName->chars);
         exit(70);
     }
 
@@ -370,14 +370,14 @@ bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
             ObjValueInstance* instance = (ObjValueInstance*)object;
             int index = getIndexFromObjectShape(vm, object, name);
             if (index == -1) {
-                runtimeError(vm, "Undefined field %s on instance.", name->chars);
+                runtimeError(vm, "Undefined field '%s' on instance.", name->chars);
                 return false;
             }
             push(vm, instance->fields.values[index]);
             return true;
         }
         default:
-            runtimeError(vm, "Undefined field %s on Object category %d.", name->chars, object->category);
+            runtimeError(vm, "Undefined field '%s' on Object category %d.", name->chars, object->category);
             exit(70);
     }
     return false;
@@ -471,7 +471,7 @@ bool getInstanceVariable(VM* vm, Value receiver, Chunk* chunk, uint8_t byte) {
             return true;
         }
         
-        runtimeError(vm, "Undefined field %s on class %s", name->chars, klass->fullName->chars);
+        runtimeError(vm, "Undefined field '%s' on class %s", name->chars, klass->fullName->chars);
         exit(70);
     }
     else if (IS_NAMESPACE(receiver)) {
@@ -503,8 +503,11 @@ bool getInstanceVariable(VM* vm, Value receiver, Chunk* chunk, uint8_t byte) {
         return getGenericInstanceVariable(vm, AS_OBJ(receiver), chunk, byte);
     }
     else {
-        if (IS_NIL(receiver)) runtimeError(vm, "Undefined field on nil.");
-        return false;
+        if (IS_NIL(receiver)) {
+            ObjString* name = AS_STRING(chunk->identifiers.values[byte]);
+            runtimeError(vm, "Undefined field '%s' on nil.", name->chars);
+            exit(70);
+        }
     }
 
     return true;
@@ -864,14 +867,14 @@ bool setGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name, Valu
         }
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
-            if (matchVariableName(name, "name", 4) || matchVariableName(name, "behavior", 8) || matchVariableName(name, "isAlias", 7)) {
-                runtimeError(vm, "Cannot set field %s on Object Type.", name);
+            if (matchVariableName(name, "name", 4)  || matchVariableName(name, "behavior", 8) || matchVariableName(name, "isAlias", 7)) {
+                runtimeError(vm, "Cannot set field '%s' on Object Type.", name);
                 exit(70);
             }
             else return setAndPushGenericInstanceVariableByName(vm, object, name, value);
         }
         default:
-            runtimeError(vm, "Undefined field %s on Object category %d.", name->chars, object->category);
+            runtimeError(vm, "Undefined field '%s' on Object category %d.", name->chars, object->category);
             exit(70);
     }
     return false;

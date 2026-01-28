@@ -48,7 +48,7 @@
 #define PARAM_TYPE_CALLABLE(returnType, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), returnType, numParams, __VA_ARGS__)
 #define PARAM_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), getNativeType(vm, #rawType), numParams, __VA_ARGS__)
 
-#define NATIVE_TYPE_BEHAVIOR(type) getNativeType(vm, #type)
+#define NATIVE_TYPE(type) getNativeType(vm, #type)
 #define NATIVE_TYPE_CALLABLE_0(type) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), type, 0)
 #define NATIVE_TYPE_CALLABLE(type, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), type, numParams, __VA_ARGS__)
 #define NATIVE_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, rawType->shortName, rawType, numParams, __VA_ARGS__);
@@ -65,6 +65,7 @@ ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass);
 TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType, int numParams, ...);
 TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* rawType, int numParams, ...);
 
+TypeInfo* declareNativeTypeParameter(VM * vm, const char* shortName);
 ObjClass* getNativeClass(VM* vm, const char* fullName);
 TypeInfo* getNativeType(VM* vm, const char* name);
 ObjNativeFunction* getNativeFunction(VM* vm, const char* name);

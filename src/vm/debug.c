@@ -4,11 +4,43 @@
 #include "object.h"
 #include "value.h"
 
-void disassembleChunk(Chunk* chunk, const char* name) {
-    printf("== %s ==\n", name);
+static void disassembleConstants(Chunk* chunk) {
+    if (chunk->constants.count == 0) return;
+    printf("==== Constants ====\n");
+
+    for (int i = 0; i < chunk->constants.count; i++) {
+        printf("%03d ", i);
+        printf("    ");
+        printValue(chunk->constants.values[i]);
+        printf("\n");
+    }
+}
+
+static void disassembleIdentifiers(Chunk* chunk) {
+    if (chunk->identifiers.count == 0) return;
+    printf("==== Identifiers ====\n");
+
+    for (int i = 0; i < chunk->identifiers.count; i++) {
+        printf("%03d ", i);
+        printf("    ");
+        printValue(chunk->identifiers.values[i]);
+        printf("\n");
+    }
+}
+
+static void disassembleInstructions(Chunk* chunk) {
+    printf("==== Instructions ====\n");
     for (int offset = 0; offset < chunk->count;) {
         offset = disassembleInstruction(chunk, offset);
     }
+}
+
+void disassembleChunk(Chunk* chunk, const char* name) {
+    printf("== %s ==\n", name);
+    disassembleConstants(chunk);
+    disassembleIdentifiers(chunk);
+    disassembleInstructions(chunk);
+    printf("\n");
 }
 
 static int constantInstruction(const char* name, Chunk* chunk, int offset) {
