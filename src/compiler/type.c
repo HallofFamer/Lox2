@@ -405,9 +405,9 @@ static void typeTableOutputFunction(CallableTypeInfo* function) {
     printf("%s(", function->baseType.shortName->chars);
 
     if (function->paramTypes != NULL && function->paramTypes->count > 0) {
-        printf("%s", function->paramTypes->elements[0]->shortName->chars);
+        printf("%s", (function->paramTypes->elements[0] != NULL) ? function->paramTypes->elements[0]->shortName->chars : "dynamic");
         for (int i = 1; i < function->paramTypes->count; i++) {
-            printf(", %s", function->paramTypes->elements[i]->shortName->chars);
+            printf(", %s", (function->paramTypes->elements[i] != NULL) ? function->paramTypes->elements[i]->shortName->chars : "dynamic");
         }
     } 
     printf(")\n");
@@ -456,9 +456,10 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
+    if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
+    if (memcmp(type2->shortName->chars, "Object", 3) == 0) return true;
     if (IS_CALLABLE_TYPE(type) && IS_BEHAVIOR_TYPE(type2) && (strcmp(type2->shortName->chars, "Function") == 0 || strcmp(type2->shortName->chars, "TCallable") == 0)) return true;
     if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false; 
-    if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
     BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type);
     BehaviorTypeInfo* supertype = AS_BEHAVIOR_TYPE(type2);
 
