@@ -6,8 +6,7 @@ println("Class of string object is: ${s.getClass().name()}")
 println("Metaclass of string object is: ${s.getClass().getClass().name()}")
 println("Class of String metaclass is: ${s.getClass().getClass().getClass().name()}")
 println("Class of Metaclass is: ${s.getClass().getClass().getClass().getClass().name()}")
-println("Class of Metaclass class is: ${s.getClass().getClass().getClass().getClass().getClass().name()}")
-println("")
+println("Class of Metaclass class is: ${s.getClass().getClass().getClass().getClass().getClass().name()}\n")
 
 class Point { 
 
@@ -42,8 +41,7 @@ println("Creating point object p2: ${p2}")
 println("Distance between p and p2 is: ${p.distance(p2)}")
 println("Point at origin: ${Point.origin}")
 println("Creating horizontal point object: ${Point.getHorizontal(2)}")
-println("Creating horizontal point object: ${Point.getVertical(3)}")
-println("")
+println("Creating horizontal point object: ${Point.getVertical(3)}\n")
 
 println("Class of point object is: ${p.getClass().name()}")
 println("Metaclass of point object is: ${p.getClass().getClass().name()}")

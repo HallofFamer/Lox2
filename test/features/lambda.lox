@@ -25,8 +25,7 @@ println("Curried Higher order function multiply(2)(3): ${curry(2)(3)}")
 val pow = fun(x, y) {
     return x.pow(y)
 }
-println("Call function dynamically using pow.call(2, 3): ${pow.call(2, 3)}")
-println("")
+println("Call function dynamically using pow.call(2, 3): ${pow.call(2, 3)}\n")
 
 fun sum(..args){ 
     var i = 0
@@ -38,8 +37,7 @@ fun sum(..args){
     return sum
 }
 println("Creating a variadic function sum(..args): ${sum(1, 2, 3, 4, 5)}")
-println("Function sum is variadic: ${sum.isVariadic()}")
-println("")
+println("Function sum is variadic: ${sum.isVariadic()}\n")
 
 val lambda0 = { 5; }
 val lambda1 = {|x| x * 2; }
@@ -52,8 +50,7 @@ val lambda2 = {
 println("Creating lambda closures: ")
 println("Evaluate lambda without parameter: ${lambda0}")
 println("Evaluate lambda with 1 parameter: ${lambda1(4)}")
-println("Evaluate lambda with 2 parameters: ${lambda2(2, 3)}")
-println("")
+println("Evaluate lambda with 2 parameters: ${lambda2(2, 3)}\n")
 
 println("Testing nonlocal return for lambda: ")
 fun nonlocal(closure) {
