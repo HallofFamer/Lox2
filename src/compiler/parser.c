@@ -1401,7 +1401,8 @@ static Ast* statement(Parser* parser) {
     else if (match(parser, TOKEN_SYMBOL_YIELD)) {
         return yieldStatement(parser);
     }
-    else if (match(parser, TOKEN_SYMBOL_LEFT_BRACE)) {
+    else if (check(parser, TOKEN_SYMBOL_LEFT_BRACE) && !checkNext(parser, TOKEN_SYMBOL_PIPE)) {
+        advance(parser);
         return block(parser);
     }
     else {

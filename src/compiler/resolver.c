@@ -622,47 +622,6 @@ static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
     return typeTableInsertAlias(resolver->vm->typetab, alias, alias, targetType);
 }
 
-static char* createAliasTypeName(AliasTypeInfo* aliasType) {
-    char* aliasName = bufferNewCString(UINT16_MAX);
-    size_t length = 0;
-
-    if (aliasType->targetType != NULL) {
-        char* targetTypeName = aliasType->targetType->shortName->chars;
-        size_t targetTypeLength = strlen(aliasType->targetType->shortName->chars);
-        memcpy(aliasName, targetTypeName, targetTypeLength);
-        length += targetTypeLength;
-    }
-    else {
-        memcpy(aliasName, "dynamic", 7);
-        length += 7;
-    }
-    aliasName[length++] = '<';
-
-
-    for (int i = 0; i < aliasType->formalTypeParams->count; i++) {
-        TypeInfo* paramType = aliasType->formalTypeParams->elements[i];
-        if (i > 0) {
-            aliasName[length++] = ',';
-            aliasName[length++] = ' ';
-        }
-        if (paramType != NULL) {
-            char* paramTypeName = paramType->shortName->chars;
-            size_t paramTypeLength = strlen(paramTypeName);
-            memcpy(aliasName + length, paramTypeName, paramTypeLength);
-            length += paramTypeLength;
-            if (isTempType(paramType)) free(paramTypeName);
-        }
-        else {
-            memcpy(aliasName + length, "dynamic", 7);
-            length += 7;
-        }
-    }
-
-    aliasName[length++] = '>';
-    aliasName[length] = '\0';
-    return aliasName;
-}
-
 static AliasTypeInfo* insertGenericAliasType(Resolver* resolver, Ast* ast) {
     Ast* typeParams = astGetChild(ast, 0);
     TypeInfo* targetType = getTypeForSymbol(resolver, ast->token, false, false);
@@ -676,6 +635,7 @@ static AliasTypeInfo* insertGenericAliasType(Resolver* resolver, Ast* ast) {
 
     astInsertTempType(resolver, ast, (TypeInfo*)aliasType, createAliasTypeName(aliasType));
     TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
+	return aliasType;
 }
 
 static SymbolItem* getVariable(Resolver* resolver, Ast* ast) {

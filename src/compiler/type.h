@@ -142,8 +142,10 @@ GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* ful
 GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType, int numParameters, ...);
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
 AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType, int numParameters, ...);
+
 char* createCallableTypeName(CallableTypeInfo* callableType);
 char* createGenericTypeName(GenericTypeInfo* genericType);
+char* createAliasTypeName(AliasTypeInfo* aliasType);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
 TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name);
