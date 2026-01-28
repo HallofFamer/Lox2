@@ -2113,7 +2113,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->objectClass, Object, objectID, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->objectClass, Object, setField, 2, RETURN_TYPE(void), PARAM_TYPE(String), PARAM_TYPE(Object));
     DEF_METHOD(vm->objectClass, Object, toString, 0, RETURN_TYPE(String));
-    DEF_OPERATOR(vm->objectClass, Object, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_OPERATOR(vm->objectClass, Object, ==, __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
 
     inheritSuperclass(vm, behaviorClass, vm->objectClass);
     behaviorClass->classType = OBJ_CLASS;
@@ -2294,13 +2294,13 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->numberClass, Number, tan, 0, RETURN_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, toInt, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->numberClass, Number, toString, 0, RETURN_TYPE(String));
-    DEF_OPERATOR(vm->numberClass, Number, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
-    DEF_OPERATOR(vm->numberClass, Number, > , __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
-    DEF_OPERATOR(vm->numberClass, Number, < , __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, ==, __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_OPERATOR(vm->numberClass, Number, >, __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, <, __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     DEF_OPERATOR(vm->numberClass, Number, +, __add__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, -, __subtract__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, *, __multiply__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
-    DEF_OPERATOR(vm->numberClass, Number, / , __divide__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
+    DEF_OPERATOR(vm->numberClass, Number, /, __divide__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, %, __modulo__, 1, RETURN_TYPE(Number), PARAM_TYPE(Number));
     insertGlobalSymbolTable(vm, "Number", "Number class");
 

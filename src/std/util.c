@@ -877,11 +877,12 @@ void registerUtilPackage(VM* vm) {
     ObjNamespace* utilNamespace = defineNativeNamespace(vm, "util", vm->stdNamespace);
     vm->currentNamespace = utilNamespace;
 
+    TypeInfo* placeholderType = declareNativeTypeParameter(vm, "T");
     ObjClass* comparableTrait = getNativeClass(vm, "clox.std.lang.TComparable");
     ObjClass* dateClass = defineNativeClass(vm, "Date");
     ObjClass* dateTimeClass = defineNativeClass(vm, "DateTime");
     ObjClass* durationClass = defineNativeClass(vm, "Duration");
-    vm->promiseClass = defineNativeClass(vm, "Promise");
+    vm->promiseClass = defineNativeGenericClass(vm, "Promise", 1, placeholderType);
     ObjClass* randomClass = defineNativeClass(vm, "Random");
     ObjClass* regexClass = defineNativeClass(vm, "Regex");
     vm->timerClass = defineNativeClass(vm, "Timer");
@@ -956,7 +957,7 @@ void registerUtilPackage(VM* vm) {
     bindSuperclass(vm, vm->promiseClass, vm->objectClass);
     vm->promiseClass->classType = OBJ_PROMISE;
     DEF_FIELD(vm->promiseClass, state, Int, false, INT_VAL(0));
-    DEF_FIELD(vm->promiseClass, value, Object, false, NIL_VAL);
+    DEF_FIELD(vm->promiseClass, value, T, false, NIL_VAL);
     DEF_FIELD(vm->promiseClass, id, Int, true, INT_VAL(0));
     DEF_INTERCEPTOR(vm->promiseClass, Promise, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE_CALLABLE(RETURN_TYPE(void), 2, PARAM_TYPE(TCallable), PARAM_TYPE(TCallable)));
     DEF_METHOD(vm->promiseClass, Promise, catch, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(TCallable));

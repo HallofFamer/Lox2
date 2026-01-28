@@ -843,7 +843,7 @@ void registerNetPackage(VM* vm) {
     DEF_FIELD(domainClass, name, String, true, OBJ_VAL(emptyString(vm)));
     DEF_INTERCEPTOR(domainClass, Domain, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.net.Domain), PARAM_TYPE(String));
     DEF_METHOD(domainClass, Domain, getIPAddresses, 0, RETURN_TYPE(clox.std.collection.Array));
-    DEF_METHOD_ASYNC(domainClass, Domain, getIPAddressesAsync, 0, RETURN_TYPE(clox.std.util.Promise));
+    DEF_METHOD_ASYNC(domainClass, Domain, getIPAddressesAsync, 0, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.collection.Array)));
     DEF_METHOD(domainClass, Domain, toString, 0, RETURN_TYPE(String));
 
     bindSuperclass(vm, ipAddressClass, vm->objectClass);
@@ -851,7 +851,7 @@ void registerNetPackage(VM* vm) {
     DEF_FIELD(ipAddressClass, version, Int, true, INT_VAL(-1));
     DEF_INTERCEPTOR(ipAddressClass, IPAddress, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.net.IPAddress), PARAM_TYPE(String));
     DEF_METHOD(ipAddressClass, IPAddress, getDomain, 0, RETURN_TYPE(clox.std.net.Domain));
-    DEF_METHOD_ASYNC(ipAddressClass, IPAddress, getDomainAsync, 0, RETURN_TYPE(clox.std.util.Promise));
+    DEF_METHOD_ASYNC(ipAddressClass, IPAddress, getDomainAsync, 0, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.Domain)));
     DEF_METHOD(ipAddressClass, IPAddress, isIPV4, 0, RETURN_TYPE(Bool));
     DEF_METHOD(ipAddressClass, IPAddress, isIPV6, 0, RETURN_TYPE(Bool));
     DEF_METHOD(ipAddressClass, IPAddress, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
@@ -954,23 +954,23 @@ void registerNetPackage(VM* vm) {
     DEF_INTERCEPTOR(httpClientClass, HTTPClient, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.net.HTTPClient));
     DEF_METHOD(httpClientClass, HTTPClient, close, 0, RETURN_TYPE(void));
     DEF_METHOD(httpClientClass, HTTPClient, delete, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, deleteAsync, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, deleteAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object));
     DEF_METHOD(httpClientClass, HTTPClient, download, 2, RETURN_TYPE(void), PARAM_TYPE(Object), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, downloadAsync, 2, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object), PARAM_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, downloadAsync, 2, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(Nil)), PARAM_TYPE(Object), PARAM_TYPE(Object));
     DEF_METHOD(httpClientClass, HTTPClient, get, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, getAsync, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, getAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object));
     DEF_METHOD(httpClientClass, HTTPClient, head, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, headAsync, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, headAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object));
     DEF_METHOD(httpClientClass, HTTPClient, options, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, optionsAsync, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, optionsAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object));
     DEF_METHOD(httpClientClass, HTTPClient, patch, 2, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, patchAsync, 2, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, patchAsync, 2, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(httpClientClass, HTTPClient, post, 2, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, postAsync, 2, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, postAsync, 2, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(httpClientClass, HTTPClient, put, 2, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, putAsync, 2, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, putAsync, 2, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(httpClientClass, HTTPClient, send, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(clox.std.net.HTTPRequest));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, sendAsync, 1, RETURN_TYPE(clox.std.util.Promise), PARAM_TYPE(clox.std.net.HTTPRequest));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, sendAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(clox.std.net.HTTPRequest));
 
     ObjClass* networkExceptionClass = defineNativeException(vm, "NetworkException", vm->exceptionClass);
     defineNativeException(vm, "DomainHostException", networkExceptionClass);
