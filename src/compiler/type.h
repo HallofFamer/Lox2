@@ -149,7 +149,6 @@ char* createAliasTypeName(AliasTypeInfo* aliasType);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
 TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name);
-TypeInfo* getGenericRawType(TypeInfo* type);
 TypeInfo* getAliasTargetType(TypeInfo* type);
 TypeInfo* getInnerBaseType(TypeInfo* type);
 bool hasGenericParameters(TypeInfo* type);

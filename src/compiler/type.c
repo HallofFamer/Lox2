@@ -453,10 +453,6 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
     return NULL;
 }
 
-TypeInfo* getGenericRawType(TypeInfo* type) {
-    return IS_GENERIC_TYPE(type) ? AS_GENERIC_TYPE(type)->rawType : type;
-}
-
 TypeInfo* getAliasTargetType(TypeInfo* type) {
     if (IS_ALIAS_TYPE(type)) {
         return getAliasTargetType(AS_ALIAS_TYPE(type)->targetType);
