@@ -471,16 +471,6 @@ TypeInfo* getInnerBaseType(TypeInfo* type) {
     else return type;
 }
 
-static bool hasCallableFormalTypeParameters(CallableTypeInfo* callableType) {
-    if (callableType->formalTypeParams->count > 0) return true;
-	if (hasGenericParameters(callableType->returnType)) return true;
-    for (int i = 0; i < callableType->paramTypes->count; i++) {
-        TypeInfo* paramType = callableType->paramTypes->elements[i];
-        if (hasGenericParameters(paramType)) return true;
-	}
-    return false;
-}
-
 bool hasGenericParameters(TypeInfo* type) {
     if (type == NULL) return false;
     else if (IS_FORMAL_TYPE(type) || IS_GENERIC_TYPE(type)) return true;
@@ -489,6 +479,18 @@ bool hasGenericParameters(TypeInfo* type) {
     else if (IS_METHOD_TYPE(type)) return AS_METHOD_TYPE(type)->declaredType->formalTypeParams->count > 0;
     else if (IS_ALIAS_TYPE(type)) return AS_ALIAS_TYPE(type)->formalTypeParams->count > 0;
     else return false;
+}
+
+bool hasCallableTypeParameters(TypeInfo* type) {
+	if (type == NULL || !IS_CALLABLE_TYPE(type)) return false;
+	CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
+    if (callableType->formalTypeParams->count > 0) return true;
+    if (hasGenericParameters(callableType->returnType)) return true;
+    for (int i = 0; i < callableType->paramTypes->count; i++) {
+        TypeInfo* paramType = callableType->paramTypes->elements[i];
+        if (hasGenericParameters(paramType)) return true;
+    }
+    return false;
 }
 
 static TypeInfo* instantiateFormalTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {

@@ -152,6 +152,7 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name);
 TypeInfo* getAliasTargetType(TypeInfo* type);
 TypeInfo* getInnerBaseType(TypeInfo* type);
 bool hasGenericParameters(TypeInfo* type);
+bool hasCallableTypeParameters(TypeInfo* type);
 TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
 
 TypeTable* newTypeTable(int id);
