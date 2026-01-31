@@ -121,7 +121,7 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 
 
 ## Example
-The following code shows how to send a simple asynchronous HTTP request and prints its status and contents to the console. This example makes uses of various features from Lox2 such as namespace declaration/import, immutable variable, async/await, and string interpolation. 
+The following code shows how to send a simple asynchronous HTTP request and prints its status and contents to the console. This code sample utilizes several Lox2 features, including namespace declaration and import, immutable variable declaration, async/await, string interpolation, and exception handling. 
 
 ```
 namespace Lox2Example
@@ -130,8 +130,13 @@ using clox.std.net.URL
 
 val client = HTTPClient()
 val response = await client.getAsync(URL.parse("https://example.com"))
-println("Response Status: ${response.status}")
+
+if (response.status != 200) {
+    throw Exception("HTTP error! Status: ${response.status}")
+}
+
 println("Content: ${response.content}")
+client.close()
 ```
 
 
