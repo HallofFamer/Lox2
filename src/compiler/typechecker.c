@@ -130,6 +130,11 @@ static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, Type
 		instantiatedType->fullName = instantiatedType->shortName = takeStringPerma(typeChecker->vm, instantiatedTypeName, (int)strlen(instantiatedTypeName));
         TypeInfoArrayAdd(typeChecker->vm->tempTypes, instantiatedType);
     }
+    else if (IS_CALLABLE_TYPE(instantiatedType)) {
+        char* instantiatedTypeName = createCallableTypeName(AS_CALLABLE_TYPE(instantiatedType));
+        instantiatedType->fullName = instantiatedType->shortName = takeStringPerma(typeChecker->vm, instantiatedTypeName, (int)strlen(instantiatedTypeName));
+        TypeInfoArrayAdd(typeChecker->vm->tempTypes, instantiatedType);
+    }
 	return instantiatedType;
 }
 
@@ -320,13 +325,13 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
             MethodTypeInfo* subMethodType = newMethodTypeInfo(i, superMethodType->baseType.shortName, superMethodType->declaredType->returnType, superMethodType->isClass, superMethodType->isInitializer);
             subMethodType->declaredType->attribute = superMethodType->declaredType->attribute;
             TypeInfo* returnType = superMethodType->declaredType->returnType;
-            if (hasGenericParameters(returnType)) {
+            if (hasGenericParameters(returnType) || hasCallableTypeParameters(returnType)) {
                 subMethodType->declaredType->returnType = instantiateTypeParameterWithName(typeChecker, returnType, behaviorType->formalTypeParams, supertype->actualTypeParams);
             }
 
             for (int i = 0; i < superMethodType->declaredType->paramTypes->count; i++) {
                 TypeInfo* paramType = superMethodType->declaredType->paramTypes->elements[i];
-                if (hasGenericParameters(paramType)) {
+                if (hasGenericParameters(paramType) || hasCallableTypeParameters(paramType)) {
                     paramType = instantiateTypeParameterWithName(typeChecker, paramType, behaviorType->formalTypeParams, supertype->actualTypeParams);
                 }
                 TypeInfoArrayAdd(subMethodType->declaredType->paramTypes, paramType);

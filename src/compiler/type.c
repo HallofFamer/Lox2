@@ -527,19 +527,40 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
     }
     else if (IS_CALLABLE_TYPE(type)) {
 		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
-        GenericTypeInfo* genericType = newGenericTypeInfo(-1, callableType->baseType.shortName, callableType->baseType.fullName, type);
-        
-        for (int i = 0; i < callableType->formalTypeParams->count; i++) {
-            TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];
-            if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
-                TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
-                TypeInfoArrayAdd(genericType->actualTypeParams, instantiatedType);
+        if (callableType->formalTypeParams->count > 0) {
+            GenericTypeInfo* genericType = newGenericTypeInfo(-1, callableType->baseType.shortName, callableType->baseType.fullName, type);            
+            for (int i = 0; i < callableType->formalTypeParams->count; i++) {
+                TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];
+                if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
+                    TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
+                    TypeInfoArrayAdd(genericType->actualTypeParams, instantiatedType);
+                }
             }
+
+            if (genericType->actualTypeParams->count == callableType->formalTypeParams->count) {
+                genericType->isFullyInstantiated = true;
+            }
+            return (TypeInfo*)genericType;
         }
-        if (genericType->actualTypeParams->count == callableType->formalTypeParams->count) {
-            genericType->isFullyInstantiated = true;
+        else {
+			CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, callableType->baseType.category, callableType->baseType.shortName, NULL);
+            instantiatedCallableType->attribute = callableType->attribute;
+            TypeInfo* instantiatedReturnType = callableType->returnType;
+            if (hasGenericParameters(instantiatedReturnType)) {
+                instantiatedReturnType = instantiateTypeParameter(instantiatedReturnType, formalParams, actualParams);
+            }
+            instantiatedCallableType->returnType = instantiatedReturnType;
+            
+            for (int i = 0; i < callableType->paramTypes->count; i++) {
+                TypeInfo* paramType = callableType->paramTypes->elements[i];
+                if (hasGenericParameters(paramType)) {
+                    paramType = instantiateTypeParameter(paramType, formalParams, actualParams);
+                }
+                TypeInfoArrayAdd(instantiatedCallableType->paramTypes, paramType);
+            }
+			return (TypeInfo*)instantiatedCallableType;
         }
-        return (TypeInfo*)genericType;
+        
     }
     else if (IS_ALIAS_TYPE(type)) {
 		TypeInfo* targetType = getInnerBaseType(type);
