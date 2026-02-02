@@ -666,7 +666,7 @@ static void typeTableFieldsInheritGeneric(TypeTable* from, TypeTable* to, TypeIn
         TypeEntry* entry = &from->entries[i];
         if (entry != NULL && entry->key != NULL) {
             FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);
-            if (fromFieldType->declaredType != NULL && hasGenericParameters(fromFieldType->declaredType)) {
+            if (fromFieldType->declaredType != NULL && (hasGenericParameters(fromFieldType->declaredType) || hasCallableTypeParameters(fromFieldType->declaredType))) {
                 TypeInfo* instantiatedType = instantiateTypeParameter(fromFieldType->declaredType, formalParams, actualParams);
                 FieldTypeInfo* toFieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, instantiatedType, fromFieldType->isMutable, fromFieldType->hasInitializer);
             }

@@ -168,7 +168,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     BehaviorTypeInfo* rawBehaviorType = AS_BEHAVIOR_TYPE(genericBehaviorType->rawType);
     
     TypeInfo* returnType = genericMethodType->returnType;
-    if (hasGenericParameters(returnType)) {
+    if (hasGenericParameters(returnType) || hasCallableTypeParameters(returnType)) {
         returnType = instantiateTypeParameterWithName(typeChecker, returnType, rawBehaviorType->formalTypeParams, genericBehaviorType->actualTypeParams);
 	}
     CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericMethodType->baseType.shortName, returnType);
@@ -176,7 +176,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
 
     for (int i = 0; i < genericMethodType->paramTypes->count; i++) {
         TypeInfo* paramType = genericMethodType->paramTypes->elements[i];
-        if (hasGenericParameters(paramType)) {
+        if (hasGenericParameters(paramType) || hasCallableTypeParameters(paramType)) {
             paramType = instantiateTypeParameterWithName(typeChecker, paramType, rawBehaviorType->formalTypeParams, genericBehaviorType->actualTypeParams);
         }
         TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
@@ -519,7 +519,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
         typeError(typeChecker, "Class %s's initializer expects to receive a total of 0 argument but gets %d.", type->shortName->chars, astNumChild(args));
     }
 
-    if (callee->type != NULL && hasGenericParameters(type)) {
+    if (callee->type != NULL && (hasGenericParameters(type) || hasCallableTypeParameters(type))) {
         if(astNumChild(callee) > 0) checkTypeParameters(typeChecker, callee, type);
         ast->type = callee->type;
     }
