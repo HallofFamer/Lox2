@@ -138,7 +138,10 @@ static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, Type
 	return instantiatedType;
 }
 
-static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker, GenericTypeInfo* genericFunctionType) {
+static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker, TypeInfo* type) {
+    if (type == NULL) return NULL;
+    if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type);
+    GenericTypeInfo* genericFunctionType = AS_GENERIC_TYPE(type);
 	CallableTypeInfo* functionType = AS_CALLABLE_TYPE(genericFunctionType->rawType);
     TypeInfo* returnType = functionType->returnType;
     if (hasGenericParameters(returnType)) {
@@ -553,7 +556,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         if (item == NULL || item->type == NULL || !IS_CALLABLE_TYPE(item->type)) return;
         CallableTypeInfo* functionType = AS_CALLABLE_TYPE(item->type);
         CallableTypeInfo* callableType = hasGenericParameters(item->type)
-            ? instantiateGenericFunctionType(typeChecker, AS_GENERIC_TYPE(callee->type))
+            ? instantiateGenericFunctionType(typeChecker, callee->type)
             : functionType;
 
         sprintf_s(calleeDesc, UINT8_MAX, "Function %s", name->chars);

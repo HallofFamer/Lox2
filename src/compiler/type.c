@@ -475,8 +475,8 @@ bool hasGenericParameters(TypeInfo* type) {
     if (type == NULL) return false;
     else if (IS_FORMAL_TYPE(type) || IS_GENERIC_TYPE(type)) return true;
     else if (IS_BEHAVIOR_TYPE(type)) return AS_BEHAVIOR_TYPE(type)->formalTypeParams->count > 0;
-    else if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type)->formalTypeParams->count > 0;
-    else if (IS_METHOD_TYPE(type)) return AS_METHOD_TYPE(type)->declaredType->formalTypeParams->count > 0;
+    else if (IS_CALLABLE_TYPE(type)) return hasCallableTypeParameters(type);
+    else if (IS_METHOD_TYPE(type)) return hasCallableTypeParameters((TypeInfo*)AS_METHOD_TYPE(type)->declaredType);
     else if (IS_ALIAS_TYPE(type)) return AS_ALIAS_TYPE(type)->formalTypeParams->count > 0;
     else return false;
 }
