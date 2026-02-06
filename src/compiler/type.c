@@ -1007,8 +1007,7 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
     }
     else if (IS_CALLABLE_TYPE(type->rawType)) {
         CallableTypeInfo* subtype = AS_CALLABLE_TYPE(type->rawType);
-        if (IS_BEHAVIOR_TYPE(type2) || IS_CALLABLE_TYPE(type2)) return isCallableSubtypeOfType(subtype, type2);
-        else if (IS_GENERIC_TYPE(type2)) {
+        if (IS_GENERIC_TYPE(type2)) {
             GenericTypeInfo* genericSupertype = AS_GENERIC_TYPE(type2);
             if (!IS_CALLABLE_TYPE(genericSupertype->rawType)) return false;
             else {
@@ -1020,6 +1019,7 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
                 return true;
             }
         }
+        else return isCallableSubtypeOfType(subtype, type2);
     }
     return false;
 }
