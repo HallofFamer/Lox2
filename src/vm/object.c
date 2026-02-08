@@ -536,7 +536,7 @@ static void printType(ObjType* type) {
         return;
     }
     else if (IS_ALIAS_TYPE(type)) {
-        printf("type alias %s", AS_ALIAS_TYPE(type)->targetType->shortName->chars);
+        printf("type alias %s", AS_ALIAS_TYPE(type)->baseType.shortName->chars);
         return;
     }
     else if (IS_VOID_TYPE(type)) printf("void");

@@ -2088,11 +2088,12 @@ void registerLangPackage(VM* vm) {
     vm->intClass = defineNativeClass(vm, "Int");
     vm->floatClass = defineNativeClass(vm, "Float");
 
-    ObjClass* iterableTrait = defineNativeTrait(vm, "TIterable");
-    ObjClass* iteratorTrait = defineNativeTrait(vm, "TIterator");
-    vm->iteratorClass = defineNativeClass(vm, "Iterator");
+    TypeInfo* elementType = declareNativeTypeParameter(vm, "E");
+    ObjClass* iterableTrait = defineNativeGenericClass(vm, "TIterable", 1, elementType);
+    ObjClass* iteratorTrait = defineNativeGenericClass(vm, "TIterator", 1, elementType);
+    vm->iteratorClass = defineNativeGenericClass(vm, "Iterator", 1, elementType);
     vm->stringClass = defineNativeClass(vm, "String");
-    ObjClass* stringIteratorClass = defineNativeClass(vm, "StringIterator");
+    ObjClass* stringIteratorClass = defineNativeGenericClass(vm, "StringIterator", 1, elementType);
 
     ObjClass* callableTrait = defineNativeTrait(vm, "TCallable");
     vm->functionClass = defineNativeClass(vm, "Function");
@@ -2354,7 +2355,7 @@ void registerLangPackage(VM* vm) {
     insertGlobalSymbolTable(vm, "TIterable", "Trait");
 
     DEF_METHOD(iteratorTrait, TIterator, currentIndex, 0, RETURN_TYPE(Object));
-    DEF_METHOD(iteratorTrait, TIterator, currentValue, 0, RETURN_TYPE(Object));
+    DEF_METHOD(iteratorTrait, TIterator, currentValue, 0, RETURN_TYPE(E));
     DEF_METHOD(iteratorTrait, TIterator, moveNext, 0, RETURN_TYPE(Bool));
     insertGlobalSymbolTable(vm, "TIterator", "Trait");
 
@@ -2364,9 +2365,9 @@ void registerLangPackage(VM* vm) {
     DEF_INTERCEPTOR(vm->iteratorClass, Iterator, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(Iterator), PARAM_TYPE(TIterable));
     DEF_FIELD(vm->iteratorClass, iterable, TIterable, false, NIL_VAL);
     DEF_FIELD(vm->iteratorClass, position, Int, false, INT_VAL(-1));
-    DEF_FIELD(vm->iteratorClass, value, Object, false, NIL_VAL);
+    DEF_FIELD(vm->iteratorClass, value, E, false, NIL_VAL);
     DEF_METHOD(vm->iteratorClass, Iterator, currentIndex, 0, RETURN_TYPE(Object));
-    DEF_METHOD(vm->iteratorClass, Iterator, currentValue, 0, RETURN_TYPE(Object));
+    DEF_METHOD(vm->iteratorClass, Iterator, currentValue, 0, RETURN_TYPE(E));
     DEF_METHOD(vm->iteratorClass, Iterator, moveNext, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->iteratorClass, Iterator, reset, 0, RETURN_TYPE(void));
     insertGlobalSymbolTable(vm, "Iterator", "Iterator class");

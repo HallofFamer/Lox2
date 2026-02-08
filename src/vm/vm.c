@@ -189,7 +189,8 @@ void initVM(VM* vm) {
 
     vm->initString = copyStringPerma(vm, "__init__", 8);
     vm->voidString = copyStringPerma(vm, "void", 4);
-    typeTableSet(vm->typetab, vm->voidString, newTypeInfo(0, sizeof(TypeInfo), TYPE_CATEGORY_VOID, vm->voidString, vm->voidString));
+    TypeInfo* voidType = newTypeInfo(0, sizeof(TypeInfo), TYPE_CATEGORY_VOID, vm->voidString, vm->voidString);
+    typeTableSet(vm->typetab, vm->voidString, voidType);
 
     registerLangPackage(vm);
     registerCollectionPackage(vm);

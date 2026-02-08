@@ -842,7 +842,8 @@ static void compileTrait(Compiler* compiler, Ast* ast) {
 }
 
 static void compileType(Compiler* compiler, Ast* ast) {
-    getVariable(compiler, findSymbolItem(compiler, ast->symtab, ast->token));
+	Token name = ast->attribute.isFunction ? syntheticToken("Function") : ast->token;
+	emitBytes(compiler, OP_GET_GLOBAL, (uint8_t)identifierConstant(compiler, &name));
 }
 
 static void compileUnary(Compiler* compiler, Ast* ast) {
