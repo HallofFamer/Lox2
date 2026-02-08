@@ -1,11 +1,16 @@
 # Change Log
 
-### Lox2 v2.1.1(current version)
+### Lox2 v2.1.2(current version)
+- Establish `Object` as top type for all types including function and metaclass types(Commits on Sep 9, 2025).
+- Update type.c to print function parameters properly if the first parameter has dynamic type(Commits on Sep 30, 2025).
+- Fix a minor bug in lexer which used to display incorrect line number when generating lexer error(Commits on Jan 8, 2026).
+
+### Lox2 v2.1.1(last version)
 - Modify typechecker to infer function/lambda parameter types for immediate function calls.
 - Update native callable type creation to display informative names when type error occurs.
 - Fix async methods in package `clox.std.io` and `clox.std.net` to use the asynchronous version of assertion macros.
  
-### Lox2 v2.1.0(last version)
+### Lox2 v2.1.0
 - Extend parser with infinite lookahead and backtrack, allowing parsing context sensitive grammar for Lox2.
 - Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be type inferred. 
 - Allow declaration of object instance/class fields outside of class initializer, which also enables optional static typing and default values.

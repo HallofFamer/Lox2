@@ -12,18 +12,19 @@ https://github.com/munificent/craftinginterpreters
 ## Features
 
 ### Original Features from Lox
-- Stacked based bytecode VM with the basic OPCode support.
-- On-demand Scanner, Pratt Parser and Single-Pass Compiler.
-- Uniform runtime representation for Lox Value. 
-- Basic Unary and Binary Expression/Operators.
-- Support for global and local variables.
-- If..Else and Switch condition Statement.
-- While Loop, Break and Continue Statement.
-- Functions and Closures with automatic upvalue capture.
-- Mark and sweep Garbage Collector.
-- Classes, Objects, Methods and `this` keyword.
-- Single Inheritance and `super` keyword.
-- Performance improvement with Faster hash table probing and Nan-Boxing.
+- Lox2 preserves most of the features found in the original Lox toy language. The following summary provides an overview for readers who may be unfamiliar with Lox.
+- Stack-based bytecode virtual machine with basic opcode support.
+- On-demand lexer integrated directly into the Pratt parser.
+- Uniform runtime representation for Lox Values.
+- Basic unary and binary expressions and operators.
+- Global and local variable support.
+- If-else and Switch conditional statements.
+- While loops with Break and Continue statements.
+- Functions and closures with automatic upvalue capture.
+- Mark-and-sweep garbage collector.
+- Classes, objects, methods, and the `this` keyword.
+- Single inheritance and the `super` keyword.
+- Performance optimizations including faster hash table probing and NaN-boxing.
 
 ### New Features in Lox2
 - Framework for creating native functions, methods and classes.
@@ -136,8 +137,13 @@ using clox.std.net.URL
 
 val client = HTTPClient()
 val response = await client.getAsync(URL.parse("https://example.com"))
-println("Response Status: ${response.status}")
+
+if (response.status != 200) {
+    throw Exception("HTTP error! Status: ${response.status}")
+}
+
 println("Content: ${response.content}")
+client.close()
 ```
 
 
@@ -145,7 +151,7 @@ println("Content: ${response.content}")
 
 #### Windows(with git, cmake and vcpkg, need to replace [$VCPKG_PATH] with installation path of vcpkg)
 ```
-git clone -b v2.1.1 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.1.2 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 cmake -DCMAKE_TOOLCHAIN_FILE:STRING="[$VCPKG_PATH]/scripts/buildsystems/vcpkg.cmake" -S . -B ./build
 cmake --build ./build --config Release
@@ -154,23 +160,25 @@ cmake --build ./build --config Release
 
 #### Linux(with git, cmake, curl and libuv, need to install one of the libcurl4-dev and libuv1.dev packages)
 ```
-git clone -b v2.1.1 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.1.2 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 mkdir build
 cmake -S . -B ./build
 cmake --build ./build --config Release
-./build/Lox2
+sudo cp build/Lox2 /usr/local/bin
+sudo cp lox2.ini /etc
+Lox2
 ```
 
 #### Docker(linux, need to replace [$LinuxDockerfile] by actual docker file name, ie. UbuntuDockerfile)
 ```
-git clone -b v2.1.1 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.1.2 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 docker build -t lox2:linux -f Docker/[$LinuxDockerfile] .
-docker run -w /Lox2-2.1.1/Lox2 -i -t lox2:linux
+docker run -w /Lox2-2.1.2/Lox2 -i -t lox2:linux
 ```
 
-Note: It is recommended to clone from the latest stable release branch("v2.1.1" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
+Note: It is recommended to clone from the latest stable release branch("v2.1.2" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
 
 
 ## Credits & Special Thanks
