@@ -129,7 +129,7 @@ Ast* astGetTypeParameters(Ast* ast) {
             return astLastChild(ast->parent);
         }
     case AST_CATEGORY_DECL:
-        if (ast->kind == AST_DECL_METHOD) {
+        if (ast->kind == AST_DECL_METHOD || ast->kind == AST_DECL_TYPE) {
             return astLastChild(ast);
         }
     }
@@ -150,6 +150,9 @@ bool astHasTypeParameters(Ast* ast) {
     case AST_CATEGORY_DECL:
         if (ast->kind == AST_DECL_METHOD) {
             return (astNumChild(ast) > 3);
+        }
+		else if (ast->kind == AST_DECL_TYPE) {
+            return (astNumChild(ast) > 1);
         }
     default:
         break;
@@ -671,6 +674,10 @@ static void astOutputDeclType(Ast* ast, int indentLevel) {
     char* typeName = tokenToCString(ast->token);
     printf("typeDecl %s\n", typeName);
     astOutputChild(ast, indentLevel + 1, 0);
+
+    if (astNumChild(ast) > 1) {
+        astOutputChild(ast, indentLevel + 1, 1);
+	}
     free(typeName);
 }
 

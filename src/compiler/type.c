@@ -471,7 +471,7 @@ TypeInfo* getInnerBaseType(TypeInfo* type) {
     else return type;
 }
 
-bool hasCallableTypeParameters(TypeInfo* type) {
+static bool hasCallableTypeParameters(TypeInfo* type) {
     if (type == NULL || !IS_CALLABLE_TYPE(type)) return false;
     CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
     if (callableType->formalTypeParams->count > 0) return true;
