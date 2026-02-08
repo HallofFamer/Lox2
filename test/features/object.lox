@@ -15,8 +15,7 @@ class Pair {
 val pair = Pair()
 pair.first = 1
 pair.second = 2
-println("Adding the pairs: ${pair.first + pair.second}")
-println("")
+println("Adding the pairs: ${pair.first + pair.second}\n")
 
 val object = Object()
 println("Printing object: ${object}")
@@ -25,8 +24,7 @@ println("Object has field length: ${object.hasField("length")}")
 println("Object's class: ${object.getClass()}")
 println("Object is instance of class Object: ${object.instanceOf(Object)}")
 println("Object is member of class Object: ${object.memberOf(Object)}")
-println("Converting object to string: ${object.toString()}")
-println("")
+println("Converting object to string: ${object.toString()}\n")
 
 val pair2 = pair.clone()
 println("Clone of pair and adding the fields: ${pair2.first + pair2.second}")

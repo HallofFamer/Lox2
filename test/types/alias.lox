@@ -1,4 +1,5 @@
 namespace test.types
+using clox.std.collection.Array;
 
 type Predicate = Bool fun(Object)
 println(Predicate)
@@ -8,3 +9,27 @@ Bool callPredicate(Predicate p, Object arg) {
 }
 
 println(callPredicate({|arg| arg % 2 == 0}, 4))
+
+type StringList = Array<String>
+println(StringList)
+
+Bool isEmpty(StringList list) {
+    return list.length == 0
+}
+
+val stringList = StringList()
+println(isEmpty(stringList))
+
+stringList[0] = "Hello"
+stringList[1] = "World"
+println(isEmpty(stringList))
+stringList.add(1)
+
+type GenericPredicate<T> = Bool fun(T)
+println(GenericPredicate)
+
+Bool callGenericPredicate<T>(GenericPredicate<T> p, T arg) {
+    return p(arg)
+}
+
+println(callGenericPredicate<String>({|arg| arg.length > 3}, "Test"))

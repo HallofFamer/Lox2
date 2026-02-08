@@ -4,8 +4,7 @@ val range = 0..4
 println("Creating an instance of Range class: (${range.from}..${range.to})")
 println("Length of Range: ${range.length()}")
 println("Range contains value 2: ${range.contains(2)}")
-println("Range element at index 3: ${range.getAt(3)}")
-println("")
+println("Range element at index 3: ${range.getAt(3)}\n")
 
 println("Looping through Range: ")
 for(val n : range){ 

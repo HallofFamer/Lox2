@@ -27,8 +27,7 @@ println("TVehicle has method 'carry': ${TVehicle.hasMethod("carry")}")
 println("Class of TVehicle: ${TVehicle.getClass()}")
 println("Class of Trait: ${TVehicle.getClass().getClass()}")
 println("Class of Trait class: ${TVehicle.getClass().getClass().getClass()}")
-println("Superclass of Trait: ${TVehicle.getClass().superclass()}")
-println("")
+println("Superclass of Trait: ${TVehicle.getClass().superclass()}\n")
 
 trait TTruck with TVehicle { 
 
@@ -44,8 +43,7 @@ trait TTruck with TVehicle {
 
 println("Trait: ${TTruck}")
 println("TTruck has method 'drive': ${TTruck.hasMethod("drive")}")
-println("TTruck has method 'carry': ${TTruck.hasMethod("carry")}")
-println("")
+println("TTruck has method 'carry': ${TTruck.hasMethod("carry")}\n")
 
 class Vehicle with TVehicle { 
 
@@ -72,8 +70,7 @@ vehicle.accelerate(10)
 println(vehicle.toString())
 println("Vehicle is instance of class Vehicle: ${vehicle.instanceOf(Vehicle)}")
 println("Vehicle is instance of trait TVehicle: ${vehicle.instanceOf(TVehicle)}")
-println("Vehicle is instance of trait TTruck: ${vehicle.instanceOf(TTruck)}")
-println("")
+println("Vehicle is instance of trait TTruck: ${vehicle.instanceOf(TTruck)}\n")
 
 class Truck extends Vehicle with TTruck { 
 
@@ -102,8 +99,7 @@ println(truck.toString())
 println("Truck is an instance of class Truck: ${truck.instanceOf(Truck)}")
 println("Truck is instance of trait TTruck: ${truck.instanceOf(TTruck)}")
 println("Truck is instance of class Vehicle: ${truck.instanceOf(Vehicle)}")
-println("Truck is instance of trait TVehicle: ${truck.instanceOf(TVehicle)}")
-println("")
+println("Truck is instance of trait TVehicle: ${truck.instanceOf(TVehicle)}\n")
 
 println("Number implements trait TComparable: ${Number.traits().contains(TComparable)}")
 println("Int is instance of trait TComparable: ${2.instanceOf(TComparable)}")
