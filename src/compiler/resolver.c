@@ -519,8 +519,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
 
 static void astInsertTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char* typeName) {
     ast->type = type;
-    ast->type->shortName = takeStringPerma(resolver->vm, typeName, (int)strlen(typeName));
-    ast->type->fullName = ast->type->shortName;
+    ast->type->fullName = ast->type->shortName = takeStringPerma(resolver->vm, typeName, (int)strlen(typeName));
 }
 
 static TypeInfo* findCallableTypeParams(Resolver* resolver, Ast* ast, Token* token) {

@@ -388,6 +388,7 @@ static void checkInheritingSuperclass(TypeChecker* typeChecker, TypeInfo* supert
     }
 
     checkInheritingSuperclass(typeChecker, superclassType->superclassType);
+	if (IS_ALIAS_TYPE(supertype)) supertype = getAliasTargetType(supertype);
     if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker, typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
 }
 
