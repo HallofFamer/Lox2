@@ -342,6 +342,7 @@ static Ast* variable(Parser* parser, Token token, bool canAssign);
 static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam);
 static Ast* statement(Parser* parser);
 static Ast* block(Parser* parser);
+static Ast* typeParameters(Parser* parser, Token token);
 static Ast* function(Parser* parser, Ast* returnType, bool isAsync, bool isLambda, bool isVoid);
 static Ast* declaration(Parser* parser);
 static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType);
@@ -414,9 +415,108 @@ static Ast* binary(Parser* parser, Token token, Ast* left, bool canAssign) {
     return newAst(AST_EXPR_BINARY, token, 2, left, right);
 }
 
+static Ast* behaviorType(Parser* parser) {
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect behavior type.");
+    return emptyAst(AST_EXPR_TYPE, previousToken(parser));
+}
+
+static Ast* callableType(Parser* parser) {
+    advance(parser);
+    Ast* returnType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+    if (returnType->token.type == TOKEN_SYMBOL_VOID) {
+        returnType->attribute.isVoid = true;
+    }
+
+    consume(parser, TOKEN_SYMBOL_FUN, "Expect 'fun' keyword after return type declaration.");
+    Token token = previousToken(parser);
+    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after 'fun' keyword.");
+    Ast* paramTypes = emptyAst(AST_LIST_EXPR, previousToken(parser));
+    Ast* paramType = NULL;
+    int arity = 0;
+
+    do {
+        arity++;
+        if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
+        if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
+            paramType = callableType(parser);
+            paramType->attribute.isFunction = true;
+        }
+        else paramType = behaviorType(parser);
+        astAppendChild(paramTypes, paramType);
+    } while (match(parser, TOKEN_SYMBOL_COMMA));
+
+    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after param types.");
+    Ast* type = newAst(AST_EXPR_TYPE, token, 2, returnType, paramTypes);
+    type->attribute.isFunction = true;
+    return type;
+}
+
+static Ast* metaclassType(Parser* parser) {
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect class name.");
+    Token token = previousToken(parser);
+    consume(parser, TOKEN_SYMBOL_CLASS, "Expect 'class' keyword after metaclass type declaration.");
+    Ast* type = emptyAst(AST_EXPR_TYPE, token);
+    type->attribute.isClass = true;
+    return type;
+}
+
+static Ast* genericType(Parser* parser) {
+    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect generic type name.");
+    Token token = previousToken(parser);
+    consume(parser, TOKEN_SYMBOL_LESS, "Expect '<' before generic parameter declaration.");
+
+    Ast* paramTypes = emptyAst(AST_LIST_EXPR, previousToken(parser));
+    Ast* paramType = NULL;
+    int arity = 0;
+
+    do {
+        arity++;
+        if (arity > UINT4_MAX) parseErrorAtCurrent(parser, "Can't have more than 15 generic types.");
+        if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
+            paramType = callableType(parser);
+            paramType->attribute.isFunction = true;
+        }
+        else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
+            paramType = genericType(parser);
+            paramType->attribute.isGeneric = true;
+        }
+        else paramType = behaviorType(parser);
+        astAppendChild(paramTypes, paramType);
+    } while (match(parser, TOKEN_SYMBOL_COMMA));
+
+    consume(parser, TOKEN_SYMBOL_GREATER, "Expect '>' after generic parameter declaration.");
+    Ast* type = newAst(AST_EXPR_TYPE, token, 1, paramTypes);
+    type->attribute.isGeneric = true;
+    return type;
+}
+
+static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
+    if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) return genericType(parser);
+    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) return metaclassType(parser);
+    else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) return callableType(parser);
+    else if ((checkParam && checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) || (!checkParam && check(parser, TOKEN_SYMBOL_IDENTIFIER))) return behaviorType(parser);
+    else if (allowEmpty) return emptyAst(AST_EXPR_TYPE, emptyToken());
+    else {
+        parseErrorAtCurrent(parser, "Invalid type specified.");
+        return NULL;
+    }
+}
+
 static Ast* call(Parser* parser, Token token, Ast* left, bool canAssign) { 
     Ast* right = argumentList(parser);
     return newAst(AST_EXPR_CALL, token, 2, left, right);
+}
+
+static Ast* invoke(Parser* parser, Token property, Ast* left, bool canAssign) {
+    Ast* right = argumentList(parser);
+    return newAst(AST_EXPR_INVOKE, property, 2, left, right);
+}
+
+static Ast* genericInvoke(Parser* parser, Token property, Ast* left, bool canAssign) {
+    Ast* typeParams = typeParameters(parser, property);
+    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect left parenthesis after type parameters.");
+    Ast* right = argumentList(parser);
+    return newAst(AST_EXPR_INVOKE, property, 3, left, right, typeParams);
 }
 
 static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) { 
@@ -427,8 +527,48 @@ static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) {
         return newAst(AST_EXPR_PROPERTY_SET, property, 2, left, right);
     }
     else if (match(parser, TOKEN_SYMBOL_LEFT_PAREN)) {
-        Ast* right = argumentList(parser);
-        return newAst(AST_EXPR_INVOKE, property, 2, left, right);
+        return invoke(parser, property, left, canAssign);
+    }
+    else if (check(parser, TOKEN_SYMBOL_LESS)) {
+        int index = parser->index;
+        Token current = parser->current;
+        Token previous2 = parser->tokens->elements[index - 2];
+        int genericDepth = 1;
+
+        advance(parser);
+        do {
+            advance(parser);
+
+            if (currentTokenType(parser) == TOKEN_SYMBOL_COMMA) {
+                advance(parser);
+                continue;
+            }
+            else if (previousTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && previousTokenType(parser) != TOKEN_SYMBOL_VOID) {
+                resetIndex(parser, index, current, false);
+                break;
+            }
+            else if (currentTokenType(parser) == TOKEN_SYMBOL_LESS) {
+                genericDepth++;
+                advance(parser);
+                continue;
+            }
+            else if (currentTokenType(parser) == TOKEN_SYMBOL_GREATER) {
+                while (match(parser, TOKEN_SYMBOL_GREATER)) {
+                    genericDepth--;
+                }
+
+                if (genericDepth == 0) {
+                    resetIndex(parser, index, current, true);
+                    return genericInvoke(parser, property, left, canAssign);
+                }
+            }
+            else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
+                resetIndex(parser, index, current, false);
+                break;
+            }
+        } while (true);
+
+        return newAst(AST_EXPR_PROPERTY_GET, property, 1, left);
     }
     else {
         return newAst(AST_EXPR_PROPERTY_GET, property, 1, left);
@@ -588,93 +728,6 @@ static Ast* closure(Parser* parser, Token token, bool canAssign) {
 
 static Ast* lambda(Parser* parser, Token token, bool canAssign) {
     return function(parser, emptyAst(AST_EXPR_TYPE, emptyToken()), false, true, false);
-}
-
-static Ast* behaviorType(Parser* parser) {
-    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect behavior type.");
-    return emptyAst(AST_EXPR_TYPE, previousToken(parser));
-}
-
-static Ast* callableType(Parser* parser) {
-    advance(parser);
-    Ast* returnType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
-    if (returnType->token.type == TOKEN_SYMBOL_VOID) {
-        returnType->attribute.isVoid = true;
-    }
-    
-    consume(parser, TOKEN_SYMBOL_FUN, "Expect 'fun' keyword after return type declaration.");
-    Token token = previousToken(parser);
-    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after 'fun' keyword.");
-    Ast* paramTypes = emptyAst(AST_LIST_EXPR, previousToken(parser));
-    Ast* paramType = NULL;
-    int arity = 0;
-
-    do {
-        arity++;
-        if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
-        if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
-            paramType = callableType(parser);
-            paramType->attribute.isFunction = true;
-        }
-        else paramType = behaviorType(parser);
-        astAppendChild(paramTypes, paramType);
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
-
-    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after param types.");
-    Ast* type = newAst(AST_EXPR_TYPE, token, 2, returnType, paramTypes);
-    type->attribute.isFunction = true;
-    return type;
-}
-
-static Ast* metaclassType(Parser* parser) {
-    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect class name.");
-    Token token = previousToken(parser);
-    consume(parser, TOKEN_SYMBOL_CLASS, "Expect 'class' keyword after metaclass type declaration.");
-    Ast* type = emptyAst(AST_EXPR_TYPE, token);
-    type->attribute.isClass = true;
-    return type;
-}
-
-static Ast* genericType(Parser* parser) {
-    consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect generic type name.");
-    Token token = previousToken(parser);
-    consume(parser, TOKEN_SYMBOL_LESS, "Expect '<' before generic parameter declaration.");
-
-    Ast* paramTypes = emptyAst(AST_LIST_EXPR, previousToken(parser));
-    Ast* paramType = NULL;
-    int arity = 0;
-
-    do {
-        arity++;
-        if (arity > UINT4_MAX) parseErrorAtCurrent(parser, "Can't have more than 15 generic types.");
-        if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
-            paramType = callableType(parser);
-            paramType->attribute.isFunction = true;
-        }
-        else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
-            paramType = genericType(parser);
-            paramType->attribute.isGeneric = true;
-        }
-        else paramType = behaviorType(parser);
-        astAppendChild(paramTypes, paramType);
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
-
-    consume(parser, TOKEN_SYMBOL_GREATER, "Expect '>' after generic parameter declaration.");
-    Ast* type = newAst(AST_EXPR_TYPE, token, 1, paramTypes);
-    type->attribute.isGeneric = true;
-    return type;
-}
-
-static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
-    if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) return genericType(parser);
-    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) return metaclassType(parser);
-    else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) return callableType(parser);
-    else if ((checkParam && checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) || (!checkParam && check(parser, TOKEN_SYMBOL_IDENTIFIER))) return behaviorType(parser);
-    else if (allowEmpty) return emptyAst(AST_EXPR_TYPE, emptyToken());
-    else {
-        parseErrorAtCurrent(parser, "Invalid type specified.");
-        return NULL;
-    }
 }
 
 static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
