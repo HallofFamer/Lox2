@@ -269,6 +269,7 @@ static void astOutputExprInvoke(Ast* ast, int indentLevel) {
     printf("invoke %s.%s\n", attribute, method);
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
+	if (astNumChild(ast) > 2) astOutputChild(ast, indentLevel + 1, 2);
     free(method);
 }
 

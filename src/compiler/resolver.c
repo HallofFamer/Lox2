@@ -573,6 +573,17 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
 				TypeInfoArrayAdd(resolver->vm->tempTypes, formalType);
             }
         }
+        else if (ast->kind == AST_DECL_METHOD && ast->attribute.isGeneric) {
+            Ast* typeParams = astLastChild(ast);
+            for (int i = 0; i < typeParams->children->count; i++) {
+                Ast* typeParam = astGetChild(typeParams, i);
+                resolveChild(resolver, typeParams, i);
+                ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
+                TypeInfo* formalType = newFormalTypeInfo(i, typeParamName);
+                TypeInfoArrayAdd(callableType->formalTypeParams, formalType);
+                TypeInfoArrayAdd(resolver->vm->tempTypes, formalType);
+            }
+        }
 
 		astInsertTempType(resolver, ast, (TypeInfo*)callableType, createCallableTypeName(callableType));
         TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
@@ -1459,6 +1470,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
         setCallableTypeModifier(ast, methodType->declaredType);
         free(methodType->declaredType);
         methodType->declaredType = AS_CALLABLE_TYPE(ast->type);
+		printf("method declared type: %s, number of generic parameters %d\n", methodType->declaredType->baseType.shortName->chars, methodType->declaredType->formalTypeParams->count);
         item->type = (TypeInfo*)methodType;
     }
 }
