@@ -902,6 +902,7 @@ static void typeCheckInterpolation(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckInvoke(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     typeCheckChild(typeChecker, ast, 1);
+	if (astNumChild(ast) > 2) typeCheckChild(typeChecker, ast, 2);
     inferAstTypeFromInvoke(typeChecker, ast);
 }
 
