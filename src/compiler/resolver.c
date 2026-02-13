@@ -665,7 +665,7 @@ static void block(Resolver* resolver, Ast* ast) {
     }
 }
 
-static void insertTypeParameters(Resolver* resolver, Ast* ast) {
+static void typeParameters(Resolver* resolver, Ast* ast) {
     Ast* typeParams = astGetTypeParameters(ast);
     if (typeParams == NULL) return;
     for (int i = 0; i < typeParams->children->count; i++) {
@@ -689,7 +689,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     beginScope(resolver, ast, scope);
 	if (astHasTypeParameters(ast)) {
         functionResolver.attribute.isGeneric = true;
-        insertTypeParameters(resolver, ast);
+        typeParameters(resolver, ast);
     }
 
     Ast* returnType = astGetChild(ast, 0);
