@@ -611,22 +611,31 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
 
     if (baseType != NULL) {
         MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-		CallableTypeInfo* declaredType = AS_CALLABLE_TYPE(methodType->declaredType);
-        if (declaredType->formalTypeParams->count > 0) {
+		TypeInfo* declaredType = (TypeInfo*)methodType->declaredType;
+        if (methodType->declaredType->formalTypeParams->count > 0) {
             if (astNumChild(ast) < 3) {
                 typeError(typeChecker, "Method %s::%s needs to be invoked with generic type parameters.", receiver->type->shortName->chars, methodName->chars);
 				return;
             }
 
 			Ast* typeParams = astLastChild(ast);
-            if (typeParams->children->count != declaredType->formalTypeParams->count) {
+            if (typeParams->children->count != methodType->declaredType->formalTypeParams->count) {
                 typeError(typeChecker, "Method %s::%s expects to receive %d generic type parameters but gets %d.", receiver->type->shortName->chars,
-                    methodName->chars, declaredType->formalTypeParams->count, typeParams->children->count);
+                    methodName->chars, methodType->declaredType->formalTypeParams->count, typeParams->children->count);
                 return;
 			}
+
+			GenericTypeInfo* genericDeclaredType = newGenericTypeInfo(-1, methodType->declaredType->baseType.shortName, methodType->declaredType->baseType.fullName, declaredType);
+            for (int i = 0; i < typeParams->children->count; i++) {
+                TypeInfo* actualType = typeParams->children->elements[i]->type;
+				TypeInfoArrayAdd(genericDeclaredType->actualTypeParams, actualType);
+            }
+
+			TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)genericDeclaredType);
+			declaredType = (TypeInfo*)genericDeclaredType;
         }
 
-        CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, (TypeInfo*)declaredType);
+        CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, declaredType);
         char methodDesc[UINT8_MAX];
         sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", receiver->type->shortName->chars, methodName->chars);
         checkArguments(typeChecker, methodDesc, args, callableType);

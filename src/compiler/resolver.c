@@ -990,6 +990,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
 			if (baseType == NULL) return;
             TypeInfoArray* formalTypeParams = AS_BEHAVIOR_TYPE(baseType)->formalTypeParams;
             Ast* typeParams = astGetChild(ast, 0);
+
             for (int i = 0; i < typeParams->children->count; i++) {
                 Ast* typeParam = astGetChild(typeParams, i);
                 ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
