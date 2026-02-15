@@ -625,14 +625,30 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
                 return;
 			}
 
-			GenericTypeInfo* genericDeclaredType = newGenericTypeInfo(-1, methodType->declaredType->baseType.shortName, methodType->declaredType->baseType.fullName, declaredType);
+			CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, methodType->baseType.category, methodType->declaredType->baseType.shortName, methodType->declaredType->returnType);
+            TypeInfoArray* actualTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+            if (actualTypeParams == NULL) {
+                fprintf(stderr, "Failed to allocate memory for formal type parameters array.\n");
+                exit(1);
+			}
+            TypeInfoArrayInit(actualTypeParams);
+
             for (int i = 0; i < typeParams->children->count; i++) {
                 TypeInfo* actualType = typeParams->children->elements[i]->type;
-				TypeInfoArrayAdd(genericDeclaredType->actualTypeParams, actualType);
+                TypeInfoArrayAdd(actualTypeParams, actualType);
             }
 
-			TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)genericDeclaredType);
-			declaredType = (TypeInfo*)genericDeclaredType;
+            for (int i = 0; i < methodType->declaredType->paramTypes->count; i++) {
+                TypeInfo* paramType = methodType->declaredType->paramTypes->elements[i];
+                if (hasGenericParameters(paramType)) {
+                    paramType = instantiateTypeParameterWithName(typeChecker, paramType, methodType->declaredType->formalTypeParams, actualTypeParams);
+                }
+                TypeInfoArrayAdd(instantiatedCallableType->paramTypes, paramType);
+            }
+
+			TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedCallableType);
+            free(actualTypeParams);
+			declaredType = (TypeInfo*)instantiatedCallableType;
         }
 
         CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, declaredType);
