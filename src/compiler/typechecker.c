@@ -165,6 +165,33 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
     return instantiatedFunctionType;
 }
 
+static CallableTypeInfo* instantiateGenericCallableType(TypeChecker* typeChecker, CallableTypeInfo* declaredType, Ast* typeParams) {
+    CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, declaredType->baseType.category, declaredType->baseType.shortName, declaredType->returnType);
+    TypeInfoArray* actualTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+    if (actualTypeParams == NULL) {
+        fprintf(stderr, "Failed to allocate memory for formal type parameters array.\n");
+        exit(1);
+    }
+    TypeInfoArrayInit(actualTypeParams);
+
+    for (int i = 0; i < typeParams->children->count; i++) {
+        TypeInfo* actualType = typeParams->children->elements[i]->type;
+        TypeInfoArrayAdd(actualTypeParams, actualType);
+    }
+
+    for (int i = 0; i < declaredType->paramTypes->count; i++) {
+        TypeInfo* paramType = declaredType->paramTypes->elements[i];
+        if (hasGenericParameters(paramType)) {
+            paramType = instantiateTypeParameterWithName(typeChecker, paramType, declaredType->formalTypeParams, actualTypeParams);
+        }
+        TypeInfoArrayAdd(instantiatedCallableType->paramTypes, paramType);
+    }
+
+    TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedCallableType);
+    free(actualTypeParams);
+    return instantiatedCallableType;
+}
+
 static CallableTypeInfo* instantiateGenericMethodTypeWithPlaceholders(TypeChecker* typeChecker, BehaviorTypeInfo* behaviorType, TypeInfo* methodType) {
     if (methodType == NULL) return NULL;
     if (IS_CALLABLE_TYPE(methodType)) return AS_CALLABLE_TYPE(methodType);
@@ -625,30 +652,7 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
                 return;
 			}
 
-			CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, methodType->baseType.category, methodType->declaredType->baseType.shortName, methodType->declaredType->returnType);
-            TypeInfoArray* actualTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-            if (actualTypeParams == NULL) {
-                fprintf(stderr, "Failed to allocate memory for formal type parameters array.\n");
-                exit(1);
-			}
-            TypeInfoArrayInit(actualTypeParams);
-
-            for (int i = 0; i < typeParams->children->count; i++) {
-                TypeInfo* actualType = typeParams->children->elements[i]->type;
-                TypeInfoArrayAdd(actualTypeParams, actualType);
-            }
-
-            for (int i = 0; i < methodType->declaredType->paramTypes->count; i++) {
-                TypeInfo* paramType = methodType->declaredType->paramTypes->elements[i];
-                if (hasGenericParameters(paramType)) {
-                    paramType = instantiateTypeParameterWithName(typeChecker, paramType, methodType->declaredType->formalTypeParams, actualTypeParams);
-                }
-                TypeInfoArrayAdd(instantiatedCallableType->paramTypes, paramType);
-            }
-
-			TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedCallableType);
-            free(actualTypeParams);
-			declaredType = (TypeInfo*)instantiatedCallableType;
+            declaredType = (TypeInfo*)instantiateGenericCallableType(typeChecker, methodType->declaredType, typeParams);
         }
 
         CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, declaredType);

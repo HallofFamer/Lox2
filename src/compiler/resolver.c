@@ -669,8 +669,9 @@ static void typeParameters(Resolver* resolver, Ast* ast) {
     Ast* typeParams = astGetTypeParameters(ast);
     if (typeParams == NULL) return;
     for (int i = 0; i < typeParams->children->count; i++) {
-        Ast* typeParam = astGetChild(typeParams, i);
         resolveChild(resolver, typeParams, i);
+        Ast* typeParam = astGetChild(typeParams, i);
+        insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);
     }
 }
 
