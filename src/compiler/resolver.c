@@ -690,12 +690,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     beginScope(resolver, ast, scope);
 	if (astHasTypeParameters(ast)) {
         functionResolver.attribute.isGeneric = true;
-        Ast* typeParams = astGetTypeParameters(ast);
-        for (int i = 0; i < typeParams->children->count; i++) {
-            resolveChild(resolver, typeParams, i);
-            Ast* typeParam = astGetChild(typeParams, i);
-            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);
-        }
+        typeParameters(resolver, ast);
     }
 
     Ast* returnType = astGetChild(ast, 0);
