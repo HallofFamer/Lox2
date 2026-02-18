@@ -15,8 +15,7 @@ val promise3 = client.downloadAsync("https://filesamples.com/samples/document/tx
 await Promise.all([promise, promise2, promise3])
 val end = clock()
 
-println("Successfully downloaded all 3 files.")
-println("")
+println("Successfully downloaded all 3 files.\n")
 println("Downloaded all 3 files after ${end - start} seconds")
 println("Closing HTTP Client... ")
 client.close()

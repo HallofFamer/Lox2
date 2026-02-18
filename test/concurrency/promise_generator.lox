@@ -7,8 +7,7 @@ class FileReader {
         val fileReader = yield File.openAsync(url, "r")
         print("Successfully opened: ")
         println(fileReader)
-        println("Now reading the entire file: ")
-        println("")
+        println("Now reading the entire file: \n")
 
         val text = yield fileReader.readToEndAsync()
         println(text)

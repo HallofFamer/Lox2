@@ -1,0 +1,75 @@
+namespace test.types
+using clox.std.collection.Array;
+
+class Entity<TId> {
+	
+	val TId id
+	
+	__init__(TId id) {
+		this.id = id
+	}
+}
+
+class Product extends Entity<Int> {
+	
+	val String name
+	val Float price
+	
+	__init__(Int id, String name, Float price) {
+		super.__init__(id)
+		this.name = name
+		this.price = price
+	}
+	
+	String toString() {
+		return "Product(id: ${this.id}, name: ${this.name}, price: ${this.price})"
+	}
+}
+
+class GenericRepository<TEntity> {
+    
+	val Array<TEntity> entities
+
+	__init__() {
+		this.entities = Array<TEntity>()
+	}
+
+	void add(TEntity entity) {
+		this.entities.add(entity)
+	}
+
+	void addAll(Array<TEntity> entities) {
+		this.entities.addAll(entities)
+	}
+
+	TEntity get(Bool fun(TEntity) predicate) {
+		for (val entity : this.entities) {
+			if (predicate(entity)) {
+				return entity
+			}
+		}
+		return nil
+	}
+
+	TEntity getById<TId>(TId id) {
+	    return this.get({|m| m.id == id })
+	}
+
+	Array<TEntity> getAll() {
+		return this.entities
+	}
+}
+
+val products = Array<Product>()
+products.add(Product(1, "Laptop", 999.99))
+products.add(Product(2, "Smartphone", 499.49))
+products.add(Product(3, "Tablet", 299.29))
+for (val product : products) {
+	println(product.toString())
+}
+
+val productRepo = GenericRepository<Product>()
+productRepo.addAll(products)
+productRepo.add(Product(4, "Monitor", 199.99))
+val product = productRepo.getById<Int>(4)
+println(product.toString())
