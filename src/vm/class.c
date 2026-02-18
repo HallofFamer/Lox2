@@ -116,8 +116,7 @@ ObjString* getClassFullName(VM* vm, ObjString* shortName, ObjString* currentName
 
 bool isObjInstanceOf(VM* vm, Value value, ObjClass* klass) {
     ObjClass* currentClass = getObjClass(vm, value);
-    if (currentClass == klass) return true;
-    if (isClassExtendingSuperclass(currentClass->superclass, klass)) return true;
+    if (currentClass == klass || isClassExtendingSuperclass(currentClass->superclass, klass)) return true;
     return isClassImplementingTrait(currentClass, klass);
 }
 

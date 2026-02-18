@@ -62,6 +62,7 @@ ObjString* locateSourceFile(VM* vm, ObjString* shortName, ObjNamespace* enclosin
     int length = enclosingNamespace->fullName->length + shortName->length + 5;
     char* heapChars = ALLOCATE(char, length + 1, GC_GENERATION_TYPE_PERMANENT);
     int offset = 0;
+
     while (offset < enclosingNamespace->fullName->length) {
         char currentChar = enclosingNamespace->fullName->chars[offset];
         heapChars[offset] = (currentChar == '.') ? '/' : currentChar;

@@ -98,9 +98,9 @@ ObjException* createException(VM* vm, ObjClass* exceptionClass, const char* form
     va_start(args, format);
     int length = vsnprintf(chars, UINT8_MAX, format, args);
     va_end(args);
+
     ObjString* message = copyString(vm, chars, length);
     ObjArray* stacktrace = getStackTrace(vm);
-
     ObjException* exception = newException(vm, message, exceptionClass);
     exception->stacktrace = stacktrace;
     return exception;

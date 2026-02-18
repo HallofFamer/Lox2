@@ -122,8 +122,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Typ
     
     char* functionTypeName = createCallableTypeName(functionType);
     item->type = (TypeInfo*)functionType;
-    item->type->shortName = takeStringPerma(vm, functionTypeName, (int)strlen(functionTypeName));
-    item->type->fullName = item->type->shortName;
+    item->type->fullName = item->type->shortName = takeStringPerma(vm, functionTypeName, (int)strlen(functionTypeName));
     TypeInfoArrayAdd(vm->tempTypes, item->type);
     va_end(args);
 }
