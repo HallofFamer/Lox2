@@ -956,8 +956,10 @@ static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
     if (resolver->currentClass == NULL) {
         semanticError(resolver, "Cannot use 'super' outside of a class/trait.");
     }
+
     findThis(resolver);
     resolveChild(resolver, ast, 0);
+    if (astNumChild(ast) > 1) resolveChild(resolver, ast, 1);
 }
 
 static void resolveThis(Resolver* resolver, Ast* ast) {

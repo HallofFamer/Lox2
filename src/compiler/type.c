@@ -809,8 +809,8 @@ static void typeTableOutputMethods(TypeTable* methods) {
             if (method->declaredType->returnType == NULL) printf("dynamic ");
             else if (method->declaredType->attribute.isVoid) printf("void ");
             else printf("%s ", method->declaredType->returnType->shortName->chars);
-
             printf("%s", entry->key->chars);
+
             if (method->declaredType->formalTypeParams != NULL && method->declaredType->formalTypeParams->count > 0) {
                 printf("<%s", method->declaredType->formalTypeParams->elements[0]->shortName->chars);
                 for (int i = 1; i < method->declaredType->formalTypeParams->count; i++) {

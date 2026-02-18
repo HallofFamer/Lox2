@@ -512,18 +512,12 @@ static Ast* invoke(Parser* parser, Token property, Ast* left, bool canAssign) {
     return newAst(AST_EXPR_INVOKE, property, 2, left, right);
 }
 
-static Ast* genericInvoke(Parser* parser, Token property, Ast* left, bool canAssign) {
+static Ast* genericInvoke(Parser* parser, Token property, Ast* left, bool isSuper) {
     Ast* typeParams = typeParameters(parser, property);
     consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect left parenthesis after type parameters.");
     Ast* right = argumentList(parser);
+    if (isSuper) return newAst(AST_EXPR_SUPER_INVOKE, property, 2, right, typeParams);
     return newAst(AST_EXPR_INVOKE, property, 3, left, right, typeParams);
-}
-
-static Ast* genericSuperInvoke(Parser* parser, Token property, bool canAssign) {
-    Ast* typeParams = typeParameters(parser, property);
-    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect left parenthesis after type parameters.");
-    Ast* arguments = argumentList(parser);
-    return newAst(AST_EXPR_SUPER_INVOKE, property, 2, arguments, typeParams);
 }
 
 static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) { 
@@ -566,7 +560,7 @@ static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) {
 
                 if (genericDepth == 0) {
                     resetIndex(parser, index, current, true);
-                    return genericInvoke(parser, property, left, canAssign);
+                    return genericInvoke(parser, property, left, false);
                 }
             }
             else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
@@ -1060,7 +1054,7 @@ static Ast* super_(Parser* parser, Token token, bool canAssign) {
 
                 if (genericDepth == 0) {
                     resetIndex(parser, index, current, true);
-                    return genericSuperInvoke(parser, method, canAssign);
+                    return genericInvoke(parser, method, NULL, true);
                 }
             }
             else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {

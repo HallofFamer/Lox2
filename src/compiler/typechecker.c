@@ -677,7 +677,7 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
     TypeInfo* declaredType = (TypeInfo*)methodType->declaredType;
 
     if (methodType->declaredType->formalTypeParams->count > 0) {
-        if (astNumChild(ast) < 3) {
+        if (astNumChild(ast) < 2) {
             typeError(typeChecker, "Method %s::%s needs to be invoked with generic type parameters.", superType->shortName->chars, methodName->chars);
             return;
         }
@@ -1048,6 +1048,7 @@ static void typeCheckSuperGet(TypeChecker* typeChecker, Ast* ast) {
 
 static void typeCheckSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
+    if (astNumChild(ast) > 1) typeCheckChild(typeChecker, ast, 1);
     inferAstTypeFromSuperInvoke(typeChecker, ast);
 }
 

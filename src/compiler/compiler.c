@@ -692,6 +692,7 @@ static void compileDictionary(Compiler* compiler, Ast* ast) {
     uint8_t entryCount = 0;
     Ast* keys = astGetChild(ast, 0);
     Ast* values = astGetChild(ast, 1);
+
     while (entryCount < keys->children->count) {
         compileChild(compiler, keys, entryCount);
         compileChild(compiler, values, entryCount);
