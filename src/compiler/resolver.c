@@ -719,12 +719,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
 
     if (astHasTypeParameters(ast)) {
         classResolver.isGeneric = true;
-        Ast* typeParams = astGetTypeParameters(ast);
-        for (int i = 0; i < typeParams->children->count; i++) {
-            resolveChild(resolver, typeParams, i);
-            Ast* typeParam = astGetChild(typeParams, i);
-            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);
-        }
+        typeParameters(resolver, ast);
     }
 
     if (type == BEHAVIOR_CLASS) {

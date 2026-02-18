@@ -674,8 +674,25 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
     TypeInfo* baseType = typeTableMethodLookup(superType, methodName);
     if (baseType == NULL) return;
     MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-    CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, superType, (TypeInfo*)methodType->declaredType);
+    TypeInfo* declaredType = (TypeInfo*)methodType->declaredType;
 
+    if (methodType->declaredType->formalTypeParams->count > 0) {
+        if (astNumChild(ast) < 3) {
+            typeError(typeChecker, "Method %s::%s needs to be invoked with generic type parameters.", superType->shortName->chars, methodName->chars);
+            return;
+        }
+
+        Ast* typeParams = astLastChild(ast);
+        if (typeParams->children->count != methodType->declaredType->formalTypeParams->count) {
+            typeError(typeChecker, "Method %s::%s expects to receive %d generic type parameters but gets %d.", superType->shortName->chars,
+                methodName->chars, methodType->declaredType->formalTypeParams->count, typeParams->children->count);
+            return;
+        }
+
+        declaredType = (TypeInfo*)instantiateGenericCallableType(typeChecker, methodType->declaredType, typeParams);
+    }
+
+    CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, superType, declaredType);
     char methodDesc[UINT8_MAX];
     sprintf_s(methodDesc, UINT8_MAX, "Method %s::%s", superType->shortName->chars, methodName->chars);
     checkArguments(typeChecker, methodDesc, args, callableType);

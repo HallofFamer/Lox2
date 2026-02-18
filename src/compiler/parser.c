@@ -519,6 +519,13 @@ static Ast* genericInvoke(Parser* parser, Token property, Ast* left, bool canAss
     return newAst(AST_EXPR_INVOKE, property, 3, left, right, typeParams);
 }
 
+static Ast* genericSuperInvoke(Parser* parser, Token property, bool canAssign) {
+    Ast* typeParams = typeParameters(parser, property);
+    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect left parenthesis after type parameters.");
+    Ast* arguments = argumentList(parser);
+    return newAst(AST_EXPR_SUPER_INVOKE, property, 2, arguments, typeParams);
+}
+
 static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) { 
     Token property = identifierToken(parser, "Expect property name after '.'.");
 
@@ -1023,7 +1030,48 @@ static Ast* super_(Parser* parser, Token token, bool canAssign) {
     consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect superclass method name.");
     Token method = previousToken(parser);
 
-    if (match(parser, TOKEN_SYMBOL_LEFT_PAREN)) {
+    if (check(parser, TOKEN_SYMBOL_LESS)) {
+        int index = parser->index;
+        Token current = parser->current;
+        Token previous2 = parser->tokens->elements[index - 2];
+        int genericDepth = 1;
+
+        advance(parser);
+        do {
+            advance(parser);
+
+            if (currentTokenType(parser) == TOKEN_SYMBOL_COMMA) {
+                advance(parser);
+                continue;
+            }
+            else if (previousTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && previousTokenType(parser) != TOKEN_SYMBOL_VOID) {
+                resetIndex(parser, index, current, false);
+                break;
+            }
+            else if (currentTokenType(parser) == TOKEN_SYMBOL_LESS) {
+                genericDepth++;
+                advance(parser);
+                continue;
+            }
+            else if (currentTokenType(parser) == TOKEN_SYMBOL_GREATER) {
+                while (match(parser, TOKEN_SYMBOL_GREATER)) {
+                    genericDepth--;
+                }
+
+                if (genericDepth == 0) {
+                    resetIndex(parser, index, current, true);
+                    return genericSuperInvoke(parser, method, canAssign);
+                }
+            }
+            else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
+                resetIndex(parser, index, current, false);
+                break;
+            }
+        } while (true);
+
+        return emptyAst(AST_EXPR_SUPER_GET, method);
+    }
+    else if (match(parser, TOKEN_SYMBOL_LEFT_PAREN)) {
         Ast* arguments = argumentList(parser);
         return newAst(AST_EXPR_SUPER_INVOKE, method, 1, arguments);
     }

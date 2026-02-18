@@ -124,14 +124,14 @@ Ast* astGetTypeParameters(Ast* ast) {
     }
 
     switch (ast->category) {
-    case AST_CATEGORY_EXPR:
-        if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
-            return astLastChild(ast->parent);
-        }
-    case AST_CATEGORY_DECL:
-        if (ast->kind == AST_DECL_METHOD || ast->kind == AST_DECL_TYPE) {
-            return astLastChild(ast);
-        }
+        case AST_CATEGORY_EXPR:
+            if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
+                return astLastChild(ast->parent);
+            }
+        case AST_CATEGORY_DECL:
+            if (ast->kind == AST_DECL_METHOD || ast->kind == AST_DECL_TYPE) {
+                return astLastChild(ast);
+            }
     }
 
     return false;
@@ -143,19 +143,19 @@ bool astHasTypeParameters(Ast* ast) {
     }
 
     switch (ast->category) {
-    case AST_CATEGORY_EXPR:
-        if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
-            return (astNumChild(ast->parent) > 1);
-        }
-    case AST_CATEGORY_DECL:
-        if (ast->kind == AST_DECL_METHOD) {
-            return (astNumChild(ast) > 3);
-        }
-		else if (ast->kind == AST_DECL_TYPE) {
-            return (astNumChild(ast) > 1);
-        }
-    default:
-        break;
+        case AST_CATEGORY_EXPR:
+            if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
+                return (astNumChild(ast->parent) > 1);
+            }
+        case AST_CATEGORY_DECL:
+            if (ast->kind == AST_DECL_METHOD) {
+                return (astNumChild(ast) > 3);
+            }
+		    else if (ast->kind == AST_DECL_TYPE) {
+                return (astNumChild(ast) > 1);
+            }
+        default:
+            break;
     }
 
     return false;
@@ -375,6 +375,7 @@ static void astOutputExprSuperInvoke(Ast* ast, int indentLevel) {
     char* method = tokenToCString(ast->token);
     printf("superInvoke %s\n", method);
     astOutputChild(ast, indentLevel + 1, 0);
+	if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
     free(method);
 }
 
