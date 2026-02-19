@@ -401,8 +401,12 @@ static void checkInheritingSuperclass(TypeChecker* typeChecker, TypeInfo* supert
         MethodTypeInfo* methodType = AS_METHOD_TYPE(methodEntry->value);
 
         TypeInfo* subclassMethodType = typeTableGet(typeChecker->currentClass->type->methods, methodEntry->key);
+        CallableTypeInfo* declaredSuperclassMethodType = methodType->declaredType;
         if (subclassMethodType != NULL && subclassMethodType->shortName != typeChecker->vm->initString) {
-            checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, methodType->declaredType, supertype);
+            if (IS_GENERIC_TYPE(supertype)) {
+                declaredSuperclassMethodType = instantiateGenericMethodType(typeChecker, supertype, declaredSuperclassMethodType);
+            }
+            checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, declaredSuperclassMethodType, supertype);
         }
     }
 
