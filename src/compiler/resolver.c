@@ -1278,8 +1278,7 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
     for (int i = 0; i < namespaceDepth - 1; i++) {
         Ast* subNamespace = astGetChild(_namespace, i);
         subNamespace->symtab = _namespace->symtab;
-        if (i > 0) continue;
-        insertSymbol(resolver, subNamespace->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, NULL, false);
+        if (i == 0) insertSymbol(resolver, subNamespace->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, NULL, false);
     }
 
     Ast* shortName = astLastChild(_namespace);

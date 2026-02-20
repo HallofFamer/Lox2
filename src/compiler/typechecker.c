@@ -165,7 +165,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
     return instantiatedFunctionType;
 }
 
-static CallableTypeInfo* instantiateGenericCallableType(TypeChecker* typeChecker, CallableTypeInfo* declaredType, Ast* typeParams) {
+static CallableTypeInfo* instantiateGenericMethodTypeFromAst(TypeChecker* typeChecker, CallableTypeInfo* declaredType, Ast* typeParams) {
     CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, declaredType->baseType.category, declaredType->baseType.shortName, declaredType->returnType);
     for (int i = 0; i < typeParams->children->count; i++) {
         TypeInfo* actualType = typeParams->children->elements[i]->type;
@@ -404,7 +404,11 @@ static void checkInheritingSuperclass(TypeChecker* typeChecker, TypeInfo* supert
         CallableTypeInfo* declaredSuperclassMethodType = methodType->declaredType;
         if (subclassMethodType != NULL && subclassMethodType->shortName != typeChecker->vm->initString) {
             if (IS_GENERIC_TYPE(supertype)) {
-                declaredSuperclassMethodType = instantiateGenericMethodType(typeChecker, supertype, declaredSuperclassMethodType);
+                if (declaredSuperclassMethodType->formalTypeParams->count > 0) {
+                    printf("superclass method has %d type parameter.\n", declaredSuperclassMethodType->formalTypeParams->count);
+                }
+                declaredSuperclassMethodType = instantiateGenericMethodType(typeChecker, supertype, (TypeInfo*)declaredSuperclassMethodType);
+				printf("declaredSuperclassMethodType: %s\n", declaredSuperclassMethodType->baseType.fullName->chars);
             }
             checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, declaredSuperclassMethodType, supertype);
         }
@@ -648,7 +652,7 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
                 return;
 			}
 
-            declaredType = (TypeInfo*)instantiateGenericCallableType(typeChecker, methodType->declaredType, typeParams);
+            declaredType = (TypeInfo*)instantiateGenericMethodTypeFromAst(typeChecker, methodType->declaredType, typeParams);
         }
 
         CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, declaredType);
@@ -693,7 +697,7 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
             return;
         }
 
-        declaredType = (TypeInfo*)instantiateGenericCallableType(typeChecker, methodType->declaredType, typeParams);
+        declaredType = (TypeInfo*)instantiateGenericMethodTypeFromAst(typeChecker, methodType->declaredType, typeParams);
     }
 
     CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, superType, declaredType);
