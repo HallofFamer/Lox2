@@ -404,11 +404,7 @@ static void checkInheritingSuperclass(TypeChecker* typeChecker, TypeInfo* supert
         CallableTypeInfo* declaredSuperclassMethodType = methodType->declaredType;
         if (subclassMethodType != NULL && subclassMethodType->shortName != typeChecker->vm->initString) {
             if (IS_GENERIC_TYPE(supertype)) {
-                if (declaredSuperclassMethodType->formalTypeParams->count > 0) {
-                    printf("superclass method has %d type parameter.\n", declaredSuperclassMethodType->formalTypeParams->count);
-                }
                 declaredSuperclassMethodType = instantiateGenericMethodType(typeChecker, supertype, (TypeInfo*)declaredSuperclassMethodType);
-				printf("declaredSuperclassMethodType: %s\n", declaredSuperclassMethodType->baseType.fullName->chars);
             }
             checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, declaredSuperclassMethodType, supertype);
         }

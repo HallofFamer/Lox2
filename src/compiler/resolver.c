@@ -617,8 +617,21 @@ static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
         semanticError(resolver, "Alias type '%s' must have a valid target type.", alias->chars);
         return NULL;
     }
+
 	TypeInfo* targetType = getAliasTargetType(typeDef->type);
-    return typeTableInsertAlias(resolver->vm->typetab, alias, alias, targetType);
+    AliasTypeInfo* aliasType = typeTableInsertAlias(resolver->vm->typetab, alias, alias, targetType);
+    if (ast->attribute.isGeneric) {
+        Ast* typeParams = astLastChild(ast);
+        for (int i = 0; i < typeParams->children->count; i++) {
+            Ast* typeParam = astGetChild(typeParams, i);
+            resolveChild(resolver, typeParams, i);
+            ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
+            TypeInfo* formalType = newFormalTypeInfo(i, typeParamName);
+            TypeInfoArrayAdd(aliasType->formalTypeParams, formalType);
+            TypeInfoArrayAdd(resolver->vm->tempTypes, formalType);
+        }
+    }
+    return aliasType;
 }
 
 static AliasTypeInfo* insertGenericAliasType(Resolver* resolver, Ast* ast) {
@@ -986,7 +999,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         else {
             TypeInfo* baseType = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass, true);
 			if (baseType == NULL) return;
-            TypeInfoArray* formalTypeParams = AS_BEHAVIOR_TYPE(baseType)->formalTypeParams;
+            TypeInfoArray* formalTypeParams = IS_ALIAS_TYPE(baseType) ? AS_ALIAS_TYPE(baseType)->formalTypeParams : AS_BEHAVIOR_TYPE(baseType)->formalTypeParams;
             Ast* typeParams = astGetChild(ast, 0);
 
             for (int i = 0; i < typeParams->children->count; i++) {
