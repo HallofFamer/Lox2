@@ -184,33 +184,6 @@ static CallableTypeInfo* instantiateGenericMethodTypeFromAst(TypeChecker* typeCh
     return instantiatedCallableType;
 }
 
-static CallableTypeInfo* instantiateGenericMethodTypeWithPlaceholders(TypeChecker* typeChecker, BehaviorTypeInfo* behaviorType, TypeInfo* methodType) {
-    if (methodType == NULL) return NULL;
-    if (IS_CALLABLE_TYPE(methodType)) return AS_CALLABLE_TYPE(methodType);
-	GenericTypeInfo* genericMethodType = AS_GENERIC_TYPE(methodType);
-    CallableTypeInfo* rawMethodType = AS_CALLABLE_TYPE(genericMethodType->rawType);
-    TypeInfo* returnType = rawMethodType->returnType;
-    if (hasGenericParameters(returnType)) {
-        returnType = instantiateTypeParameterWithName(typeChecker, returnType, rawMethodType->formalTypeParams, genericMethodType->actualTypeParams);
-    }
-
-    CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, genericMethodType->baseType.shortName, returnType);
-    instantiatedMethodType->formalTypeParams = rawMethodType->formalTypeParams;
-    for (int i = 0; i < rawMethodType->paramTypes->count; i++) {
-        TypeInfo* paramType = rawMethodType->paramTypes->elements[i];
-        if (hasGenericParameters(paramType)) {
-            paramType = instantiateTypeParameterWithName(typeChecker, paramType, rawMethodType->formalTypeParams, genericMethodType->actualTypeParams);
-        }
-        TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
-    }
-
-    TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedMethodType);
-    char* instantiatedMethodTypeName = createCallableTypeName(instantiatedMethodType);
-    instantiatedMethodType->baseType.fullName = instantiatedMethodType->baseType.shortName =
-        takeStringPerma(typeChecker->vm, instantiatedMethodTypeName, (int)strlen(instantiatedMethodTypeName));
-    return instantiatedMethodType;
-}
-
 static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, TypeInfo* behaviorType, TypeInfo* methodType) {
     if (!IS_GENERIC_TYPE(behaviorType)) return AS_CALLABLE_TYPE(getInnerBaseType(methodType));
     GenericTypeInfo* genericBehaviorType = AS_GENERIC_TYPE(behaviorType);

@@ -172,8 +172,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
                     SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
                     if (item != NULL) {
                         if (checkFormalParam && item->category == SYMBOL_CATEGORY_FORMAL) {
-                            type = newFormalTypeInfo(-1, originalName);
-							TypeInfoArrayAdd(resolver->vm->tempTypes, type);
+                            type = declareNativeTypeParameter(resolver->vm, originalName->chars);
                         }
                         else type = item->type;
                     }
@@ -244,9 +243,8 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
             Ast* typeParam = astGetChild(typeParams, i);
             resolveChild(resolver, typeParams, i);
             ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
-            TypeInfo* formalType = newFormalTypeInfo(i, typeParamName);
+            TypeInfo* formalType = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
             TypeInfoArrayAdd(behaviorType->formalTypeParams, formalType);
-			TypeInfoArrayAdd(resolver->vm->tempTypes, formalType);
         }
     }
 
@@ -530,8 +528,7 @@ static TypeInfo* findCallableTypeParams(Resolver* resolver, Ast* ast, Token* tok
         Ast* typeParam = astGetChild(typeParams, i);
         if (tokensEqual(token, &typeParam->token)) {
             ObjString* formalTypeName = createStringFromToken(resolver->vm, typeParam->token);
-            TypeInfo* formalType = newFormalTypeInfo(i, formalTypeName);
-            TypeInfoArrayAdd(resolver->vm->tempTypes, formalType);
+			TypeInfo* formalType = declareNativeTypeParameter(resolver->vm, formalTypeName->chars);
             return formalType;
         }
     }
@@ -568,9 +565,8 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
                 Ast* typeParam = astGetChild(typeParams, i);
                 resolveChild(resolver, typeParams, i);
                 ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
-                TypeInfo* formalType = newFormalTypeInfo(i, typeParamName);
+                TypeInfo* formalType = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
                 TypeInfoArrayAdd(callableType->formalTypeParams, formalType);
-                TypeInfoArrayAdd(resolver->vm->tempTypes, formalType);
             }
         }
 
@@ -583,8 +579,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
 static void insertTypeParameter(Resolver* resolver, Ast* ast, int index, GenericTypeInfo* genericType) {
     if (ast->type == NULL && astNumChild(ast) == 0) {
         ObjString* typeParamName = createStringFromToken(resolver->vm, ast->token);
-        ast->type = newFormalTypeInfo(index, typeParamName);
-		TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
+		ast->type = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
     }
     TypeInfoArrayAdd(genericType->actualTypeParams, ast->type);
 }
@@ -626,9 +621,8 @@ static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
             Ast* typeParam = astGetChild(typeParams, i);
             resolveChild(resolver, typeParams, i);
             ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
-            TypeInfo* formalType = newFormalTypeInfo(i, typeParamName);
+			TypeInfo* formalType = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
             TypeInfoArrayAdd(aliasType->formalTypeParams, formalType);
-            TypeInfoArrayAdd(resolver->vm->tempTypes, formalType);
         }
     }
     return aliasType;
