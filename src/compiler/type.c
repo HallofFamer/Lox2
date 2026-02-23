@@ -500,7 +500,7 @@ static TypeInfo* instantiateFormalTypeParameter(TypeInfo* type, TypeInfoArray* f
             return actualParams->elements[i];
         }
     }
-    return NULL;
+    return type;
 }
 
 TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
