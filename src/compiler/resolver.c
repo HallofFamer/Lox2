@@ -1496,12 +1496,7 @@ static void resolveTypeDeclaration(Resolver* resolver, Ast* ast) {
     
 	beginScope(resolver, ast, SYMBOL_SCOPE_BLOCK);
     if (astHasTypeParameters(ast)) {
-		Ast* typeParams = astGetTypeParameters(ast);
-        for (int i = 0; i < typeParams->children->count; i++) {
-            Ast* typeParam = astGetChild(typeParams, i);
-			ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
-            insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);
-		}
+		typeParameters(resolver, ast);
     }
 
     resolveChild(resolver, ast, 0);

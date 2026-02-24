@@ -420,6 +420,8 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
                     checkMethodSignatures(typeChecker, methodType->declaredType, AS_METHOD_TYPE(superclassMethodType)->declaredType, supertype);
                 }
             }
+
+            if (IS_ALIAS_TYPE(supertype)) supertype = getAliasTargetType(supertype);
             if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker, typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
         }
     }
