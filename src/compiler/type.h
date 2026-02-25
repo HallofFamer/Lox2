@@ -151,6 +151,7 @@ void freeTempTypes(TypeInfoArray* typeArray);
 TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name);
 TypeInfo* getAliasTargetType(TypeInfo* type);
 TypeInfo* getInnerBaseType(TypeInfo* type);
+TypeInfoArray* getTypeParameters(TypeInfo* type);
 bool hasGenericParameters(TypeInfo* type);
 TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
 
