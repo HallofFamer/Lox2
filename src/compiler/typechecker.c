@@ -262,8 +262,7 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
     }
 
     char* callableTypeName = createCallableTypeName(calleeType);
-    calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, callableTypeName, (int)strlen(callableTypeName));
-    calleeType->baseType.fullName = calleeType->baseType.shortName;
+    calleeType->baseType.fullName = calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, callableTypeName, (int)strlen(callableTypeName));
 }
 
 static void checkTypeParameters(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {

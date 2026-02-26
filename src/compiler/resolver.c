@@ -993,7 +993,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         else {
             TypeInfo* baseType = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass, true);
 			if (baseType == NULL) return;
-            TypeInfoArray* formalTypeParams = IS_ALIAS_TYPE(baseType) ? AS_ALIAS_TYPE(baseType)->formalTypeParams : AS_BEHAVIOR_TYPE(baseType)->formalTypeParams;
+            TypeInfoArray* formalTypeParams = getTypeParameters(baseType);
             Ast* typeParams = astGetChild(ast, 0);
 
             for (int i = 0; i < typeParams->children->count; i++) {
