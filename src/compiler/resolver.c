@@ -1417,8 +1417,8 @@ static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
     if (ast->attribute.isClass) {
         classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, concatenateString(resolver->vm, classType->baseType.fullName, newStringPerma(resolver->vm, "class"), " ")));
     }
-    ObjString* name = createStringFromToken(resolver->vm, ast->token);
 
+    ObjString* name = createStringFromToken(resolver->vm, ast->token);
     TypeInfo* fieldTypeInfo = NULL;
     if (ast->attribute.isTyped) {
         Ast* fieldType = astGetChild(ast, 0);

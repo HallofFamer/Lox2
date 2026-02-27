@@ -1397,8 +1397,8 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
         TypeInfo* initializerType = (initializer == NULL) ? NULL : initializer->type;
 		if (initializerType == NULL) return;
         else if (!isSubtypeOfType(initializerType, fieldType->declaredType)) {
-            typeError(typeChecker, "Initial value for instance field must be a subtype of %s but gets %s.", 
-                fieldType->declaredType->shortName->chars, initializerType->shortName->chars);
+            typeError(typeChecker, "Initial value for instance field '%s' must be a subtype of %s but gets %s.",
+                name->chars, fieldType->declaredType->shortName->chars, initializerType->shortName->chars);
         }
     }
 
