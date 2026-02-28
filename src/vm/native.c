@@ -281,8 +281,7 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
     }
 
     char* name = createCallableTypeName(callableType);
-    callableType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
-    callableType->baseType.fullName = callableType->baseType.shortName;
+    callableType->baseType.fullName = callableType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
     return (TypeInfo*)callableType;
 }
 
@@ -299,8 +298,7 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* 
     va_end(args);
 
     char* name = createGenericTypeName(genericType);
-    genericType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
-    genericType->baseType.fullName = genericType->baseType.shortName;
+    genericType->baseType.fullName = genericType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
     return (TypeInfo*)genericType;
 }
 

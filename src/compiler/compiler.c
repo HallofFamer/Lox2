@@ -496,6 +496,7 @@ static void string(Compiler* compiler, Token token) {
 static void getVariable(Compiler* compiler, SymbolItem* item) {
     switch (item->category) {
         case SYMBOL_CATEGORY_LOCAL:
+        case SYMBOL_CATEGORY_FORMAL:
             emitBytes(compiler, OP_GET_LOCAL, (uint8_t)findLocal(compiler, &item->token));
             break;
         case SYMBOL_CATEGORY_UPVALUE:
@@ -523,6 +524,15 @@ static uint8_t lambdaDepth(Compiler* compiler) {
     return depth;
 }
 
+static void typeParameters(Compiler* compiler, Ast* ast) {
+    for (int i = 0; i < ast->children->count; i++) {
+        compiler->function->arity++;
+        Ast* typeParam = astGetChild(ast, i);
+        uint8_t constant = makeVariable(compiler, &typeParam->token, "Expect type parameter name.");
+        defineVariable(compiler, constant, false);
+    }
+}
+
 static void block(Compiler* compiler, Ast* ast) {
     Ast* stmts = astGetChild(ast, 0);
     for (int i = 0; i < stmts->children->count; i++) {
@@ -534,6 +544,10 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
     Compiler compiler;
     initCompiler(enclosing->vm, &compiler, enclosing, type, &ast->token, isAsync, enclosing->debugCode);
     beginScope(&compiler);
+
+    if (astHasTypeParameters(ast)) {
+        typeParameters(&compiler, astGetTypeParameters(ast));
+    }
 
     parameters(&compiler, astGetChild(ast, 1));
     block(&compiler, astGetChild(ast, 2));
@@ -678,10 +692,23 @@ static void compileBinary(Compiler* compiler, Ast* ast) {
 
 static void compileCall(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
+	Ast* callee = astGetChild(ast, 0);
+    int typeArgCount = 0;
+
+    if (callee->attribute.isGeneric) {
+		Ast* typeArgs = astGetChild(callee, 0);
+        for (int i = 0; i < typeArgs->children->count; i++) {
+			Ast* typeArg = astGetChild(typeArgs, i);
+			SymbolItem* item = findSymbolItem(compiler, typeArgs->symtab, typeArg->token);
+            getVariable(compiler, item);
+            typeArgCount++;
+		}
+    }
+
     Ast* args = astGetChild(ast, 1);
     uint8_t argCount = argumentList(compiler, args);
     OpCode opCode = ast->attribute.isOptional ? OP_OPTIONAL_CALL : OP_CALL;
-    emitBytes(compiler, opCode, argCount);
+    emitBytes(compiler, opCode, argCount + typeArgCount);
 }
 
 static void compileClass(Compiler* compiler, Ast* ast) {
