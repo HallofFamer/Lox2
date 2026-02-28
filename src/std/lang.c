@@ -2259,9 +2259,9 @@ void registerLangPackage(VM* vm) {
 
     DEF_METHOD(comparableTrait, TComparable, compareTo, 1, RETURN_TYPE(Int), PARAM_TYPE(TComparable));
     DEF_METHOD(comparableTrait, TComparable, equals, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
-    DEF_OPERATOR(comparableTrait, TComparable, == , __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
-    DEF_OPERATOR(comparableTrait, TComparable, > , __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
-    DEF_OPERATOR(comparableTrait, TComparable, < , __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(comparableTrait, TComparable, ==, __equal__, 1, RETURN_TYPE(Bool), PARAM_TYPE(Object));
+    DEF_OPERATOR(comparableTrait, TComparable, >, __greater__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
+    DEF_OPERATOR(comparableTrait, TComparable, <, __less__, 1, RETURN_TYPE(Bool), PARAM_TYPE(TComparable));
     insertGlobalSymbolTable(vm, "TComparable", "Trait");
 
     bindSuperclass(vm, vm->numberClass, vm->objectClass);

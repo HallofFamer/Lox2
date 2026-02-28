@@ -2267,10 +2267,10 @@ void registerCollectionPackage(VM* vm) {
     DEF_INTERCEPTOR(vm->dictionaryClass, Dictionary, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(vm->dictionaryClass, Dictionary, clear, 0, RETURN_TYPE(void));
     DEF_METHOD(vm->dictionaryClass, Dictionary, clone, 0, RETURN_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, collect, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE(RETURN_TYPE(void), 2, PARAM_TYPE(K), PARAM_TYPE(V)));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, collect, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE(RETURN_TYPE(V), 2, PARAM_TYPE(K), PARAM_TYPE(V)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, containsKey, 1, RETURN_TYPE(Bool), PARAM_TYPE(K));
     DEF_METHOD(vm->dictionaryClass, Dictionary, containsValue, 1, RETURN_TYPE(Bool), PARAM_TYPE(V));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, detect, 1, RETURN_TYPE(V), PARAM_TYPE_CALLABLE(RETURN_TYPE(void), 2, PARAM_TYPE(K), PARAM_TYPE(V)));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, detect, 1, RETURN_TYPE(V), PARAM_TYPE_CALLABLE(RETURN_TYPE(Bool), 2, PARAM_TYPE(K), PARAM_TYPE(V)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, each, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE(RETURN_TYPE(void), 2, PARAM_TYPE(K), PARAM_TYPE(V)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, eachKey, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE(RETURN_TYPE(void), 1, PARAM_TYPE(K)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, eachValue, 1, RETURN_TYPE(void), PARAM_TYPE_CALLABLE(RETURN_TYPE(void), 1, PARAM_TYPE(V)));
@@ -2283,9 +2283,9 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->dictionaryClass, Dictionary, keySet, 0, RETURN_TYPE(clox.std.collection.Set));
     DEF_METHOD(vm->dictionaryClass, Dictionary, putAll, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(vm->dictionaryClass, Dictionary, putAt, 2, RETURN_TYPE(void), PARAM_TYPE(K), PARAM_TYPE(V));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, reject, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE(RETURN_TYPE(void), 2, PARAM_TYPE(K), PARAM_TYPE(V)));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, reject, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE(RETURN_TYPE(Bool), 2, PARAM_TYPE(K), PARAM_TYPE(V)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, removeAt, 1, RETURN_TYPE(V), PARAM_TYPE(K));
-    DEF_METHOD(vm->dictionaryClass, Dictionary, select, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE(RETURN_TYPE(void), 2, PARAM_TYPE(K), PARAM_TYPE(V)));
+    DEF_METHOD(vm->dictionaryClass, Dictionary, select, 1, RETURN_TYPE(clox.std.collection.Dictionary), PARAM_TYPE_CALLABLE(RETURN_TYPE(Bool), 2, PARAM_TYPE(K), PARAM_TYPE(V)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->dictionaryClass, Dictionary, toString, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->dictionaryClass, Dictionary, valueSet, 0, RETURN_TYPE(clox.std.collection.Set));

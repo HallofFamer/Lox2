@@ -466,6 +466,7 @@ LOX_METHOD(IPAddress, getDomain) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* address = AS_STRING(getObjField(vm, self, "address"));
     int status = -1;
+
     ObjString* domain = dnsGetDomainFromIPAddress(vm, address->chars, &status);
     if (status) THROW_EXCEPTION(clox.std.net.DomainHostException, "Failed to get domain information for IP Address.");
     RETURN_OBJ(domain);
@@ -497,6 +498,7 @@ LOX_METHOD(IPAddress, toArray) {
     ASSERT_ARG_COUNT("IPAddress::toArray()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* address = AS_STRING(getObjField(vm, self, "address"));
+
     int version = AS_INT(getObjField(vm, self, "version"));
     ObjArray* array = newArray(vm);
     ipWriteByteArray(vm, array, address, version == 6 ? 16 : 10);

@@ -758,6 +758,7 @@ void registerIOPackage(VM* vm) {
     ObjClass* fileMetaclass = vm->fileClass->obj.klass;
     DEF_METHOD(fileMetaclass, FileClass, open, 2, RETURN_TYPE(IOStream), PARAM_TYPE(String), PARAM_TYPE(String));
     DEF_METHOD(fileMetaclass, FileClass, openAsync, 2, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.io.IOStream)), PARAM_TYPE(String), PARAM_TYPE(String));
+    
     DEF_METHOD(closableTrait, TClosable, close, 0, RETURN_TYPE(Bool));
 
     bindSuperclass(vm, ioStreamClass, vm->objectClass);

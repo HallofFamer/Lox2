@@ -93,7 +93,7 @@ LOX_METHOD(Date, toDateTime) {
     copyObjField(vm, self, dateTime, "day");
     setObjField(vm, dateTime, "hour", INT_VAL(0));
     setObjField(vm, dateTime, "minute", INT_VAL(0));
-    setObjField(vm, dateTime, "second", INT_VAL(0));
+    setObjField(vm, dateTime, "second", INT_VAL(0)); 
     pop(vm);
     RETURN_OBJ(dateTime);
 }
@@ -835,6 +835,7 @@ LOX_METHOD(UUID, __init__) {
     ASSERT_ARG_COUNT("UUID::__init__()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     char buffer[UUID4_LEN];
+
     uuid4_init();
     uuid4_generate(buffer);
     setObjField(vm, self, "buffer", OBJ_VAL(newString(vm, buffer)));
