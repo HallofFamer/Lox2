@@ -1406,7 +1406,6 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
 
 static void typeCheckFunDeclaration(TypeChecker* typeChecker, Ast* ast) {
     defineAstType(typeChecker, ast, "Function", NULL);
-    Ast* function = astGetChild(ast, 0);
     typeCheckChild(typeChecker, ast, 0);
 }
 

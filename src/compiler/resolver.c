@@ -266,8 +266,8 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Ast* supe
     TypeInfo* superclassType = (superclass->type != NULL) ? superclass->type : getTypeForSymbol(resolver, superclass->token, false, false);    
     if (superclassType == NULL) return;
     currentClassType->superclassType = superclassType;
-    BehaviorTypeInfo* superclassBehaviorType = AS_BEHAVIOR_TYPE(getInnerBaseType(superclassType));
 
+    BehaviorTypeInfo* superclassBehaviorType = AS_BEHAVIOR_TYPE(getInnerBaseType(superclassType));
     BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
     TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassBehaviorType->baseType.fullName));
     currentMetaclassType->superclassType = superMetaclassType;
@@ -886,7 +886,9 @@ static void resolveInterpolation(Resolver* resolver, Ast* ast) {
 static void resolveInvoke(Resolver* resolver, Ast* ast) {
     resolveChild(resolver, ast, 0);
     resolveChild(resolver, ast, 1);
-    if (astNumChild(ast) > 2) resolveChild(resolver, ast, 2);
+    if (astNumChild(ast) > 2) {
+        resolveChild(resolver, ast, 2);
+    }
 }
 
 static void resolveLiteral(Resolver* resolver, Ast* ast) {
@@ -964,8 +966,11 @@ static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
         semanticError(resolver, "Cannot use 'super' outside of a class/trait.");
     }
     findThis(resolver);
+    
     resolveChild(resolver, ast, 0);
-    if (astNumChild(ast) > 1) resolveChild(resolver, ast, 1);
+    if (astNumChild(ast) > 1) {
+        resolveChild(resolver, ast, 1);
+    }
 }
 
 static void resolveThis(Resolver* resolver, Ast* ast) {
