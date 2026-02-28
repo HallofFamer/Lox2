@@ -11,9 +11,8 @@ while (i < 10) {
     println("")
     i = i + 1
 }
-println("")
 
-println("Testing Nested loop using 'for':")
+println("\nTesting Nested loop using 'for':")
 for (val i : 1..5) { 
     for (val j : 1..5) { 
         println("The result of ${i} ^ ${j} is: ${i.pow(j)}")

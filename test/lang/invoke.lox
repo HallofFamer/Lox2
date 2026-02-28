@@ -1,10 +1,12 @@
 namespace test.lang
 
 class Oops { 
+
     __init__(){ 
         fun f(){ 
             println("not a method")
         }
+        
         this.field = f
     }
 }
