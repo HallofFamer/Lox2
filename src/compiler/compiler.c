@@ -493,14 +493,16 @@ static void string(Compiler* compiler, Token token) {
     emitConstant(compiler, OBJ_VAL(takeStringPerma(compiler->vm, string, token.length)));
 }
 
-static void getVariable(Compiler* compiler, SymbolItem* item) {
+static void getVariable(Compiler* compiler, SymbolItem* item, SymbolTable* symtab) {
     switch (item->category) {
         case SYMBOL_CATEGORY_LOCAL:
-        case SYMBOL_CATEGORY_FORMAL:
             emitBytes(compiler, OP_GET_LOCAL, (uint8_t)findLocal(compiler, &item->token));
             break;
         case SYMBOL_CATEGORY_UPVALUE:
             emitBytes(compiler, OP_GET_UPVALUE, (uint8_t)findUpvalue(compiler, &item->token));
+            break;
+        case SYMBOL_CATEGORY_FORMAL:
+            emitBytes(compiler, OP_GET_LOCAL, (uint8_t)findLocal(compiler, &item->token));
             break;
         default:
             emitBytes(compiler, OP_GET_GLOBAL, (uint8_t)identifierConstant(compiler, &item->token));
@@ -600,7 +602,7 @@ static void behavior(Compiler* compiler, BehaviorType type, Ast* ast) {
 
 static uint8_t super_(Compiler* compiler, Ast* ast) {
     uint8_t index = identifierConstant(compiler, &ast->token);
-    getVariable(compiler, findSymbolItem(compiler, ast->symtab, syntheticToken("this")));
+    getVariable(compiler, findSymbolItem(compiler, ast->symtab, syntheticToken("this")), ast->symtab);
     return index;
 }
 
@@ -700,7 +702,7 @@ static void compileCall(Compiler* compiler, Ast* ast) {
         for (int i = 0; i < typeArgs->children->count; i++) {
 			Ast* typeArg = astGetChild(typeArgs, i);
 			SymbolItem* item = findSymbolItem(compiler, typeArgs->symtab, typeArg->token);
-            getVariable(compiler, item);
+            getVariable(compiler, item, typeArg->symtab);
             typeArgCount++;
 		}
     }
@@ -847,7 +849,7 @@ static void compileSubscriptSet(Compiler* compiler, Ast* ast) {
 
 static void compileSuperGet(Compiler* compiler, Ast* ast) {
     uint8_t index = super_(compiler, ast);
-    getVariable(compiler, findSymbolItem(compiler, ast->symtab, compiler->currentClass->superclass));
+    getVariable(compiler, findSymbolItem(compiler, ast->symtab, compiler->currentClass->superclass), ast->symtab);
     emitBytes(compiler, OP_GET_SUPER, index);
 }
 
@@ -856,13 +858,13 @@ static void compileSuperInvoke(Compiler* compiler, Ast* ast) {
     Ast* args = astGetChild(ast, 0);
     uint8_t argCount = argumentList(compiler, args);
 
-    getVariable(compiler, findSymbolItem(compiler, ast->symtab, compiler->currentClass->superclass));
+    getVariable(compiler, findSymbolItem(compiler, ast->symtab, compiler->currentClass->superclass), ast->symtab);
     emitBytes(compiler, OP_SUPER_INVOKE, index);
     emitByte(compiler, argCount);
 }
 
 static void compileThis(Compiler* compiler, Ast* ast) {
-    getVariable(compiler, findSymbolItem(compiler, ast->symtab, ast->token));
+    getVariable(compiler, findSymbolItem(compiler, ast->symtab, ast->token), ast->symtab);
 }
 
 static void compileTrait(Compiler* compiler, Ast* ast) {
@@ -884,7 +886,7 @@ static void compileUnary(Compiler* compiler, Ast* ast) {
 }
 
 static void compileVariable(Compiler* compiler, Ast* ast) {
-    getVariable(compiler, findSymbolItem(compiler, ast->symtab, ast->token));
+    getVariable(compiler, findSymbolItem(compiler, ast->symtab, ast->token), ast->symtab);
 }
 
 static void compileYield(Compiler* compiler, Ast* ast) {

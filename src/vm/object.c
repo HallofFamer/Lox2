@@ -407,7 +407,7 @@ Value getObjField(VM* vm, ObjInstance* object, char* name) {
 
 Value getObjFieldByIndex(VM* vm, ObjInstance* object, int index) {
     if (index >= object->fields.count) {
-        runtimeError(vm, "Invalid index %d for object %s field.", index, object->obj.klass->fullName->chars);
+        runtimeError(vm, "Invalid index %d for object field '%s'.", index, object->obj.klass->fullName->chars);
         exit(70);
     }
     return object->fields.values[index];
