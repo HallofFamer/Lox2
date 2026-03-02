@@ -585,9 +585,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL || item->type == NULL || !IS_CALLABLE_TYPE(item->type)) return;
         CallableTypeInfo* functionType = AS_CALLABLE_TYPE(item->type);
-        CallableTypeInfo* callableType = hasGenericParameters(item->type)
-            ? instantiateGenericFunctionType(typeChecker, callee->type)
-            : functionType;
+        CallableTypeInfo* callableType = hasGenericParameters(item->type) ? instantiateGenericFunctionType(typeChecker, callee->type) : functionType;
 
         sprintf_s(calleeDesc, UINT8_MAX, "Function %s", name->chars);
         checkArguments(typeChecker, calleeDesc, args, callableType);
@@ -597,6 +595,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 		SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL) return;
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);
+        
         TypeInfo* classType = getClassType(typeChecker, className, ast->symtab);
         if (classType == NULL) return;
         inferAstTypeFromInitializer(typeChecker, ast, classType);
