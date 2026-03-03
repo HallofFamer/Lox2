@@ -148,6 +148,7 @@ typedef struct {
 typedef struct {
     Obj obj;
     int arity;
+	int typeParamCount;
     int upvalueCount;
     bool isGenerator;
     bool isAsync;

@@ -172,6 +172,7 @@ ObjFunction* newFunction(VM* vm, ObjString* name, bool isAsync) {
     ObjFunction* function = ALLOCATE_OBJ_GEN(ObjFunction, OBJ_FUNCTION, NULL, generation);
 
     function->arity = 0;
+	function->typeParamCount = 0;
     function->upvalueCount = 0;
     function->isGenerator = false;
     function->isAsync = isAsync;
