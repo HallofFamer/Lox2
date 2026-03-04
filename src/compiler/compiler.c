@@ -497,13 +497,11 @@ static void getVariable(Compiler* compiler, SymbolTable* symtab, Token token) {
     SymbolItem* item = findSymbolItem(compiler, symtab, token);
     switch (item->category) {
         case SYMBOL_CATEGORY_LOCAL:
+        case SYMBOL_CATEGORY_FORMAL:
             emitBytes(compiler, OP_GET_LOCAL, (uint8_t)findLocal(compiler, &item->token));
             break;
         case SYMBOL_CATEGORY_UPVALUE:
             emitBytes(compiler, OP_GET_UPVALUE, (uint8_t)findUpvalue(compiler, &item->token));
-            break;
-        case SYMBOL_CATEGORY_FORMAL:
-            emitBytes(compiler, OP_GET_LOCAL, (uint8_t)findLocal(compiler, &item->token));
             break;
         default:
             emitBytes(compiler, OP_GET_GLOBAL, (uint8_t)identifierConstant(compiler, &item->token));
