@@ -528,6 +528,7 @@ static uint8_t lambdaDepth(Compiler* compiler) {
 static void typeParameters(Compiler* compiler, Ast* ast) {
     for (int i = 0; i < ast->children->count; i++) {
         compiler->function->arity++;
+        compiler->function->typeParamCount++;
         Ast* typeParam = astGetChild(ast, i);
         uint8_t constant = makeVariable(compiler, &typeParam->token, "Expect type parameter name.");
         defineVariable(compiler, constant, false);

@@ -349,7 +349,7 @@ static bool callClosureAsync(VM* vm, ObjClosure* closure, int argCount) {
 
 bool callClosure(VM* vm, ObjClosure* closure, int argCount) {
     if (closure->function->arity > 0 && argCount != closure->function->arity) {
-        throwNativeException(vm, "clox.std.lang.IllegalArgumentException", "Expected %d argument(s) but got %d.", closure->function->arity, argCount);
+        throwNativeException(vm, "clox.std.lang.IllegalArgumentException", "Expected %d argument(s) but got %d.", closure->function->arity - closure->function->typeParamCount, argCount - closure->function->typeParamCount);
         return false;
     }
 
