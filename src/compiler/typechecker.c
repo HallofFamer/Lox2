@@ -592,6 +592,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         inferAstTypeFromReturn(typeChecker, ast, callableType);
     }
     else if (IS_BEHAVIOR_TYPE(rawType)) {
+        callee->attribute.isInitializer = true;
 		SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL) return;
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);

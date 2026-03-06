@@ -697,7 +697,7 @@ static void compileCall(Compiler* compiler, Ast* ast) {
 	Ast* callee = astGetChild(ast, 0);
     int typeArgCount = 0;
 
-    if (callee->attribute.isGeneric) {
+    if (callee->attribute.isGeneric && !callee->attribute.isInitializer) {
 		Ast* typeArgs = astGetChild(callee, 0);
         for (int i = 0; i < typeArgs->children->count; i++) {
 			Ast* typeArg = astGetChild(typeArgs, i);
