@@ -450,7 +450,9 @@ LOX_METHOD(Function, arity) {
     if (IS_NATIVE_FUNCTION(receiver)) {
          RETURN_INT(AS_NATIVE_FUNCTION(receiver)->arity);
     }
-    RETURN_INT(AS_CLOSURE(receiver)->function->arity);
+
+	ObjClosure* self = AS_CLOSURE(receiver);
+    RETURN_INT(self->function->arity - self->function->typeParamCount);
 }
 
 LOX_METHOD(Function, call) {
@@ -536,8 +538,15 @@ LOX_METHOD(Function, toString) {
     RETURN_STRING_FMT("<function %s>", AS_CLOSURE(receiver)->function->name->chars);
 }
 
+LOX_METHOD(Function, typeParamCount) {
+    ASSERT_ARG_COUNT("Function::typeParams()", 0);
+    if (IS_NATIVE_FUNCTION(receiver)) RETURN_INT(0);
+    RETURN_INT(AS_CLOSURE(receiver)->function->typeParamCount);
+}
+
 LOX_METHOD(Function, upvalueCount) {
     ASSERT_ARG_COUNT("Function::upvalueCount()", 0);
+    if (IS_NATIVE_FUNCTION(receiver)) RETURN_INT(0);
     RETURN_INT(AS_CLOSURE(receiver)->upvalueCount);
 }
 
@@ -2439,6 +2448,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->functionClass, Function, isVariadic, 0, RETURN_TYPE(Bool));
     DEF_METHOD(vm->functionClass, Function, name, 0, RETURN_TYPE(String));
     DEF_METHOD(vm->functionClass, Function, toString, 0, RETURN_TYPE(String));
+	DEF_METHOD(vm->functionClass, Function, typeParamCount, 0, RETURN_TYPE(Int));
     DEF_METHOD(vm->functionClass, Function, upvalueCount, 0, RETURN_TYPE(Int));
     DEF_OPERATOR(vm->functionClass, Function, (), __invoke__, -1, RETURN_TYPE(Object));
     insertGlobalSymbolTable(vm, "Function", "Function class");

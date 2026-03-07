@@ -535,6 +535,13 @@ static void typeParameters(Compiler* compiler, Ast* ast) {
     }
 }
 
+static void typeArguments(Compiler* compiler, Ast* ast) {
+    for (int i = 0; i < ast->children->count; i++) {
+        Ast* typeArg = astGetChild(ast, i);
+        getVariable(compiler, typeArg->symtab, typeArg->token);
+    }
+}
+
 static void block(Compiler* compiler, Ast* ast) {
     Ast* stmts = astGetChild(ast, 0);
     for (int i = 0; i < stmts->children->count; i++) {
@@ -699,11 +706,8 @@ static void compileCall(Compiler* compiler, Ast* ast) {
 
     if (callee->attribute.isGeneric && !callee->attribute.isInitializer) {
 		Ast* typeArgs = astGetChild(callee, 0);
-        for (int i = 0; i < typeArgs->children->count; i++) {
-			Ast* typeArg = astGetChild(typeArgs, i);
-            getVariable(compiler, typeArg->symtab, typeArg->token);
-            typeArgCount++;
-		}
+		typeArguments(compiler, typeArgs);
+		typeArgCount = typeArgs->children->count;
     }
 
     Ast* args = astGetChild(ast, 1);
