@@ -830,42 +830,42 @@ void registerNetPackage(VM* vm) {
     DEF_FIELD(urlClass, query, String, false, OBJ_VAL(emptyString(vm)));
     DEF_FIELD(urlClass, fragment, String, false, OBJ_VAL(emptyString(vm)));
     DEF_FIELD(urlClass, raw, String, false, OBJ_VAL(emptyString(vm)));
-    DEF_INTERCEPTOR(urlClass, URL, INTERCEPTOR_INIT, __init__, 6, RETURN_TYPE(clox.std.net.URL), PARAM_TYPE(String), PARAM_TYPE(String), PARAM_TYPE(Int), PARAM_TYPE(String), PARAM_TYPE(String), PARAM_TYPE(String));
-    DEF_METHOD(urlClass, URL, isAbsolute, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(urlClass, URL, isRelative, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(urlClass, URL, pathArray, 0, RETURN_TYPE(clox.std.collection.Array));
-    DEF_METHOD(urlClass, URL, queryDict, 0, RETURN_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD(urlClass, URL, relativize, 1, RETURN_TYPE(clox.std.net.URL), PARAM_TYPE(clox.std.net.URL));
-    DEF_METHOD(urlClass, URL, toString, 0, RETURN_TYPE(String));
+    DEF_INTERCEPTOR(urlClass, URL, INTERCEPTOR_INIT, __init__, 6, NATIVE_TYPE(clox.std.net.URL), NATIVE_TYPE(String), NATIVE_TYPE(String), NATIVE_TYPE(Int), NATIVE_TYPE(String), NATIVE_TYPE(String), NATIVE_TYPE(String));
+    DEF_METHOD(urlClass, URL, isAbsolute, 0, NATIVE_TYPE(Bool));
+    DEF_METHOD(urlClass, URL, isRelative, 0, NATIVE_TYPE(Bool));
+    DEF_METHOD(urlClass, URL, pathArray, 0, NATIVE_TYPE(clox.std.collection.Array));
+    DEF_METHOD(urlClass, URL, queryDict, 0, NATIVE_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD(urlClass, URL, relativize, 1, NATIVE_TYPE(clox.std.net.URL), NATIVE_TYPE(clox.std.net.URL));
+    DEF_METHOD(urlClass, URL, toString, 0, NATIVE_TYPE(String));
 
     ObjClass* urlMetaclass = urlClass->obj.klass;
-    DEF_METHOD(urlMetaclass, URLClass, parse, 1, RETURN_TYPE(clox.std.net.URL), PARAM_TYPE(String));
+    DEF_METHOD(urlMetaclass, URLClass, parse, 1, NATIVE_TYPE(clox.std.net.URL), NATIVE_TYPE(String));
 
     bindSuperclass(vm, domainClass, vm->objectClass);
     DEF_FIELD(domainClass, name, String, true, OBJ_VAL(emptyString(vm)));
-    DEF_INTERCEPTOR(domainClass, Domain, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.net.Domain), PARAM_TYPE(String));
-    DEF_METHOD(domainClass, Domain, getIPAddresses, 0, RETURN_TYPE(clox.std.collection.Array));
-    DEF_METHOD_ASYNC(domainClass, Domain, getIPAddressesAsync, 0, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.collection.Array)));
-    DEF_METHOD(domainClass, Domain, toString, 0, RETURN_TYPE(String));
+    DEF_INTERCEPTOR(domainClass, Domain, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(clox.std.net.Domain), NATIVE_TYPE(String));
+    DEF_METHOD(domainClass, Domain, getIPAddresses, 0, NATIVE_TYPE(clox.std.collection.Array));
+    DEF_METHOD_ASYNC(domainClass, Domain, getIPAddressesAsync, 0, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.collection.Array)));
+    DEF_METHOD(domainClass, Domain, toString, 0, NATIVE_TYPE(String));
 
     bindSuperclass(vm, ipAddressClass, vm->objectClass);
     DEF_FIELD(ipAddressClass, address, String, true, OBJ_VAL(emptyString(vm)));
     DEF_FIELD(ipAddressClass, version, Int, true, INT_VAL(-1));
-    DEF_INTERCEPTOR(ipAddressClass, IPAddress, INTERCEPTOR_INIT, __init__, 1, RETURN_TYPE(clox.std.net.IPAddress), PARAM_TYPE(String));
-    DEF_METHOD(ipAddressClass, IPAddress, getDomain, 0, RETURN_TYPE(clox.std.net.Domain));
-    DEF_METHOD_ASYNC(ipAddressClass, IPAddress, getDomainAsync, 0, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.Domain)));
-    DEF_METHOD(ipAddressClass, IPAddress, isIPV4, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(ipAddressClass, IPAddress, isIPV6, 0, RETURN_TYPE(Bool));
-    DEF_METHOD(ipAddressClass, IPAddress, toArray, 0, RETURN_TYPE(clox.std.collection.Array));
-    DEF_METHOD(ipAddressClass, IPAddress, toString, 0, RETURN_TYPE(String));
+    DEF_INTERCEPTOR(ipAddressClass, IPAddress, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(clox.std.net.IPAddress), NATIVE_TYPE(String));
+    DEF_METHOD(ipAddressClass, IPAddress, getDomain, 0, NATIVE_TYPE(clox.std.net.Domain));
+    DEF_METHOD_ASYNC(ipAddressClass, IPAddress, getDomainAsync, 0, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.Domain)));
+    DEF_METHOD(ipAddressClass, IPAddress, isIPV4, 0, NATIVE_TYPE(Bool));
+    DEF_METHOD(ipAddressClass, IPAddress, isIPV6, 0, NATIVE_TYPE(Bool));
+    DEF_METHOD(ipAddressClass, IPAddress, toArray, 0, NATIVE_TYPE(clox.std.collection.Array));
+    DEF_METHOD(ipAddressClass, IPAddress, toString, 0, NATIVE_TYPE(String));
 
     bindSuperclass(vm, socketAddressClass, vm->objectClass);
     DEF_FIELD(socketAddressClass, address, String, true, OBJ_VAL(emptyString(vm)));
     DEF_FIELD(socketAddressClass, family, Int, true, INT_VAL(AF_UNSPEC));
     DEF_FIELD(socketAddressClass, port, Int, true, INT_VAL(0));
-    DEF_INTERCEPTOR(socketAddressClass, SocketAddress, INTERCEPTOR_INIT, __init__, 3, RETURN_TYPE(clox.std.net.URL), PARAM_TYPE(String), PARAM_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(socketAddressClass, SocketAddress, ipAddress, 0, RETURN_TYPE(clox.std.net.IPAddress));
-    DEF_METHOD(socketAddressClass, SocketAddress, toString, 0, RETURN_TYPE(String));
+    DEF_INTERCEPTOR(socketAddressClass, SocketAddress, INTERCEPTOR_INIT, __init__, 3, NATIVE_TYPE(clox.std.net.URL), NATIVE_TYPE(String), NATIVE_TYPE(Int), NATIVE_TYPE(Int));
+    DEF_METHOD(socketAddressClass, SocketAddress, ipAddress, 0, NATIVE_TYPE(clox.std.net.IPAddress));
+    DEF_METHOD(socketAddressClass, SocketAddress, toString, 0, NATIVE_TYPE(String));
 
     ObjClass* closableTrait = getNativeClass(vm, "clox.std.io.TClosable");
     bindSuperclass(vm, socketClass, vm->objectClass);
@@ -874,11 +874,11 @@ void registerNetPackage(VM* vm) {
     DEF_FIELD(socketClass, socketType, Int, false, INT_VAL(SOCK_STREAM));
     DEF_FIELD(socketClass, protocolType, Int, false, INT_VAL(IPPROTO_TCP));
     DEF_FIELD(socketClass, descriptor, Int, false, INT_VAL(INVALID_SOCKET));
-    DEF_INTERCEPTOR(socketClass, Socket, INTERCEPTOR_INIT, __init__, 3, RETURN_TYPE(clox.std.net.Socket), PARAM_TYPE(Int), PARAM_TYPE(Int), PARAM_TYPE(Int));
-    DEF_METHOD(socketClass, Socket, close, 0, RETURN_TYPE(void));
-    DEF_METHOD(socketClass, Socket, receive, 0, RETURN_TYPE(String));
-    DEF_METHOD(socketClass, Socket, send, 1, RETURN_TYPE(void), PARAM_TYPE(String));
-    DEF_METHOD(socketClass, Socket, toString, 0, RETURN_TYPE(String));
+    DEF_INTERCEPTOR(socketClass, Socket, INTERCEPTOR_INIT, __init__, 3, NATIVE_TYPE(clox.std.net.Socket), NATIVE_TYPE(Int), NATIVE_TYPE(Int), NATIVE_TYPE(Int));
+    DEF_METHOD(socketClass, Socket, close, 0, NATIVE_TYPE(void));
+    DEF_METHOD(socketClass, Socket, receive, 0, NATIVE_TYPE(String));
+    DEF_METHOD(socketClass, Socket, send, 1, NATIVE_TYPE(void), NATIVE_TYPE(String));
+    DEF_METHOD(socketClass, Socket, toString, 0, NATIVE_TYPE(String));
 
     ObjClass* socketMetaclass = socketClass->obj.klass;
     DEF_FIELD(socketMetaclass, afUNSPEC, Int, false, INT_VAL(AF_UNSPEC));
@@ -902,21 +902,21 @@ void registerNetPackage(VM* vm) {
 
     bindSuperclass(vm, socketClientClass, socketClass);
     DEF_FIELD(socketClientClass, socketAddress, clox.std.net.SocketAddress, false, NIL_VAL);
-    DEF_METHOD(socketClientClass, SocketClient, connect, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.net.SocketAddress));
+    DEF_METHOD(socketClientClass, SocketClient, connect, 1, NATIVE_TYPE(void), NATIVE_TYPE(clox.std.net.SocketAddress));
 
     bindSuperclass(vm, socketServerClass, socketClass);
     DEF_FIELD(socketServerClass, socketAddress, clox.std.net.SocketAddress, false, NIL_VAL);
-    DEF_METHOD(socketServerClass, SocketServer, accept, 0, RETURN_TYPE(clox.std.net.SocketAddress));
-    DEF_METHOD(socketServerClass, SocketServer, bind, 1, RETURN_TYPE(void), PARAM_TYPE(clox.std.net.SocketAddress));
-    DEF_METHOD(socketServerClass, SocketServer, listen, 0, RETURN_TYPE(void));
+    DEF_METHOD(socketServerClass, SocketServer, accept, 0, NATIVE_TYPE(clox.std.net.SocketAddress));
+    DEF_METHOD(socketServerClass, SocketServer, bind, 1, NATIVE_TYPE(void), NATIVE_TYPE(clox.std.net.SocketAddress));
+    DEF_METHOD(socketServerClass, SocketServer, listen, 0, NATIVE_TYPE(void));
 
     bindSuperclass(vm, httpRequestClass, vm->objectClass);
     DEF_FIELD(httpRequestClass, url, Object, true, OBJ_VAL(emptyString(vm)));
     DEF_FIELD(httpRequestClass, method, Int, true, INT_VAL(HTTP_GET));
     DEF_FIELD(httpRequestClass, headers, clox.std.collection.Dictionary, true, OBJ_VAL(newDictionary(vm)));
     DEF_FIELD(httpRequestClass, data, clox.std.collection.Dictionary, true, OBJ_VAL(newDictionary(vm)));
-    DEF_INTERCEPTOR(httpRequestClass, HTTPRequest, INTERCEPTOR_INIT, __init__, 4, RETURN_TYPE(clox.std.net.HTTPRequest), PARAM_TYPE(Object), PARAM_TYPE(Int), PARAM_TYPE(clox.std.collection.Dictionary), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD(httpRequestClass, HTTPRequest, toString, 0, RETURN_TYPE(String));
+    DEF_INTERCEPTOR(httpRequestClass, HTTPRequest, INTERCEPTOR_INIT, __init__, 4, NATIVE_TYPE(clox.std.net.HTTPRequest), NATIVE_TYPE(Object), NATIVE_TYPE(Int), NATIVE_TYPE(clox.std.collection.Dictionary), NATIVE_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD(httpRequestClass, HTTPRequest, toString, 0, NATIVE_TYPE(String));
 
     ObjClass* httpRequestMetaclass = httpRequestClass->obj.klass;
     DEF_FIELD(httpRequestMetaclass, httpHEAD, Int, false, INT_VAL(HTTP_HEAD));
@@ -935,8 +935,8 @@ void registerNetPackage(VM* vm) {
     DEF_FIELD(httpResponseClass, status, Int, true, INT_VAL(0));
     DEF_FIELD(httpResponseClass, headers, clox.std.collection.Dictionary, true, OBJ_VAL(newDictionary(vm)));
     DEF_FIELD(httpResponseClass, contentType, String, true, OBJ_VAL(emptyString(vm)));
-    DEF_INTERCEPTOR(httpResponseClass, HTTPResponse, INTERCEPTOR_INIT, __init__, 4, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(String), PARAM_TYPE(Int), PARAM_TYPE(clox.std.collection.Dictionary), PARAM_TYPE(String));
-    DEF_METHOD(httpResponseClass, HTTPResponse, toString, 0, RETURN_TYPE(String));
+    DEF_INTERCEPTOR(httpResponseClass, HTTPResponse, INTERCEPTOR_INIT, __init__, 4, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(String), NATIVE_TYPE(Int), NATIVE_TYPE(clox.std.collection.Dictionary), NATIVE_TYPE(String));
+    DEF_METHOD(httpResponseClass, HTTPResponse, toString, 0, NATIVE_TYPE(String));
 
     ObjClass* httpResponseMetaclass = httpResponseClass->obj.klass;
     DEF_FIELD(httpResponseMetaclass, statusOK, Int, false, INT_VAL(200));
@@ -953,26 +953,26 @@ void registerNetPackage(VM* vm) {
     bindSuperclass(vm, httpClientClass, vm->objectClass);
     bindTrait(vm, httpClientClass, closableTrait);
     DEF_FIELD(httpClientClass, metadata, Object, false, NIL_VAL);
-    DEF_INTERCEPTOR(httpClientClass, HTTPClient, INTERCEPTOR_INIT, __init__, 0, RETURN_TYPE(clox.std.net.HTTPClient));
-    DEF_METHOD(httpClientClass, HTTPClient, close, 0, RETURN_TYPE(void));
-    DEF_METHOD(httpClientClass, HTTPClient, delete, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, deleteAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object));
-    DEF_METHOD(httpClientClass, HTTPClient, download, 2, RETURN_TYPE(void), PARAM_TYPE(Object), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, downloadAsync, 2, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(Nil)), PARAM_TYPE(Object), PARAM_TYPE(Object));
-    DEF_METHOD(httpClientClass, HTTPClient, get, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, getAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object));
-    DEF_METHOD(httpClientClass, HTTPClient, head, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, headAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object));
-    DEF_METHOD(httpClientClass, HTTPClient, options, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, optionsAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object));
-    DEF_METHOD(httpClientClass, HTTPClient, patch, 2, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, patchAsync, 2, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD(httpClientClass, HTTPClient, post, 2, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, postAsync, 2, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD(httpClientClass, HTTPClient, put, 2, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, putAsync, 2, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(Object), PARAM_TYPE(clox.std.collection.Dictionary));
-    DEF_METHOD(httpClientClass, HTTPClient, send, 1, RETURN_TYPE(clox.std.net.HTTPResponse), PARAM_TYPE(clox.std.net.HTTPRequest));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, sendAsync, 1, RETURN_TYPE_GENERIC(clox.std.util.Promise, 1, PARAM_TYPE(clox.std.net.HTTPResponse)), PARAM_TYPE(clox.std.net.HTTPRequest));
+    DEF_INTERCEPTOR(httpClientClass, HTTPClient, INTERCEPTOR_INIT, __init__, 0, NATIVE_TYPE(clox.std.net.HTTPClient));
+    DEF_METHOD(httpClientClass, HTTPClient, close, 0, NATIVE_TYPE(void));
+    DEF_METHOD(httpClientClass, HTTPClient, delete, 1, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, deleteAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(Object));
+    DEF_METHOD(httpClientClass, HTTPClient, download, 2, NATIVE_TYPE(void), NATIVE_TYPE(Object), NATIVE_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, downloadAsync, 2, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(Nil)), NATIVE_TYPE(Object), NATIVE_TYPE(Object));
+    DEF_METHOD(httpClientClass, HTTPClient, get, 1, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, getAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(Object));
+    DEF_METHOD(httpClientClass, HTTPClient, head, 1, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, headAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(Object));
+    DEF_METHOD(httpClientClass, HTTPClient, options, 1, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, optionsAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(Object));
+    DEF_METHOD(httpClientClass, HTTPClient, patch, 2, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object), NATIVE_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, patchAsync, 2, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(Object), NATIVE_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD(httpClientClass, HTTPClient, post, 2, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object), NATIVE_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, postAsync, 2, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(Object), NATIVE_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD(httpClientClass, HTTPClient, put, 2, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object), NATIVE_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, putAsync, 2, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(Object), NATIVE_TYPE(clox.std.collection.Dictionary));
+    DEF_METHOD(httpClientClass, HTTPClient, send, 1, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(clox.std.net.HTTPRequest));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, sendAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(clox.std.net.HTTPRequest));
 
     ObjClass* networkExceptionClass = defineNativeException(vm, "NetworkException", vm->exceptionClass);
     defineNativeException(vm, "DomainHostException", networkExceptionClass);
