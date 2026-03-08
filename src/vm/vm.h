@@ -51,6 +51,7 @@ typedef struct {
     uint8_t flagUnusedImport;
     uint8_t flagUnusedVariable;
     uint8_t flagMutableVariable;
+    uint8_t flagUndefinedType;
 
     const char* gcType;
     size_t gcTotalHeapSize;

@@ -81,7 +81,6 @@ char* readFile(const char* path) {
 
     char* buffer = (char*)malloc(fileSize + 1);
     ABORT_IFNULL(buffer, "Not enough memory to read \"%s\".\n", path);
-
     size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
     ABORT_IFTRUE(bytesRead < fileSize, "Could not read file \"%s\".\n", path);
 
@@ -128,6 +127,9 @@ static int parseConfiguration(void* data, const char* section, const char* name,
     }
     else if (HAS_CONFIG("flag", "flagMutableVariable")) {
         config->flagMutableVariable = (uint8_t)atoi(value);
+    }
+    else if (HAS_CONFIG("flag", "flagUndefinedType")) {
+		config->flagUndefinedType = (uint8_t)atoi(value);
     }
     else if (HAS_CONFIG("gc", "gcType")) {
         config->gcType = _strdup(value);

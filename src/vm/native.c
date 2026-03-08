@@ -390,11 +390,11 @@ void loadSourceFile(VM* vm, const char* filePath) {
 }
 
 void registerNativeFunctions(VM* vm){
-    DEF_FUNCTION(assert, RETURN_TYPE(void), 2, PARAM_TYPE(Object), PARAM_TYPE(String));
-    DEF_FUNCTION(clock, RETURN_TYPE(Number), 0);
-    DEF_FUNCTION(error, RETURN_TYPE(void), 1, PARAM_TYPE(String));
-    DEF_FUNCTION(gc, RETURN_TYPE(void), 1, PARAM_TYPE(Int));
-    DEF_FUNCTION(print, RETURN_TYPE(void), 1, PARAM_TYPE(Object));
-    DEF_FUNCTION(println, RETURN_TYPE(void), 1, PARAM_TYPE(Object));
-    DEF_FUNCTION(read, RETURN_TYPE(String), 0);
+    DEF_FUNCTION(assert, NATIVE_TYPE(void), 2, NATIVE_TYPE(Object), NATIVE_TYPE(String));
+    DEF_FUNCTION(clock, NATIVE_TYPE(Number), 0);
+    DEF_FUNCTION(error, NATIVE_TYPE(void), 1, NATIVE_TYPE(String));
+    DEF_FUNCTION(gc, NATIVE_TYPE(void), 1, NATIVE_TYPE(Int));
+    DEF_FUNCTION(print, NATIVE_TYPE(void), 1, NATIVE_TYPE(Object));
+    DEF_FUNCTION(println, NATIVE_TYPE(void), 1, NATIVE_TYPE(Object));
+    DEF_FUNCTION(read, NATIVE_TYPE(String), 0);
 }

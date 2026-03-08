@@ -594,11 +594,9 @@ void printObject(Value value) {
         case OBJ_INSTANCE:
             printf("<object %s>", AS_OBJ(value)->klass->name->chars);
             break;
-        case OBJ_ITERATOR: {
-            ObjIterator* iterator = AS_ITERATOR(value);
-            printf("<iterator %s>", iterator->obj.klass->name->chars);
+        case OBJ_ITERATOR:
+            printf("<iterator %s>", AS_ITERATOR(value)->obj.klass->name->chars);
             break;
-        }
         case OBJ_METHOD: { 
             ObjMethod* method = AS_METHOD(value);
             printf("<method %s::%s>", method->behavior->name->chars, method->closure->function->name->chars);
