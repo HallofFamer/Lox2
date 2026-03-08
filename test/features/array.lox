@@ -18,9 +18,8 @@ val array3 = [1 + 1, 3.5, true, "hello World".capitalize()]
 println("Creating another array using literal: ${array3}")
 println("The first and last array are equal: ${array.equals(array3)}")
 println(array.equals(array3))
-println("")
 
-println("Getting element at index 3: ${array.getAt(3)}")
+println("\nGetting element at index 3: ${array.getAt(3)}")
 println("Index of element 'true': ${array.indexOf(true)}\n")
 array[2] = false
 println("Setting element false at index 2: ${array}")
@@ -33,8 +32,7 @@ println("Current array is: ${array}")
 array.clear()
 println("Clearing array: ${array}")
 println(array.toString())
-println("")
 
 val array4 = Array.fromElements(1, 2, 3, 4, 5)
-println("Creating an array from class methods: ${array4}")
+println("\nCreating an array from class methods: ${array4}")
 println("New array contains element 2: ${array4.contains(2)}")

@@ -2,38 +2,33 @@ namespace test.features
 
 println("Iterating over Int 5: ")
 5.timesRepeat({|i| print("${i }") })
-println("")
-println("Iterating from Int 5 to 10: ")
+println("\nIterating from Int 5 to 10: ")
 5.upTo(10, {|i| print("${i} ") })
 println("\n")
 
 val array = [2, 3.5, true, "Hello World"]
 println("Enumerating array with each method: ")
 array.each({|element| println("Element: ${element}") })
-println("")
 
 val selected = array.select({|x| x.instanceOf(Number) })
-println("Selecting elements that are numbers: ")
+println("\nSelecting elements that are numbers: ")
 println(selected)
 
 val rejected = array.reject({|x| x.instanceOf(Number) })
 println("Rejecting elements that are numbers: ")
 println(rejected)
-println("")
 
 val array2 = [1, 2, 3, 4, 5]
-println("Enumerating a number array with index: ")
+println("\nEnumerating a number array with index: ")
 array2.eachIndex({|index, element| println("Element ${index}: ${element}") })
-println("")
 
-println("Collect a number array by square: ")
+println("\nCollect a number array by square: ")
 println(array2.collect({|x| x * x }))
 println("Detecting first even number: ")
 println(array2.detect({|x| x.isEven() }))
-println("")
 
 val dict = ["US": "United States", "CA": "Canada", "EU": "Europe", "JP": "Japan", "RU": "Russia"]
-println("Enumerating a dictionary of countries: ")
+println("\nEnumerating a dictionary of countries: ")
 dict.each({|key, value| println("Key: ${key}, Value: ${value}") })
 println("Select countries with length 6: ")
 val dict2 = dict.select({|key, value| value.length() == 6 })
