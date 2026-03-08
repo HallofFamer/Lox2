@@ -1294,7 +1294,7 @@ static Ast* forStatement(Parser* parser) {
         astAppendChild(decl, element);
     }
 
-    consume(parser, TOKEN_SYMBOL_COLON, "Expect ':' after variable name.");
+    consume(parser, TOKEN_SYMBOL_COLON, "Expect ':' after loop variable name.");
     Ast* expr = expression(parser);
     consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after loop expression.");
     Ast* body = statement(parser);

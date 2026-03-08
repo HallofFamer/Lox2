@@ -775,13 +775,20 @@ static void compileInterpolation(Compiler* compiler, Ast* ast) {
 
 static void compileInvoke(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
+	int typeArgCount = 0;
+    if (astNumChild(ast) > 2) {
+        Ast* typeArgs = astGetChild(ast, 2);
+        typeArguments(compiler, typeArgs);
+        typeArgCount = typeArgs->children->count;
+    }
+
     Ast* args = astGetChild(ast, 1);
     uint8_t methodIndex = identifierConstant(compiler, &ast->token);
     uint8_t argCount = argumentList(compiler, args);
 
     OpCode opCode = ast->attribute.isOptional ? OP_OPTIONAL_INVOKE : OP_INVOKE;
     emitBytes(compiler, opCode, methodIndex);
-    emitByte(compiler, argCount);
+    emitByte(compiler, argCount + typeArgCount);
 }
 
 static void compileLiteral(Compiler* compiler, Ast* ast) {

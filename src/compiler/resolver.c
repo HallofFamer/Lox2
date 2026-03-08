@@ -421,7 +421,7 @@ static SymbolItem* findUpvalue(Resolver* resolver, Ast* ast) {
     do {
         if (functionResolver->enclosing == NULL) break;
         item = symbolTableGet(currentSymtab, symbol);
-        if (item != NULL && item->category != SYMBOL_CATEGORY_GLOBAL && item->category != SYMBOL_CATEGORY_FORMAL) {
+        if (item != NULL && item->category != SYMBOL_CATEGORY_GLOBAL) {
             return addUpvalue(resolver, item);
         }
 

@@ -902,7 +902,7 @@ static void typeCheckDictionary(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckFunction(TypeChecker* typeChecker, Ast* ast) {
-    if (ast->parent != NULL && ast->parent->kind == AST_DECL_FUN) {
+    if (ast->parent != NULL && (ast->parent->kind == AST_DECL_FUN || (ast->parent->parent != NULL && ast->parent->parent->kind == AST_EXPR_CALL))) {
         function(typeChecker, ast, NULL, ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer, ast->attribute.isLambda);
     }
 }

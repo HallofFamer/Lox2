@@ -78,8 +78,7 @@ void astAppendChild(Ast* ast, Ast* child) {
 }
 
 Ast* astFirstChild(Ast* ast) {
-    if (!astHasChild(ast)) return NULL;
-    return ast->children->elements[0];
+    return astHasChild(ast) ? ast->children->elements[0] : NULL;
 }
 
 Ast* astGetChild(Ast* ast, int index) {
@@ -95,7 +94,7 @@ bool astHasChild(Ast* ast) {
 }
 
 Ast* astLastChild(Ast* ast) {
-	return (astHasChild(ast)) ? ast->children->elements[ast->children->count - 1] : NULL;
+	return astHasChild(ast) ? ast->children->elements[ast->children->count - 1] : NULL;
 }
 
 int astNumChild(Ast* ast) {
