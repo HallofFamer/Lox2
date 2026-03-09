@@ -951,8 +951,10 @@ static bool isCallableEqualType(CallableTypeInfo* type, CallableTypeInfo* type2)
 }
 
 static bool isGenericEqualType(GenericTypeInfo* type, GenericTypeInfo* type2) {
-    if (!isEqualType(type->rawType, type2->rawType)) return false;
-    if (type->actualTypeParams->count != type2->actualTypeParams->count) return false;
+    if (!isEqualType(type->rawType, type2->rawType) || (type->actualTypeParams->count != type2->actualTypeParams->count)) {
+        return false;
+    }
+
     for (int i = 0; i < type->actualTypeParams->count; i++) {
         if (!isEqualType(type->actualTypeParams->elements[i], type2->actualTypeParams->elements[i])) return false;
     }

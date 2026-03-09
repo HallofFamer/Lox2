@@ -865,12 +865,18 @@ static void compileSuperGet(Compiler* compiler, Ast* ast) {
 
 static void compileSuperInvoke(Compiler* compiler, Ast* ast) {
     uint8_t index = super_(compiler, ast);
+    int typeArgCount = 0;
+    if (astNumChild(ast) > 1) {
+        Ast* typeArgs = astGetChild(ast, 1);
+        typeArguments(compiler, typeArgs);
+        typeArgCount = typeArgs->children->count;
+    }
+
     Ast* args = astGetChild(ast, 0);
     uint8_t argCount = argumentList(compiler, args);
-
     getVariable(compiler, ast->symtab, compiler->currentClass->superclass);
     emitBytes(compiler, OP_SUPER_INVOKE, index);
-    emitByte(compiler, argCount);
+    emitByte(compiler, argCount + typeArgCount);
 }
 
 static void compileThis(Compiler* compiler, Ast* ast) {
