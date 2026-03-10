@@ -213,10 +213,12 @@ AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjS
     if (aliasType != NULL) {
         aliasType->targetType = targetType;
         aliasType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        
         if (aliasType->formalTypeParams != NULL) {
             TypeInfoArrayInit(aliasType->formalTypeParams);
 			va_list args;
             va_start(args, numParameters);
+            
             for (int i = 0; i < numParameters; i++) {
                 TypeInfo* type = va_arg(args, TypeInfo*);
                 TypeInfoArrayAdd(aliasType->formalTypeParams, type);
@@ -393,6 +395,7 @@ void freeTypeInfo(TypeInfo* type) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
         if (behaviorType->formalTypeParams != NULL) TypeInfoArrayFree(behaviorType->formalTypeParams);
+        
         freeTypeTable(behaviorType->fields);
         freeTypeTable(behaviorType->methods);
         free(behaviorType);
@@ -476,6 +479,7 @@ static bool hasCallableTypeParameters(TypeInfo* type) {
     CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
     if (callableType->formalTypeParams->count > 0) return true;
     if (hasGenericParameters(callableType->returnType)) return true;
+
     for (int i = 0; i < callableType->paramTypes->count; i++) {
         TypeInfo* paramType = callableType->paramTypes->elements[i];
         if (hasGenericParameters(paramType)) return true;
@@ -704,7 +708,6 @@ TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
             if (methodType != NULL) return methodType;
         }
     }
-
     return typeTableMethodLookup(behaviorType->superclassType, key);
 }
 

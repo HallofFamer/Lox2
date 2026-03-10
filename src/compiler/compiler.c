@@ -600,6 +600,16 @@ static void behavior(Compiler* compiler, BehaviorType type, Ast* ast) {
         emitBytes(compiler, OP_IMPLEMENT, traitCount);
     }
 
+    if (astHasTypeParameters(ast)) {
+        Ast* typeParams = astGetTypeParameters(ast);
+        for (int i = 0; i < typeParams->children->count; i++) {
+            Ast* typeParam = astGetChild(typeParams, i);
+            uint8_t index = identifierConstant(compiler, &typeParam->token);
+            emitBytes(compiler, OP_NIL, OP_FIELD);
+            emitBytes(compiler, index, 0);
+        }
+    }
+
     childIndex++; 
     compileChild(compiler, ast, childIndex);
     if (type != BEHAVIOR_TRAIT) compileChild(compiler, ast, childIndex + 1);
