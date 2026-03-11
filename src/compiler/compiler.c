@@ -530,8 +530,8 @@ static void typeParameters(Compiler* compiler, Ast* ast) {
         compiler->function->arity++;
         compiler->function->typeParamCount++;
         Ast* typeParam = astGetChild(ast, i);
-        uint8_t constant = makeVariable(compiler, &typeParam->token, "Expect type parameter name.");
-        defineVariable(compiler, constant, false);
+        uint8_t index = makeVariable(compiler, &typeParam->token, "Expect type parameter name.");
+        defineVariable(compiler, index, false);
     }
 }
 
@@ -554,7 +554,26 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
     initCompiler(enclosing->vm, &compiler, enclosing, type, &ast->token, isAsync, enclosing->debugCode);
     beginScope(&compiler);
 
-    if (astHasTypeParameters(ast)) {
+    if (ast->attribute.isInitializer) {
+        ObjString* className = copyStringPerma(compiler.vm, compiler.currentClass->name.start, compiler.currentClass->name.length);
+        SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
+        BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler.vm->typetab, getClassNameFromMetaclass(compiler.vm, classItem->type->fullName)));
+        
+        for (int i = 0; i < classType->formalTypeParams->count; i++) {
+			TypeInfo* formalTypeParamType = classType->formalTypeParams->elements[i];
+			Token formalTypeParamToken = syntheticToken(formalTypeParamType->shortName->chars);
+            compiler.function->arity++;
+            compiler.function->typeParamCount++;
+            
+			uint8_t index = identifierConstant(&compiler, &formalTypeParamToken);
+            compiler.localCount++;
+            defineVariable(&compiler, index, false);
+            emitBytes(&compiler, OP_GET_LOCAL, 0);
+            emitBytes(&compiler, OP_GET_LOCAL, compiler.function->typeParamCount);
+			emitBytes(&compiler, OP_SET_PROPERTY, index);
+        }
+    }
+    else if (astHasTypeParameters(ast)) {
         typeParameters(&compiler, astGetTypeParameters(ast));
     }
 
@@ -714,10 +733,10 @@ static void compileCall(Compiler* compiler, Ast* ast) {
 	Ast* callee = astGetChild(ast, 0);
     int typeArgCount = 0;
 
-    if (callee->attribute.isGeneric && !callee->attribute.isInitializer) {
+    if (callee->attribute.isGeneric) {
 		Ast* typeArgs = astGetChild(callee, 0);
-		typeArguments(compiler, typeArgs);
-		typeArgCount = typeArgs->children->count;
+        typeArguments(compiler, typeArgs);
+        typeArgCount = typeArgs->children->count;
     }
 
     Ast* args = astGetChild(ast, 1);

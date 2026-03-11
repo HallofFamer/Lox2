@@ -998,8 +998,8 @@ static bool isBehaviorSubtypeOfType(BehaviorTypeInfo* subtype, BehaviorTypeInfo*
 static bool isCallableSubtypeOfType(CallableTypeInfo* type, TypeInfo* type2) {
     if (IS_BEHAVIOR_TYPE(type2)) {
         CallableTypeInfo* callableSupertype = AS_CALLABLE_TYPE(type2);
-        if (memcmp(type2->shortName->chars, "Function", 8) == 0) return true;
-        else if (memcmp(type2->shortName->chars, "TCallable", 9) == 0) return true;
+        if (strcmp(type2->shortName->chars, "Function") == 0) return true;
+        else if (strcmp(type2->shortName->chars, "TCallable") == 0) return true;
     }
     else if (IS_CALLABLE_TYPE(type2)) return isCallableEqualType(type, AS_CALLABLE_TYPE(type2));
     return false;
@@ -1044,8 +1044,8 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
 
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
-    if (memcmp(type->shortName->chars, "Nil", 3) == 0) return true;
-    if (memcmp(type2->shortName->chars, "Object", 3) == 0) return true;
+    if (strcmp(type->shortName->chars, "Nil") == 0) return true;
+    if (strcmp(type2->shortName->chars, "Object") == 0) return true;
     if (IS_ALIAS_TYPE(type) || IS_ALIAS_TYPE(type2)) return isSubtypeOfType(getAliasTargetType(type), getAliasTargetType(type2));
 
     if (IS_CALLABLE_TYPE(type)) {
