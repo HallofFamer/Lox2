@@ -697,6 +697,7 @@ TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
     if (type == NULL) return NULL;
 	TypeInfo* baseType = getInnerBaseType(type);
 	if (!IS_BEHAVIOR_TYPE(baseType)) return NULL;
+
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(baseType);
     TypeInfo* methodType = typeTableGet(behaviorType->methods, key);
     if (methodType != NULL) return methodType;
@@ -971,13 +972,13 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (IS_ALIAS_TYPE(type) || IS_ALIAS_TYPE(type2)) return isEqualType(getAliasTargetType(type), getAliasTargetType(type2));
 
     if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return (type->id == type2->id);
-    else if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
+    if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
 		return isCallableEqualType(AS_CALLABLE_TYPE(type), AS_CALLABLE_TYPE(type2));
     }
-	else if (IS_GENERIC_TYPE(type) && IS_GENERIC_TYPE(type2)) {
+	if (IS_GENERIC_TYPE(type) && IS_GENERIC_TYPE(type2)) {
         return isGenericEqualType(AS_GENERIC_TYPE(type), AS_GENERIC_TYPE(type2));
     }
-    else return false;
+    return false;
 }
 
 static bool isBehaviorSubtypeOfType(BehaviorTypeInfo* subtype, BehaviorTypeInfo* supertype) {

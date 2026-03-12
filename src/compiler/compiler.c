@@ -334,10 +334,10 @@ static ObjString* identifierName(Compiler* compiler, uint8_t arg) {
     return AS_STRING(currentChunk(compiler)->identifiers.values[arg]);
 }
 
-static SymbolItem* findSymbolItem(Compiler* compiler, SymbolTable* symtab, Token token) {
+static SymbolItem* findSymbolItemByToken(Compiler* compiler, SymbolTable* symtab, Token token) {
     ObjString* name = copyStringPerma(compiler->vm, token.start, token.length);
     SymbolItem* item = symbolTableGet(symtab, name);
-    return (item != NULL) ? item : findSymbolItem(compiler, symtab->parent, token);
+    return (item != NULL) ? item : findSymbolItemByToken(compiler, symtab->parent, token);
 }
 
 static int findLocal(Compiler* compiler, Token* name) {
@@ -494,7 +494,7 @@ static void string(Compiler* compiler, Token token) {
 }
 
 static void getVariable(Compiler* compiler, SymbolTable* symtab, Token token) {
-    SymbolItem* item = findSymbolItem(compiler, symtab, token);
+    SymbolItem* item = findSymbolItemByToken(compiler, symtab, token);
     switch (item->category) {
         case SYMBOL_CATEGORY_LOCAL:
         case SYMBOL_CATEGORY_FORMAL:
@@ -683,7 +683,7 @@ static void compileArray(Compiler* compiler, Ast* ast) {
 static void compileAssign(Compiler* compiler, Ast* ast) {
     uint8_t setOp;
     int arg;
-    SymbolItem* item = findSymbolItem(compiler, ast->symtab, ast->token);
+    SymbolItem* item = findSymbolItemByToken(compiler, ast->symtab, ast->token);
 
     switch (item->category) {
         case SYMBOL_CATEGORY_LOCAL:
