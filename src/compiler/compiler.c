@@ -525,6 +525,26 @@ static uint8_t lambdaDepth(Compiler* compiler) {
     return depth;
 }
 
+static void behaviorTypeParameters(Compiler* compiler, Ast* ast) {
+    ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
+    SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
+    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, classItem->type->fullName)));
+
+    for (int i = 0; i < classType->formalTypeParams->count; i++) {
+        TypeInfo* formalTypeParamType = classType->formalTypeParams->elements[i];
+        Token formalTypeParamToken = syntheticToken(formalTypeParamType->shortName->chars);
+        compiler->function->arity++;
+        compiler->function->typeParamCount++;
+
+        uint8_t index = identifierConstant(compiler, &formalTypeParamToken);
+        compiler->localCount++;
+        defineVariable(compiler, index, false);
+        emitBytes(compiler, OP_GET_LOCAL, 0);
+        emitBytes(compiler, OP_GET_LOCAL, compiler->function->typeParamCount);
+        emitBytes(compiler, OP_SET_PROPERTY, index);
+    }
+}
+
 static void typeParameters(Compiler* compiler, Ast* ast) {
     for (int i = 0; i < ast->children->count; i++) {
         compiler->function->arity++;
@@ -555,23 +575,7 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
     beginScope(&compiler);
 
     if (ast->attribute.isInitializer) {
-        ObjString* className = copyStringPerma(compiler.vm, compiler.currentClass->name.start, compiler.currentClass->name.length);
-        SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
-        BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler.vm->typetab, getClassNameFromMetaclass(compiler.vm, classItem->type->fullName)));
-        
-        for (int i = 0; i < classType->formalTypeParams->count; i++) {
-			TypeInfo* formalTypeParamType = classType->formalTypeParams->elements[i];
-			Token formalTypeParamToken = syntheticToken(formalTypeParamType->shortName->chars);
-            compiler.function->arity++;
-            compiler.function->typeParamCount++;
-            
-			uint8_t index = identifierConstant(&compiler, &formalTypeParamToken);
-            compiler.localCount++;
-            defineVariable(&compiler, index, false);
-            emitBytes(&compiler, OP_GET_LOCAL, 0);
-            emitBytes(&compiler, OP_GET_LOCAL, compiler.function->typeParamCount);
-			emitBytes(&compiler, OP_SET_PROPERTY, index);
-        }
+		behaviorTypeParameters(&compiler, ast);
     }
     else if (astHasTypeParameters(ast)) {
         typeParameters(&compiler, astGetTypeParameters(ast));

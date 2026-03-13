@@ -129,6 +129,7 @@ CallableTypeInfo* newCallableTypeInfoWithFormalParameters(int id, TypeCategory c
             TypeInfoArrayInit(callableType->formalTypeParams);
             va_list args;
             va_start(args, numParameters);
+
             for (int i = 0; i < numParameters; i++) {
                 TypeInfo* type = va_arg(args, TypeInfo*);
                 TypeInfoArrayAdd(callableType->formalTypeParams, type);
@@ -229,10 +230,10 @@ AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjS
     return aliasType;
 }
 
-static char* createTempTypeName(TypeInfo* paramType) {
-    if (IS_CALLABLE_TYPE(paramType)) return createCallableTypeName(AS_CALLABLE_TYPE(paramType));
-    else if (IS_GENERIC_TYPE(paramType)) return createGenericTypeName(AS_GENERIC_TYPE(paramType));
-    else return paramType->shortName->chars;
+static char* createTempTypeName(TypeInfo* type) {
+    if (IS_CALLABLE_TYPE(type)) return createCallableTypeName(AS_CALLABLE_TYPE(type));
+    else if (IS_GENERIC_TYPE(type)) return createGenericTypeName(AS_GENERIC_TYPE(type));
+    else return type->shortName->chars;
 }
 
 char* createCallableTypeName(CallableTypeInfo* callableType) {
