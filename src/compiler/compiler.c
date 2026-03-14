@@ -545,7 +545,7 @@ static void behaviorTypeParameters(Compiler* compiler, Ast* ast) {
     }
 }
 
-static void typeParameters(Compiler* compiler, Ast* ast) {
+static void callableTypeParameters(Compiler* compiler, Ast* ast) {
     for (int i = 0; i < ast->children->count; i++) {
         compiler->function->arity++;
         compiler->function->typeParamCount++;
@@ -578,7 +578,7 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
 		behaviorTypeParameters(&compiler, ast);
     }
     else if (astHasTypeParameters(ast)) {
-        typeParameters(&compiler, astGetTypeParameters(ast));
+        callableTypeParameters(&compiler, astGetTypeParameters(ast));
     }
 
     parameters(&compiler, astGetChild(ast, 1));

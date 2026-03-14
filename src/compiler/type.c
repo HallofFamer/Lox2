@@ -458,10 +458,7 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
 }
 
 TypeInfo* getAliasTargetType(TypeInfo* type) {
-    if (IS_ALIAS_TYPE(type)) {
-        return getAliasTargetType(AS_ALIAS_TYPE(type)->targetType);
-	}
-    return type;
+	return IS_ALIAS_TYPE(type) ? AS_ALIAS_TYPE(type)->targetType : type;
 }
 
 TypeInfo* getInnerBaseType(TypeInfo* type) {
