@@ -593,16 +593,18 @@ static Ast* callableType(Parser* parser, const char* message) {
     Ast* paramType = NULL;
     int arity = 0;
 
-    do {
-        arity++;
-        if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
-        if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
-            paramType = callableType(parser, "Expect function type.");
-            paramType->attribute.isFunction = true;
-        }
-        else paramType = behaviorType(parser, "Expect param type.");
-        astAppendChild(paramTypes, paramType);
-    } while (match(parser, TOKEN_COMMA));
+    if (!check(parser, TOKEN_RIGHT_PAREN)) {
+        do {
+            arity++;
+            if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
+            if (checkEither(parser, TOKEN_IDENTIFIER, TOKEN_VOID) && checkNext(parser, TOKEN_FUN)) {
+                paramType = callableType(parser, "Expect function type.");
+                paramType->attribute.isFunction = true;
+            }
+            else paramType = behaviorType(parser, "Expect param type.");
+            astAppendChild(paramTypes, paramType);
+        } while (match(parser, TOKEN_COMMA));
+    }
 
     consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after param types.");
     Ast* type = newAst(AST_EXPR_TYPE, token, 2, returnType, paramTypes);
