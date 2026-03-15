@@ -548,6 +548,7 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
 			CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, callableType->baseType.category, callableType->baseType.shortName, NULL);
             instantiatedCallableType->attribute = callableType->attribute;
             TypeInfo* instantiatedReturnType = callableType->returnType;
+            
             if (hasGenericParameters(instantiatedReturnType)) {
                 instantiatedReturnType = instantiateTypeParameter(instantiatedReturnType, formalParams, actualParams);
             }
