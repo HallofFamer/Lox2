@@ -497,16 +497,30 @@ static void string(Compiler* compiler, Token token) {
     emitConstant(compiler, OBJ_VAL(takeStringPerma(compiler->vm, string, token.length)));
 }
 
+static void getTypeParameter(Compiler* compiler, SymbolScope scope, Token token) {
+    if (isClassScope(scope)) {
+        uint8_t index = identifierConstant(compiler, &token);
+        emitBytes(compiler, OP_GET_LOCAL, 0);
+        emitBytes(compiler, OP_GET_PROPERTY, index);
+    }
+    else {
+        emitBytes(compiler, OP_GET_LOCAL, (uint8_t)findLocal(compiler, &token));
+    }
+}
+
 static void getVariable(Compiler* compiler, SymbolTable* symtab, Token token) {
     SymbolScope scope;
     SymbolItem* item = findSymbolItemByToken(compiler, symtab, token, &scope);
+
     switch (item->category) {
         case SYMBOL_CATEGORY_LOCAL:
-        case SYMBOL_CATEGORY_FORMAL:
             emitBytes(compiler, OP_GET_LOCAL, (uint8_t)findLocal(compiler, &item->token));
             break;
         case SYMBOL_CATEGORY_UPVALUE:
             emitBytes(compiler, OP_GET_UPVALUE, (uint8_t)findUpvalue(compiler, &item->token));
+            break;
+        case SYMBOL_CATEGORY_FORMAL:
+			getTypeParameter(compiler, scope, item->token);
             break;
         default:
             emitBytes(compiler, OP_GET_GLOBAL, (uint8_t)identifierConstant(compiler, &item->token));

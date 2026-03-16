@@ -968,13 +968,20 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (type == NULL || type2 == NULL) return true;
 	if (IS_VOID_TYPE(type) && IS_VOID_TYPE(type2)) return true;
     if (IS_FORMAL_TYPE(type) && IS_FORMAL_TYPE(type2)) return true;
-    if (IS_ALIAS_TYPE(type) || IS_ALIAS_TYPE(type2)) return isEqualType(getAliasTargetType(type), getAliasTargetType(type2));
+    
+    if (IS_ALIAS_TYPE(type) || IS_ALIAS_TYPE(type2)) {
+        return isEqualType(getAliasTargetType(type), getAliasTargetType(type2));
+    }
 
-    if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) return (type->id == type2->id);
+    if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) {
+        return (type->id == type2->id);
+    }
+
     if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
 		return isCallableEqualType(AS_CALLABLE_TYPE(type), AS_CALLABLE_TYPE(type2));
     }
-	if (IS_GENERIC_TYPE(type) && IS_GENERIC_TYPE(type2)) {
+	
+    if (IS_GENERIC_TYPE(type) && IS_GENERIC_TYPE(type2)) {
         return isGenericEqualType(AS_GENERIC_TYPE(type), AS_GENERIC_TYPE(type2));
     }
     return false;
