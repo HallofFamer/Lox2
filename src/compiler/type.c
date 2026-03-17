@@ -364,7 +364,6 @@ char* createAliasTypeName(AliasTypeInfo* aliasType) {
     }
     aliasName[length++] = '<';
 
-
     for (int i = 0; i < aliasType->formalTypeParams->count; i++) {
         TypeInfo* paramType = aliasType->formalTypeParams->elements[i];
         if (i > 0) {
@@ -395,8 +394,7 @@ void freeTypeInfo(TypeInfo* type) {
     if (IS_BEHAVIOR_TYPE(type)) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
-        if (behaviorType->formalTypeParams != NULL) TypeInfoArrayFree(behaviorType->formalTypeParams);
-        
+        if (behaviorType->formalTypeParams != NULL) TypeInfoArrayFree(behaviorType->formalTypeParams);  
         freeTypeTable(behaviorType->fields);
         freeTypeTable(behaviorType->methods);
         free(behaviorType);
@@ -1058,9 +1056,11 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (IS_CALLABLE_TYPE(type)) {
         return isCallableSubtypeOfType(AS_CALLABLE_TYPE(type), type2);
     } 
+
     if (IS_GENERIC_TYPE(type)) {
         return isGenericSubtypeOfType(AS_GENERIC_TYPE(type), type2);
     }
+    
     if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) {
         return false;
     }

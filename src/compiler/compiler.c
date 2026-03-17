@@ -544,7 +544,7 @@ static uint8_t lambdaDepth(Compiler* compiler) {
     return depth;
 }
 
-static void behaviorTypeParameters(Compiler* compiler, Ast* ast) {
+static void behaviorTypeParametersAtInitializer(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, classItem->type->fullName)));
@@ -594,7 +594,7 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
     beginScope(&compiler);
 
     if (ast->attribute.isInitializer) {
-		behaviorTypeParameters(&compiler, ast);
+		behaviorTypeParametersAtInitializer(&compiler, ast);
     }
     else if (astHasTypeParameters(ast)) {
         callableTypeParameters(&compiler, astGetTypeParameters(ast));
