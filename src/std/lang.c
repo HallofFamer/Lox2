@@ -982,7 +982,8 @@ LOX_METHOD(Method, arity) {
     if (IS_NATIVE_METHOD(receiver)) {
         RETURN_INT(AS_NATIVE_METHOD(receiver)->arity);
     }
-    RETURN_INT(AS_METHOD(receiver)->closure->function->arity);
+	ObjMethod* self = AS_METHOD(receiver);
+    RETURN_INT(self->closure->function->arity - self->closure->function->typeParamCount);
 }
 
 LOX_METHOD(Method, behavior) {
@@ -1037,6 +1038,12 @@ LOX_METHOD(Method, toString) {
     }
     ObjMethod* method = AS_METHOD(receiver);
     RETURN_STRING_FMT("<method %s::%s>", method->behavior->name->chars, method->closure->function->name->chars);
+}
+
+LOX_METHOD(Method, typeParamCount) {
+    ASSERT_ARG_COUNT("Method::typeParams()", 0);
+    if (IS_NATIVE_METHOD(receiver)) RETURN_INT(0);
+    RETURN_INT(AS_CLOSURE(receiver)->function->typeParamCount);
 }
 
 LOX_METHOD(Namespace, __init__) {
@@ -2194,6 +2201,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->methodClass, Method, isVariadic, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->methodClass, Method, name, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->methodClass, Method, toString, 0, NATIVE_TYPE(String));
+    DEF_METHOD(vm->methodClass, Method, typeParamCount, 0, NATIVE_TYPE(Int));
 
     bindMethodClass(vm, vm->objectClass);
     bindMethodClass(vm, objectMetaclass);

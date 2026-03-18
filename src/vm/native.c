@@ -193,40 +193,40 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
 void defineNativeInterceptor(VM* vm, ObjClass* klass, InterceptorType type, int arity, NativeMethod method, ...) {
     switch (type) {
         case INTERCEPTOR_INIT:
-            defineNativeMethod(vm, klass, "__init__", arity, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__init__", arity, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_BEFORE_GET:
-            defineNativeMethod(vm, klass, "__beforeGet__", 1, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__beforeGet__", 1, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_AFTER_GET:
-            defineNativeMethod(vm, klass, "__afterGet__", 2, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__afterGet__", 2, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_BEFORE_SET:
-            defineNativeMethod(vm, klass, "__beforeSet__", 2, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__beforeSet__", 2, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_AFTER_SET: 
-            defineNativeMethod(vm, klass, "__afterSet__", 2, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__afterSet__", 2, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_ON_INVOKE:
-            defineNativeMethod(vm, klass, "__onInvoke__", 2, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__onInvoke__", 2, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_ON_RETURN:
-            defineNativeMethod(vm, klass, "__onReturn__", 2, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__onReturn__", 2, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_ON_THROW:
-            defineNativeMethod(vm, klass, "__onThrow__", 2, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__onThrow__", 2, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_ON_YIELD:
-            defineNativeMethod(vm, klass, "__onYield__", 2, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__onYield__", 2, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_ON_AWAIT:
-            defineNativeMethod(vm, klass, "__onAwait__", 2, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__onAwait__", 2, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_UNDEFINED_GET:
-            defineNativeMethod(vm, klass, "__undefinedGet__", 1, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__undefinedGet__", 1, false, method, NATIVE_TYPE(Object));
             break;
         case INTERCEPTOR_UNDEFINED_INVOKE:
-            defineNativeMethod(vm, klass, "__undefinedInvoke__", 2, false, method, RETURN_TYPE(Object));
+            defineNativeMethod(vm, klass, "__undefinedInvoke__", 2, false, method, NATIVE_TYPE(Object));
             break;
         default: 
             runtimeError(vm, "Unknown interceptor type %d.", type);

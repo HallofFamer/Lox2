@@ -960,7 +960,7 @@ void registerUtilPackage(VM* vm) {
     DEF_FIELD(vm->promiseClass, state, Int, false, INT_VAL(0));
     DEF_FIELD(vm->promiseClass, value, T, false, NIL_VAL);
     DEF_FIELD(vm->promiseClass, id, Int, true, INT_VAL(0));
-    DEF_INTERCEPTOR(vm->promiseClass, Promise, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(clox.std.util.Promise), PARAM_TYPE_CALLABLE(NATIVE_TYPE(void), 2, NATIVE_TYPE(TCallable), NATIVE_TYPE(TCallable)));
+    DEF_INTERCEPTOR(vm->promiseClass, Promise, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(void), 2, NATIVE_TYPE(TCallable), NATIVE_TYPE(TCallable)));
     DEF_METHOD(vm->promiseClass, Promise, catch, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE(TCallable));
     DEF_METHOD(vm->promiseClass, Promise, catchAll, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE(TCallable));
     DEF_METHOD(vm->promiseClass, Promise, finally, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE(TCallable));

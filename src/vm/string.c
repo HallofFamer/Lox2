@@ -38,6 +38,7 @@ ObjString* takeString(VM* vm, char* chars, int length) {
         FREE_ARRAY(char, chars, (size_t)length + 1, interned->obj.generation);
         return interned;
     }
+
     ObjString* string = allocateString(vm, chars, length, hash, GC_GENERATION_TYPE_EDEN);
     FREE_ARRAY(char, chars, (size_t)length + 1, string->obj.generation);
     return string;
@@ -50,6 +51,7 @@ ObjString* takeStringPerma(VM* vm, char* chars, int length) {
         FREE_ARRAY(char, chars, (size_t)length + 1, GC_GENERATION_TYPE_PERMANENT);
         return interned;
     }
+
     ObjString* string = allocateString(vm, chars, length, hash, GC_GENERATION_TYPE_PERMANENT);
     FREE_ARRAY(char, chars, (size_t)length + 1, string->obj.generation);
     return string;
@@ -144,6 +146,7 @@ ObjString* concatenateString(VM* vm, ObjString* string, ObjString* string2, cons
     char* chars = bufferNewCString(totalLength);
     memcpy(chars, string->chars, string->length);
     if (separatorLength > 0) chars[string->length] = separator[0];
+
     memcpy(chars + string->length + separatorLength, string2->chars, string2->length);
     chars[totalLength] = '\0';
     return takeString(vm, chars, (int)totalLength);
