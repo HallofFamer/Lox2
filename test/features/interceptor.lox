@@ -63,13 +63,11 @@ val intercept = InterceptObject()
 println("Testing interceptor methods for property get: ")
 println(intercept.definedProperty)
 intercept.undefinedProperty
-println("")
 
-println("Testing interceptor methods for property set: ")
+println("\nTesting interceptor methods for property set: ")
 intercept.definedProperty = "property 2"
 println(intercept.definedProperty)
-println("")
-println("Testing interceptor methods for method invocation: ")
+println("\nTesting interceptor methods for method invocation: ")
 intercept.definedMethod("Hello", true)
 intercept.undefinedMethod(0, 2, 4)
 

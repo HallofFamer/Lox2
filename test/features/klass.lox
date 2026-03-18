@@ -33,11 +33,11 @@ class Point {
 }
 
 Point.origin = Point(0, 0)
-
 val p = Point(1, 2)
 println("Create point object p: ${p}")
 val p2 = Point(4, 6)
 println("Creating point object p2: ${p2}")
+
 println("Distance between p and p2 is: ${p.distance(p2)}")
 println("Point at origin: ${Point.origin}")
 println("Creating horizontal point object: ${Point.getHorizontal(2)}")

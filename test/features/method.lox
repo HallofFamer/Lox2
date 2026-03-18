@@ -19,9 +19,8 @@ val boundMethod = method.bind(scone)
 println("Bound method to receiver: ${boundMethod}")
 println("Invoking bound method: ")
 boundMethod("berries", "cream")
-println("")
 
-println("Getting method dict from Object: ")
+println("\nGetting method dict from Object: ")
 var methods = Object.methods()
 for(val (name, method) : methods){
    println("Method ${method.behavior().name()}::${name}, arity: ${method.arity()}")

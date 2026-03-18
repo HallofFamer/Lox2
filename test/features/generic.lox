@@ -1,6 +1,6 @@
 namespace test.features
 
-println("Testing getting properties: ")
+println("Testing getting instance fields: ")
 val array = [1, 2, 3, 4, 5]
 println("Length of array: ${array.length}")
 
@@ -20,7 +20,7 @@ catch (ArithmeticException e) {
     println("Caught exception with message: ${e.message}\n")
 }
 
-println("Testing setting properties: ")
+println("Testing setting instance fields: ")
 array.name = "Number Array"
 array.capacity = 8
 println("Array Name: ${array.name}, Capacity: ${array.capacity}")

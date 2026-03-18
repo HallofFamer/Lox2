@@ -1,7 +1,12 @@
 namespace test.features
 
-class Street { 
-    __init__(name, apartment, unit){ 
+class Street {
+
+    val String name
+    val Int apartment
+    val Int unit
+
+    __init__(String name, Int apartment, Int unit){ 
         this.name = name
         this.apartment = apartment
         this.unit = unit
@@ -9,7 +14,13 @@ class Street {
 }
 
 class Area { 
-    __init__(city, state, country, zipcode){ 
+
+    val String city
+    val String state
+    val String country
+    val Int zipcode
+
+    __init__(String city, String state, String country, Int zipcode){ 
         this.city = city
         this.state = state
         this.country = country
@@ -18,6 +29,10 @@ class Area {
 }
  
 class Address { 
+
+    val Street street
+    val Area area
+
     __init__(){ 
         this.street = nil
         this.area = nil
