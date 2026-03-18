@@ -544,6 +544,16 @@ static uint8_t lambdaDepth(Compiler* compiler) {
     return depth;
 }
 
+static void behaviorTypeParametersAtDeclaration(Compiler* compiler, Ast* ast) {
+    Ast* typeParams = astGetTypeParameters(ast);
+    for (int i = 0; i < typeParams->children->count; i++) {
+        Ast* typeParam = astGetChild(typeParams, i);
+        uint8_t index = identifierConstant(compiler, &typeParam->token);
+        emitBytes(compiler, OP_NIL, OP_FIELD);
+        emitBytes(compiler, index, 0);
+    }
+}
+
 static void behaviorTypeParametersAtInitializer(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
@@ -643,13 +653,7 @@ static void behavior(Compiler* compiler, BehaviorType type, Ast* ast) {
     }
 
     if (astHasTypeParameters(ast)) {
-        Ast* typeParams = astGetTypeParameters(ast);
-        for (int i = 0; i < typeParams->children->count; i++) {
-            Ast* typeParam = astGetChild(typeParams, i);
-            uint8_t index = identifierConstant(compiler, &typeParam->token);
-            emitBytes(compiler, OP_NIL, OP_FIELD);
-            emitBytes(compiler, index, 0);
-        }
+        behaviorTypeParametersAtDeclaration(compiler, ast);
     }
 
     childIndex++; 

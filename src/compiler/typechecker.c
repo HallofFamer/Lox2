@@ -288,6 +288,7 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
             TypeInfo* paramType = callableType->paramTypes->elements[i];
             if (paramType == NULL) continue;
             Ast* arg = ast->children->elements[i];
+            
             if (!isSubtypeOfType(arg->type, paramType)) {
                 typeError(typeChecker, "%s expects argument %d to be an instance of %s but gets %s.", 
                     calleeDesc, i + 1, paramType->shortName->chars, arg->type->shortName->chars);
@@ -342,10 +343,10 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
         TypeEntry* entry = &behaviorType->methods->entries[i];
         if (entry != NULL && entry->key != NULL) {
 			if (typeTableGet(subtype->methods, entry->key) != NULL) continue;
-
             MethodTypeInfo* superMethodType = AS_METHOD_TYPE(entry->value);
             MethodTypeInfo* subMethodType = newMethodTypeInfo(i, superMethodType->baseType.shortName, superMethodType->declaredType->returnType, superMethodType->isClass, superMethodType->isInitializer);
             subMethodType->declaredType->attribute = superMethodType->declaredType->attribute;
+            
             TypeInfo* returnType = superMethodType->declaredType->returnType;
             if (hasGenericParameters(returnType)) {
                 subMethodType->declaredType->returnType = instantiateTypeParameterWithName(typeChecker, returnType, behaviorType->formalTypeParams, supertype->actualTypeParams);

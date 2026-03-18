@@ -83,9 +83,10 @@ const char* tokenNames[] = {
 
 Token syntheticToken(const char* text) {
     return (Token) {
-        .type = TOKEN_SYMBOL_EMPTY, 
-        .start = text, 
-        .length = (int)strlen(text)
+        .type = TOKEN_SYMBOL_EMPTY,
+        .start = text,
+        .length = (int)strlen(text),
+        .line = 0
     };
 }
 

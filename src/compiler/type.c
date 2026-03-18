@@ -107,11 +107,11 @@ CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* 
     if (callableType != NULL) {
         callableType->returnType = returnType;
         callableType->paramTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-        callableType->attribute = callableTypeInitAttribute();
-
         if (callableType->paramTypes != NULL) TypeInfoArrayInit(callableType->paramTypes);
+
+        callableType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (callableType->formalTypeParams != NULL) TypeInfoArrayInit(callableType->formalTypeParams);
+        callableType->attribute = callableTypeInitAttribute();
     }
     return callableType;
 }
