@@ -971,6 +971,10 @@ static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
     if (astNumChild(ast) > 1) {
         resolveChild(resolver, ast, 1);
     }
+
+    if (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0) {
+        ast->attribute.isInitializer = true;
+    }
 }
 
 static void resolveThis(Resolver* resolver, Ast* ast) {

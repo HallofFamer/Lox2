@@ -923,7 +923,22 @@ static void compileSuperGet(Compiler* compiler, Ast* ast) {
 static void compileSuperInvoke(Compiler* compiler, Ast* ast) {
     uint8_t index = super_(compiler, ast);
     int typeArgCount = 0;
-    if (astNumChild(ast) > 1) {
+    if (ast->attribute.isInitializer) {
+        ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
+        SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
+        BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, classItem->type->fullName)));
+
+        if (hasGenericParameters(classType->superclassType)) {
+            BehaviorTypeInfo* superclassType = AS_BEHAVIOR_TYPE(getInnerBaseType(classType->superclassType));
+            for (int i = 0; i < superclassType->formalTypeParams->count; i++) {
+                TypeInfo* formalParamType = superclassType->formalTypeParams->elements[i];
+                Token formalTypeParamToken = syntheticToken(formalParamType->shortName->chars);
+				getVariable(compiler, ast->symtab, formalTypeParamToken);
+            }
+            typeArgCount = superclassType->formalTypeParams->count;
+        }
+    }
+    else if (astNumChild(ast) > 1) {
         Ast* typeArgs = astGetChild(ast, 1);
         typeArguments(compiler, typeArgs);
         typeArgCount = typeArgs->children->count;
