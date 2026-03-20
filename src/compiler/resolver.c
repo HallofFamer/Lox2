@@ -889,6 +889,10 @@ static void resolveInvoke(Resolver* resolver, Ast* ast) {
     if (astNumChild(ast) > 2) {
         resolveChild(resolver, ast, 2);
     }
+
+    if (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0) {
+        ast->attribute.isInitializer = true;
+    }
 }
 
 static void resolveLiteral(Resolver* resolver, Ast* ast) {
@@ -958,7 +962,11 @@ static void resolveSuperGet(Resolver* resolver, Ast* ast) {
         semanticError(resolver, "Cannot use 'super' outside of a class/trait.");
     }
     findThis(resolver);
+
     resolveChild(resolver, ast, 0);
+    if (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0) {
+        ast->attribute.isInitializer = true;
+    }
 }
 
 static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
