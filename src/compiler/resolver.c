@@ -515,6 +515,10 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     }
 }
 
+static bool astMatchInitializer(Resolver* resolver, Ast* ast) {
+    return (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0);
+}
+
 static void astInsertTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char* typeName) {
     ast->type = type;
     ast->type->fullName = ast->type->shortName = takeStringPerma(resolver->vm, typeName, (int)strlen(typeName));
@@ -890,7 +894,7 @@ static void resolveInvoke(Resolver* resolver, Ast* ast) {
         resolveChild(resolver, ast, 2);
     }
 
-    if (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0) {
+    if (astMatchInitializer(resolver, ast)) {
         ast->attribute.isInitializer = true;
     }
 }
@@ -964,7 +968,7 @@ static void resolveSuperGet(Resolver* resolver, Ast* ast) {
     findThis(resolver);
 
     resolveChild(resolver, ast, 0);
-    if (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0) {
+    if (astMatchInitializer(resolver, ast)) {
         ast->attribute.isInitializer = true;
     }
 }
@@ -980,7 +984,7 @@ static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
         resolveChild(resolver, ast, 1);
     }
 
-    if (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0) {
+    if (astMatchInitializer(resolver, ast)) {
         ast->attribute.isInitializer = true;
     }
 }

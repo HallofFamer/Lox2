@@ -584,7 +584,7 @@ static void callableTypeParameters(Compiler* compiler, Ast* ast) {
     }
 }
 
-static int typeArguments(Compiler* compiler, Ast* ast) {
+static int typeArgumentsAtInvocation(Compiler* compiler, Ast* ast) {
     for (int i = 0; i < ast->children->count; i++) {
         Ast* typeArg = astGetChild(ast, i);
         getVariable(compiler, typeArg->symtab, typeArg->token);
@@ -592,7 +592,7 @@ static int typeArguments(Compiler* compiler, Ast* ast) {
     return ast->children->count;
 }
 
-static int typeArgumentsFromSuperclass(Compiler* compiler, Ast* ast) {
+static int typeArgumentsAtSuper(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, classItem->type->fullName)));
@@ -780,7 +780,7 @@ static void compileCall(Compiler* compiler, Ast* ast) {
 
     if (callee->attribute.isGeneric) {
 		Ast* typeArgs = astGetChild(callee, 0);
-        typeArguments(compiler, typeArgs);
+        typeArgumentsAtInvocation(compiler, typeArgs);
         typeArgCount = typeArgs->children->count;
     }
 
@@ -852,7 +852,7 @@ static void compileInvoke(Compiler* compiler, Ast* ast) {
 	int typeArgCount = 0;
     if (astNumChild(ast) > 2) {
         Ast* typeArgs = astGetChild(ast, 2);
-        typeArguments(compiler, typeArgs);
+        typeArgumentsAtInvocation(compiler, typeArgs);
         typeArgCount = typeArgs->children->count;
     }
 
@@ -941,11 +941,11 @@ static void compileSuperInvoke(Compiler* compiler, Ast* ast) {
     uint8_t index = super_(compiler, ast);
     int typeArgCount = 0;
     if (ast->attribute.isInitializer) {
-        typeArgCount = typeArgumentsFromSuperclass(compiler, ast);
+        typeArgCount = typeArgumentsAtSuper(compiler, ast);
     }
     else if (astNumChild(ast) > 1) {
         Ast* typeArgs = astGetChild(ast, 1);
-        typeArguments(compiler, typeArgs);
+        typeArgumentsAtInvocation(compiler, typeArgs);
         typeArgCount = typeArgs->children->count;
     }
 
