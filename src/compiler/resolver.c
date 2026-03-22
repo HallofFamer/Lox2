@@ -516,7 +516,10 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
 }
 
 static bool astMatchInitializer(Resolver* resolver, Ast* ast) {
-    return (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0);
+    if (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0) {
+        ast->attribute.isInitializer = true;
+    }
+	return ast->attribute.isInitializer;
 }
 
 static void astInsertTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char* typeName) {
@@ -893,10 +896,7 @@ static void resolveInvoke(Resolver* resolver, Ast* ast) {
     if (astNumChild(ast) > 2) {
         resolveChild(resolver, ast, 2);
     }
-
-    if (astMatchInitializer(resolver, ast)) {
-        ast->attribute.isInitializer = true;
-    }
+	astMatchInitializer(resolver, ast);
 }
 
 static void resolveLiteral(Resolver* resolver, Ast* ast) {
@@ -966,11 +966,8 @@ static void resolveSuperGet(Resolver* resolver, Ast* ast) {
         semanticError(resolver, "Cannot use 'super' outside of a class/trait.");
     }
     findThis(resolver);
-
     resolveChild(resolver, ast, 0);
-    if (astMatchInitializer(resolver, ast)) {
-        ast->attribute.isInitializer = true;
-    }
+	astMatchInitializer(resolver, ast);
 }
 
 static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
@@ -978,15 +975,12 @@ static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
         semanticError(resolver, "Cannot use 'super' outside of a class/trait.");
     }
     findThis(resolver);
-    
+  
     resolveChild(resolver, ast, 0);
     if (astNumChild(ast) > 1) {
         resolveChild(resolver, ast, 1);
     }
-
-    if (astMatchInitializer(resolver, ast)) {
-        ast->attribute.isInitializer = true;
-    }
+    astMatchInitializer(resolver, ast);
 }
 
 static void resolveThis(Resolver* resolver, Ast* ast) {

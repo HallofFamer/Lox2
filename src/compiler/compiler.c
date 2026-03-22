@@ -780,8 +780,7 @@ static void compileCall(Compiler* compiler, Ast* ast) {
 
     if (callee->attribute.isGeneric) {
 		Ast* typeArgs = astGetChild(callee, 0);
-        typeArgumentsAtInvocation(compiler, typeArgs);
-        typeArgCount = typeArgs->children->count;
+        typeArgCount = typeArgumentsAtInvocation(compiler, typeArgs);
     }
 
     Ast* args = astGetChild(ast, 1);
@@ -852,8 +851,7 @@ static void compileInvoke(Compiler* compiler, Ast* ast) {
 	int typeArgCount = 0;
     if (astNumChild(ast) > 2) {
         Ast* typeArgs = astGetChild(ast, 2);
-        typeArgumentsAtInvocation(compiler, typeArgs);
-        typeArgCount = typeArgs->children->count;
+        typeArgCount = typeArgumentsAtInvocation(compiler, typeArgs);
     }
 
     Ast* args = astGetChild(ast, 1);
@@ -945,8 +943,7 @@ static void compileSuperInvoke(Compiler* compiler, Ast* ast) {
     }
     else if (astNumChild(ast) > 1) {
         Ast* typeArgs = astGetChild(ast, 1);
-        typeArgumentsAtInvocation(compiler, typeArgs);
-        typeArgCount = typeArgs->children->count;
+        typeArgCount = typeArgumentsAtInvocation(compiler, typeArgs);
     }
 
     Ast* args = astGetChild(ast, 0);
