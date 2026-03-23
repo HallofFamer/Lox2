@@ -598,13 +598,13 @@ static int typeArgumentsAtSuper(Compiler* compiler, Ast* ast) {
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, classItem->type->fullName)));
 
     if (hasGenericParameters(classType->superclassType)) {
-        BehaviorTypeInfo* superclassType = AS_BEHAVIOR_TYPE(getInnerBaseType(classType->superclassType));
-        for (int i = 0; i < superclassType->formalTypeParams->count; i++) {
-            TypeInfo* formalParamType = superclassType->formalTypeParams->elements[i];
+		TypeInfoArray* formalTypeParams = getTypeParameters(classType->superclassType);
+        for (int i = 0; i < formalTypeParams->count; i++) {
+            TypeInfo* formalParamType = formalTypeParams->elements[i];
             Token formalTypeParamToken = syntheticToken(formalParamType->shortName->chars);
             getVariable(compiler, ast->symtab, formalTypeParamToken);
         }
-        return superclassType->formalTypeParams->count;
+        return formalTypeParams->count;
     }
     return 0;
 }

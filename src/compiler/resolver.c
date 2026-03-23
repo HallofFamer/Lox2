@@ -515,11 +515,10 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     }
 }
 
-static bool astMatchInitializer(Resolver* resolver, Ast* ast) {
+static void astMatchInitializer(Resolver* resolver, Ast* ast) {
     if (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0) {
         ast->attribute.isInitializer = true;
     }
-	return ast->attribute.isInitializer;
 }
 
 static void astInsertTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char* typeName) {
