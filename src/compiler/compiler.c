@@ -568,6 +568,7 @@ static void behaviorTypeParametersAtInitializer(Compiler* compiler, Ast* ast) {
         uint8_t index = identifierConstant(compiler, &formalTypeParamToken);
         compiler->localCount++;
         defineVariable(compiler, index, false);
+
         emitBytes(compiler, OP_GET_LOCAL, 0);
         emitBytes(compiler, OP_GET_LOCAL, compiler->function->typeParamCount);
         emitBytes(compiler, OP_SET_PROPERTY, index);

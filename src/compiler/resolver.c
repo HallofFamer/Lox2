@@ -515,7 +515,7 @@ static void insertParamType(Resolver* resolver, Ast* ast, bool hasType) {
     }
 }
 
-static void astMatchInitializer(Resolver* resolver, Ast* ast) {
+static void astHandleInitializer(Resolver* resolver, Ast* ast) {
     if (strncmp(ast->token.start, resolver->vm->initString->chars, ast->token.length) == 0) {
         ast->attribute.isInitializer = true;
     }
@@ -895,7 +895,7 @@ static void resolveInvoke(Resolver* resolver, Ast* ast) {
     if (astNumChild(ast) > 2) {
         resolveChild(resolver, ast, 2);
     }
-	astMatchInitializer(resolver, ast);
+	astHandleInitializer(resolver, ast);
 }
 
 static void resolveLiteral(Resolver* resolver, Ast* ast) {
@@ -966,7 +966,7 @@ static void resolveSuperGet(Resolver* resolver, Ast* ast) {
     }
     findThis(resolver);
     resolveChild(resolver, ast, 0);
-	astMatchInitializer(resolver, ast);
+	astHandleInitializer(resolver, ast);
 }
 
 static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
@@ -979,7 +979,7 @@ static void resolveSuperInvoke(Resolver* resolver, Ast* ast) {
     if (astNumChild(ast) > 1) {
         resolveChild(resolver, ast, 1);
     }
-    astMatchInitializer(resolver, ast);
+    astHandleInitializer(resolver, ast);
 }
 
 static void resolveThis(Resolver* resolver, Ast* ast) {
