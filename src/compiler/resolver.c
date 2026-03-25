@@ -251,9 +251,8 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
     switch (category) {
         case TYPE_CATEGORY_CLASS:
             return (TypeInfo*)insertMetaclassType(resolver, shortName, fullName);
-        case TYPE_CATEGORY_METACLASS: {
+        case TYPE_CATEGORY_METACLASS:
             return getNativeType(resolver->vm, "Metaclass");
-        }
         case TYPE_CATEGORY_TRAIT:
             return getNativeType(resolver->vm, "Trait");
         default:

@@ -593,7 +593,7 @@ static int typeArgumentsAtInvocation(Compiler* compiler, Ast* ast) {
     return ast->children->count;
 }
 
-static int typeArgumentsAtSuper(Compiler* compiler, Ast* ast) {
+static int typeArgumentsAtSuperInit(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, classItem->type->fullName)));
@@ -609,6 +609,7 @@ static int typeArgumentsAtSuper(Compiler* compiler, Ast* ast) {
     }
     return 0;
 }
+
 static void block(Compiler* compiler, Ast* ast) {
     Ast* stmts = astGetChild(ast, 0);
     for (int i = 0; i < stmts->children->count; i++) {
@@ -783,6 +784,21 @@ static void compileCall(Compiler* compiler, Ast* ast) {
 		Ast* typeArgs = astGetChild(callee, 0);
         typeArgCount = typeArgumentsAtInvocation(compiler, typeArgs);
     }
+    else if (callee->type != NULL){
+        TypeInfo* rawType = getInnerBaseType(callee->type);
+		if (IS_BEHAVIOR_TYPE(rawType)) {
+            BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, rawType->fullName)));
+            if (hasGenericParameters(behaviorType->superclassType)) {
+				TypeInfoArray* typeArgs = getTypeParameters(behaviorType->superclassType);
+				for (int i = 0; i < typeArgs->count; i++) {
+                    TypeInfo* typeArg = typeArgs->elements[i];
+                    Token typeArgToken = syntheticToken(typeArg->shortName->chars);
+                    getVariable(compiler, ast->symtab, typeArgToken);
+                }
+				typeArgCount = typeArgs->count;
+			}
+        }
+    }
 
     Ast* args = astGetChild(ast, 1);
     uint8_t argCount = argumentList(compiler, args);
@@ -940,7 +956,7 @@ static void compileSuperInvoke(Compiler* compiler, Ast* ast) {
     uint8_t index = super_(compiler, ast);
     int typeArgCount = 0;
     if (ast->attribute.isInitializer) {
-        typeArgCount = typeArgumentsAtSuper(compiler, ast);
+        typeArgCount = typeArgumentsAtSuperInit(compiler, ast);
     }
     else if (astNumChild(ast) > 1) {
         Ast* typeArgs = astGetChild(ast, 1);
