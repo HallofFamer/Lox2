@@ -593,6 +593,23 @@ static int typeArgumentsAtInvocation(Compiler* compiler, Ast* ast) {
     return ast->children->count;
 }
 
+static int typeArgumentsAtSuperCall(Compiler* compiler, Ast* callee) {
+    TypeInfo* rawType = getInnerBaseType(callee->type);
+	ObjString* className = getClassNameFromMetaclass(compiler->vm, rawType->fullName);
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, className));
+    
+    if (hasGenericParameters(behaviorType->superclassType)) {
+        TypeInfoArray* typeArgs = getTypeParameters(behaviorType->superclassType);
+        for (int i = 0; i < typeArgs->count; i++) {
+            TypeInfo* typeArg = typeArgs->elements[i];
+            Token typeArgToken = syntheticToken(typeArg->shortName->chars);
+            getVariable(compiler, callee->symtab, typeArgToken);
+        }
+        return typeArgs->count;
+    }
+    return 0;
+}
+
 static int typeArgumentsAtSuperInit(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
