@@ -596,6 +596,7 @@ static int typeArgumentsAtInvocation(Compiler* compiler, Ast* ast) {
 static int typeArgumentsAtSuperCall(Compiler* compiler, Ast* callee) {
     TypeInfo* rawType = getInnerBaseType(callee->type);
 	ObjString* className = getClassNameFromMetaclass(compiler->vm, rawType->fullName);
+    if (!IS_BEHAVIOR_TYPE(rawType)) return 0;
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, className));
     
     if (hasGenericParameters(behaviorType->superclassType)) {
@@ -802,19 +803,7 @@ static void compileCall(Compiler* compiler, Ast* ast) {
         typeArgCount = typeArgumentsAtInvocation(compiler, typeArgs);
     }
     else if (callee->type != NULL){
-        TypeInfo* rawType = getInnerBaseType(callee->type);
-		if (IS_BEHAVIOR_TYPE(rawType)) {
-            BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, rawType->fullName)));
-            if (hasGenericParameters(behaviorType->superclassType)) {
-				TypeInfoArray* typeArgs = getTypeParameters(behaviorType->superclassType);
-				for (int i = 0; i < typeArgs->count; i++) {
-                    TypeInfo* typeArg = typeArgs->elements[i];
-                    Token typeArgToken = syntheticToken(typeArg->shortName->chars);
-                    getVariable(compiler, ast->symtab, typeArgToken);
-                }
-				typeArgCount = typeArgs->count;
-			}
-        }
+        typeArgCount = typeArgumentsAtSuperCall(compiler, callee);
     }
 
     Ast* args = astGetChild(ast, 1);
