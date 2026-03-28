@@ -22,6 +22,7 @@
 typedef struct VM VM;
 typedef struct CallFrame CallFrame;
 typedef struct Compiler Compiler;
+typedef struct Marshaler Marshaler;
 typedef struct GC GC;
 
 typedef enum {

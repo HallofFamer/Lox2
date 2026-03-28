@@ -8,6 +8,7 @@
 #include "table.h"
 #include "value.h"
 #include "../compiler/compiler.h"
+#include "../compiler/marshal.h"
 
 #define FRAMES_MAX 64
 #define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
@@ -108,6 +109,7 @@ struct VM {
     TypeTable* typetab;
     TypeInfoArray* tempTypes;
     Compiler* compiler;
+	Marshaler* marshaler;
     GC* gc;
 
     int behaviorCount;

@@ -113,6 +113,8 @@ set(Source_Files__compiler
     "src/compiler/compiler.h"
     "src/compiler/lexer.c"
     "src/compiler/lexer.h"
+    "src/compiler/marshal.c"
+    "src/compiler/marshal.h"
     "src/compiler/name.c"
     "src/compiler/name.h"
     "src/compiler/parser.c"
