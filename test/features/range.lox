@@ -10,9 +10,8 @@ println("Looping through Range: ")
 for(val n : range){ 
     println(n)
 }
-println("")
 
-println("Looping through Range again with step 2: ")
+println("\nLooping through Range again with step 2: ")
 range.step(2, fun(n){ 
     println(n)
 })

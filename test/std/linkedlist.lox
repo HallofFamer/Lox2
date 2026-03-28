@@ -25,10 +25,9 @@ println("Current elements in linked list: ${list.toString()}")
 println("Add a new element false to the index 4: ")
 list.addAt(4, false)
 println(list.toString())
-println("")
 
 list.remove()
-println("Removing first element from linked list: ${list.toString()}")
+println("\nRemoving first element from linked list: ${list.toString()}")
 list.removeLast()
 println("Removing last element from linked list: ${list.toString()}\n")
 
@@ -36,8 +35,7 @@ println("Looping through elements in linked list...")
 for(val element : list){
     println("Element: ${element}")
 }
-println("")
 
-println("Clearing linked list: ")
+println("\nClearing linked list: ")
 list.clear()
 println("Current elements in linked list: ${list.toString()}")

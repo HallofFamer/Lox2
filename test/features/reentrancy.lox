@@ -5,18 +5,15 @@ println("Testing reentrancy for methods on Int class...\n")
 val n = 5
 println("Loop and print number from 0 to 4")
 n.timesRepeat({|i| println("Current integer: ${i}") })
-println("")
 
 val n2 = 10
-println("Loop from number ${n} up to ${n2}")
+println("\nLoop from number ${n} up to ${n2}")
 n.upTo(n2, {|i| println("Current integer: ${i}") })
-println("")
 
 val n3 = 0
-println("Loop from number ${n} down to ${n3}")
+println("\nLoop from number ${n} down to ${n3}")
 n.downTo(n3, {|i| println("Current integer: ${i}") })
-println("")
-println("Reentrancy test passed for Int class.\n")
+println("\nReentrancy test passed for Int class.\n")
 
 println("Testing reentrancy for methods on Number class...\n")
 val d = 1.5
@@ -25,8 +22,7 @@ val step = 0.3
 println("Loop from ${d} to ${d2} with step size {$step}")
 
 d.step(d2, step, {|i| println("Current number: ${i}") })
-println("")
-println("Reentrancy test passed for Number class.\n")
+println("\nReentrancy test passed for Number class.\n")
 
 println("Testing reentrancy for methods on Array class...\n")
 val array = [1, 2, 3, 4, 5]
@@ -36,15 +32,13 @@ val mul = 2
 array.each(fun(e){ 
     println("Element: ${e * mul}")
 })
-println("")
 
-println("Square each element with index: ")
+println("\nSquare each element with index: ")
 array.eachIndex(fun(i, e){ 
     println("Element at index ${i}: ${e * e}")
 });
-println("")
 
-print("Collect elements into a new array with sqaured values: ")
+print("\nCollect elements into a new array with sqaured values: ")
 println(array.collect(fun(e) { return e * e }))
 
 print("Detect first even number: ")
@@ -55,36 +49,28 @@ println(array.select(fun(e) { return e.isOdd() }))
 
 print("Reject odd numbers from array: ")
 println(array.reject(fun(e) { return e.isOdd() }))
-println("")
 
-println("Reentrancy test passed for Array class.")
-println("")
+println("\nReentrancy test passed for Array class.")
 
-println("Testing reentrancy for methods on Dictionary class...")
-println("")
+println("\nTesting reentrancy for methods on Dictionary class...")
 val dict = ["US": "United States", "CA": "Canada", "EU": "Europe", "JP": "Japan", "RU": "Russia"]
 
-println("Looping through Dictionary: ")
+println("\nLooping through Dictionary: ")
 dict.each({|key, value| println("Key: ${key}, Value: ${value}") })
-println("")
 
-println("Collect entries with capitalized values: ")
+println("\nCollect entries with capitalized values: ")
 println(dict.collect(fun(k, v) { return v.toUppercase() }))
-println("")
 
-println("Detect first value with length greater than 6: ")
+println("\nDetect first value with length greater than 6: ")
 println(dict.detect(fun(k, v) { return v.length() > 6 }))
-println("")
 
 println("Select entries with length 6: ")
 println(dict.select(fun(k, v) { return v.length() == 6 }))
-println("")
 
-println("Reject entries with length 6: ")
+println("\nReject entries with length 6: ")
 println(dict.reject(fun(k, v) { return v.length() == 6 }))
-println("")
 
-println("Reentrancy test passed for Dictionary class.\n")
+println("\nReentrancy test passed for Dictionary class.\n")
 println("Testing reentrancy for methods on LinkedList class...\n")
 
 var list = LinkedList()
@@ -94,22 +80,17 @@ list.addAll([true, nil, "Hello World"])
 
 println("Looping through LinkedList: ")
 list.each({|e| println("Element: ${e}") })
-println("");
 
-println("Collect elements with capitalized string values: ")
+println("\nCollect elements with capitalized string values: ")
 println(list.collect(fun(e) { return e.toString().toUppercase() }).toString())
-println("");
 
-println("Detect with first non-numeric element: ")
+println("\nDetect with first non-numeric element: ")
 println(list.detect(fun(e) { return !e.instanceOf(Number) }))
-println("")
 
-println("Select numeric elements: ")
+println("\nSelect numeric elements: ")
 println(list.select(fun(e) { return e.instanceOf(Number) }).toString())
-println("")
 
-println("Reject numeric elements: ")
+println("\nReject numeric elements: ")
 println(list.reject(fun(e) { return e.instanceOf(Number) }).toString())
-println("")
 
-println("Reentrancy test passed for LinkedList class.\n")
+println("\nReentrancy test passed for LinkedList class.\n")

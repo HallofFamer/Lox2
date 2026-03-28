@@ -18,7 +18,7 @@ while(!fileReader.isAtEnd()){
 }
 println("\n")
 
-println("File stream is at end: ${fileReader.isAtEnd()}")
+println("\nFile stream is at end: ${fileReader.isAtEnd()}")
 println("Closing read stream for file.")
 fileReader.close()
 println("")
@@ -28,9 +28,8 @@ println(fileOut)
 println("Creating a write stream for out file.")
 
 val fileWriter = FileWriteStream(fileOut)
-println("")
 
-println("Now write character 'B' to file.")
+println("\nNow write character 'B' to file.")
 fileWriter.write("B")
 println("Then write a new line, and string 'x = 32'.")
 fileWriter.writeLine()
