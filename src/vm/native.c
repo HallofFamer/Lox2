@@ -304,12 +304,12 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* 
 
 TypeInfo* declareNativeTypeParameter(VM* vm, const char* shortName) {
 	ObjString* name = newStringPerma(vm, shortName);
-	TypeInfo* formalType = typeTableGet(vm->typetab, name);
-    if (formalType == NULL) {
-        formalType = newFormalTypeInfo(-1, name);
-        typeTableSet(vm->typetab, name, formalType);
+	TypeInfo* placeholderType = typeTableGet(vm->typetab, name);
+    if (placeholderType == NULL) {
+        placeholderType = newPlaceholderTypeInfo(-1, name);
+        typeTableSet(vm->typetab, name, placeholderType);
     }
-	return formalType;
+	return placeholderType;
 }
 
 ObjClass* getNativeClass(VM* vm, const char* fullName) {

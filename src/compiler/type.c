@@ -161,8 +161,8 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
     return methodType;
 }
 
-TypeInfo* newFormalTypeInfo(int id, ObjString* name) {
-    return newTypeInfo(id, sizeof(TypeInfo), TYPE_CATEGORY_FORMAL, name, name);
+TypeInfo* newPlaceholderTypeInfo(int id, ObjString* name) {
+    return newTypeInfo(id, sizeof(TypeInfo), TYPE_CATEGORY_PLACEHOLDER, name, name);
 }
 
 GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType) {
@@ -191,7 +191,7 @@ GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, 
             for (int i = 0; i < numParameters; i++) {
                 TypeInfo* type = va_arg(args, TypeInfo*);
                 TypeInfoArrayAdd(genericType->actualTypeParams, type);
-                if (IS_FORMAL_TYPE(type)) genericType->isFullyInstantiated = false;
+                if (IS_PLACEHOLDER_TYPE(type)) genericType->isFullyInstantiated = false;
             }
             va_end(args);
         }
@@ -426,7 +426,7 @@ void freeTempTypes(TypeInfoArray* typeArray) {
     free(typeArray);
 }
 
-TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
+TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name) {
     if (type == NULL) return NULL;
     else if (IS_BEHAVIOR_TYPE(type)) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
@@ -447,7 +447,7 @@ TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name) {
         if (genericType->isFullyInstantiated) {
             for (int i = 0; i < genericType->actualTypeParams->count; i++) {
                 TypeInfo* formalType = genericType->actualTypeParams->elements[i];
-				if (formalType == NULL || !IS_FORMAL_TYPE(formalType)) continue;
+				if (formalType == NULL || !IS_PLACEHOLDER_TYPE(formalType)) continue;
                 if (formalType->shortName == name) return formalType;
             }
         }
@@ -485,7 +485,7 @@ static bool hasCallableTypeParameters(TypeInfo* type) {
 
 bool hasGenericParameters(TypeInfo* type) {
     if (type == NULL) return false;
-    else if (IS_FORMAL_TYPE(type) || IS_GENERIC_TYPE(type)) return true;
+    else if (IS_PLACEHOLDER_TYPE(type) || IS_GENERIC_TYPE(type)) return true;
     else if (IS_BEHAVIOR_TYPE(type)) return AS_BEHAVIOR_TYPE(type)->formalTypeParams->count > 0;
     else if (IS_CALLABLE_TYPE(type)) return hasCallableTypeParameters(type);
     else if (IS_METHOD_TYPE(type)) return hasCallableTypeParameters((TypeInfo*)AS_METHOD_TYPE(type)->declaredType);
@@ -505,7 +505,7 @@ static TypeInfo* instantiateFormalTypeParameter(TypeInfo* type, TypeInfoArray* f
 
 TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
 	if (type == NULL) return NULL;
-	else if (IS_FORMAL_TYPE(type)) {
+	else if (IS_PLACEHOLDER_TYPE(type)) {
         return instantiateFormalTypeParameter(type, formalParams, actualParams);
     }
     else if (IS_BEHAVIOR_TYPE(type)){
@@ -514,7 +514,7 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
 		
         for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
             TypeInfo* formalTypeParam = behaviorType->formalTypeParams->elements[i];
-            if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
+            if (formalTypeParam != NULL && IS_PLACEHOLDER_TYPE(formalTypeParam)) {
                 TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
                 TypeInfoArrayAdd(genericType->actualTypeParams, instantiatedType);
             }
@@ -531,7 +531,7 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
             GenericTypeInfo* genericType = newGenericTypeInfo(-1, callableType->baseType.shortName, callableType->baseType.fullName, type);            
             for (int i = 0; i < callableType->formalTypeParams->count; i++) {
                 TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];
-                if (formalTypeParam != NULL && IS_FORMAL_TYPE(formalTypeParam)) {
+                if (formalTypeParam != NULL && IS_PLACEHOLDER_TYPE(formalTypeParam)) {
                     TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
                     TypeInfoArrayAdd(genericType->actualTypeParams, instantiatedType);
                 }
@@ -768,7 +768,7 @@ static void typeTableOutputCategory(TypeCategory category) {
         case TYPE_CATEGORY_METHOD:
             printf("method");
             break;
-        case TYPE_CATEGORY_FORMAL:
+        case TYPE_CATEGORY_PLACEHOLDER:
             printf("formal");
             break;
         case TYPE_CATEGORY_GENERIC:
@@ -965,7 +965,7 @@ static bool isGenericEqualType(GenericTypeInfo* type, GenericTypeInfo* type2) {
 bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (type == NULL || type2 == NULL) return true;
 	if (IS_VOID_TYPE(type) && IS_VOID_TYPE(type2)) return true;
-    if (IS_FORMAL_TYPE(type) && IS_FORMAL_TYPE(type2)) return true;
+    if (IS_PLACEHOLDER_TYPE(type) && IS_PLACEHOLDER_TYPE(type2)) return true;
     
     if (IS_ALIAS_TYPE(type) || IS_ALIAS_TYPE(type2)) {
         return isEqualType(getAliasTargetType(type), getAliasTargetType(type2));

@@ -165,7 +165,7 @@ bool astHasInstantiatedTypeParameters(Ast* ast) {
 
     for (int i = 0; i < ast->children->count; i++) {
         Ast* typeParam = astGetChild(ast, i);
-        if (typeParam->type != NULL && !IS_FORMAL_TYPE(typeParam->type)) {
+        if (typeParam->type != NULL && !IS_PLACEHOLDER_TYPE(typeParam->type)) {
             hasInstantiatedParams = true;
             break;
         }

@@ -460,7 +460,7 @@ static void inferAstTypeFromUnary(TypeChecker* typeChecker, Ast* ast, SymbolItem
 static void inferAstTypeFromBinaryOperator(TypeChecker* typeChecker, Ast* ast, SymbolItem* item) {
     Ast* receiver = astGetChild(ast, 0);
     Ast* arg = astGetChild(ast, 1);
-    if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type) || arg->type == NULL) return;
+    if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type) || arg->type == NULL) return;
 
     ObjString* methodName = copyStringPerma(typeChecker->vm, ast->token.start, ast->token.length);
     TypeInfo* baseType = typeTableMethodLookup(receiver->type, methodName);
@@ -606,7 +606,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 
 static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
-    if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
+    if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type)) return;
     Ast* args = astGetChild(ast, 1);
     ObjString* methodName = createStringFromToken(typeChecker->vm, ast->token);
     TypeInfo* baseType = typeTableMethodLookup(receiver->type, methodName);
@@ -685,7 +685,7 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
 static void inferAstTypeFromSubscriptGet(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
     Ast* index = astGetChild(ast, 1);
-    if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type) || index->type == NULL) return;
+    if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type) || index->type == NULL) return;
 
     if (isSubtypeOfType(receiver->type, typeChecker->stringType)) {
         if (!isSubtypeOfType(index->type, typeChecker->intType)) {
@@ -721,7 +721,7 @@ static void inferAstTypeFromSubscriptSet(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
     Ast* index = astGetChild(ast, 1);
     Ast* value = astGetChild(ast, 2);
-    if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type) || index->type == NULL) return;
+    if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type) || index->type == NULL) return;
 
     if (isSubtypeOfType(receiver->type, typeChecker->stringType)) {
         if (!isSubtypeOfType(index->type, typeChecker->intType)) {
@@ -964,7 +964,7 @@ static void typeCheckParam(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckPropertyGet(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     Ast* receiver = astGetChild(ast, 0);
-    if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
+    if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type)) return;
 
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(getInnerBaseType(receiver->type));
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
@@ -976,7 +976,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     typeCheckChild(typeChecker, ast, 1);
     Ast* receiver = astGetChild(ast, 0);
-    if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
+    if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type)) return;
     
     BehaviorTypeInfo* receiverType = AS_BEHAVIOR_TYPE(getInnerBaseType(receiver->type));
     ObjString* fieldName = createStringFromToken(typeChecker->vm, ast->token);
@@ -1022,7 +1022,7 @@ static void typeCheckSuperGet(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     Ast* receiver = astGetChild(ast, 0);
     ObjString* property = copyStringPerma(typeChecker->vm, ast->token.start, ast->token.length);
-    if (receiver->type == NULL || IS_FORMAL_TYPE(receiver->type)) return;
+    if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type)) return;
 
     TypeInfo* superType = AS_BEHAVIOR_TYPE(receiver->type)->superclassType;
     TypeInfo* methodType = typeTableMethodLookup(superType, property);

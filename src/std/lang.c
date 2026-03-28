@@ -1927,7 +1927,7 @@ LOX_METHOD(Type, isClass) {
 LOX_METHOD(Type, isFormal) {
     ASSERT_ARG_COUNT("Type::isFormal()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_FORMAL);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_PLACEHOLDER);
 }
 
 LOX_METHOD(Type, isGeneric) {

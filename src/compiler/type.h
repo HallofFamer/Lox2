@@ -14,7 +14,7 @@ DECLARE_BUFFER(TypeInfoArray, TypeInfo*)
 #define IS_CALLABLE_TYPE(type) (type->category == TYPE_CATEGORY_FUNCTION)
 #define IS_FIELD_TYPE(type) (type->category == TYPE_CATEGORY_FIELD)
 #define IS_METHOD_TYPE(type) (type->category == TYPE_CATEGORY_METHOD)
-#define IS_FORMAL_TYPE(type) (type->category == TYPE_CATEGORY_FORMAL)
+#define IS_PLACEHOLDER_TYPE(type) (type->category == TYPE_CATEGORY_PLACEHOLDER)
 #define IS_GENERIC_TYPE(type) (type->category == TYPE_CATEGORY_GENERIC)
 #define IS_ALIAS_TYPE(type) (type->category == TYPE_CATEGORY_ALIAS)
 #define IS_VOID_TYPE(type) (type->category == TYPE_CATEGORY_VOID)
@@ -34,7 +34,7 @@ typedef enum {
     TYPE_CATEGORY_FUNCTION,
     TYPE_CATEGORY_FIELD,
     TYPE_CATEGORY_METHOD,
-    TYPE_CATEGORY_FORMAL,
+    TYPE_CATEGORY_PLACEHOLDER,
     TYPE_CATEGORY_GENERIC,
     TYPE_CATEGORY_ALIAS,
     TYPE_CATEGORY_VOID
@@ -137,7 +137,7 @@ CallableTypeInfo* newCallableTypeInfo(int id, TypeCategory category, ObjString* 
 CallableTypeInfo* newCallableTypeInfoWithFormalParameters(int id, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParameters, ...);
 FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer);
-TypeInfo* newFormalTypeInfo(int id, ObjString* name);
+TypeInfo* newPlaceholderTypeInfo(int id, ObjString* name);
 GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType);
 GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType, int numParameters, ...);
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
@@ -148,7 +148,7 @@ char* createGenericTypeName(GenericTypeInfo* genericType);
 char* createAliasTypeName(AliasTypeInfo* aliasType);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
-TypeInfo* getFormalTypeByName(TypeInfo* type, ObjString* name);
+TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name);
 TypeInfo* getAliasTargetType(TypeInfo* type);
 TypeInfo* getInnerBaseType(TypeInfo* type);
 bool hasGenericParameters(TypeInfo* type);
