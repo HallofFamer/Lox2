@@ -171,7 +171,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
                 if (type == NULL) {
                     SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
                     if (item != NULL) {
-                        if (checkFormalParam && item->category == SYMBOL_CATEGORY_FORMAL) {
+                        if (checkFormalParam && item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
                             type = declareNativeTypeParameter(resolver->vm, originalName->chars);
                         }
                         else type = item->type;
@@ -307,7 +307,7 @@ static void checkUnusedVariables(Resolver* resolver, int flag) {
         SymbolEntry* entry = &resolver->currentSymtab->entries[i];
         if (entry->key == NULL) continue;
         else if (entry->value->state == SYMBOL_STATE_DECLARED || entry->value->state == SYMBOL_STATE_DEFINED) {
-            if (entry->value->category == SYMBOL_CATEGORY_FORMAL) continue;
+            if (entry->value->category == SYMBOL_CATEGORY_PLACEHOLDER) continue;
             if (flag == 1) semanticWarning(resolver, "Variable '%s' is declared but never used.", entry->key->chars);
             else if (flag == 2) semanticError(resolver, "Variable '%s' is declared but never used.", entry->key->chars);
         }
@@ -683,7 +683,7 @@ static void typeParameters(Resolver* resolver, Ast* ast) {
     for (int i = 0; i < typeParams->children->count; i++) {
         resolveChild(resolver, typeParams, i);
         Ast* typeParam = astGetChild(typeParams, i);
-        insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_FORMAL, SYMBOL_STATE_DEFINED, NULL, false);
+        insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_PLACEHOLDER, SYMBOL_STATE_DEFINED, NULL, false);
     }
 }
 
@@ -1023,7 +1023,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
     }
     else {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createStringFromToken(resolver->vm, ast->token));
-        if (item != NULL && item->category == SYMBOL_CATEGORY_FORMAL && item->state == SYMBOL_STATE_DEFINED) {
+        if (item != NULL && item->category == SYMBOL_CATEGORY_PLACEHOLDER && item->state == SYMBOL_STATE_DEFINED) {
             item->state = SYMBOL_STATE_ACCESSED;
             item->type = getNativeType(resolver->vm, "Type");
         }

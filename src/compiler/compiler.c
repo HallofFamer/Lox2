@@ -519,7 +519,7 @@ static void getVariable(Compiler* compiler, SymbolTable* symtab, Token token) {
         case SYMBOL_CATEGORY_UPVALUE:
             emitBytes(compiler, OP_GET_UPVALUE, (uint8_t)findUpvalue(compiler, &item->token));
             break;
-        case SYMBOL_CATEGORY_FORMAL:
+        case SYMBOL_CATEGORY_PLACEHOLDER:
 			getTypeParameter(compiler, scope, item->token);
             break;
         default:

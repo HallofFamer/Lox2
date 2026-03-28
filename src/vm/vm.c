@@ -445,6 +445,7 @@ Value callReentrantMethod(VM* vm, Value receiver, Value callee, ...) {
     int argCount = getCalleeArity(callee);
     va_list args;
     va_start(args, callee);
+
     for (int i = 0; i < argCount; i++) {
         push(vm, va_arg(args, Value));
     }
