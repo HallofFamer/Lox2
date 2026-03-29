@@ -593,8 +593,23 @@ static int typeArgumentsAtInvocation(Compiler* compiler, Ast* ast) {
     return ast->children->count;
 }
 
-static int typeArgumentsAtSuperCall(Compiler* compiler, Ast* callee) {
-    TypeInfo* rawType = getInnerBaseType(callee->type);
+static int typeArgumentsAtSuper(Compiler* compiler, Ast* ast, ObjString* className) {
+    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, className));
+
+    if (hasGenericParameters(behaviorType->superclassType)) {
+        TypeInfoArray* typeArgs = getTypeParameters(behaviorType->superclassType);
+        for (int i = 0; i < typeArgs->count; i++) {
+            TypeInfo* typeArg = typeArgs->elements[i];
+            Token typeArgToken = syntheticToken(typeArg->shortName->chars);
+            getVariable(compiler, ast->symtab, typeArgToken);
+        }
+        return typeArgs->count;
+    }
+    return 0;
+}
+
+static int typeArgumentsAtSuperCall(Compiler* compiler, Ast* ast) {
+    TypeInfo* rawType = getInnerBaseType(ast->type);
 	ObjString* className = getClassNameFromMetaclass(compiler->vm, rawType->fullName);
     if (!IS_BEHAVIOR_TYPE(rawType)) return 0;
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, className));
@@ -604,7 +619,7 @@ static int typeArgumentsAtSuperCall(Compiler* compiler, Ast* callee) {
         for (int i = 0; i < typeArgs->count; i++) {
             TypeInfo* typeArg = typeArgs->elements[i];
             Token typeArgToken = syntheticToken(typeArg->shortName->chars);
-            getVariable(compiler, callee->symtab, typeArgToken);
+            getVariable(compiler, ast->symtab, typeArgToken);
         }
         return typeArgs->count;
     }
@@ -614,16 +629,17 @@ static int typeArgumentsAtSuperCall(Compiler* compiler, Ast* callee) {
 static int typeArgumentsAtSuperInit(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
-    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, classItem->type->fullName)));
+	ObjString* superclassName = getClassNameFromMetaclass(compiler->vm, classItem->type->fullName);
+    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, superclassName));
 
     if (hasGenericParameters(classType->superclassType)) {
-		TypeInfoArray* formalTypeParams = getTypeParameters(classType->superclassType);
-        for (int i = 0; i < formalTypeParams->count; i++) {
-            TypeInfo* formalParamType = formalTypeParams->elements[i];
+		TypeInfoArray* typeArgs = getTypeParameters(classType->superclassType);
+        for (int i = 0; i < typeArgs->count; i++) {
+            TypeInfo* formalParamType = typeArgs->elements[i];
             Token formalTypeParamToken = syntheticToken(formalParamType->shortName->chars);
             getVariable(compiler, ast->symtab, formalTypeParamToken);
         }
-        return formalTypeParams->count;
+        return typeArgs->count;
     }
     return 0;
 }

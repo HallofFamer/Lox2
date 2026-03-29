@@ -143,6 +143,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
     if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type);
     GenericTypeInfo* genericFunctionType = AS_GENERIC_TYPE(type);
 	CallableTypeInfo* functionType = AS_CALLABLE_TYPE(genericFunctionType->rawType);
+    
     TypeInfo* returnType = functionType->returnType;
     if (hasGenericParameters(returnType)) {
         returnType = instantiateTypeParameterWithName(typeChecker, returnType, functionType->formalTypeParams, genericFunctionType->actualTypeParams);
