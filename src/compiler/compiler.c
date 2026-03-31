@@ -618,19 +618,9 @@ static int typeArgumentsAtSuperCall(Compiler* compiler, Ast* ast) {
 static int typeArgumentsAtSuperInit(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
+    if (classItem == NULL) return 0;
 	ObjString* superclassName = getClassNameFromMetaclass(compiler->vm, classItem->type->fullName);
-    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, superclassName));
-
-    if (hasGenericParameters(classType->superclassType)) {
-		TypeInfoArray* typeArgs = getTypeParameters(classType->superclassType);
-        for (int i = 0; i < typeArgs->count; i++) {
-            TypeInfo* formalParamType = typeArgs->elements[i];
-            Token formalTypeParamToken = syntheticToken(formalParamType->shortName->chars);
-            getVariable(compiler, ast->symtab, formalTypeParamToken);
-        }
-        return typeArgs->count;
-    }
-    return 0;
+    return typeArgumentsAtSuper(compiler, ast, superclassName);
 }
 
 static void block(Compiler* compiler, Ast* ast) {

@@ -398,33 +398,31 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
         Ast* trait = astGetChild(traitList, 0);
         ObjString* name = createStringFromToken(typeChecker->vm, trait->token);
         TypeInfo* supertype = (trait->type != NULL) ? trait->type : getClassType(typeChecker, name, traitList->symtab);
-
         if (supertype == NULL) continue;
-        else {
-            BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(getInnerBaseType(supertype));
-            for (int j = 0; j < traitType->methods->capacity; j++) {
-                TypeEntry* methodEntry = &traitType->methods->entries[j];
-                if (methodEntry == NULL || methodEntry->key == NULL) continue;
-                MethodTypeInfo* methodType = AS_METHOD_TYPE(methodEntry->value);
+        BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(getInnerBaseType(supertype));
 
-                TypeInfo* subclassMethodType = typeTableGet(typeChecker->currentClass->type->methods, methodEntry->key);
-                CallableTypeInfo* declaredTraitMethodType = methodType->declaredType;
-                if (subclassMethodType != NULL && subclassMethodType->shortName != typeChecker->vm->initString) {
-                    if (IS_GENERIC_TYPE(supertype)) {
-                        declaredTraitMethodType = instantiateGenericMethodType(typeChecker, supertype, (TypeInfo*)declaredTraitMethodType);
-                    }
-                    checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, declaredTraitMethodType, supertype);
-                }
+        for (int j = 0; j < traitType->methods->capacity; j++) {
+            TypeEntry* methodEntry = &traitType->methods->entries[j];
+            if (methodEntry == NULL || methodEntry->key == NULL) continue;
+            MethodTypeInfo* methodType = AS_METHOD_TYPE(methodEntry->value);
 
-                TypeInfo* superclassMethodType = typeTableGet(superclassType->methods, methodEntry->key);
-                if (superclassMethodType != NULL && superclassMethodType->shortName != typeChecker->vm->initString) {
-                    checkMethodSignatures(typeChecker, methodType->declaredType, AS_METHOD_TYPE(superclassMethodType)->declaredType, supertype);
+            TypeInfo* subclassMethodType = typeTableGet(typeChecker->currentClass->type->methods, methodEntry->key);
+            CallableTypeInfo* declaredTraitMethodType = methodType->declaredType;
+            if (subclassMethodType != NULL && subclassMethodType->shortName != typeChecker->vm->initString) {
+                if (IS_GENERIC_TYPE(supertype)) {
+                    declaredTraitMethodType = instantiateGenericMethodType(typeChecker, supertype, (TypeInfo*)declaredTraitMethodType);
                 }
+                checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, declaredTraitMethodType, supertype);
             }
 
-            if (IS_ALIAS_TYPE(supertype)) supertype = getAliasTargetType(supertype);
-            if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker, typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
+            TypeInfo* superclassMethodType = typeTableGet(superclassType->methods, methodEntry->key);
+            if (superclassMethodType != NULL && superclassMethodType->shortName != typeChecker->vm->initString) {
+                checkMethodSignatures(typeChecker, methodType->declaredType, AS_METHOD_TYPE(superclassMethodType)->declaredType, supertype);
+            }
         }
+
+        if (IS_ALIAS_TYPE(supertype)) supertype = getAliasTargetType(supertype);
+        if (IS_GENERIC_TYPE(supertype)) inheritGenericSupertypeMethods(typeChecker, typeChecker->currentClass->type, AS_GENERIC_TYPE(supertype));
     }
 }
 
@@ -801,8 +799,8 @@ static void behavior(TypeChecker* typeChecker, BehaviorType type, Ast* ast) {
         typeCheckChild(typeChecker, ast, childIndex);
         ObjString* superclassName = copyStringPerma(typeChecker->vm, superclass->token.start, superclass->token.length);
         SymbolItem* superclassItem = symbolTableLookup(ast->symtab, superclassName);
+        
         childIndex++;
-
         if (!isSubtypeOfType(superclassItem->type, typeChecker->classType)) {
             typeError(typeChecker, "Superclass must be an instance of Class but gets %s.", superclassItem->type->shortName->chars);
         }
