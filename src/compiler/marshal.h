@@ -25,6 +25,8 @@ struct Marshaler {
 
 void initMarshaler(Marshaler* marshaler, VM* vm);
 void marshalSerializeValue(ByteArray* bytes, Value value);
+Value marshalDeserializeValue(Marshaler* marshaler);
 void marshalDump(Marshaler* marshaler, ObjModule* module);
+bool marshalLoad(Marshaler* marshaler, ObjModule* module);
 
 #endif // !clox_marshal_h

@@ -5,6 +5,7 @@
 
 #include "chunk.h"
 #include "marshal.h"
+#include "../vm/debug.h"
 
 void initMarshaler(Marshaler* marshaler, VM* vm) {
 	marshaler->vm = vm;
@@ -151,7 +152,7 @@ static void marshalSerializeModule(ByteArray* bytes, ObjModule* module) {
 	}
 
 	marshalSerializeInt(bytes, (uint32_t)module->varIndexes.count);
-	for (int i = 0; i < module->varIndexes.count; i++) {
+	for (int i = 0; i < module->varIndexes.capacity; i++) {
 		IDEntry* entry = &module->varIndexes.entries[i];
 		if (entry != NULL && entry->key != NULL) {
 			marshalSerializeString(bytes, entry->key);
@@ -177,4 +178,151 @@ void marshalDump(Marshaler* marshaler, ObjModule* module) {
 	fwrite(marshaler->bytes->elements, sizeof(uint8_t), marshaler->bytes->count, file);
 	fclose(file);
 	marshalCleanup(marshaler);
+}
+
+static uint8_t marshalDeserializeByte(Marshaler* marshaler) {
+	return marshaler->bytes->elements[marshaler->offset++];
+}
+
+static uint16_t marshalDeserializeShort(Marshaler* marshaler) {
+	uint16_t value = (marshalDeserializeByte(marshaler) << 8) | marshalDeserializeByte(marshaler);
+	return value;
+}
+
+static uint32_t marshalDeserializeInt(Marshaler* marshaler) {
+	uint32_t value = (marshalDeserializeByte(marshaler) << 24) | (marshalDeserializeByte(marshaler) << 16) |
+		(marshalDeserializeByte(marshaler) << 8) | marshalDeserializeByte(marshaler);
+	return value;
+}
+
+static double marshalDeserializeDouble(Marshaler* marshaler) {
+	uint64_t numBits = ((uint64_t)marshalDeserializeByte(marshaler) << 56) | ((uint64_t)marshalDeserializeByte(marshaler) << 48) |
+		((uint64_t)marshalDeserializeByte(marshaler) << 40) | ((uint64_t)marshalDeserializeByte(marshaler) << 32) |
+		((uint64_t)marshalDeserializeByte(marshaler) << 24) | ((uint64_t)marshalDeserializeByte(marshaler) << 16) |
+		((uint64_t)marshalDeserializeByte(marshaler) << 8) | (uint64_t)marshalDeserializeByte(marshaler);
+	return AS_NUMBER(numBits);
+}
+
+static ObjString* marshalDeserializeString(Marshaler* marshaler) {
+	uint32_t length = marshalDeserializeInt(marshaler);
+	char* chars = (char*)malloc((size_t)length + 1);
+	ABORT_IFNULL(chars, "Failed to allocate memory for deserializing string.\n");
+
+	for (uint32_t i = 0; i < length; i++) {
+		chars[i] = (char)marshalDeserializeByte(marshaler);
+	}
+
+	chars[length] = '\0';
+	ObjString* string = takeString(marshaler->vm, chars, length);
+	return string;
+}
+
+static ObjFunction* marshalDeserializeFunction(Marshaler* marshaler) {
+	bool isNamed = marshalDeserializeByte(marshaler) == 1;
+	ObjString* name = isNamed ? marshalDeserializeString(marshaler) : NULL;
+	ObjFunction* function = newFunction(marshaler->vm, name, false);
+	push(marshaler->vm, OBJ_VAL(function));
+
+	function->arity = marshalDeserializeByte(marshaler);
+	function->typeParamCount = marshalDeserializeByte(marshaler);
+	function->upvalueCount = marshalDeserializeByte(marshaler);
+	function->isAsync = marshalDeserializeByte(marshaler) == 1;
+	function->isGenerator = marshalDeserializeByte(marshaler) == 1;
+
+	uint8_t constantCount = marshalDeserializeByte(marshaler);
+	for (uint8_t i = 0; i < constantCount; i++) {
+		Value constant = marshalDeserializeValue(marshaler);
+		addConstant(marshaler->vm, &function->chunk, constant);
+	}
+
+	uint8_t identifierCount = marshalDeserializeByte(marshaler);
+	for (uint8_t i = 0; i < identifierCount; i++) {
+		ObjString* identifier = marshalDeserializeString(marshaler);
+		addIdentifier(marshaler->vm, &function->chunk, OBJ_VAL(identifier));
+	}
+
+	uint32_t codeCount = marshalDeserializeInt(marshaler);
+	for (uint32_t i = 0; i < codeCount; i++) {
+		uint8_t code = marshalDeserializeByte(marshaler);
+		writeChunk(marshaler->vm, &function->chunk, code, 0);
+	}
+
+	if (marshaler->vm->config.debugCode) {
+	    disassembleChunk(&function->chunk, function->name != NULL ? function->name->chars : "<script>");
+	}
+	pop(marshaler->vm);
+	return function;
+}
+
+static Value marshalDeserializeValue(Marshaler* marshaler) {
+	uint8_t type = marshalDeserializeByte(marshaler);
+	switch (type) {
+	    case MARSHAL_TYPE_NIL:
+		    return NIL_VAL;
+	    case MARSHAL_TYPE_BOOL:
+		    return BOOL_VAL(marshalDeserializeByte(marshaler) == 1);
+	    case MARSHAL_TYPE_INT:
+	     	return INT_VAL((int32_t)marshalDeserializeInt(marshaler));
+	    case MARSHAL_TYPE_NUMBER:
+		    return NUMBER_VAL(marshalDeserializeDouble(marshaler));
+	    case MARSHAL_TYPE_STRING:
+		    return OBJ_VAL(marshalDeserializeString(marshaler));
+	    case MARSHAL_TYPE_FUNCTION:
+		    return OBJ_VAL(marshalDeserializeFunction(marshaler));
+	    default:
+		    fprintf(stderr, "Unsupported value type for deserialization.\n");
+	     	exit(1);
+	}
+}
+
+static void marshalDeserializeModule(Marshaler* marshaler) {
+	ObjString* path = marshalDeserializeString(marshaler);
+	if (marshaler->module->path != path) {
+		fprintf(stderr, "Module path mismatch during marshal deserialization. Expected: %s, but got: %s.\n", marshaler->module->path->chars, path->chars);
+		exit(1);
+	}
+
+	int numValIndexes = marshalDeserializeInt(marshaler);
+	for (int i = 0; i < numValIndexes; i++) {
+		ObjString* name = marshalDeserializeString(marshaler);
+		uint32_t index = marshalDeserializeInt(marshaler);
+		idMapSet(marshaler->vm, &marshaler->module->valIndexes, name, index);
+		valueArrayWrite(marshaler->vm, &marshaler->module->valFields, NIL_VAL);
+	}
+
+	int numVarIndexes = marshalDeserializeInt(marshaler);
+	for (int i = 0; i < numVarIndexes; i++) {
+		ObjString* name = marshalDeserializeString(marshaler);
+		uint32_t index = marshalDeserializeInt(marshaler);
+		idMapSet(marshaler->vm, &marshaler->module->varIndexes, name, index);
+		valueArrayWrite(marshaler->vm, &marshaler->module->varFields, NIL_VAL);
+	}
+
+	ObjFunction* function = marshalDeserializeFunction(marshaler);
+	ABORT_IFNULL(function, "Failed to deserialize program for file \"%s\".\n", marshaler->module->path->chars);
+	push(marshaler->vm, OBJ_VAL(function));
+	marshaler->module->closure = newClosure(marshaler->vm, function);
+	pop(marshaler->vm);
+}
+
+bool marshalLoad(Marshaler* marshaler, ObjModule* module) {
+	char fileName[UINT8_COUNT];
+	sprintf_s(fileName, UINT8_COUNT, "%s%s", module->path->chars, "o");
+	FILE* file;
+    fopen_s(&file, fileName, "rb");
+	if (file == NULL) return false;
+
+	marshaler->module = module;
+	marshaler->bytes = (ByteArray*)malloc(sizeof(ByteArray));
+	ABORT_IFNULL(marshaler->bytes, "Failed to allocate memory for byte streams to perform marshal deserialization.\n");
+
+	size_t fileSize = marshalFileSize(file);
+	marshalInitBytes(marshaler, (int)fileSize);
+	size_t bytesRead = fread(marshaler->bytes->elements, sizeof(uint8_t), fileSize, file);
+	ABORT_IFTRUE(bytesRead < fileSize, "Failed to read file \"%s\" for marshal deserialization.\n", fileName);
+	marshalDeserializeModule(marshaler);
+
+	fclose(file);
+	marshalCleanup(marshaler);
+	return true;
 }
