@@ -86,7 +86,7 @@ static void marshalSerializeFunction(ByteArray* bytes, ObjFunction* function) {
 	marshalSerializeByte(bytes, isNamed ? 1 : 0);
 	if (isNamed) marshalSerializeString(bytes, function->name);
 
-	marshalSerializeByte(bytes, (uint8_t)function->arity);
+	marshalSerializeShort(bytes, (uint16_t)function->arity);
 	marshalSerializeByte(bytes, (uint8_t)function->typeParamCount);
 	marshalSerializeByte(bytes, (uint8_t)function->upvalueCount);
 	marshalSerializeByte(bytes, (uint8_t)function->isAsync);
@@ -223,7 +223,7 @@ static ObjFunction* marshalDeserializeFunction(Marshaler* marshaler) {
 	ObjFunction* function = newFunction(marshaler->vm, name, false);
 	push(marshaler->vm, OBJ_VAL(function));
 
-	function->arity = marshalDeserializeByte(marshaler);
+	function->arity = (int16_t)marshalDeserializeShort(marshaler);
 	function->typeParamCount = marshalDeserializeByte(marshaler);
 	function->upvalueCount = marshalDeserializeByte(marshaler);
 	function->isAsync = marshalDeserializeByte(marshaler) == 1;
