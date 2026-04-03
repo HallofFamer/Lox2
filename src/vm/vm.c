@@ -1118,7 +1118,7 @@ InterpretResult run(VM* vm) {
                 break;
             }
             case OP_CLOSURE: {
-                ObjFunction* function = AS_FUNCTION(READ_IDENTIFIER());
+                ObjFunction* function = AS_FUNCTION(READ_CONSTANT());
                 ObjClosure* closure = newClosure(vm, function);
                 push(vm, OBJ_VAL(closure));
                 for (int i = 0; i < closure->upvalueCount; i++) {

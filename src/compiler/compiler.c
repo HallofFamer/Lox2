@@ -645,7 +645,7 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
     parameters(&compiler, astGetChild(ast, 1));
     block(&compiler, astGetChild(ast, 2));
     ObjFunction* function = endCompiler(&compiler);
-    emitBytes(enclosing, OP_CLOSURE, makeIdentifier(enclosing, OBJ_VAL(function)));
+    emitBytes(enclosing, OP_CLOSURE, makeConstant(enclosing, OBJ_VAL(function)));
 
     for (int i = 0; i < function->upvalueCount; i++) {
         emitByte(enclosing, compiler.upvalues[i].isLocal ? 1 : 0);
