@@ -1366,7 +1366,10 @@ InterpretResult run(VM* vm) {
                 ObjString* name = frame->closure->function->name;
                 Value receiver = peek(vm, frame->closure->function->arity);
                 closeUpvalues(vm, frame->slots);
-                if (frame->closure->function->isGenerator || frame->closure->function->isAsync) vm->runningGenerator->state = GENERATOR_RETURN;
+
+                if (frame->closure->function->isGenerator || frame->closure->function->isAsync) {
+                    vm->runningGenerator->state = GENERATOR_RETURN;
+                }
                 if (frame->closure->function->isAsync && !IS_PROMISE(result)) {
                     result = OBJ_VAL(promiseWithFulfilled(vm, result));
                 }

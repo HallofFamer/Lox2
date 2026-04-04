@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <time.h>
 
 #include "chunk.h"
 #include "marshal.h"
@@ -305,9 +307,18 @@ static void marshalDeserializeModule(Marshaler* marshaler) {
 	pop(marshaler->vm);
 }
 
+static bool marshalSourceFileModified(const char* sourceFilePath, const char* compiledFilePath) {
+	struct stat sourceFileStat, compiledFileStat;
+	if (stat(sourceFilePath, &sourceFileStat) != 0 || stat(compiledFilePath, &compiledFileStat)) {	
+		return false;
+	}
+	return difftime(sourceFileStat.st_mtime, compiledFileStat.st_mtime) > 0;
+}
+
 bool marshalLoad(Marshaler* marshaler, ObjModule* module) {
 	char fileName[UINT8_COUNT];
 	sprintf_s(fileName, UINT8_COUNT, "%s%s", module->path->chars, "o");
+	if (marshalSourceFileModified(module->path->chars, fileName)) return false;
 	FILE* file;
     fopen_s(&file, fileName, "rb");
 	if (file == NULL) return false;
