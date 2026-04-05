@@ -23,7 +23,8 @@ struct Marshaler {
 	int offset;
 };
 
-void initMarshaler(Marshaler* marshaler, VM* vm);
+Marshaler* newMarshaler(VM* vm);
+void freeMarshaler(Marshaler* marshaler);
 void marshalSerializeValue(ByteArray* bytes, Value value);
 Value marshalDeserializeValue(Marshaler* marshaler);
 void marshalDump(Marshaler* marshaler, ObjModule* module);

@@ -9,11 +9,26 @@
 #include "marshal.h"
 #include "../vm/debug.h"
 
-void initMarshaler(Marshaler* marshaler, VM* vm) {
+static void initMarshaler(Marshaler* marshaler, VM* vm) {
 	marshaler->vm = vm;
 	marshaler->module = NULL;
 	marshaler->bytes = NULL;
 	marshaler->offset = 0;
+}
+
+Marshaler* newMarshaler(VM* vm) {
+	Marshaler* marshaler = (Marshaler*)malloc(sizeof(Marshaler));
+	ABORT_IFNULL(marshaler, "Failed to allocate memory for Marshaler.\n");
+	initMarshaler(marshaler, vm);
+	return marshaler;
+}
+
+void freeMarshaler(Marshaler* marshaler) {
+	if (marshaler->bytes != NULL) {
+		ByteArrayFree(marshaler->bytes);
+		free(marshaler->bytes);
+	}
+	free(marshaler);
 }
 
 static size_t marshalFileSize(FILE* file) {
@@ -44,7 +59,6 @@ static void marshalInitBytes(Marshaler* marshaler, int fileSize) {
 
 static void marshalCleanup(Marshaler* marshaler) {
 	ByteArrayFree(marshaler->bytes);
-	free(marshaler->bytes);
 	initMarshaler(marshaler, marshaler->vm);
 }
 
@@ -332,7 +346,7 @@ bool marshalLoad(Marshaler* marshaler, ObjModule* module) {
 	size_t bytesRead = fread(marshaler->bytes->elements, sizeof(uint8_t), fileSize, file);
 	ABORT_IFTRUE(bytesRead < fileSize, "Failed to read file \"%s\" for marshal deserialization.\n", fileName);
 	marshalDeserializeModule(marshaler);
-
+	
 	fclose(file);
 	marshalCleanup(marshaler);
 	return true;
