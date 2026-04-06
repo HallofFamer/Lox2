@@ -240,10 +240,10 @@ static ObjFunction* marshalDeserializeFunction(Marshaler* marshaler) {
 	push(marshaler->vm, OBJ_VAL(function));
 
 	function->arity = (int16_t)marshalDeserializeShort(marshaler);
-	function->typeParamCount = marshalDeserializeByte(marshaler);
-	function->upvalueCount = marshalDeserializeByte(marshaler);
-	function->isAsync = marshalDeserializeByte(marshaler) == 1;
-	function->isGenerator = marshalDeserializeByte(marshaler) == 1;
+	function->typeParamCount = (int8_t)marshalDeserializeByte(marshaler);
+	function->upvalueCount = (int8_t)marshalDeserializeByte(marshaler);
+	function->isAsync = (marshalDeserializeByte(marshaler) == 1);
+	function->isGenerator = (marshalDeserializeByte(marshaler) == 1);
 
 	uint8_t constantCount = marshalDeserializeByte(marshaler);
 	for (uint8_t i = 0; i < constantCount; i++) {

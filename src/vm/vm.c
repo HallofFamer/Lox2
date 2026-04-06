@@ -174,6 +174,7 @@ void initVM(VM* vm) {
     vm->initString = NULL;
     vm->voidString = NULL;
     vm->gc = newGC(vm);
+	vm->marshaler = newMarshaler(vm);
     vm->behaviorCount = 0;
     vm->namespaceCount = 0;
     vm->moduleCount = 1;
@@ -217,6 +218,7 @@ void freeVM(VM* vm) {
     freeSymbolTable(vm->symtab);
     freeTempTypes(vm->tempTypes);
     freeTypeTable(vm->typetab);
+    freeMarshaler(vm->marshaler);
     freeObjects(vm);
     freeGC(vm);
     freeLoop(vm);
@@ -1492,9 +1494,7 @@ InterpretResult run(VM* vm) {
 }
 
 InterpretResult interpret(VM* vm, const char* source) {
-	Marshaler marshaler;
-	initMarshaler(&marshaler, vm);
-	if (!marshalLoad(&marshaler, vm->currentModule)) {
+	if (!marshalLoad(vm->marshaler, vm->currentModule)) {
         ObjFunction* function = compile(vm, source);
         if (function == NULL) return INTERPRET_COMPILE_ERROR;
         push(vm, OBJ_VAL(function));
@@ -1502,7 +1502,7 @@ InterpretResult interpret(VM* vm, const char* source) {
         ObjClosure* closure = newClosure(vm, function);
         vm->currentModule->closure = closure;
         pop(vm);
-        marshalDump(&marshaler, vm->currentModule);
+        marshalDump(vm->marshaler, vm->currentModule);
     }
     return runModule(vm, vm->currentModule, true);
 }
