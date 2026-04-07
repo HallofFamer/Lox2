@@ -37,6 +37,16 @@ LOX_FUNCTION(gc) {
     RETURN_NIL;
 }
 
+LOX_FUNCTION(getenv) {
+	ASSERT_ARG_COUNT("getenv(name)", 1);
+	ASSERT_ARG_TYPE("getenv(name)", 0, String);
+	const char* value = getenv(AS_CSTRING(args[0]));
+    if (value != NULL) {
+        RETURN_OBJ(newString(vm, value));
+    }
+    RETURN_NIL;
+}
+
 LOX_FUNCTION(print){
     ASSERT_ARG_COUNT("print(message)", 1);
     printValue(args[0]);
@@ -394,6 +404,7 @@ void registerNativeFunctions(VM* vm){
     DEF_FUNCTION(clock, NATIVE_TYPE(Number), 0);
     DEF_FUNCTION(error, NATIVE_TYPE(void), 1, NATIVE_TYPE(String));
     DEF_FUNCTION(gc, NATIVE_TYPE(void), 1, NATIVE_TYPE(Int));
+	DEF_FUNCTION(getenv, NATIVE_TYPE(String), 1, NATIVE_TYPE(String));
     DEF_FUNCTION(print, NATIVE_TYPE(void), 1, NATIVE_TYPE(Object));
     DEF_FUNCTION(println, NATIVE_TYPE(void), 1, NATIVE_TYPE(Object));
     DEF_FUNCTION(read, NATIVE_TYPE(String), 0);

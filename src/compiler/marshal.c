@@ -342,6 +342,7 @@ bool marshalLoad(Marshaler* marshaler, ObjModule* module) {
 	ABORT_IFNULL(marshaler->bytes, "Failed to allocate memory for byte streams to perform marshal deserialization.\n");
 
 	size_t fileSize = marshalFileSize(file);
+	ABORT_IFTRUE(fileSize == 0, "File \"%s\" is empty, cannot perform marshal deserialization.\n", fileName);
 	marshalInitBytes(marshaler, (int)fileSize);
 	size_t bytesRead = fread(marshaler->bytes->elements, sizeof(uint8_t), fileSize, file);
 	ABORT_IFTRUE(bytesRead < fileSize, "Failed to read file \"%s\" for marshal deserialization.\n", fileName);
