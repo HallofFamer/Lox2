@@ -1334,6 +1334,18 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
     else {
         shortName->symtab = _namespace->symtab;
         insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+		TypeInfo* metaType = getTypeForSymbol(resolver, shortName->token, false, false);
+		ObjString* fullName = getClassNameFromMetaclass(resolver->vm, metaType->fullName);
+		TypeInfo* behaviorType = typeTableGet(resolver->vm->typetab, fullName);
+		if (hasGenericParameters(behaviorType)) {
+			TypeInfo* typeType = getNativeType(resolver->vm, "Type");
+			BehaviorTypeInfo* genericBehaviorType = AS_BEHAVIOR_TYPE(behaviorType);
+			for (int i = 0; i < genericBehaviorType->formalTypeParams->count; i++) {
+                TypeInfo* typeParam = genericBehaviorType->formalTypeParams->elements[i];
+                insertSymbol(resolver, syntheticToken(typeParam->shortName->chars), SYMBOL_CATEGORY_PLACEHOLDER, SYMBOL_STATE_ACCESSED, typeType, false);
+            }
+        }
+
         nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, shortName->token), fullName);
     }
 }

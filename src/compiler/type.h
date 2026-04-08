@@ -172,7 +172,7 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2);
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2);
 
 static inline bool isTempType(TypeInfo* type) {
-    return IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type);
+    return (type != NULL) && (IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type));
 }
 
 static inline TypeInfoArray* getTypeParameters(TypeInfo* type) {

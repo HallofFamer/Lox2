@@ -125,7 +125,8 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
 
 static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
 	TypeInfo* instantiatedType = instantiateTypeParameter(type, formalParams, actualParams);
-    if (IS_GENERIC_TYPE(instantiatedType)) {
+	if (instantiatedType == NULL) return NULL;
+    else if (IS_GENERIC_TYPE(instantiatedType)) {
 		char* instantiatedTypeName = createGenericTypeName(AS_GENERIC_TYPE(instantiatedType));
 		instantiatedType->fullName = instantiatedType->shortName = takeStringPerma(typeChecker->vm, instantiatedTypeName, (int)strlen(instantiatedTypeName));
         TypeInfoArrayAdd(typeChecker->vm->tempTypes, instantiatedType);
@@ -215,9 +216,20 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
 
 static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer, bool isLambda);
 
+static TypeInfo* getAstGenericDynamicType(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
+    GenericTypeInfo* genericType = newGenericTypeInfo(-1, type->shortName, type->fullName, type);
+    for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
+        TypeInfoArrayAdd(genericType->actualTypeParams, NULL);
+    }
+    char* genericTypeName = createGenericTypeName(genericType);
+    genericType->baseType.fullName = genericType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
+    return (TypeInfo*)genericType;
+}
+
 static void defineAstType(TypeChecker* typeChecker, Ast* ast, const char* name, SymbolItem* item) {
     ObjString* typeName = newStringPerma(typeChecker->vm, name);
-    ast->type = getNativeType(typeChecker->vm, name);
+    TypeInfo* type = getNativeType(typeChecker->vm, name);
+	ast->type = hasGenericParameters(type) ? getAstGenericDynamicType(typeChecker, ast, type) : type;
     if (item != NULL) item->type = ast->type;
 }
 
@@ -325,7 +337,7 @@ static void checkMethodSignatures(TypeChecker* typeChecker, CallableTypeInfo* su
     }
 
     if (subclassMethod->paramTypes->count != superclassMethod->paramTypes->count) {
-        typeError(typeChecker, "Method %s::%s expects to receive %d parameters but gets %d.", className->chars,
+        typeError(typeChecker, "Method %s::%s expects to receive %d arguments but gets %d.", className->chars,
             subclassMethod->baseType.shortName->chars, superclassMethod->paramTypes->count, subclassMethod->paramTypes->count);
     }
     else {
@@ -553,8 +565,25 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     }
 
     if (callee->type != NULL && hasGenericParameters(type)) {
-        if(astNumChild(callee) > 0) checkTypeParameters(typeChecker, callee, type);
-        ast->type = callee->type;
+        GenericTypeInfo* calleeType = newGenericTypeInfo(-1, type->shortName, type->fullName, type);
+        if (astNumChild(callee) > 0) {
+            checkTypeParameters(typeChecker, callee, type);
+			Ast* typeArgs = astGetChild(callee, 0);
+			for (int i = 0; i < astNumChild(callee); i++) {
+                Ast* typeArg = astGetChild(typeArgs, i);
+                TypeInfoArrayAdd(calleeType->actualTypeParams, typeArg->type);
+            }
+            char* genericTypeName = createGenericTypeName(calleeType);
+			calleeType->baseType.fullName = calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
+        }
+        else {
+            for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
+				TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
+            }
+            char* genericTypeName = createGenericTypeName(calleeType);
+            calleeType->baseType.fullName = calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
+        }
+        ast->type = (TypeInfo*)calleeType;
     }
     else ast->type = type;
 }
@@ -596,7 +625,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 		SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL) return;
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);
-        
+
         TypeInfo* classType = getClassType(typeChecker, className, ast->symtab);
         if (classType == NULL) return;
         inferAstTypeFromInitializer(typeChecker, ast, classType);

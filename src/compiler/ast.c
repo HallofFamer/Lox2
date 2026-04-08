@@ -590,6 +590,7 @@ static void astOutputDeclClass(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     char* className = tokenToCString(ast->token);
     printf("classDecl %s\n", className);
+
     astOutputChild(ast, indentLevel + 1, 0);
     if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
     free(className);
@@ -636,7 +637,10 @@ static void astOutputDeclMethod(Ast* ast, int indentLevel) {
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
     astOutputChild(ast, indentLevel + 1, 2);
-    if (astNumChild(ast) > 3) astOutputChild(ast, indentLevel + 1, 3);
+
+    if (astNumChild(ast) > 3) {
+        astOutputChild(ast, indentLevel + 1, 3);
+    }
     free(methodName);
 }
 

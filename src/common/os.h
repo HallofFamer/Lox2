@@ -26,6 +26,7 @@
 #define _chmod(path,mode) chmod(path,mode)
 #define _getcwd(buffer,size) getcwd(buffer,size)
 #define _mkdir(path) mkdir(path,777)
+#define _putenv_s(name,value) setenv(name,value,1)
 #define _rmdir(path) rmdir(path)
 #define _strdup(str1) strdup(str1)
 #define SOCKET int

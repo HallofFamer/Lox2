@@ -41,6 +41,7 @@ LOX_FUNCTION(getenv) {
 	ASSERT_ARG_COUNT("getenv(name)", 1);
 	ASSERT_ARG_TYPE("getenv(name)", 0, String);
 	const char* value = getenv(AS_CSTRING(args[0]));
+
     if (value != NULL) {
         RETURN_OBJ(newString(vm, value));
     }
@@ -82,6 +83,19 @@ LOX_FUNCTION(read) {
     ObjString* input = newString(vm, line);
     free(line);
     RETURN_OBJ(input);
+}
+
+LOX_FUNCTION(setenv) {
+    ASSERT_ARG_COUNT("setenv(name, value)", 2);
+    ASSERT_ARG_TYPE("setenv(name, value)", 0, String);
+    ASSERT_ARG_TYPE("setenv(name, value)", 1, String);
+    const char* name = AS_CSTRING(args[0]);
+    const char* value = AS_CSTRING(args[1]);
+
+    if (_putenv_s(name, value) != 0) {
+		THROW_EXCEPTION_FMT(clox.std.lang.UnsupportedOperationException, "Failed to set environment variable \"%s\".", name);
+    }
+	RETURN_NIL;
 }
 
 ObjClass* defineNativeClass(VM* vm, const char* name) {
@@ -408,4 +422,5 @@ void registerNativeFunctions(VM* vm){
     DEF_FUNCTION(print, NATIVE_TYPE(void), 1, NATIVE_TYPE(Object));
     DEF_FUNCTION(println, NATIVE_TYPE(void), 1, NATIVE_TYPE(Object));
     DEF_FUNCTION(read, NATIVE_TYPE(String), 0);
+	DEF_FUNCTION(setenv, NATIVE_TYPE(void), 2, NATIVE_TYPE(String), NATIVE_TYPE(String));
 }

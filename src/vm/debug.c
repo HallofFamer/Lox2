@@ -107,12 +107,12 @@ static int exceptionHandlerInstruction(const char* name, Chunk* chunk, int offse
 
 static int closureInstruction(const char* name, Chunk* chunk, int offset) {
     offset++;
-    uint8_t identifier = chunk->code[offset++];
-    printf("%-16s %4d ", name, identifier);
-    printValue(chunk->identifiers.values[identifier]);
+    uint8_t constant = chunk->code[offset++];
+    printf("%-16s %4d ", name, constant);
+    printValue(chunk->constants.values[constant]);
     printf("\n");
 
-    ObjFunction* function = AS_FUNCTION(chunk->identifiers.values[identifier]);
+    ObjFunction* function = AS_FUNCTION(chunk->constants.values[constant]);
     for (int j = 0; j < function->upvalueCount; j++) {
         int isLocal = chunk->code[offset++];
         int index = chunk->code[offset++];
