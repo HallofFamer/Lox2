@@ -2368,7 +2368,7 @@ void registerLangPackage(VM* vm) {
     DEF_FIELD(floatMetaclass, min, Number, true, NUMBER_VAL(DBL_MIN));
     DEF_METHOD(floatMetaclass, FloatClass, parse, 1, NATIVE_TYPE(Float), NATIVE_TYPE(Object));
 
-    DEF_METHOD(iterableTrait, TIterable, iterator, 1, NATIVE_TYPE(TIterator));
+    DEF_METHOD(iterableTrait, TIterable, iterator, 0, NATIVE_TYPE(TIterator));
     insertGlobalSymbolTable(vm, "TIterable", "Trait");
 
     DEF_METHOD(iteratorTrait, TIterator, currentIndex, 0, NATIVE_TYPE(Object));

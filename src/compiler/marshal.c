@@ -334,11 +334,13 @@ bool marshalLoad(Marshaler* marshaler, ObjModule* module) {
 	if (!marshaler->vm->config.marshalEnabled) return false;
 	char fileName[UINT8_COUNT];
 	sprintf_s(fileName, UINT8_COUNT, "%s%s", module->path->chars, "o");
-	if (marshalSourceFileModified(module->path->chars, fileName)) return false;
+	if (marshaler->vm->config.marshalFileWatch && marshalSourceFileModified(module->path->chars, fileName)) {
+		return false;
+	}
+
 	FILE* file;
     fopen_s(&file, fileName, "rb");
 	if (file == NULL) return false;
-
 	marshaler->module = module;
 	marshaler->bytes = (ByteArray*)malloc(sizeof(ByteArray));
 	ABORT_IFNULL(marshaler->bytes, "Failed to allocate memory for byte streams to perform marshal deserialization.\n");
@@ -348,8 +350,8 @@ bool marshalLoad(Marshaler* marshaler, ObjModule* module) {
 	marshalInitBytes(marshaler, (int)fileSize);
 	size_t bytesRead = fread(marshaler->bytes->elements, sizeof(uint8_t), fileSize, file);
 	ABORT_IFTRUE(bytesRead < fileSize, "Failed to read file \"%s\" for marshal deserialization.\n", fileName);
-	marshalDeserializeModule(marshaler);
 	
+	marshalDeserializeModule(marshaler);	
 	fclose(file);
 	marshalCleanup(marshaler);
 	return true;

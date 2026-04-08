@@ -11,9 +11,21 @@
        if (IS_STRING(message)) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
     } while (false)
 
+#define ASSERT_ARG_COUNT_GENERIC(method, expectedCount, typeParamCount) \
+    do { \
+       Value message = assertArgCount(vm, method, expectedCount, argCount - typeParamCount); \
+       if (IS_STRING(message)) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
+    } while (false)
+
 #define ASSERT_ARG_COUNT_ASYNC(method, expectedCount) \
     do { \
        Value message = assertArgCount(vm, method, expectedCount, argCount); \
+       if (IS_STRING(message)) RETURN_PROMISE_EX(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
+    } while (false)
+
+#define ASSERT_ARG_COUNT_GENERIC_ASYNC(method, expectedCount, typeParamCount) \
+    do { \
+       Value message = assertArgCount(vm, method, expectedCount, argCount - typeParamCount); \
        if (IS_STRING(message)) RETURN_PROMISE_EX(clox.std.lang.IllegalArgumentException, AS_CSTRING(message)); \
     } while (false)
 

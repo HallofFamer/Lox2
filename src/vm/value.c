@@ -181,22 +181,25 @@ char* valueToString(VM* vm, Value value) {
         return "nil";
     }
     else if (IS_INT(value)) {
-        char* chars = ALLOCATE(char, (size_t)11, GC_GENERATION_TYPE_PERMANENT);
-        int length = sprintf_s(chars, 11, "%d", AS_INT(value));
+        size_t bufSize = 12;
+        char* chars = ALLOCATE(char, bufSize, GC_GENERATION_TYPE_EDEN);
+        sprintf_s(chars, bufSize, "%d", AS_INT(value));
         return chars;
     }
     else if (IS_FLOAT(value)) {
-        char* chars = ALLOCATE(char, (size_t)24, GC_GENERATION_TYPE_PERMANENT);
-        int length = sprintf_s(chars, 24, "%.14g", AS_FLOAT(value));
+        size_t bufSize = 32;
+        char* chars = ALLOCATE(char, bufSize, GC_GENERATION_TYPE_EDEN);
+        sprintf_s(chars, bufSize, "%.14g", AS_FLOAT(value));
         return chars;
     }
     else if (IS_OBJ(value)) {
         Obj* object = AS_OBJ(value);
         if (IS_STRING(value)) return AS_CSTRING(value);
         else {
-            size_t size = (size_t)(9 + object->klass->name->length);
-            char* chars = ALLOCATE(char, size, GC_GENERATION_TYPE_PERMANENT);
-            int length = sprintf_s(chars, strlen(chars), "<object %s>", object->klass->name->chars);
+            size_t nameLen = (size_t)object->klass->name->length;
+            size_t bufSize = 9 + nameLen + 1;
+            char* chars = ALLOCATE(char, bufSize, GC_GENERATION_TYPE_EDEN);
+            sprintf_s(chars, bufSize, "<object %s>", object->klass->name->chars);
             return chars;
         }
     }

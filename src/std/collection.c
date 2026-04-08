@@ -409,7 +409,7 @@ static ObjString* setToString(VM* vm, ObjInstance* set) {
 }
 
 LOX_METHOD(Array, __init__) {
-    ASSERT_ARG_COUNT("Array::__init__()", 0);
+    ASSERT_ARG_COUNT_GENERIC("Array::__init__()", 0, 1);
     RETURN_VAL(receiver);
 }
 
@@ -668,7 +668,7 @@ LOX_METHOD(ArrayClass, fromElements) {
 }
 
 LOX_METHOD(ArrayIterator, __init__) {
-    ASSERT_ARG_COUNT("ArrayIterator::__init__(iterable)", 1);
+    ASSERT_ARG_COUNT_GENERIC("ArrayIterator::__init__(iterable)", 1, 1);
     ASSERT_ARG_TYPE("ArrayIterator::__init__(iterable)", 0, Array);
     ObjIterator* self = AS_ITERATOR(receiver);
     self->iterable = args[0];
@@ -870,7 +870,7 @@ LOX_METHOD(Collection, toArray) {
 }
 
 LOX_METHOD(Dictionary, __init__) {
-    ASSERT_ARG_COUNT("Dictionary::__init__()", 0);
+    ASSERT_ARG_COUNT_GENERIC("Dictionary::__init__()", 0, 2);
     RETURN_VAL(receiver);
 }
 
@@ -1198,7 +1198,7 @@ LOX_METHOD(Dictionary, __setSubscript__) {
 }
 
 LOX_METHOD(DictionaryIterator, __init__) {
-    ASSERT_ARG_COUNT("DictionaryIterator::__init__(iterable)", 1);
+    ASSERT_ARG_COUNT_GENERIC("DictionaryIterator::__init__(iterable)", 1, 1);
     ASSERT_ARG_TYPE("DictionaryIterator::__init__(iterable)", 0, Dictionary);
     ObjIterator* self = AS_ITERATOR(receiver);
     self->iterable = args[0];
@@ -1233,7 +1233,7 @@ LOX_METHOD(DictionaryIterator, moveNext) {
 }
 
 LOX_METHOD(Entry, __init__) {
-    ASSERT_ARG_COUNT("Entry::__init__(key, value)", 2);
+    ASSERT_ARG_COUNT_GENERIC("Entry::__init__(key, value)", 2, 2);
     ObjEntry* self = AS_ENTRY(receiver);
     self->key = args[0];
     self->value = args[1];
@@ -1242,7 +1242,7 @@ LOX_METHOD(Entry, __init__) {
 
 
 LOX_METHOD(Entry, clone) {
-    ASSERT_ARG_COUNT("Entry::clone()", 0);
+    ASSERT_ARG_COUNT_GENERIC("Entry::clone()", 0, 2);
     ObjEntry* self = AS_ENTRY(receiver);
     ObjEntry* entry = newEntry(vm, self->key, self->value);
     RETURN_OBJ(entry);
@@ -1290,7 +1290,7 @@ LOX_METHOD(Entry, toString) {
 }
 
 LOX_METHOD(LinkedList, __init__) {
-    ASSERT_ARG_COUNT("LinkedList::__init__()", 0);
+    ASSERT_ARG_COUNT_GENERIC("LinkedList::__init__()", 0, 1);
     ObjInstance* self = AS_INSTANCE(receiver);
     setObjField(vm, self, "length", INT_VAL(0));
     setObjField(vm, self, "first", NIL_VAL);
@@ -1463,7 +1463,7 @@ LOX_METHOD(LinkedList, toString) {
 }
 
 LOX_METHOD(LinkedListIterator, __init__) {
-    ASSERT_ARG_COUNT("LinkedListIterator::__init__(iterable)", 1);
+    ASSERT_ARG_COUNT_GENERIC("LinkedListIterator::__init__(iterable)", 1, 1);
     ASSERT_ARG_INSTANCE_OF("LinkedListIterator::__init__(iterable)", 0, clox.std.collection.LinkedList);
     ObjIterator* self = AS_ITERATOR(receiver);
     self->iterable = args[0];
@@ -1544,7 +1544,7 @@ LOX_METHOD(List, putAt) {
 }
 
 LOX_METHOD(Node, __init__) {
-    ASSERT_ARG_COUNT("Node::__init__(element, prev, next)", 3);
+    ASSERT_ARG_COUNT_GENERIC("Node::__init__(element, prev, next)", 3, 1);
     ObjNode* self = AS_NODE(receiver);
     self->element = args[0];
     if (!IS_NIL(args[1])) self->prev = AS_NODE(args[1]);
@@ -1588,7 +1588,7 @@ LOX_METHOD(Node, toString) {
 }
 
 LOX_METHOD(Queue, __init__) {
-    ASSERT_ARG_COUNT("Queue::__init__()", 0);
+    ASSERT_ARG_COUNT_GENERIC("Queue::__init__()", 0, 1);
     ObjInstance* self = AS_INSTANCE(receiver);
     setObjField(vm, self, "length", INT_VAL(0));
     setObjField(vm, self, "first", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
@@ -1714,7 +1714,7 @@ LOX_METHOD(Queue, toString) {
 }
 
 LOX_METHOD(QueueIterator, __init__) {
-    ASSERT_ARG_COUNT("QueueIterator::__init__(iterable)", 1);
+    ASSERT_ARG_COUNT_GENERIC("QueueIterator::__init__(iterable)", 1, 1);
     ASSERT_ARG_INSTANCE_OF("QueueIterator::__init__(iterable)", 0, clox.std.collection.Queue);
     ObjIterator* self = AS_ITERATOR(receiver);
     self->iterable = args[0];
@@ -1885,7 +1885,7 @@ LOX_METHOD(RangeIterator, moveNext) {
 }
 
 LOX_METHOD(Set, __init__) {
-    ASSERT_ARG_COUNT("Set::__init__()", 0);
+    ASSERT_ARG_COUNT_GENERIC("Set::__init__()", 0, 1);
     ObjInstance* self = AS_INSTANCE(receiver);
     setObjField(vm, self, "dict", OBJ_VAL(newDictionary(vm)));
     RETURN_OBJ(receiver);
@@ -1981,7 +1981,7 @@ LOX_METHOD(Set, toString) {
 }
 
 LOX_METHOD(SetIterator, __init__) {
-    ASSERT_ARG_COUNT("SetIterator::__init__(iterable)", 1);
+    ASSERT_ARG_COUNT_GENERIC("SetIterator::__init__(iterable)", 1, 1);
     ASSERT_ARG_INSTANCE_OF("SetIterator::__init__(iterable)", 0, clox.std.collection.Set);
     ObjIterator* self = AS_ITERATOR(receiver);
     self->iterable = args[0];
@@ -2015,7 +2015,7 @@ LOX_METHOD(SetIterator, moveNext) {
 }
 
 LOX_METHOD(Stack, __init__) {
-    ASSERT_ARG_COUNT("Stack::__init__()", 0);
+    ASSERT_ARG_COUNT_GENERIC("Stack::__init__()", 0, 1);
     ObjInstance* self = AS_INSTANCE(receiver);
     setObjField(vm, self, "length", INT_VAL(0));
     setObjField(vm, self, "first", OBJ_VAL(newNode(vm, NIL_VAL, NULL, NULL)));
@@ -2123,7 +2123,7 @@ LOX_METHOD(Stack, toString) {
 }
 
 LOX_METHOD(StackIterator, __init__) {
-    ASSERT_ARG_COUNT("StackIterator::__init__(iterable)", 1);
+    ASSERT_ARG_COUNT_GENERIC("StackIterator::__init__(iterable)", 1, 1);
     ASSERT_ARG_INSTANCE_OF("StackIterator::__init__(iterable)", 0, clox.std.collection.Stack);
     ObjIterator* self = AS_ITERATOR(receiver);
     self->iterable = args[0];
@@ -2137,7 +2137,7 @@ void registerCollectionPackage(VM* vm) {
 
     TypeInfo* elementType = declareNativeTypeParameter(vm, "E");
     ObjClass* iterableTrait = getNativeClass(vm, "clox.std.lang.TIterable");
-	ObjClass* collectionClass = defineNativeGenericClass(vm, "Collection", 1, elementType);
+    ObjClass* collectionClass = defineNativeGenericClass(vm, "Collection", 1, elementType);
     ObjClass* listClass = defineNativeGenericClass(vm, "List", 1, elementType);
     vm->arrayClass = defineNativeGenericClass(vm, "Array", 1, elementType);
     ObjClass* arrayIteratorClass = defineNativeGenericClass(vm, "ArrayIterator", 1, elementType);
@@ -2145,8 +2145,8 @@ void registerCollectionPackage(VM* vm) {
     ObjClass* linkedListIteratorClass = defineNativeGenericClass(vm, "LinkedListIterator", 1, elementType);
     vm->nodeClass = defineNativeGenericClass(vm, "Node", 1, elementType);
 
-	TypeInfo* keyType = declareNativeTypeParameter(vm, "K");
-	TypeInfo* valueType = declareNativeTypeParameter(vm, "V");
+    TypeInfo* keyType = declareNativeTypeParameter(vm, "K");
+    TypeInfo* valueType = declareNativeTypeParameter(vm, "V");
     vm->dictionaryClass = defineNativeGenericClass(vm, "Dictionary", 2, keyType, valueType);
     ObjClass* dictionaryIteratorClass = defineNativeGenericClass(vm, "DictionaryIterator", 1, valueType);
     vm->entryClass = defineNativeGenericClass(vm, "Entry", 2, keyType, valueType);
@@ -2212,7 +2212,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_OPERATOR(vm->arrayClass, Array, []=, __setSubscript__, 2, NATIVE_TYPE(void), NATIVE_TYPE(Int), NATIVE_TYPE(E));
 
     ObjClass* arrayMetaclass = vm->arrayClass->obj.klass;
-    DEF_METHOD(arrayMetaclass, ArrayClass, fromElements, -1, NATIVE_TYPE(clox.std.collection.Array), NATIVE_TYPE(Object));
+    DEF_METHOD(arrayMetaclass, ArrayClass, fromElements, -1, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NULL), NATIVE_TYPE(Object));
 
     bindSuperclass(vm, arrayIteratorClass, vm->iteratorClass);
     DEF_INTERCEPTOR(arrayIteratorClass, ArrayIterator, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(clox.std.collection.ArrayIterator), NATIVE_TYPE(Object));
