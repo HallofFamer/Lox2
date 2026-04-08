@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "memory.h"
+#include "namespace.h"
 #include "object.h"
 #include "../common/os.h"
 
@@ -229,14 +230,7 @@ ObjModule* newModule(VM* vm, ObjString* path) {
     initIDMap(&module->varIndexes, module->obj.generation);
     initValueArray(&module->varFields, module->obj.generation);
 
-    for (int i = 0; i < vm->langNamespace->values.capacity; i++) {
-        Entry* entry = &vm->langNamespace->values.entries[i];
-        if (entry->key != NULL) {
-            idMapSet(vm, &module->valIndexes, entry->key, module->valFields.count);
-            valueArrayWrite(vm, &module->valFields, entry->value);
-        }
-    }
-    
+	loadNamespaceIntoModule(vm, vm->langNamespace, module);
     tableSet(vm, &vm->modules, path, NIL_VAL);
     return module;
 }

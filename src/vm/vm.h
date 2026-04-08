@@ -59,6 +59,11 @@ typedef struct {
     size_t gcEdenHeapSize;
     size_t gcYoungHeapSize;
     size_t gcOldHeapSize;
+
+	bool marshalEnabled;
+    bool marshalFileWatch;
+    bool marshalLineInfo;
+    const char* marshalOutputPath;
 } Configuration;
 
 struct VM {

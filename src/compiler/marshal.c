@@ -179,6 +179,7 @@ static void marshalSerializeModule(ByteArray* bytes, ObjModule* module) {
 }
 
 void marshalDump(Marshaler* marshaler, ObjModule* module) {
+	if (!marshaler->vm->config.marshalEnabled) return;
 	char fileName[UINT8_COUNT];
 	sprintf_s(fileName, UINT8_COUNT, "%s%s", module->path->chars, "o");
 	FILE* file;
@@ -330,6 +331,7 @@ static bool marshalSourceFileModified(const char* sourceFilePath, const char* co
 }
 
 bool marshalLoad(Marshaler* marshaler, ObjModule* module) {
+	if (!marshaler->vm->config.marshalEnabled) return false;
 	char fileName[UINT8_COUNT];
 	sprintf_s(fileName, UINT8_COUNT, "%s%s", module->path->chars, "o");
 	if (marshalSourceFileModified(module->path->chars, fileName)) return false;

@@ -158,6 +158,18 @@ InterpretResult runModule(VM* vm, ObjModule* module, bool isRootModule) {
     }
 }
 
+bool loadNamespaceIntoModule(VM* vm, ObjNamespace* namespace, ObjModule* module) {
+    if (namespace == NULL || module == NULL) return false;
+    for (int i = 0; i < vm->langNamespace->values.capacity; i++) {
+        Entry* entry = &vm->langNamespace->values.entries[i];
+        if (entry->key != NULL) {
+            idMapSet(vm, &module->valIndexes, entry->key, module->valFields.count);
+            valueArrayWrite(vm, &module->valFields, entry->value);
+        }
+    }
+    return true;
+}
+
 bool loadModule(VM* vm, ObjString* path) {
     ObjModule* lastModule = vm->currentModule;
     vm->currentModule = newModule(vm, path);

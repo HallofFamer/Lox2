@@ -14,6 +14,7 @@ bool sourceDirectoryExists(ObjString* directoryPath);
 ObjString* locateSourceDirectory(VM* vm, ObjString* shortName, ObjNamespace* enclosingNamespace);
 ObjString* locateSourceDirectoryFromFullName(VM* vm, ObjString* fullName);
 InterpretResult runModule(VM* vm, ObjModule* module, bool isRootModule);
+bool loadNamespaceIntoModule(VM* vm, ObjNamespace* namespace, ObjModule* module);
 bool loadModule(VM* vm, ObjString* path);
 
 #endif // !clox_namespace_h

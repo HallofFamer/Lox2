@@ -146,6 +146,18 @@ static int parseConfiguration(void* data, const char* section, const char* name,
     else if (HAS_CONFIG("gc", "gcOldHeapSize")) {
         config->gcOldHeapSize = (size_t)atol(value);
     }
+    else if (HAS_CONFIG("marshal", "marshalEnabled")) {
+        config->marshalEnabled = (bool)atoi(value);
+    }
+    else if (HAS_CONFIG("marshal", "marshalFileWatch")) {
+        config->marshalFileWatch = (bool)atoi(value);
+    }
+    else if (HAS_CONFIG("marshal", "marshalLineInfo")) {
+        config->marshalLineInfo = (bool)atoi(value);
+    }
+    else if (HAS_CONFIG("marshal", "marshalOutputPath")) {
+        config->marshalOutputPath = _strdup(value);
+    }
     else {
         return 0;
     }
@@ -158,6 +170,15 @@ static void initConfiguration(VM* vm) {
     int iniParsed = ini_parse("lox2.ini", parseConfiguration, &config);
     ABORT_IFTRUE(iniParsed < 0, "Can't load \"lox2.ini\" configuration file...\n");
     vm->config = config;
+}
+
+static void freeConfiguration(Configuration* config) {
+    if (config->version != NULL) free((void*)config->version);
+    if (config->script != NULL) free((void*)config->script);
+    if (config->path != NULL) free((void*)config->path);
+    if (config->timezone != NULL) free((void*)config->timezone);
+    if (config->gcType != NULL) free((void*)config->gcType);
+    if (config->marshalOutputPath != NULL) free((void*)config->marshalOutputPath);
 }
 
 void initVM(VM* vm) {
@@ -222,6 +243,7 @@ void freeVM(VM* vm) {
     freeObjects(vm);
     freeGC(vm);
     freeLoop(vm);
+	freeConfiguration(&vm->config);
 }
 
 void push(VM* vm, Value value) {
