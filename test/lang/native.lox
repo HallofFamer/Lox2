@@ -2,7 +2,9 @@ namespace test.lang
 
 assert(5 > 3, "There's something about 5 that beats 3")
 val start = clock()
-println("Current time is: ${start}")
+println("Current time: ${start}")
+val username = getenv("USERNAME");
+println("Current user: ${username}")
 println("Enter any text: ")
 val text = read()
 println("Your entered text: ${text}")

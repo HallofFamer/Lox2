@@ -20,6 +20,10 @@ class User extends Model {
 		this.username = username
 		this.email = email
 	}
+
+	String toString() {
+		return "User(id: ${this.id}, username: ${this.username}, email: ${this.email})"
+	}
 }
 
 trait TRepository<T> {
@@ -67,7 +71,7 @@ class Repository<T> with TRepository<T> {
 	}
 
 	Array<T> getAll() {
-		return this.modelS
+		return this.models
 	}
 
 	void remove(T model) {
@@ -87,9 +91,21 @@ class UserRepository extends Repository<User> {
 }
 
 val userRepo = UserRepository()
-userRepo.add(User(1, "john_doe", "johndoe@gmail.com"))
-userRepo.add(User(2, "jane_doe", "janedoe@outlook.com"))
-val user = userRepo.getByUsername("john_doe")
+userRepo.add(User(1, "jsmith", "jsmith@gmail.com"))
+userRepo.add(User(2, "alicew", "alice.williams@outlook.com"))
+val user = userRepo.getByUsername("jsmith")
 val user2 = userRepo.get({|m| m.id == 2})
-println("User 1: ${user.username}, Email: ${user.email}")
-println("User 2: ${user2.username}, Email: ${user2.email}")
+println("Retrieved users:")
+println(user.toString())
+println(user2.toString())
+
+val array = Array<User>()
+array[0] = User(3, "bob.f", "bob.f@yahoo.com")
+array[1] = User(4, "cindy_tech", "cindy.tech@aol.com")
+array[2] = User(5, "david_jones_88", "davidjones88@apple.com")
+
+userRepo.addAll(array)
+println("\nAll users in repository:")
+for (val u : userRepo.getAll()) {
+	println("Username: ${u.username}, Email: ${u.email}")
+}

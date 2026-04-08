@@ -1,13 +1,14 @@
-parser grammar Lox;
+parser grammar Lox2;
 options { tokenVocab = LoxLexer; }
 
 program: declaration* EOF;
-declaration: classDecl | funDecl | namespaceDecl | traitDecl | varDecl | statement;
+declaration: classDecl | funDecl | namespaceDecl | traitDecl | typeDecl | varDecl | statement;
 classDecl: CLASS IDENTIFIER classBody;
 fieldDecl: CLASS? (VAL | VAR) type? IDENTIFIER (EQ expression)? TERMINATOR;
 funDecl: (FUN | type | VOID) function;
 namespaceDecl: NAMESPACE IDENTIFIER (DOT IDENTIFIER)*;
 traitDecl: TRAIT IDENTIFIER traitBody;
+typeDecl: TYPE IDENTIFIER EQ type TERMINATOR;
 varDecl: (VAL | VAR) IDENTIFIER (EQ expression)? TERMINATOR;
 
 statement: awaitStmt | breakStmt | caseStmt | continueStmt | exprStmt | forStmt | ifStmt | requireStmt | returnStmt | switchStmt | usingStmt | whileStmt | yieldStmt | block;
@@ -46,7 +47,7 @@ functionBody: LPAREN parameters? RPAREN block;
 traitBody: (WITH parameters)? LBRACE CLASS? function* RBRACE;
 behaviorType: IDENTIFIER CLASS?;
 callableType: (type | VOID)? fun LPAREN (type (COMMA type)*)? RPAREN;
-genericType: IDENTIFIER (LT type (COMMA type)*)? GT;
+genericType: IDENTIFIER (LT type (COMMA type)*)? GT; ID
 type: behaviorType | callableType | genericType
 parameters: (VAR? type? IDENTIFIER (VAR? COMMA type? IDENTIFIER)*) | (DOTDOT type? IDENTIFIER);
 arguments: expression (COMMA expression)*;

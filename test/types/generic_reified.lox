@@ -1,0 +1,55 @@
+namespace test.types
+using clox.std.util.UUID
+
+T identity<T>(T arg) {
+    println(T)
+    return arg
+}
+
+val id = identity<UUID>(UUID())
+println(id.toString())
+
+class Box<T> {
+
+    var T item
+
+    __init__(T item) {
+        this.item = item
+    }
+
+    T getItem() {
+        return this.item
+    }
+
+    void setItem(T item) {
+        this.item = item
+    }
+
+    String toString() {
+        return "Box<${T.name()}>(${this.item})"
+    }
+}
+
+class WeightedBox<T> extends Box<T> {
+
+    val Float weight
+
+    __init__(T item, Float weight) {
+        super.__init__<T>(item)
+        this.weight = weight
+    }
+
+    Float getWeight() {
+        return this.weight
+    }
+
+    String toString() {
+        return "WeightedBox<${T.name()}>(${this.item}, ${this.weight}kg)"
+    }
+}
+
+val box = Box<Int>(32)
+println(box.toString())
+
+val weightedBox = WeightedBox<String>("Hello World", 2.5)
+println(weightedBox.toString())

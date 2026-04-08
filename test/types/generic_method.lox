@@ -73,3 +73,16 @@ productRepo.addAll(products)
 productRepo.add(Product(4, "Monitor", 199.99))
 val product = productRepo.getById<Int>(4)
 println(product.toString())
+
+class ProductRepository extends GenericRepository<Product> { 
+    
+	Product getByName(String name) {
+		return this.get({|m| m.name == name })
+	}
+}
+
+val productRepo2 = ProductRepository()
+productRepo2.addAll(products)
+productRepo2.add(Product(5, "Keyboard", 49.99))
+val product2 = productRepo2.getByName("Keyboard")
+println(product2.toString())

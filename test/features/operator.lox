@@ -51,7 +51,7 @@ class Complex {
         throw UnsupportedOperationException("Only real and imaginary keys are supported.")
     }
 
-    []=(String key, Numbeer value) {
+    []=(String key, Number value) {
         if (key == "real") this.real = value
         if (key == "imaginary") this.imaginary = value
         throw UnsupportedOperationException("Only real and imaginary keys are supported.") 

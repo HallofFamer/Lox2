@@ -1,4 +1,4 @@
-lexer grammar Lox;
+lexer grammar Lox2;
 
 SEPARATOR: [ \t\r\n];
 KEYWORD: AND | AS | ASYNC | AWAIT | BREAK | CATCH | CLASS | CONTINUE | DEFAULT | ELSE | EXTENDS | FINALLY | FOR | FROM | FUN | IF | OR | RETURN | SUPER | THIS | THROW | TRAIT | TRY | TYPE | VAL | VAR | VOID | WHILE | WITH | YIELD;
