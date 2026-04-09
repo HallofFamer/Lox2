@@ -97,7 +97,7 @@ static void marshalSerializeString(ByteArray* bytes, ObjString* string) {
 	}
 }
 
-static void marshalSerializeFunction(ByteArray* bytes, ObjFunction* function) {
+static void marshalSerializeFunction(Marshaler* marshaler, ByteArray* bytes, ObjFunction* function) {
 	bool isNamed = function->name != NULL;
 	marshalSerializeByte(bytes, isNamed ? 1 : 0);
 	if (isNamed) marshalSerializeString(bytes, function->name);
@@ -110,7 +110,7 @@ static void marshalSerializeFunction(ByteArray* bytes, ObjFunction* function) {
 
 	marshalSerializeByte(bytes, (uint8_t)function->chunk.constants.count);
 	for (int i = 0; i < function->chunk.constants.count; i++) {
-		marshalSerializeValue(bytes, function->chunk.constants.values[i]);
+		marshalSerializeValue(marshaler, bytes, function->chunk.constants.values[i]);
 	}
 
 	marshalSerializeByte(bytes, (uint8_t)function->chunk.identifiers.count);
@@ -122,9 +122,15 @@ static void marshalSerializeFunction(ByteArray* bytes, ObjFunction* function) {
 	for (int i = 0; i < function->chunk.count; i++) {
 		marshalSerializeByte(bytes, function->chunk.code[i]);
 	}
+
+	if (marshaler->vm->config.marshalLineInfo) {
+		for (int i = 0; i < function->chunk.count; i++) {
+			marshalSerializeShort(bytes, (uint16_t)function->chunk.lines[i]);
+		}
+	}
 }
 
-static void marshalSerializeValue(ByteArray* bytes, Value value) {
+void marshalSerializeValue(Marshaler* marshaler, ByteArray* bytes, Value value) {
 	if (IS_NIL(value)) {
 		marshalSerializeByte(bytes, MARSHAL_TYPE_NIL);
 	}
@@ -146,7 +152,7 @@ static void marshalSerializeValue(ByteArray* bytes, Value value) {
 	}
 	else if (IS_FUNCTION(value)) {
 		marshalSerializeByte(bytes, MARSHAL_TYPE_FUNCTION);
-		marshalSerializeFunction(bytes, AS_FUNCTION(value));
+		marshalSerializeFunction(marshaler, bytes, AS_FUNCTION(value));
 	}
 	else {
 		fprintf(stderr, "Unsupported value type for serialization.\n");
@@ -154,7 +160,7 @@ static void marshalSerializeValue(ByteArray* bytes, Value value) {
 	}
 }
 
-static void marshalSerializeModule(ByteArray* bytes, ObjModule* module) {
+static void marshalSerializeModule(Marshaler* marshaler, ByteArray* bytes, ObjModule* module) {
 	ObjFunction* function = module->closure->function;
 	marshalSerializeString(bytes, module->path);
 
@@ -175,7 +181,7 @@ static void marshalSerializeModule(ByteArray* bytes, ObjModule* module) {
 			marshalSerializeInt(bytes, (uint32_t)entry->value);
 		}
 	}
-	marshalSerializeFunction(bytes, function);
+	marshalSerializeFunction(marshaler, bytes, function);
 }
 
 void marshalDump(Marshaler* marshaler, ObjModule* module) {
@@ -190,7 +196,7 @@ void marshalDump(Marshaler* marshaler, ObjModule* module) {
 	marshaler->bytes = (ByteArray*)malloc(sizeof(ByteArray));
 	ByteArrayInit(marshaler->bytes);
 	ABORT_IFNULL(marshaler->bytes, "Failed to allocate memory for byte streams to perform marshal serialization.\n");
-	marshalSerializeModule(marshaler->bytes, marshaler->module);
+	marshalSerializeModule(marshaler, marshaler->bytes, marshaler->module);
 
 	fwrite(marshaler->bytes->elements, sizeof(uint8_t), marshaler->bytes->count, file);
 	fclose(file);
@@ -262,6 +268,13 @@ static ObjFunction* marshalDeserializeFunction(Marshaler* marshaler) {
 	for (uint32_t i = 0; i < codeCount; i++) {
 		uint8_t code = marshalDeserializeByte(marshaler);
 		writeChunk(marshaler->vm, &function->chunk, code, 0);
+	}
+
+	if (marshaler->vm->config.marshalLineInfo) {
+		for (uint32_t i = 0; i < codeCount; i++) {
+			uint16_t line = marshalDeserializeShort(marshaler);
+			function->chunk.lines[i] = (int)line;
+		}
 	}
 
 	if (marshaler->vm->config.debugCode) {

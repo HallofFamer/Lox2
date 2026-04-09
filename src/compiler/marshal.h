@@ -25,7 +25,7 @@ struct Marshaler {
 
 Marshaler* newMarshaler(VM* vm);
 void freeMarshaler(Marshaler* marshaler);
-void marshalSerializeValue(ByteArray* bytes, Value value);
+void marshalSerializeValue(Marshaler* marshaler, ByteArray* bytes, Value value);
 Value marshalDeserializeValue(Marshaler* marshaler);
 void marshalDump(Marshaler* marshaler, ObjModule* module);
 bool marshalLoad(Marshaler* marshaler, ObjModule* module);
