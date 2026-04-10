@@ -16,18 +16,18 @@ typedef enum {
 	MARSHAL_TYPE_END
 } MarshalType;
 
-struct Marshaler {
+struct Marshaller {
 	VM* vm;
 	ObjModule* module;
 	ByteArray* bytes;
 	int offset;
 };
 
-Marshaler* newMarshaler(VM* vm);
-void freeMarshaler(Marshaler* marshaler);
-void marshalSerializeValue(Marshaler* marshaler, ByteArray* bytes, Value value);
-Value marshalDeserializeValue(Marshaler* marshaler);
-void marshalDump(Marshaler* marshaler, ObjModule* module);
-bool marshalLoad(Marshaler* marshaler, ObjModule* module);
+Marshaller* newMarshaller(VM* vm);
+void freeMarshaller(Marshaller* marshaller);
+void marshalSerializeValue(Marshaller* marshaller, ByteArray* bytes, Value value);
+Value marshalDeserializeValue(Marshaller* marshaller);
+void marshalDump(Marshaller* marshaller, ObjModule* module);
+bool marshalLoad(Marshaller* marshaller, ObjModule* module);
 
 #endif // !clox_marshal_h

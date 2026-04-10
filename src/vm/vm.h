@@ -114,7 +114,7 @@ struct VM {
     TypeTable* typetab;
     TypeInfoArray* tempTypes;
     Compiler* compiler;
-	Marshaler* marshaler;
+	Marshaller* marshaller;
     GC* gc;
 
     int behaviorCount;
