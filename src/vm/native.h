@@ -51,6 +51,7 @@ void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type
 void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bool isAsync, NativeMethod method, ...);
 void defineNativeInterceptor(VM* vm, ObjClass* klass, InterceptorType type, int arity, NativeMethod method, ...);
 ObjClass* defineNativeTrait(VM* vm, const char* name);
+ObjClass* defineNativeGenericTrait(VM* vm, const char* name, int numParams, ...);
 ObjNamespace* defineNativeNamespace(VM* vm, const char* name, ObjNamespace* enclosing);
 ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass);
 TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType, int numParams, ...);

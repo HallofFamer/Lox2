@@ -212,6 +212,10 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
         TypeInfoArrayAdd(vm->tempTypes, (TypeInfo*)methodType->declaredType);
     }
     va_end(args);
+
+    if (isInitializer && behaviorType->formalTypeParams->count > 0) {
+        nativeMethod->arity += behaviorType->formalTypeParams->count;
+    }
 }
 
 void defineNativeInterceptor(VM* vm, ObjClass* klass, InterceptorType type, int arity, NativeMethod method, ...) {
@@ -270,6 +274,20 @@ ObjClass* defineNativeTrait(VM* vm, const char* name) {
     pop(vm);
     typeTableInsertBehavior(vm->typetab, TYPE_CATEGORY_TRAIT, traitName, nativeTrait->fullName, NULL);
     return nativeTrait;
+}
+
+ObjClass* defineNativeGenericTrait(VM* vm, const char* name, int numParams, ...) {
+	ObjClass* trait = defineNativeTrait(vm, name);
+    BehaviorTypeInfo* traitName = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, trait->fullName));
+    va_list args;
+    va_start(args, numParams);
+
+    for (int i = 0; i < numParams; i++) {
+        TypeInfo* formalType = va_arg(args, TypeInfo*);
+        TypeInfoArrayAdd(traitName->formalTypeParams, formalType);
+    }
+    va_end(args);
+    return trait;
 }
 
 ObjNamespace* defineNativeNamespace(VM* vm, const char* name, ObjNamespace* enclosing) {

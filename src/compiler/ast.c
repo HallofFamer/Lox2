@@ -598,7 +598,7 @@ static void astOutputDeclClass(Ast* ast, int indentLevel) {
 
 static void astOutputDeclField(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    char* mutable = ast->attribute.isMutable ? "val " : "var ";
+    char* mutable = ast->attribute.isMutable ? "var " : "val ";
     char* name = tokenToCString(ast->token);
     printf("fieldDecl %s%s\n", mutable, name);
 

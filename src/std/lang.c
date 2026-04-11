@@ -2105,8 +2105,8 @@ void registerLangPackage(VM* vm) {
     vm->floatClass = defineNativeClass(vm, "Float");
 
     TypeInfo* elementType = declareNativeTypeParameter(vm, "E");
-    ObjClass* iterableTrait = defineNativeGenericClass(vm, "TIterable", 1, elementType);
-    ObjClass* iteratorTrait = defineNativeGenericClass(vm, "TIterator", 1, elementType);
+    ObjClass* iterableTrait = defineNativeGenericTrait(vm, "TIterable", 1, elementType);
+    ObjClass* iteratorTrait = defineNativeGenericTrait(vm, "TIterator", 1, elementType);
     vm->iteratorClass = defineNativeGenericClass(vm, "Iterator", 1, elementType);
     vm->stringClass = defineNativeClass(vm, "String");
     ObjClass* stringIteratorClass = defineNativeGenericClass(vm, "StringIterator", 1, elementType);
