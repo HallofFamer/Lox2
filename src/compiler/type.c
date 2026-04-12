@@ -1053,10 +1053,10 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (strcmp(type2->shortName->chars, "Object") == 0) return true;
     if (IS_ALIAS_TYPE(type) || IS_ALIAS_TYPE(type2)) return isSubtypeOfType(getAliasTargetType(type), getAliasTargetType(type2));
 
+	if (IS_PLACEHOLDER_TYPE(type) || IS_PLACEHOLDER_TYPE(type2)) return true;
     if (IS_CALLABLE_TYPE(type)) {
         return isCallableSubtypeOfType(AS_CALLABLE_TYPE(type), type2);
     } 
-
     if (IS_GENERIC_TYPE(type)) {
         return isGenericSubtypeOfType(AS_GENERIC_TYPE(type), type2);
     }

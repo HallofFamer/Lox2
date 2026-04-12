@@ -162,6 +162,7 @@ void marshalSerializeValue(Marshaller* marshaller, ByteArray* bytes, Value value
 
 static void marshalSerializeModule(Marshaller* marshaller, ByteArray* bytes, ObjModule* module) {
 	ObjFunction* function = module->closure->function;
+	marshalSerializeString(bytes, newString(marshaller->vm, marshaller->vm->config.version));
 	marshalSerializeString(bytes, module->path);
 
 	marshalSerializeInt(bytes, (uint32_t)module->valIndexes.count);
@@ -306,6 +307,12 @@ static Value marshalDeserializeValue(Marshaller* marshaller) {
 }
 
 static void marshalDeserializeModule(Marshaller* marshaller) {
+	ObjString* version = marshalDeserializeString(marshaller);
+	if (strcmp(version->chars, marshaller->vm->config.version) != 0) {
+		fprintf(stderr, "Version mismatch during marshal deserialization. Expected: v%s, but got: v%s.\n", marshaller->vm->config.version, version->chars);
+		exit(1);
+	}
+
 	ObjString* path = marshalDeserializeString(marshaller);
 	if (marshaller->module->path != path) {
 		fprintf(stderr, "Module path mismatch during marshal deserialization. Expected: %s, but got: %s.\n", marshaller->module->path->chars, path->chars);

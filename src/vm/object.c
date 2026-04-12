@@ -230,7 +230,6 @@ ObjModule* newModule(VM* vm, ObjString* path) {
     initIDMap(&module->varIndexes, module->obj.generation);
     initValueArray(&module->varFields, module->obj.generation);
 
-	loadNamespaceIntoModule(vm, vm->langNamespace, module);
     tableSet(vm, &vm->modules, path, NIL_VAL);
     return module;
 }

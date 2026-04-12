@@ -477,7 +477,14 @@ Value callReentrantMethod(VM* vm, Value receiver, Value callee, ...) {
 
     if (IS_CLOSURE(callee)) callReentrantClosure(vm, callee, argCount);
     else if (IS_BOUND_METHOD(callee)) callBoundMethod(vm, AS_BOUND_METHOD(callee), argCount);
-    else callNativeMethod(vm, AS_NATIVE_METHOD(callee)->method, argCount);
+    else {
+		if (!IS_NATIVE_METHOD(callee)) {
+			fprintf(stderr, "Attempting to call a non-callable value.\n");
+            printValue(callee);
+            exit(65);
+        }
+        callNativeMethod(vm, AS_NATIVE_METHOD(callee)->method, argCount);
+    }
     return pop(vm);
 }
 
@@ -1526,5 +1533,6 @@ InterpretResult interpret(VM* vm, const char* source) {
         pop(vm);
         marshalDump(vm->marshaller, vm->currentModule);
     }
+    loadNamespaceIntoModule(vm, vm->langNamespace, vm->currentModule);
     return runModule(vm, vm->currentModule, true);
 }
