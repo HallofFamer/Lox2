@@ -174,15 +174,20 @@ bool loadModule(VM* vm, ObjString* path) {
     ObjModule* lastModule = vm->currentModule;
     vm->currentModule = newModule(vm, path);
 
-    char* source = readFile(path->chars);
-    ObjFunction* function = compile(vm, source);
-    free(source);
-    if (function == NULL) return false;
-    push(vm, OBJ_VAL(function));
+    if (!marshalLoad(vm->marshaller, vm->currentModule)) {
+        char* source = readFile(path->chars);
+        ObjFunction* function = compile(vm, source);
+        free(source);
+        if (function == NULL) return false;
+        push(vm, OBJ_VAL(function));
 
-    vm->currentModule->closure = newClosure(vm, function);
-    pop(vm);
+        vm->currentModule->closure = newClosure(vm, function);
+        pop(vm);
+        marshalDump(vm->marshaller, vm->currentModule);
+    }
+
     InterpretResult result = runModule(vm, vm->currentModule, false);
+	if (result != INTERPRET_OK) return false;
     vm->currentModule = lastModule;
     return true;
 }

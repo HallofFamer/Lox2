@@ -70,7 +70,7 @@ static FunctionTypeChecker* getCurrentMethodTypeChecker(TypeChecker* typeChecker
 	if (typeChecker->currentFunction == NULL) return NULL;
     FunctionTypeChecker* functionTypeChecker = typeChecker->currentFunction;
     while (functionTypeChecker != NULL) {
-        if (functionTypeChecker->isMethod) {
+		if (functionTypeChecker->name.length > 0 && functionTypeChecker->name.start[0] != '{') {
             return functionTypeChecker;
         }
         functionTypeChecker = functionTypeChecker->enclosing;
@@ -229,7 +229,7 @@ static TypeInfo* getAstGenericDynamicType(TypeChecker* typeChecker, Ast* ast, Ty
 static void defineAstType(TypeChecker* typeChecker, Ast* ast, const char* name, SymbolItem* item) {
     ObjString* typeName = newStringPerma(typeChecker->vm, name);
     TypeInfo* type = getNativeType(typeChecker->vm, name);
-	ast->type = hasGenericParameters(type) ? getAstGenericDynamicType(typeChecker, ast, type) : type;
+    ast->type = type;
     if (item != NULL) item->type = ast->type;
 }
 
@@ -326,24 +326,25 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
     }
 }
 
-static void checkMethodSignatures(TypeChecker* typeChecker, CallableTypeInfo* subclassMethod, CallableTypeInfo* superclassMethod, TypeInfo* superclassType) {
+static void checkMethodSignatures(TypeChecker* typeChecker, MethodTypeInfo* method, CallableTypeInfo* superclassMethod, TypeInfo* superclassType) {
+	CallableTypeInfo* subclassMethod = method->declaredType;
     ObjString* className = createStringFromToken(typeChecker->vm, typeChecker->currentClass->name);
     if (!subclassMethod->attribute.isVoid && superclassMethod->attribute.isVoid) {
-        typeError(typeChecker, "Method %s::%s expects return type to be void.", className->chars, subclassMethod->baseType.shortName->chars);
+        typeError(typeChecker, "Method %s::%s expects return type to be void.", className->chars, method->baseType.shortName->chars);
     }
     else if (!isEqualType(subclassMethod->returnType, superclassMethod->returnType)) {
         typeError(typeChecker, "Method %s::%s expects return type to be an instance of %s but gets %s.", className->chars,
-            subclassMethod->baseType.shortName->chars, superclassMethod->returnType->shortName->chars, subclassMethod->returnType->shortName->chars);
+            method->baseType.shortName->chars, superclassMethod->returnType->shortName->chars, subclassMethod->returnType->shortName->chars);
     }
 
     if (subclassMethod->paramTypes->count != superclassMethod->paramTypes->count) {
         typeError(typeChecker, "Method %s::%s expects to receive %d arguments but gets %d.", className->chars,
-            subclassMethod->baseType.shortName->chars, superclassMethod->paramTypes->count, subclassMethod->paramTypes->count);
+            method->baseType.shortName->chars, superclassMethod->paramTypes->count, subclassMethod->paramTypes->count);
     }
     else {
         for (int i = 0; i < subclassMethod->paramTypes->count; i++) {
             if (!isEqualType(subclassMethod->paramTypes->elements[i], superclassMethod->paramTypes->elements[i])) {
-                typeError(typeChecker, "Method %s::%s expects argument %d to be %s but gets %s.", className->chars, subclassMethod->baseType.shortName->chars,
+                typeError(typeChecker, "Method %s::%s expects argument %d to be %s but gets %s.", className->chars, method->baseType.shortName->chars,
                     i + 1, superclassMethod->paramTypes->elements[i]->shortName->chars, subclassMethod->paramTypes->elements[i]->shortName->chars);
             }
         }
@@ -355,7 +356,7 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
     for (int i = 0; i < behaviorType->methods->capacity; i++) {
         TypeEntry* entry = &behaviorType->methods->entries[i];
         if (entry != NULL && entry->key != NULL) {
-			if (typeTableGet(subtype->methods, entry->key) != NULL) continue;
+			if ((entry->key == typeChecker->vm->initString) || typeTableGet(subtype->methods, entry->key) != NULL) continue;
             MethodTypeInfo* superMethodType = AS_METHOD_TYPE(entry->value);
             MethodTypeInfo* subMethodType = newMethodTypeInfo(i, superMethodType->baseType.shortName, superMethodType->declaredType->returnType, superMethodType->isClass, superMethodType->isInitializer);
             subMethodType->declaredType->attribute = superMethodType->declaredType->attribute;
@@ -392,7 +393,7 @@ static void checkInheritingSuperclass(TypeChecker* typeChecker, TypeInfo* supert
             if (IS_GENERIC_TYPE(supertype)) {
                 declaredSuperclassMethodType = instantiateGenericMethodType(typeChecker, supertype, (TypeInfo*)declaredSuperclassMethodType);
             }
-            checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, declaredSuperclassMethodType, supertype);
+            checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType), declaredSuperclassMethodType, supertype);
         }
     }
 
@@ -424,12 +425,12 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
                 if (IS_GENERIC_TYPE(supertype)) {
                     declaredTraitMethodType = instantiateGenericMethodType(typeChecker, supertype, (TypeInfo*)declaredTraitMethodType);
                 }
-                checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType)->declaredType, declaredTraitMethodType, supertype);
+                checkMethodSignatures(typeChecker, AS_METHOD_TYPE(subclassMethodType), declaredTraitMethodType, supertype);
             }
 
             TypeInfo* superclassMethodType = typeTableGet(superclassType->methods, methodEntry->key);
             if (superclassMethodType != NULL && superclassMethodType->shortName != typeChecker->vm->initString) {
-                checkMethodSignatures(typeChecker, methodType->declaredType, AS_METHOD_TYPE(superclassMethodType)->declaredType, supertype);
+                checkMethodSignatures(typeChecker, methodType, AS_METHOD_TYPE(superclassMethodType)->declaredType, supertype);
             }
         }
 
@@ -569,7 +570,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
         if (astNumChild(callee) > 0) {
             checkTypeParameters(typeChecker, callee, type);
 			Ast* typeArgs = astGetChild(callee, 0);
-			for (int i = 0; i < astNumChild(callee); i++) {
+			for (int i = 0; i < astNumChild(typeArgs); i++) {
                 Ast* typeArg = astGetChild(typeArgs, i);
                 TypeInfoArrayAdd(calleeType->actualTypeParams, typeArg->type);
             }

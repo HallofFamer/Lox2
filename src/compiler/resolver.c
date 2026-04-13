@@ -206,6 +206,19 @@ static SymbolItem* insertSymbol(Resolver* resolver, Token token, SymbolCategory 
     }
 }
 
+static void insertTypeParamSymbols(Resolver* resolver, ObjString* className) {
+    TypeInfo* behaviorType = typeTableGet(resolver->vm->typetab, className);
+    if (hasGenericParameters(behaviorType)) {
+        TypeInfo* typeType = getNativeType(resolver->vm, "Type");
+        BehaviorTypeInfo* genericBehaviorType = AS_BEHAVIOR_TYPE(behaviorType);
+        
+        for (int i = 0; i < genericBehaviorType->formalTypeParams->count; i++) {
+            TypeInfo* typeParam = genericBehaviorType->formalTypeParams->elements[i];
+            insertSymbol(resolver, syntheticToken(typeParam->shortName->chars), SYMBOL_CATEGORY_PLACEHOLDER, SYMBOL_STATE_ACCESSED, typeType, false);
+        }
+    }
+}
+
 static SymbolItem* findThis(Resolver* resolver) {
     ObjString* symbol = createStringFromToken(resolver->vm, resolver->thisVar);
     SymbolItem* item = symbolTableGet(resolver->currentSymtab, symbol);
@@ -1329,23 +1342,13 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
         Ast* alias = astGetChild(ast, 1);
         alias->symtab = _namespace->symtab;
         insertSymbol(resolver, alias->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        insertTypeParamSymbols(resolver, fullName);
         nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, alias->token), fullName);
     }
     else {
         shortName->symtab = _namespace->symtab;
         insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
-		TypeInfo* metaType = getTypeForSymbol(resolver, shortName->token, false, false);
-		ObjString* fullName = getClassNameFromMetaclass(resolver->vm, metaType->fullName);
-		TypeInfo* behaviorType = typeTableGet(resolver->vm->typetab, fullName);
-		if (hasGenericParameters(behaviorType)) {
-			TypeInfo* typeType = getNativeType(resolver->vm, "Type");
-			BehaviorTypeInfo* genericBehaviorType = AS_BEHAVIOR_TYPE(behaviorType);
-			for (int i = 0; i < genericBehaviorType->formalTypeParams->count; i++) {
-                TypeInfo* typeParam = genericBehaviorType->formalTypeParams->elements[i];
-                insertSymbol(resolver, syntheticToken(typeParam->shortName->chars), SYMBOL_CATEGORY_PLACEHOLDER, SYMBOL_STATE_ACCESSED, typeType, false);
-            }
-        }
-
+        insertTypeParamSymbols(resolver, fullName);
         nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, shortName->token), fullName);
     }
 }

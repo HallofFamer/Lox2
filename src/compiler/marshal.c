@@ -1,5 +1,4 @@
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -7,10 +6,11 @@
 
 #include "chunk.h"
 #include "marshal.h"
+#include "../common/os.h"
 #include "../vm/debug.h"
 
 static void initMarshaller(Marshaller* marshaller, VM* vm) {
-	marshaller->vm = vm;
+	marshaller->vm = vm;	
 	marshaller->module = NULL;
 	marshaller->bytes = NULL;
 	marshaller->offset = 0;
@@ -188,9 +188,9 @@ static void marshalSerializeModule(Marshaller* marshaller, ByteArray* bytes, Obj
 void marshalDump(Marshaller* marshaller, ObjModule* module) {
 	if (!marshaller->vm->config.marshalEnabled || module->path->length == 0) return;
 	char fileName[UINT8_COUNT];
-	sprintf_s(fileName, UINT8_COUNT, "%s%s", module->path->chars, "o");
+	sprintf_s(fileName, UINT8_COUNT, "%s%s%s", marshaller->vm->config.marshalOutputPath, module->path->chars, "o");
 	FILE* file;
-	fopen_s(&file, fileName, "wb");
+	fopen_p(&file, fileName, "wb");
 	ABORT_IFNULL(file, "Failed to open file \"%s\" for marshal serialization.\n", fileName);
 
 	marshaller->module = module;
@@ -353,7 +353,7 @@ static bool marshalSourceFileModified(const char* sourceFilePath, const char* co
 bool marshalLoad(Marshaller* marshaller, ObjModule* module) {
 	if (!marshaller->vm->config.marshalEnabled || module->path->length == 0) return false;
 	char fileName[UINT8_COUNT];
-	sprintf_s(fileName, UINT8_COUNT, "%s%s", module->path->chars, "o");
+	sprintf_s(fileName, UINT8_COUNT, "%s%s%s", marshaller->vm->config.marshalOutputPath, module->path->chars, "o");
 	if (marshaller->vm->config.marshalFileWatch && marshalSourceFileModified(module->path->chars, fileName)) {
 		return false;
 	}

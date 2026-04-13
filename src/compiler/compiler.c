@@ -263,6 +263,7 @@ static void initCompiler(VM* vm, Compiler* compiler, Compiler* enclosing, Compil
         compiler->currentLoop = enclosing->currentLoop;
         compiler->currentSwitch = enclosing->currentSwitch;
         compiler->currentTry = enclosing->currentTry;
+        compiler->currentToken = enclosing->currentToken;
     }
 
     Local* local = &compiler->locals[compiler->localCount++];
@@ -335,6 +336,7 @@ static ObjString* identifierName(Compiler* compiler, uint8_t arg) {
 }
 
 static SymbolItem* findSymbolItemByToken(Compiler* compiler, SymbolTable* symtab, Token token, SymbolScope* scope) {
+    if (symtab == NULL) return NULL;
     ObjString* name = copyStringPerma(compiler->vm, token.start, token.length);
     SymbolItem* item = symbolTableGet(symtab, name);
     if (item != NULL) {
@@ -342,6 +344,17 @@ static SymbolItem* findSymbolItemByToken(Compiler* compiler, SymbolTable* symtab
         return item;
     }
     return findSymbolItemByToken(compiler, symtab->parent, token, scope);
+}
+
+static TypeInfo* findClassTypeWithInitializer(Compiler* compiler, TypeInfo* type) {
+    if (type == NULL) return NULL;
+	TypeInfo* initBaseType = getInnerBaseType(type);
+    if (!IS_BEHAVIOR_TYPE(initBaseType)) return NULL;
+
+	BehaviorTypeInfo* initBehaviorType = AS_BEHAVIOR_TYPE(initBaseType);
+    TypeInfo* initMethodType = typeTableGet(initBehaviorType->methods, compiler->vm->initString);
+    if (initMethodType != NULL) return type;
+    return findClassTypeWithInitializer(compiler, initBehaviorType->superclassType);
 }
 
 static int findLocal(Compiler* compiler, Token* name) {
@@ -504,13 +517,19 @@ static void getTypeParameter(Compiler* compiler, SymbolScope scope, Token token)
         emitBytes(compiler, OP_GET_PROPERTY, index);
     }
     else {
-        emitBytes(compiler, OP_GET_LOCAL, (uint8_t)findLocal(compiler, &token));
+        int index = findLocal(compiler, &token);
+        if (index == -1) emitByte(compiler, OP_NIL);
+        else emitBytes(compiler, OP_GET_LOCAL, (uint8_t)index);
     }
 }
 
 static void getVariable(Compiler* compiler, SymbolTable* symtab, Token token) {
     SymbolScope scope;
     SymbolItem* item = findSymbolItemByToken(compiler, symtab, token, &scope);
+    if (item == NULL) {
+        compileError(compiler, "Undefined variable '%.*s'.", token.length, token.start);
+        return;
+	}
 
     switch (item->category) {
         case SYMBOL_CATEGORY_LOCAL:
@@ -593,11 +612,9 @@ static int typeArgumentsAtInvocation(Compiler* compiler, Ast* ast) {
     return ast->children->count;
 }
 
-static int typeArgumentsAtSuper(Compiler* compiler, Ast* ast, ObjString* className) {
-    BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, className));
-
-    if (hasGenericParameters(behaviorType->superclassType)) {
-        TypeInfoArray* typeArgs = getTypeParameters(behaviorType->superclassType);
+static int typeArgumentsAtInit(Compiler* compiler, Ast* ast, TypeInfo* type) {
+    if (hasGenericParameters(type)) {
+        TypeInfoArray* typeArgs = getTypeParameters(type);
         for (int i = 0; i < typeArgs->count; i++) {
             TypeInfo* typeArg = typeArgs->elements[i];
             Token typeArgToken = syntheticToken(typeArg->shortName->chars);
@@ -608,19 +625,13 @@ static int typeArgumentsAtSuper(Compiler* compiler, Ast* ast, ObjString* classNa
     return 0;
 }
 
-static int typeArgumentsAtSuperCall(Compiler* compiler, Ast* ast) {
-    TypeInfo* rawType = getInnerBaseType(ast->type);
-	ObjString* className = getClassNameFromMetaclass(compiler->vm, rawType->fullName);
-    if (!IS_BEHAVIOR_TYPE(rawType)) return 0;
-	return typeArgumentsAtSuper(compiler, ast, className);
-}
-
 static int typeArgumentsAtSuperInit(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
     if (classItem == NULL) return 0;
-	ObjString* superclassName = getClassNameFromMetaclass(compiler->vm, classItem->type->fullName);
-    return typeArgumentsAtSuper(compiler, ast, superclassName);
+	ObjString* classFullName = getClassNameFromMetaclass(compiler->vm, classItem->type->fullName);
+    TypeInfo* classType = typeTableGet(compiler->vm->typetab, classFullName);
+    return typeArgumentsAtInit(compiler, ast, AS_BEHAVIOR_TYPE(classType)->superclassType);
 }
 
 static void block(Compiler* compiler, Ast* ast) {
@@ -798,7 +809,15 @@ static void compileCall(Compiler* compiler, Ast* ast) {
         typeArgCount = typeArgumentsAtInvocation(compiler, typeArgs);
     }
     else if (callee->type != NULL){
-        typeArgCount = typeArgumentsAtSuperCall(compiler, callee);
+        if (IS_BEHAVIOR_TYPE(callee->type)) {
+            TypeInfo* classType = typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, callee->type->fullName));			
+            TypeInfo* initClassType = findClassTypeWithInitializer(compiler, classType);
+            typeArgCount = typeArgumentsAtInit(compiler, ast, initClassType);
+        }
+        else if (IS_ALIAS_TYPE(callee->type)) {
+			TypeInfo* targetType = getAliasTargetType(callee->type);
+            typeArgCount = typeArgumentsAtInit(compiler, ast, targetType);
+        }
     }
 
     Ast* args = astGetChild(ast, 1);
@@ -853,7 +872,7 @@ static void compileInterpolation(Compiler* compiler, Ast* ast) {
 
         compileChild(compiler, exprs, count);
         expr = astGetChild(exprs, count);
-        if (expr->type == NULL || !isSubtypeOfType(expr->type, getNativeType(compiler->vm, "String"))) {
+        if (expr->type == NULL || IS_PLACEHOLDER_TYPE(expr->type) || !isSubtypeOfType(expr->type, getNativeType(compiler->vm, "String"))) {
             invokeMethod(compiler, 0, "toString", 8);
         }
 

@@ -535,7 +535,6 @@ static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) {
     else if (check(parser, TOKEN_SYMBOL_LESS)) {
         int index = parser->index;
         Token current = parser->current;
-        Token previous2 = parser->tokens->elements[index - 2];
         int genericDepth = 1;
 
         advance(parser);
@@ -931,7 +930,7 @@ static Ast* methods(Parser* parser, Token* name) {
         if (match(parser, TOKEN_SYMBOL_CLASS)) isClass = true;
         if (match(parser, TOKEN_SYMBOL_VOID)) isVoid = true;
 
-        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER) || (check(parser, TOKEN_SYMBOL_IDENTIFIER) && tokenIsOperator(nextToken(parser)) && checkNextN(parser, 2, TOKEN_SYMBOL_LEFT_PAREN))) {
+        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER) || (check(parser, TOKEN_SYMBOL_IDENTIFIER) && tokenIsOperator(nextToken(parser)) && (checkNextN(parser, 2, TOKEN_SYMBOL_LEFT_PAREN) || checkNextN(parser, 3, TOKEN_SYMBOL_LEFT_PAREN)))) {
             hasReturnType = true;
             returnType = behaviorType(parser);
         }
@@ -1029,7 +1028,6 @@ static Ast* super_(Parser* parser, Token token, bool canAssign) {
     if (check(parser, TOKEN_SYMBOL_LESS)) {
         int index = parser->index;
         Token current = parser->current;
-        Token previous2 = parser->tokens->elements[index - 2];
         int genericDepth = 1;
 
         advance(parser);
@@ -1580,16 +1578,47 @@ static bool matchGenericFunDeclaration(Parser* parser, bool* isAsync, bool* hasR
     int index = parser->index;
     Token current = parser->current;
     advance(parser);
+
+    do {
+        advance(parser);
+        if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && currentTokenType(parser) != TOKEN_SYMBOL_VOID) {
+            return resetIndex(parser, index, current, false);
+        }
+        else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
+            return resetIndex(parser, index, current, false);
+        }
+    } while (match(parser, TOKEN_SYMBOL_COMMA));
+
     advance(parser);
+    if (currentTokenType(parser) != TOKEN_SYMBOL_GREATER) return resetIndex(parser, index, current, false);
+    
+    advance(parser);
+	if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER) return resetIndex(parser, index, current, false);
 
-    if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && currentTokenType(parser) != TOKEN_SYMBOL_VOID) {
-        return resetIndex(parser, index, current, false);
-    }
-    else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
-        return resetIndex(parser, index, current, false);
+    advance(parser); 
+    if (currentTokenType(parser) != TOKEN_SYMBOL_LEFT_PAREN) return resetIndex(parser, index, current, false);
+    
+	if (nextTokenType(parser) == TOKEN_SYMBOL_RIGHT_PAREN) {
+        *hasReturnType = true;
+        return resetIndex(parser, index, current, true);
     }
 
-    *hasReturnType = true;
+    do {
+        advance(parser);
+        if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && currentTokenType(parser) != TOKEN_SYMBOL_VOID) {
+            return resetIndex(parser, index, current, false);
+        }
+        else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
+            return resetIndex(parser, index, current, false);
+        }
+    } while (match(parser, TOKEN_SYMBOL_COMMA));
+
+    advance(parser);
+    if (currentTokenType(parser) != TOKEN_SYMBOL_RIGHT_PAREN) return resetIndex(parser, index, current, false);
+
+    advance(parser);
+    if (currentTokenType(parser) != TOKEN_SYMBOL_LEFT_BRACKET) return resetIndex(parser, index, current, false);
+
     return resetIndex(parser, index, current, true);
 }
 
