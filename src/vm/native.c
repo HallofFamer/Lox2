@@ -7,6 +7,7 @@
 #include "memory.h"
 #include "native.h"
 #include "string.h"
+#include "../common/os.h"
 
 LOX_FUNCTION(assert) {
     ASSERT_ARG_COUNT("assert(expression, message)", 2);

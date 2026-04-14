@@ -10,12 +10,12 @@
 
 #define LOX_FUNCTION(name) static Value name##NativeFunction(VM* vm, int argCount, Value* args)
 #define LOX_METHOD(className, name) static Value name##NativeMethodFor##className(VM* vm, Value receiver, int argCount, Value* args)
-#define DEF_FUNCTION(name, returnType, arity, ...) defineNativeFunction(vm, #name, arity, false, returnType, name##NativeFunction, __VA_ARGS__)
-#define DEF_FUNCTION_ASYNC(name, returnType, arity, ...) defineNativeFunction(vm, #name, arity, true, returnType, name##NativeFunction, __VA_ARGS__)
+#define DEF_FUNCTION(name, returnType, arity, ...) defineNativeFunction(vm, #name, arity, false, returnType, name##NativeFunction, ##__VA_ARGS__)
+#define DEF_FUNCTION_ASYNC(name, returnType, arity, ...) defineNativeFunction(vm, #name, arity, true, returnType, name##NativeFunction, ##__VA_ARGS__)
 #define DEF_FIELD(klass, name, type, isMutable, defaultValue) defineNativeField(vm, klass, #name, getNativeType(vm, #type), isMutable, defaultValue)
-#define DEF_METHOD(klass, className, name, arity, ...) defineNativeMethod(vm, klass, #name, arity, false, name##NativeMethodFor##className, __VA_ARGS__)
-#define DEF_METHOD_ASYNC(klass, className, name, arity, ...) defineNativeMethod(vm, klass, #name, arity, true, name##NativeMethodFor##className, __VA_ARGS__)
-#define DEF_OPERATOR(klass, className, symbol, name, arity, ...) defineNativeMethod(vm, klass, #symbol, arity, false, name##NativeMethodFor##className, __VA_ARGS__)
+#define DEF_METHOD(klass, className, name, arity, ...) defineNativeMethod(vm, klass, #name, arity, false, name##NativeMethodFor##className, ##__VA_ARGS__)
+#define DEF_METHOD_ASYNC(klass, className, name, arity, ...) defineNativeMethod(vm, klass, #name, arity, true, name##NativeMethodFor##className, ##__VA_ARGS__)
+#define DEF_OPERATOR(klass, className, symbol, name, arity, ...) defineNativeMethod(vm, klass, #symbol, arity, false, name##NativeMethodFor##className, ##__VA_ARGS__)
 #define DEF_INTERCEPTOR(klass, className, type, name, arity, ...) \
   do { \
        defineNativeMethod(vm, klass, #name, arity, false, name##NativeMethodFor##className, __VA_ARGS__); \

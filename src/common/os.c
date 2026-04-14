@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <curl/curl.h>
 
 #include "os.h"
@@ -7,6 +8,26 @@
 #ifdef _WIN32
     // define windows only functions.
     #pragma comment(lib,"WS2_32")
+
+char* dirname(char* path) { 
+    if (path == NULL || *path == '\0') return ".";
+
+    char* lastSlash = strpbrk(path, "/\\");
+    char* temp = lastSlash;
+    while (temp) {
+        lastSlash = temp;
+        temp = strpbrk(lastSlash + 1, "/\\");
+    }
+
+    if (!lastSlash) return ".";
+    if (lastSlash == path) {
+        *(lastSlash + 1) = '\0';
+        return path;
+    }
+
+    *lastSlash = '\0';
+    return path;
+}
 #else
     // define non-windows functions.
 static void strrev(char str[]) {
@@ -48,6 +69,41 @@ void _itoa_s(int value, char buffer[], size_t bufsz, int radix) {
     strrev(buffer);
 }
 #endif
+
+int mkdir_p(const char* path) {
+    char buffer[256];
+    char* p = NULL;
+    size_t len;
+
+    snprintf(buffer, sizeof(buffer), "%s", path);
+    len = strlen(buffer);
+    if (buffer[len - 1] == '/') buffer[len - 1] = 0;
+
+    for (p = buffer + 1; *p; p++) {
+        if (*p == '/') {
+            *p = 0;
+            int result = _mkdir(buffer);
+			if (result != 0 && errno != EEXIST) return result;
+            *p = '/';
+        }
+    }
+    return _mkdir(buffer);
+}
+
+int fopen_p(FILE** file, const char* path, const char* mode) {
+    char dirPath[256];
+
+    strcpy_s(dirPath, sizeof(dirPath), path);
+    char* lastSlash = strrchr(dirPath, '/');
+    if (lastSlash) *lastSlash = '\0';
+
+    struct stat dirStat;
+    if (stat(dirPath, &dirStat) == -1) {
+        int result = mkdir_p(dirPath);
+        if (result != 0) return result;
+    }
+	return fopen_s(file, path, mode);
+}
 
 void runAtStartup() {
 #ifdef _WIN32

@@ -2,6 +2,8 @@
 #ifndef clox_os_h
 #define clox_os_h
 
+#include <stdio.h>
+
 #include "common.h"
 
 #ifdef _WIN32
@@ -9,6 +11,8 @@
 #include <io.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+
+char* dirname(char* path);
 #else
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -37,6 +41,8 @@
 void _itoa_s(int value, char buffer[], size_t bufsz, int radix);
 #endif
 
+int mkdir_p(const char* path);
+int fopen_p(FILE** file, const char* path, const char* mode);
 void runAtStartup();
 void runAtExit(void);
 

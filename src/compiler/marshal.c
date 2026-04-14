@@ -164,6 +164,7 @@ static void marshalSerializeModule(Marshaller* marshaller, ByteArray* bytes, Obj
 	ObjFunction* function = module->closure->function;
 	marshalSerializeString(bytes, newString(marshaller->vm, marshaller->vm->config.version));
 	marshalSerializeString(bytes, module->path);
+	marshalSerializeByte(bytes, (uint8_t)marshaller->vm->config.marshalLineInfo);
 
 	marshalSerializeInt(bytes, (uint32_t)module->valIndexes.count);
 	for (int i = 0; i < module->valIndexes.capacity; i++) {
@@ -285,7 +286,7 @@ static ObjFunction* marshalDeserializeFunction(Marshaller* marshaller) {
 	return function;
 }
 
-static Value marshalDeserializeValue(Marshaller* marshaller) {
+Value marshalDeserializeValue(Marshaller* marshaller) {
 	uint8_t type = marshalDeserializeByte(marshaller);
 	switch (type) {
 	    case MARSHAL_TYPE_NIL:
@@ -314,8 +315,15 @@ static void marshalDeserializeModule(Marshaller* marshaller) {
 	}
 
 	ObjString* path = marshalDeserializeString(marshaller);
-	if (marshaller->module->path != path) {
+	if (path != marshaller->module->path) {
 		fprintf(stderr, "Module path mismatch during marshal deserialization. Expected: %s, but got: %s.\n", marshaller->module->path->chars, path->chars);
+		exit(1);
+	}
+
+	int hasLineInfo = marshalDeserializeByte(marshaller);
+	if (hasLineInfo != marshaller->vm->config.marshalLineInfo) {
+		fprintf(stderr, "Marshal line info configuration mismatch during deserialization. Expected: %s, but got: %s.\n", 
+			marshaller->vm->config.marshalLineInfo ? "1(enabled)" : "0(disabled)", hasLineInfo ? "1(enabled)" : "0(disabled)");
 		exit(1);
 	}
 
