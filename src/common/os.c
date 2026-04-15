@@ -83,7 +83,7 @@ int mkdir_p(const char* path) {
         if (*p == '/') {
             *p = 0;
             int result = _mkdir(buffer);
-			if (result != 0 && errno != EEXIST) return result;
+			if (result != 0) return result;
             *p = '/';
         }
     }

@@ -26,6 +26,7 @@ char* dirname(char* path);
 #define sscanf_s(buffer,format,...) sscanf(buffer,format,__VA_ARGS__)
 #define sprintf_s(buffer,bufsz,format,...) sprintf(buffer,format,__VA_ARGS__)
 #define snprintf_s(buffer,bufsz,format,...) snprintf(buffer,format,__VA_ARGS__)
+#define strcpy_s(dest,destsz,src) strcpy(dest,src)
 #define strtok_s(str,delim,ctx) strtok(str,delim)
 #define _chmod(path,mode) chmod(path,mode)
 #define _getcwd(buffer,size) getcwd(buffer,size)

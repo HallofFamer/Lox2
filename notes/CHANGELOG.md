@@ -1,11 +1,17 @@
 # Change Log
 
-### Lox2 v2.1.3(current version)
+### Lox2 v2.2.0(current version)
+- Enhanced type system with basic support for generics/parametric polymorphism.
+- `type` keyword used as declaration of type alias, useful for complex callable or generic types.
+- Capability of serializing compiled bytecodes into disk as .loxo files, skipping compilation for faster startup time.
+- Refactor classes in the existing standard library to use generics(in `clox.std` parent package), such as `Array<E>` and `Promise<T>`.
+
+### Lox2 v2.1.3(last version)
 - Add type checking to immediate function calls with anonymous functions and lambda expressions as parameters.
 - Modify parser to allow callable type annotations without parameters such as `Int fun()` and `void fun()`.
 - Fix incorrect type annotations for enumeration methods on class `Dictionary` in package `clox.std.collection`.
 
-### Lox2 v2.1.2(last version)
+### Lox2 v2.1.2
 - Establish `Object` as top type for all types including function and metaclass types.
 - Update type.c to print function parameters properly if the first parameter has dynamic type.
 - Fix a minor bug in lexer which used to display incorrect line number when generating lexer error.
