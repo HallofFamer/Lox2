@@ -375,7 +375,6 @@ char* createAliasTypeName(AliasTypeInfo* aliasType) {
             size_t paramTypeLength = strlen(paramTypeName);
             memcpy(aliasName + length, paramTypeName, paramTypeLength);
             length += paramTypeLength;
-            if (isTempType(paramType)) free(paramTypeName);
         }
         else {
             memcpy(aliasName + length, "dynamic", 7);

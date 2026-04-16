@@ -166,9 +166,13 @@ static int parseConfiguration(void* data, const char* section, const char* name,
 }
 
 static void initConfiguration(VM* vm) {
+	char* initPath = "lox2.ini";
+    struct stat initStat;
+    ABORT_IFTRUE(stat(initPath, &initStat) == -1, "Can't load \"lox2.ini\" configuration file...\n");
+
     Configuration config;
-    int iniParsed = ini_parse("lox2.ini", parseConfiguration, &config);
-    ABORT_IFTRUE(iniParsed < 0, "Can't load \"lox2.ini\" configuration file...\n");
+    int iniParsed = ini_parse(initPath, parseConfiguration, &config);
+    ABORT_IFTRUE(iniParsed < 0, "Error parsing \"lox2.ini\" configuration file...\n");
     vm->config = config;
 }
 
