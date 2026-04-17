@@ -168,7 +168,19 @@ static int parseConfiguration(void* data, const char* section, const char* name,
 static void initConfiguration(VM* vm) {
 	char* initPath = "lox2.ini";
     struct stat initStat;
-    ABORT_IFTRUE(stat(initPath, &initStat) == -1, "Can't load \"lox2.ini\" configuration file...\n");
+	if (stat(initPath, &initStat) == -1) {
+		char defaultPath[UINT8_COUNT];
+		char* defaultDir = getenv("LOX2_HOME");
+        if (defaultDir != NULL) {
+			sprintf_s(defaultPath, UINT8_COUNT, "%s/lox2.ini", defaultDir);
+            if (stat(defaultPath, &initStat) == -1) {
+                fprintf(stderr, "Warning: Could not find \"lox2.ini\" configuration file in the current directory or in lox2 home directory.\n");
+            }
+            else {
+                initPath = defaultPath;
+			}
+        }
+    }
 
     Configuration config;
     int iniParsed = ini_parse(initPath, parseConfiguration, &config);

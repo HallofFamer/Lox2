@@ -4,6 +4,11 @@ set(CMAKE_SYSTEM_VERSION 10.0 CACHE STRING "" FORCE)
 
 project(Lox2 C)
 
+# Export build directory to environment so subprocesses (custom commands/tests)
+# can discover repository build root. This works on both Windows and Linux.
+set(ENV{LOX2_HOME} "${CMAKE_CURRENT_LIST_DIR}")
+message(STATUS "LOX2_HOME=${CMAKE_CURRENT_LIST_DIR}")
+
 ################################################################################
 # Set target arch type if empty. Visual studio solution generator provides it.
 ################################################################################
@@ -350,7 +355,3 @@ if(MSVC)
 else ()
     target_link_libraries(${PROJECT_NAME} m)
 endif()
-
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_LIST_DIR}/lox2.ini $<TARGET_FILE_DIR:${PROJECT_NAME}>
-)
