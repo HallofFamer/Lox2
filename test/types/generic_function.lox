@@ -18,7 +18,6 @@ class Box<T> {
     }
 
     String toString() {
-        //return "Box<${T}>(${this.content})"
         return "Box(${this.content})"
     }
 }

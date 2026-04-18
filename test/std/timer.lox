@@ -8,10 +8,9 @@ val timer3 = Timer.timeout({ println("Timer3 finishes...") }, 500)
 println(timer.toString())
 println(timer2.toString())
 println(timer3.toString())
-println("")
 
 var count = 0
-println("Creating timers that run at certain interval...")
+println("\nCreating timers that run at certain interval...")
 val timer4 = Timer.interval({|timer| 
     count = count + 1
     println("Timer4 runs ${count} times...")

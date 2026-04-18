@@ -15,8 +15,8 @@ promise.then({|value|
            println("Second Promise fulfilled: ${value}")
            Promise({|fulfill, reject| Timer.timeout({ fulfill("How are you doing?") }, 1500) })
        })
-       .then({|value| 
-           println("Third Promise fulfilled: ${value}");
+       .then({|value|
+           println("Third Promise fulfilled: ${value}")
            Promise({|fulfill, reject| Timer.timeout({ fulfill("Goodbye.") }, 2000) })
        })
        .then({|value| println("Last Promise fulfilled: ${value}") })

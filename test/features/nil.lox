@@ -30,8 +30,8 @@ class Area {
  
 class Address { 
 
-    val Street street
-    val Area area
+    var Street street
+    var Area area
 
     __init__(){ 
         this.street = nil
