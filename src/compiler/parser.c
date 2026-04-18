@@ -1625,21 +1625,25 @@ static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnTyp
     else return false;
 }
 
+static bool matchFunDeclarationWithoutReturnType(Parser* parser) {
+    if (checkEither(parser, TOKEN_SYMBOL_FUN, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_IDENTIFIER)) {
+        advance(parser);
+		return true;
+    }
+    return false;
+}
+
 static bool matchFunDeclarationWithAsync(Parser* parser, bool* hasReturnType) {
-    if (check(parser, TOKEN_SYMBOL_FUN)) {
+    if (matchFunDeclarationWithoutReturnType(parser)) {
+		// If the declaration starts with 'async' and is followed by 'fun' or 'void' and an identifier, it's a valid async function declaration without a return type annotation. Set hasReturnType to false and return true.
         advance(parser);
         *hasReturnType = false;
         return true;
     }
-    else if (check(parser, TOKEN_SYMBOL_VOID)) {
-        *hasReturnType = false;
-        return true;
+    else {
+        // For all other cases, check if the declaration matches valid function declarations with return type annotations. This will correctly identify valid function declarations with return types while rejecting invalid declarations that don't match the previous patterns.
+        return matchFunDeclarationWithReturnType(parser, hasReturnType);
     }
-    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER)) {
-        *hasReturnType = true;
-        return true;
-    }
-    else return false;
 }
 
 static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
@@ -1651,16 +1655,18 @@ static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnTy
     */
 
     if (check(parser, TOKEN_SYMBOL_ASYNC)) {
+		// If the declaration starts with 'async', advance parser, set isAsync to true, and check if the declaration matches valid async function declarations.
         advance(parser);
         *isAsync = true;
         return matchFunDeclarationWithAsync(parser, hasReturnType);
     }
-    else if (checkEither(parser, TOKEN_SYMBOL_FUN, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_IDENTIFIER)) {
-        advance(parser);
+    else if (matchFunDeclarationWithoutReturnType(parser)) {
+		// If the declaration starts with 'fun' or 'void' followed by an identifier, it's a valid function declaration without a return type annotation. Set hasReturnType to false and return true.
         *hasReturnType = false;
         return true;
     }
     else {
+		// For all other cases, check if the declaration matches valid function declarations with return type annotations. This will correctly identify valid function declarations with return types while rejecting invalid declarations that don't match the previous patterns.
 		return matchFunDeclarationWithReturnType(parser, hasReturnType);
     }
 }

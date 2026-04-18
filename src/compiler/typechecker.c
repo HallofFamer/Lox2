@@ -117,6 +117,10 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
                 if (item != NULL && item->type != NULL) {
                     type = typeTableGet(typeChecker->vm->typetab, getClassNameFromMetaclass(typeChecker->vm, item->type->fullName));
                 }
+
+                if (type == NULL && typeChecker->vm->config.flagUndefinedType == 2) {
+					typeError(typeChecker, "Class '%s' is undefined.", shortName->chars);
+                }
             }
         }
     }

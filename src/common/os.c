@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -83,7 +84,7 @@ int mkdir_p(const char* path) {
         if (*p == '/') {
             *p = 0;
             int result = _mkdir(buffer);
-			if (result != 0) return result;
+			if (result != 0 && errno != EEXIST) return result;
             *p = '/';
         }
     }
@@ -98,7 +99,9 @@ int fopen_p(FILE** file, const char* path, const char* mode) {
     if (lastSlash) *lastSlash = '\0';
 
     struct stat dirStat;
-    if (stat(dirPath, &dirStat) == -1) {
+    int result = stat(dirPath, &dirStat);
+
+    if (result == -1) {
         int result = mkdir_p(dirPath);
         if (result != 0) return result;
     }

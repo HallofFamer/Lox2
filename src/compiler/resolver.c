@@ -147,6 +147,7 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
 }
 
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {
+	if (token.length == 0) return NULL;
     ObjString* shortName = createStringFromToken(resolver->vm, token);
     ObjString* originalName = shortName;
     if (isMetaclass && !checkFormalParam) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
@@ -176,6 +177,9 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
                         }
                         else type = item->type;
                     }
+
+                    if (resolver->vm->config.flagUndefinedType == 1) semanticWarning(resolver, "Type '%s' is undefined.", originalName->chars);
+                    else if (resolver->vm->config.flagUndefinedType == 2) semanticError(resolver, "Type '%s' is undefined.", originalName->chars);
                 }
             }
         }
@@ -322,7 +326,7 @@ static void checkUnusedImports(Resolver* resolver, int flag) {
         else if (entry->value->isImported && entry->value->state == SYMBOL_STATE_DEFINED) {
             if (flag == 1) semanticWarning(resolver, "Type '%s' is imported but never used.", entry->key->chars);
             else if (flag == 2) semanticError(resolver, "Type '%s' is imported but never used.", entry->key->chars);
-		}
+        }
     }
 }
 
