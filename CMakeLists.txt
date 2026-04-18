@@ -172,6 +172,8 @@ set(Source_Files__vm
     "src/vm/assert.h"
     "src/vm/class.c"
     "src/vm/class.h"
+    "src/vm/config.c"
+    "src/vm/config.h"
     "src/vm/date.c"
     "src/vm/date.h"
     "src/vm/debug.c"
@@ -355,3 +357,34 @@ if(MSVC)
 else ()
     target_link_libraries(${PROJECT_NAME} m)
 endif()
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_LIST_DIR}/lox2.ini $<TARGET_FILE_DIR:${PROJECT_NAME}>
+)
+
+
+if(WIN32)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_LIST_DIR}/lox2.ini $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+	
+    # On Windows, force the install prefix to the project directory so `cmake --install`
+    # does not default to protected system locations like "C:/Program Files (...)".
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}" CACHE PATH "Install path" FORCE)
+    message(STATUS "Windows detected: setting CMAKE_INSTALL_PREFIX to ${CMAKE_INSTALL_PREFIX}")
+else()
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_LIST_DIR}/lox2.ini $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+endif()
+
+# Install target: on Windows we rely on the target output directory
+# (e.g. <build>/x64/Release). For non-Windows platforms install to
+# ${CMAKE_INSTALL_PREFIX}/bin as usual.
+if(NOT WIN32)
+    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+endif()
+
+# Persist LOX2_HOME and add the build binary directory to the user PATH on Windows
+# at install time. These actions run when `cmake --install` is executed.
+install(SCRIPT "${CMAKE_CURRENT_LIST_DIR}/CMake/PostInstall.cmake")

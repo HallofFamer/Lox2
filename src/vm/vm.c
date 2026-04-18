@@ -17,7 +17,6 @@
 #include "variable.h"
 #include "vm.h"
 #include "../common/os.h"
-#include "../inc/ini.h"
 #include "../std/collection.h"
 #include "../std/io.h"
 #include "../std/lang.h"
@@ -87,114 +86,6 @@ char* readFile(const char* path) {
     buffer[bytesRead] = '\0';
     fclose(file);
     return buffer;
-}
-
-static int parseConfiguration(void* data, const char* section, const char* name, const char* value) {
-    Configuration* config = (Configuration*)data;
-#define HAS_CONFIG(s, n) strcmp(section, (s)) == 0 && strcmp(name, (n)) == 0
-    if (HAS_CONFIG("basic", "version")) {
-        config->version = _strdup(value);
-    }
-    else if (HAS_CONFIG("basic", "script")) {
-        config->script = _strdup(value);
-    }
-    else if (HAS_CONFIG("basic", "path")) {
-        config->path = _strdup(value);
-    }
-    else if (HAS_CONFIG("basic", "timezone")) {
-        config->timezone = _strdup(value);
-    }
-    else if (HAS_CONFIG("debug", "debugToken")) {
-        config->debugToken = (bool)atoi(value);
-    }
-    else if (HAS_CONFIG("debug", "debugAst")) {
-        config->debugAst = (bool)atoi(value);
-    }
-    else if (HAS_CONFIG("debug", "debugSymtab")) {
-        config->debugSymtab = (bool)atoi(value);
-    }
-    else if (HAS_CONFIG("debug", "debugTypetab")) {
-        config->debugTypetab = (bool)atoi(value);
-    }
-    else if (HAS_CONFIG("debug", "debugCode")) {
-        config->debugCode = (bool)atoi(value);
-    }
-    else if (HAS_CONFIG("flag", "flagUnusedImport")) {
-        config->flagUnusedImport = (uint8_t)atoi(value);
-    }
-    else if (HAS_CONFIG("flag", "flagUnusedVariable")) {
-        config->flagUnusedVariable = (uint8_t)atoi(value);
-    }
-    else if (HAS_CONFIG("flag", "flagMutableVariable")) {
-        config->flagMutableVariable = (uint8_t)atoi(value);
-    }
-    else if (HAS_CONFIG("flag", "flagUndefinedType")) {
-		config->flagUndefinedType = (uint8_t)atoi(value);
-    }
-    else if (HAS_CONFIG("gc", "gcType")) {
-        config->gcType = _strdup(value);
-    }
-    else if (HAS_CONFIG("gc", "gcTotalHeapSize")) {
-        config->gcTotalHeapSize = (size_t)atol(value);
-    }
-    else if (HAS_CONFIG("gc", "gcEdenHeapSize")) {
-        config->gcEdenHeapSize = (size_t)atol(value);
-    }
-    else if (HAS_CONFIG("gc", "gcYoungHeapSize")) {
-        config->gcYoungHeapSize = (size_t)atol(value);
-    }
-    else if (HAS_CONFIG("gc", "gcOldHeapSize")) {
-        config->gcOldHeapSize = (size_t)atol(value);
-    }
-    else if (HAS_CONFIG("marshal", "marshalEnabled")) {
-        config->marshalEnabled = (bool)atoi(value);
-    }
-    else if (HAS_CONFIG("marshal", "marshalFileWatch")) {
-        config->marshalFileWatch = (bool)atoi(value);
-    }
-    else if (HAS_CONFIG("marshal", "marshalLineInfo")) {
-        config->marshalLineInfo = (bool)atoi(value);
-    }
-    else if (HAS_CONFIG("marshal", "marshalOutputPath")) {
-        config->marshalOutputPath = _strdup(value);
-    }
-    else {
-        return 0;
-    }
-    return 1;
-#undef HAS_CONFIG
-}
-
-static void initConfiguration(VM* vm) {
-	char* initPath = "lox2.ini";
-    struct stat initStat;
-	if (stat(initPath, &initStat) == -1) {
-		char defaultPath[UINT8_COUNT];
-		char* defaultDir = getenv("LOX2_HOME");
-        if (defaultDir != NULL) {
-			sprintf_s(defaultPath, UINT8_COUNT, "%s/lox2.ini", defaultDir);
-            if (stat(defaultPath, &initStat) == -1) {
-                fprintf(stderr, "Warning: Could not find \"lox2.ini\" configuration file in the current directory or in lox2 home directory.\n");
-            }
-            else {
-                initPath = defaultPath;
-			}
-        }
-    }
-
-    Configuration config;
-    int iniParsed = ini_parse(initPath, parseConfiguration, &config);
-    ABORT_IFTRUE(iniParsed < 0, "Error parsing \"lox2.ini\" configuration file...\n");
-    vm->config = config;
-}
-
-static void freeConfiguration(Configuration* config) {
-    if (config->version != NULL) free((void*)config->version);
-    if (config->script != NULL) free((void*)config->script);
-    if (config->path != NULL) free((void*)config->path);
-    if (config->timezone != NULL) free((void*)config->timezone);
-    if (config->gcType != NULL) free((void*)config->gcType);
-    if (config->marshalOutputPath != NULL) free((void*)config->marshalOutputPath);
 }
 
 void initVM(VM* vm) {

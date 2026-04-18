@@ -2,6 +2,7 @@
 #ifndef clox_vm_h
 #define clox_vm_h
 
+#include "config.h"
 #include "exception.h"
 #include "object.h"
 #include "shape.h"
@@ -36,35 +37,6 @@ struct CallFrame {
     uint8_t handlerCount;
     ExceptionHandler handlerStack[UINT4_MAX];
 };
-
-typedef struct {
-    const char* version;
-    const char* script;
-    const char* path;
-    const char* timezone;
-
-    bool debugToken;
-    bool debugAst;
-    bool debugSymtab;
-    bool debugTypetab;
-    bool debugCode;
-
-    uint8_t flagUnusedImport;
-    uint8_t flagUnusedVariable;
-    uint8_t flagMutableVariable;
-    uint8_t flagUndefinedType;
-
-    const char* gcType;
-    size_t gcTotalHeapSize;
-    size_t gcEdenHeapSize;
-    size_t gcYoungHeapSize;
-    size_t gcOldHeapSize;
-
-	bool marshalEnabled;
-    bool marshalFileWatch;
-    bool marshalLineInfo;
-    const char* marshalOutputPath;
-} Configuration;
 
 struct VM {
     ObjClass* objectClass;
