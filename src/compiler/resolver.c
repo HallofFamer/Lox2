@@ -315,6 +315,17 @@ static void bindTraitTypes(Resolver* resolver, Token currentClass, Ast* ast) {
     }
 }
 
+static void checkUnusedImports(Resolver* resolver, int flag) {
+    for (int i = 0; i < resolver->currentSymtab->capacity; i++) {
+        SymbolEntry* entry = &resolver->currentSymtab->entries[i];
+        if (entry->key == NULL) continue;
+        else if (entry->value->isImported && entry->value->state == SYMBOL_STATE_DEFINED) {
+            if (flag == 1) semanticWarning(resolver, "Type '%s' is imported but never used.", entry->key->chars);
+            else if (flag == 2) semanticError(resolver, "Type '%s' is imported but never used.", entry->key->chars);
+		}
+    }
+}
+
 static void checkUnusedVariables(Resolver* resolver, int flag) {
     for (int i = 0; i < resolver->currentSymtab->capacity; i++) {
         SymbolEntry* entry = &resolver->currentSymtab->entries[i];
@@ -1341,13 +1352,15 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
     if (astNumChild(ast) > 1) {
         Ast* alias = astGetChild(ast, 1);
         alias->symtab = _namespace->symtab;
-        insertSymbol(resolver, alias->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        SymbolItem* item = insertSymbol(resolver, alias->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_DEFINED, type, false);
+        item->isImported = true;
         insertTypeParamSymbols(resolver, fullName);
         nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, alias->token), fullName);
     }
     else {
         shortName->symtab = _namespace->symtab;
-        insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        SymbolItem* item = insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_DEFINED, type, false);
+		item->isImported = true;
         insertTypeParamSymbols(resolver, fullName);
         nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, shortName->token), fullName);
     }
@@ -1619,6 +1632,7 @@ NameTable* resolve(Resolver* resolver, Ast* ast) {
     resolveAst(resolver, ast);
     endFunctionResolver(resolver);
 
+    checkUnusedImports(resolver, resolver->vm->config.flagUnusedImport);
     if (resolver->debugSymtab) {
         symbolTableOutput(resolver->rootSymtab);
         symbolTableOutput(resolver->vm->symtab);

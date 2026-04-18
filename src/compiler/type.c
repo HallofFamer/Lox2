@@ -768,7 +768,7 @@ static void typeTableOutputCategory(TypeCategory category) {
             printf("method");
             break;
         case TYPE_CATEGORY_PLACEHOLDER:
-            printf("formal");
+            printf("placeholder");
             break;
         case TYPE_CATEGORY_GENERIC:
             printf("generic");

@@ -1535,24 +1535,7 @@ static Ast* classDeclaration(Parser* parser) {
     return ast;
 }
 
-static bool matchAsyncFunDeclaration(Parser* parser, bool* hasReturnType) {
-    if (check(parser, TOKEN_SYMBOL_FUN)) {
-        advance(parser);
-        *hasReturnType = false;
-        return true;
-    }
-    else if (check(parser, TOKEN_SYMBOL_VOID)) {
-        *hasReturnType = false;
-        return true;
-    }
-    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER)) {
-        *hasReturnType = true;
-        return true;
-    }
-    else return false;
-}
-
-static bool matchHigherOrderFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
+static bool matchHigherOrderFunDeclaration(Parser* parser, bool* hasReturnType) {
     int index = parser->index;
     Token current = parser->current;
     advance(parser);
@@ -1574,7 +1557,7 @@ static bool matchHigherOrderFunDeclaration(Parser* parser, bool* isAsync, bool* 
     return resetIndex(parser, index, current, true);
 }
 
-static bool matchGenericFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
+static bool matchGenericFunDeclaration(Parser* parser, bool* hasReturnType) {
     int index = parser->index;
     Token current = parser->current;
     advance(parser);
@@ -1619,41 +1602,67 @@ static bool matchGenericFunDeclaration(Parser* parser, bool* isAsync, bool* hasR
     advance(parser);
     if (currentTokenType(parser) != TOKEN_SYMBOL_LEFT_BRACKET) return resetIndex(parser, index, current, false);
 
+	*hasReturnType = true;
     return resetIndex(parser, index, current, true);
 }
 
-static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
-    if (check(parser, TOKEN_SYMBOL_ASYNC)) {
-        advance(parser);
-        *isAsync = true;
-        return matchAsyncFunDeclaration(parser, hasReturnType);
-    }
-    else if (checkEither(parser, TOKEN_SYMBOL_FUN, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_IDENTIFIER)) {
-        advance(parser);
-        *isAsync = false;
-        *hasReturnType = false;
-        return true;
-    }
-    else if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) {
-        *isAsync = false;
+static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnType) {
+    if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         *hasReturnType = true;
         return true;
     }
     else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
-        *isAsync = false;
-        return matchHigherOrderFunDeclaration(parser, isAsync, hasReturnType);
+        return matchHigherOrderFunDeclaration(parser, hasReturnType);
     }
     else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) {
-        *isAsync = false;
         *hasReturnType = true;
         return true;
     }
     else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
-        *isAsync = false;
         *hasReturnType = true;
-        return matchGenericFunDeclaration(parser, isAsync, hasReturnType);
+        return matchGenericFunDeclaration(parser, hasReturnType);
     }
     else return false;
+}
+
+static bool matchFunDeclarationWithAsync(Parser* parser, bool* hasReturnType) {
+    if (check(parser, TOKEN_SYMBOL_FUN)) {
+        advance(parser);
+        *hasReturnType = false;
+        return true;
+    }
+    else if (check(parser, TOKEN_SYMBOL_VOID)) {
+        *hasReturnType = false;
+        return true;
+    }
+    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER)) {
+        *hasReturnType = true;
+        return true;
+    }
+    else return false;
+}
+
+static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnType) {
+    /*
+	    parsing function declarations is a bit tricky since the return type annotation and async modifier are optional. 
+        To handle this, we first check if the declaration starts with 'async' since that has a more limited set of valid declarations that can follow it. 
+		If it doesn't start with 'async', then we check for valid function declarations without return types. This is a simple scenario if a function begins with 'fun' or 'void', followed by an identifier.
+	    If it doesn't match either of those, then we check for function declarations with return types which is the most permissive and can match all valid function declarations.
+    */
+
+    if (check(parser, TOKEN_SYMBOL_ASYNC)) {
+        advance(parser);
+        *isAsync = true;
+        return matchFunDeclarationWithAsync(parser, hasReturnType);
+    }
+    else if (checkEither(parser, TOKEN_SYMBOL_FUN, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_IDENTIFIER)) {
+        advance(parser);
+        *hasReturnType = false;
+        return true;
+    }
+    else {
+		return matchFunDeclarationWithReturnType(parser, hasReturnType);
+    }
 }
 
 static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
