@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "resolver.h"
 #include "../vm/namespace.h"
@@ -146,58 +147,6 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
     return takeStringPerma(resolver->vm, fullName, length);
 }
 
-static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {
-	if (token.length == 0) return NULL;
-    ObjString* shortName = createStringFromToken(resolver->vm, token);
-    ObjString* originalName = shortName;
-    if (isMetaclass && !checkFormalParam) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
-    TypeInfo* type = typeTableGet(resolver->vm->typetab, shortName);
-    ObjString* fullName = NULL;
-
-    if (type == NULL) {
-        fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
-        type = typeTableGet(resolver->vm->typetab, fullName);
-
-        if (type == NULL) {
-            fullName = concatenateString(resolver->vm, resolver->currentNamespace, shortName, ".");
-            type = typeTableGet(resolver->vm->typetab, fullName);
-
-            if (type == NULL) {
-                fullName = nameTableGet(resolver->nametab, originalName);
-                if (fullName != NULL) {
-                    if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
-                    type = typeTableGet(resolver->vm->typetab, fullName);
-                }
-
-                if (type == NULL) {
-                    SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
-                    if (item != NULL) {
-                        if (checkFormalParam && item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
-                            type = declareNativeTypeParameter(resolver->vm, originalName->chars);
-                        }
-                        else type = item->type;
-                    }
-
-                    if (resolver->vm->config.flagUndefinedType == 1) semanticWarning(resolver, "Type '%s' is undefined.", originalName->chars);
-                    else if (resolver->vm->config.flagUndefinedType == 2) semanticError(resolver, "Type '%s' is undefined.", originalName->chars);
-                }
-            }
-        }
-    }
-    return type;
-}
-
-static void setCallableTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
-    callableType->attribute.isAsync = ast->attribute.isAsync;
-    callableType->attribute.isClassMethod = ast->attribute.isClass;
-    callableType->attribute.isGeneric = ast->attribute.isGeneric;
-    callableType->attribute.isInitializer = ast->attribute.isInitializer;
-    callableType->attribute.isInstanceMethod = !ast->attribute.isClass;
-    callableType->attribute.isLambda = ast->attribute.isLambda;
-    callableType->attribute.isVariadic = ast->attribute.isVariadic;
-    callableType->attribute.isVoid = ast->attribute.isVoid;
-}
-
 static SymbolItem* insertSymbol(Resolver* resolver, Token token, SymbolCategory category, SymbolState state, TypeInfo* type, bool isMutable) {
     ObjString* symbol = createStringFromToken(resolver->vm, token);
     SymbolItem* item = newSymbolItemWithType(token, category, state, isMutable, type);
@@ -215,12 +164,65 @@ static void insertTypeParamSymbols(Resolver* resolver, ObjString* className) {
     if (hasGenericParameters(behaviorType)) {
         TypeInfo* typeType = getNativeType(resolver->vm, "Type");
         BehaviorTypeInfo* genericBehaviorType = AS_BEHAVIOR_TYPE(behaviorType);
-        
+
         for (int i = 0; i < genericBehaviorType->formalTypeParams->count; i++) {
             TypeInfo* typeParam = genericBehaviorType->formalTypeParams->elements[i];
             insertSymbol(resolver, syntheticToken(typeParam->shortName->chars), SYMBOL_CATEGORY_PLACEHOLDER, SYMBOL_STATE_ACCESSED, typeType, false);
         }
     }
+}
+
+static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {
+	if (token.length == 0) return NULL;
+    ObjString* shortName = createStringFromToken(resolver->vm, token);
+    ObjString* originalName = shortName;
+    if (isMetaclass && !checkFormalParam) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
+    TypeInfo* type = typeTableGet(resolver->vm->typetab, shortName);
+    ObjString* fullName = NULL;
+
+    if (type == NULL) {
+        fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
+        type = typeTableGet(resolver->vm->typetab, fullName);
+
+        if (type == NULL) {
+            fullName = concatenateString(resolver->vm, resolver->currentNamespace, shortName, ".");
+            type = typeTableGet(resolver->vm->typetab, fullName);
+
+            if (type == NULL) {
+                    fullName = nameTableGet(resolver->nametab, originalName);
+                    if (fullName != NULL) {
+                        if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
+                        type = typeTableGet(resolver->vm->typetab, fullName);
+                    }
+
+                    if (type == NULL) {
+                        SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
+                        if (item != NULL) {
+                            if (checkFormalParam && item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
+                                type = declareNativeTypeParameter(resolver->vm, originalName->chars);
+                            }
+                            else type = item->type;
+                        }
+
+                        if (resolver->vm->config.flagUndefinedType == 1) semanticWarning(resolver, "Type '%s' is undefined.", originalName->chars);
+                        else if (resolver->vm->config.flagUndefinedType == 2) semanticError(resolver, "Type '%s' is undefined.", originalName->chars);
+                    }
+                }
+            }
+        }
+    }
+    return type;
+}
+
+static void setCallableTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
+    callableType->attribute.isAsync = ast->attribute.isAsync;
+    callableType->attribute.isClassMethod = ast->attribute.isClass;
+    callableType->attribute.isGeneric = ast->attribute.isGeneric;
+    callableType->attribute.isInitializer = ast->attribute.isInitializer;
+    callableType->attribute.isInstanceMethod = !ast->attribute.isClass;
+    callableType->attribute.isLambda = ast->attribute.isLambda;
+    callableType->attribute.isVariadic = ast->attribute.isVariadic;
+    callableType->attribute.isVoid = ast->attribute.isVoid;
 }
 
 static SymbolItem* findThis(Resolver* resolver) {
@@ -1034,7 +1036,11 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         }
         else {
             TypeInfo* baseType = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass, true);
-			if (baseType == NULL) return;
+            if (baseType == NULL) return;
+            if (strstr(baseType->fullName->chars, " class") != NULL) {
+                baseType = typeTableGet(resolver->vm->typetab, getClassNameFromMetaclass(resolver->vm, baseType->fullName));
+            }
+
             TypeInfoArray* formalTypeParams = getTypeParameters(baseType);
             Ast* typeParams = astGetChild(ast, 0);
 

@@ -1535,6 +1535,16 @@ static Ast* classDeclaration(Parser* parser) {
     return ast;
 }
 
+static bool checkBehaviorReturnType(Parser* parser) {
+    if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) {
+        return true;
+    }
+    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS) && checkNextN(parser, 2, TOKEN_SYMBOL_IDENTIFIER)) {
+        return true;
+    }
+	else return false;
+}
+
 static bool matchCallableReturnType(Parser* parser, bool* hasReturnType) {
     int index = parser->index;
     Token current = parser->current;
@@ -1607,16 +1617,12 @@ static bool matchGenericReturnType(Parser* parser, bool* hasReturnType) {
 }
 
 static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnType) {
-    if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) {
+    if (checkBehaviorReturnType(parser)) {
         *hasReturnType = true;
         return true;
     }
     else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
         return matchCallableReturnType(parser, hasReturnType);
-    }
-    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) {
-        *hasReturnType = true;
-        return true;
     }
     else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
         *hasReturnType = true;
