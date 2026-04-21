@@ -61,7 +61,7 @@ void runtimeError(VM* vm, const char* format, ...) {
 
         if (function->name == NULL) {
             fprintf(stderr, "script\n");
-        } 
+        }
         else {
             fprintf(stderr, "%s()\n", function->name->chars);
         }
@@ -680,7 +680,7 @@ InterpretResult run(VM* vm) {
                 uint8_t byte = READ_BYTE();
                 Value value;
                 if (!loadGlobal(vm, &frame->closure->function->chunk, byte, &value)) {
-                    ObjString* name = AS_STRING(frame->closure->function->chunk.identifiers.values[byte]);
+					ObjString* name = AS_STRING(frame->closure->function->chunk.identifiers.values[byte]);
                     RUNTIME_ERROR("Undefined variable '%s'.", name->chars);
                 }
                 push(vm, value);
@@ -887,7 +887,7 @@ InterpretResult run(VM* vm) {
                 break;
             }
             case OP_EQUAL: {
-                if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(BOOL_VAL, == );
+                if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(BOOL_VAL, ==);
                 else {
                     ObjString* op = copyStringPerma(vm, "==", 2);
                     if (!invokeOperator(vm, op, 1)) {
@@ -900,11 +900,11 @@ InterpretResult run(VM* vm) {
                 break;
             }
             case OP_GREATER:
-                if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(BOOL_VAL, > );
+                if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(BOOL_VAL, >);
                 else OVERLOAD_OP(>, 1);
                 break;
             case OP_LESS:
-                if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(BOOL_VAL, < );
+                if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(BOOL_VAL, <);
                 else OVERLOAD_OP(<, 1);
                 break;
             case OP_ADD: {
@@ -932,7 +932,7 @@ InterpretResult run(VM* vm) {
                 if (IS_INT(peek(vm, 0)) && AS_INT(peek(vm, 0)) == 0) {
                     throwNativeException(vm, "clox.std.lang.ArithmeticException", "It is illegal to divide an integer by 0.");
                 }
-                else if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(NUMBER_VAL, / );
+                else if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(NUMBER_VAL, /);
                 else OVERLOAD_OP(/, 1);
                 break;
             case OP_MODULO: {
@@ -1185,7 +1185,7 @@ InterpretResult run(VM* vm) {
                 else {
                     ObjString* filePath = locateSourceFile(vm, shortName, enclosingNamespace);
                     if (sourceFileExists(filePath)) {
-                        loadModule(vm, filePath);
+						loadModule(vm, filePath);
                         if (tableGet(&enclosingNamespace->values, shortName, &value)) {
                             pop(vm);
                             push(vm, value);

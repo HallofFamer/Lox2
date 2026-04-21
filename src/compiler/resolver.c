@@ -189,6 +189,16 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
             type = typeTableGet(resolver->vm->typetab, fullName);
 
             if (type == NULL) {
+				struct stat fullPathStat;
+				ObjString* fullPath = locateSourceFileFromFullName(resolver->vm, fullName);
+                if ((stat(fullPath->chars, &fullPathStat) == 0) && loadModule(resolver->vm, fullPath)) {
+                    ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, fullName);
+                    type = typeTableGet(resolver->vm->typetab, metaclassName);
+                    insertSymbol(resolver, token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+                    insertTypeParamSymbols(resolver, fullName);
+                }
+
+                if (type == NULL) {
                     fullName = nameTableGet(resolver->nametab, originalName);
                     if (fullName != NULL) {
                         if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
@@ -1343,7 +1353,8 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
     if (!isNativeNamespace(fullName)) {
         ObjString* filePath = locateSourceFileFromFullName(resolver->vm, fullName);
         if (sourceFileExists(filePath)) {
-            loadModule(resolver->vm, filePath);
+            bool result = loadModule(resolver->vm, filePath);
+            if (!result) semanticError(resolver, "Failed to load module '%s'.", fullName->chars);
         }
         else {
             ObjString* directoryPath = locateSourceDirectoryFromFullName(resolver->vm, fullName);
