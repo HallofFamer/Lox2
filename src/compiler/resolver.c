@@ -176,6 +176,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
 	if (token.length == 0) return NULL;
     ObjString* shortName = createStringFromToken(resolver->vm, token);
     ObjString* originalName = shortName;
+
     if (isMetaclass && !checkFormalParam) shortName = getMetaclassNameFromClass(resolver->vm, shortName);
     TypeInfo* type = typeTableGet(resolver->vm->typetab, shortName);
     ObjString* fullName = NULL;

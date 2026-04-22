@@ -171,6 +171,8 @@ bool loadNamespaceIntoModule(VM* vm, ObjNamespace* namespace, ObjModule* module)
 }
 
 bool loadModule(VM* vm, ObjString* path) {
+    Value value;
+    if (tableGet(&vm->modules, path, &value)) return true;
     ObjModule* lastModule = vm->currentModule;
     vm->currentModule = newModule(vm, path);
 
