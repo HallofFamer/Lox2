@@ -215,8 +215,10 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
                             else type = item->type;
                         }
 
-                        if (resolver->vm->config.flagUndefinedType == 1) semanticWarning(resolver, "Type '%s' is undefined.", originalName->chars);
-                        else if (resolver->vm->config.flagUndefinedType == 2) semanticError(resolver, "Type '%s' is undefined.", originalName->chars);
+                        if (type == NULL) {
+                            if (resolver->vm->config.flagUndefinedType == 1) semanticWarning(resolver, "Type '%s' is undefined.", originalName->chars);
+                            else if (resolver->vm->config.flagUndefinedType == 2) semanticError(resolver, "Type '%s' is undefined.", originalName->chars);
+                        }
                     }
                 }
             }
@@ -271,7 +273,6 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
         Ast* typeParams = astLastChild(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
-            resolveChild(resolver, typeParams, i);
             ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
             TypeInfo* formalType = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
             TypeInfoArrayAdd(behaviorType->formalTypeParams, formalType);
@@ -1041,7 +1042,10 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         insertCallableType(resolver, ast, false, ast->attribute.isGeneric, false, ast->attribute.isVariadic, ast->attribute.isVoid);
     }
     else if (ast->attribute.isGeneric) {
+        SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createStringFromToken(resolver->vm, ast->token));
+        if (item != NULL && item->isImported) item->state = SYMBOL_STATE_ACCESSED;
         resolveChild(resolver, ast, 0);
+
         if (astHasInstantiatedTypeParameters(astGetChild(ast, 0))) {
             insertGenericType(resolver, ast);
         }

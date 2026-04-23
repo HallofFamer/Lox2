@@ -60,10 +60,14 @@ void runtimeError(VM* vm, const char* format, ...) {
         fprintf(stderr, "[line %d] in ", function->chunk.lines[instruction]);
 
         if (function->name == NULL) {
-            fprintf(stderr, "script\n");
-        }
+            fprintf(stderr, "script");
+        } 
         else {
-            fprintf(stderr, "%s()\n", function->name->chars);
+            fprintf(stderr, "%s()", function->name->chars);
+        }
+
+        if (frame->closure->module != NULL && frame->closure->module->path->length > 0) {
+			fprintf(stderr, " from %s.\n", frame->closure->module->path->chars);
         }
     }
     resetStack(vm);
