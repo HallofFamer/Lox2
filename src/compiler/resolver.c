@@ -172,6 +172,13 @@ static void insertTypeParamSymbols(Resolver* resolver, ObjString* className) {
     }
 }
 
+static void importSymbols(Resolver* resolver, Ast* ast, ObjString* fullName, TypeInfo* type) {
+    SymbolItem* item = insertSymbol(resolver, ast->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_DEFINED, type, false);
+    item->isImported = true;
+    insertTypeParamSymbols(resolver, fullName);
+    nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, ast->token), fullName);
+}
+
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {
 	if (token.length == 0) return NULL;
     ObjString* shortName = createStringFromToken(resolver->vm, token);
