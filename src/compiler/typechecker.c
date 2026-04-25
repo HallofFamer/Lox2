@@ -570,25 +570,19 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     }
 
     if (callee->type != NULL && hasGenericParameters(type)) {
-        GenericTypeInfo* calleeType = newGenericTypeInfo(-1, type->shortName, type->fullName, type);
         if (astNumChild(callee) > 0) {
             checkTypeParameters(typeChecker, callee, type);
-			Ast* typeArgs = astGetChild(callee, 0);
-			for (int i = 0; i < astNumChild(typeArgs); i++) {
-                Ast* typeArg = astGetChild(typeArgs, i);
-                TypeInfoArrayAdd(calleeType->actualTypeParams, typeArg->type);
-            }
-            char* genericTypeName = createGenericTypeName(calleeType);
-			calleeType->baseType.fullName = calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
+            ast->type = callee->type;
         }
         else {
+            GenericTypeInfo* calleeType = newGenericTypeInfo(-1, type->shortName, type->fullName, type);
             for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
-				TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
+                TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
             }
             char* genericTypeName = createGenericTypeName(calleeType);
             calleeType->baseType.fullName = calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
+            ast->type = (TypeInfo*)calleeType;
         }
-        ast->type = (TypeInfo*)calleeType;
     }
     else ast->type = type;
 }
@@ -630,7 +624,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 		SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL) return;
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, item->type->fullName);
-
+       
         TypeInfo* classType = getClassType(typeChecker, className, ast->symtab);
         if (classType == NULL) return;
         inferAstTypeFromInitializer(typeChecker, ast, classType);

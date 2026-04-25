@@ -1539,10 +1539,14 @@ static bool checkBehaviorReturnType(Parser* parser) {
     if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         return true;
     }
-    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS) && checkNextN(parser, 2, TOKEN_SYMBOL_IDENTIFIER)) {
+	else return false;
+}
+
+static bool checkMetaclassReturnType(Parser* parser) {
+    if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS) && checkNextN(parser, 2, TOKEN_SYMBOL_IDENTIFIER)) {
         return true;
     }
-	else return false;
+    else return false;
 }
 
 static bool checkCallableReturnType(Parser* parser, bool* hasReturnType) {
@@ -1618,6 +1622,10 @@ static bool checkGenericReturnType(Parser* parser, bool* hasReturnType) {
 
 static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnType) {
     if (checkBehaviorReturnType(parser)) {
+        *hasReturnType = true;
+        return true;
+    }
+	else if (checkMetaclassReturnType(parser)) {
         *hasReturnType = true;
         return true;
     }
