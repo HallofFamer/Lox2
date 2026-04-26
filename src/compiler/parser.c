@@ -1536,17 +1536,11 @@ static Ast* classDeclaration(Parser* parser) {
 }
 
 static bool checkBehaviorReturnType(Parser* parser) {
-    if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER)) {
-        return true;
-    }
-	else return false;
+	return checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER);
 }
 
 static bool checkMetaclassReturnType(Parser* parser) {
-    if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS) && checkNextN(parser, 2, TOKEN_SYMBOL_IDENTIFIER)) {
-        return true;
-    }
-    else return false;
+    return (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS) && checkNextN(parser, 2, TOKEN_SYMBOL_IDENTIFIER));
 }
 
 static bool checkCallableReturnType(Parser* parser, bool* hasReturnType) {

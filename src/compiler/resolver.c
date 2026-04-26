@@ -1385,17 +1385,11 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
     if (astNumChild(ast) > 1) {
         Ast* alias = astGetChild(ast, 1);
         alias->symtab = _namespace->symtab;
-        SymbolItem* item = insertSymbol(resolver, alias->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_DEFINED, type, false);
-        item->isImported = true;
-        insertTypeParamSymbols(resolver, fullName);
-        nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, alias->token), fullName);
+        importSymbols(resolver, alias, fullName, type);
     }
     else {
         shortName->symtab = _namespace->symtab;
-        SymbolItem* item = insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_DEFINED, type, false);
-		item->isImported = true;
-        insertTypeParamSymbols(resolver, fullName);
-        nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, shortName->token), fullName);
+		importSymbols(resolver, shortName, fullName, type);
     }
 }
 
