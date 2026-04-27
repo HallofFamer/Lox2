@@ -430,6 +430,7 @@ static bool callValue(VM* vm, Value callee, int argCount) {
     ObjClass* klass = getObjClass(vm, callee);
     ObjString* name = copyStringPerma(vm, "()", 2);
     Value method;
+
     if (!tableGet(&klass->methods, name, &method)) { 
         throwNativeException(vm, "clox.std.lang.MethodNotFoundException", "Undefined operator method '%s' on class %s.", name->chars, klass->fullName->chars);
         return false;
@@ -461,6 +462,7 @@ static bool invoke(VM* vm, ObjString* name, int argCount) {
         ObjInstance* instance = AS_INSTANCE(receiver);
         IDMap* idMap = getShapeIndexes(vm, instance->obj.shapeID);
         int index;
+
         if (idMapGet(idMap, name, &index)) {
             Value value = instance->fields.values[index];
             vm->stackTop[-argCount - 1] = value;
@@ -499,6 +501,7 @@ bool bindMethod(VM* vm, ObjClass* klass, ObjString* name) {
     Value method;
     if (!tableGet(&klass->methods, name, &method)) return false;
     ObjBoundMethod* bound = newBoundMethod(vm, peek(vm, 0), method);
+    
     pop(vm);
     push(vm, OBJ_VAL(bound));
     return true;
