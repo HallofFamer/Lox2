@@ -7,11 +7,9 @@ val fileReader = await File.openAsync("test/others/file_input.txt", "r")
 print("Successfully opened: ")
 println(fileReader)
 
-println("Now reading the entire file: ")
-println("")
+println("Now reading the entire file: \n")
 println(await fileReader.readToEndAsync())
-println("")
 
-println("Closing read stream for file.")
+println("\nClosing read stream for file.")
 await fileReader.closeAsync()
 println("Read stream has been closed.")

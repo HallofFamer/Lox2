@@ -5,9 +5,8 @@ using clox.std.util.Promise
 val client = HTTPClient()
 print("Initializing HTTP Client: ")
 println(client)
-println("")
 
-println("Downloading sample files: ")
+println("\nDownloading sample files: ")
 val start = clock()
 val promise = client.downloadAsync("https://filesamples.com/samples/document/txt/sample1.txt", "test/others/file_downloaded_1.txt")
 val promise2 = client.downloadAsync("https://filesamples.com/samples/document/txt/sample2.txt", "test/others/file_downloaded_2.txt")

@@ -1,5 +1,5 @@
 namespace test.types
-using clox.std.collection.Array;
+using clox.std.collection.Array
 
 type Predicate = Bool fun(Object)
 println(Predicate)
