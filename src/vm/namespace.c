@@ -23,6 +23,8 @@ ObjNamespace* declareNamespace(VM* vm, uint8_t namespaceDepth) {
         pop(vm);
         namespaceDepth--;
     }
+
+	vm->currentModule->namespace = enclosingNamespace;
     return enclosingNamespace;
 }
 

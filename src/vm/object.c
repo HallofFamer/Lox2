@@ -222,6 +222,7 @@ ObjMethod* newMethod(VM* vm, ObjClass* behavior, ObjClosure* closure) {
 ObjModule* newModule(VM* vm, ObjString* path) {
     ObjModule* module = ALLOCATE_OBJ_GEN(ObjModule, OBJ_MODULE, NULL, GC_GENERATION_TYPE_PERMANENT);
     module->path = path;
+    module->namespace = NULL;
     module->closure = NULL;
     module->isNative = false;
 

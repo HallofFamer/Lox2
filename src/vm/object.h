@@ -313,6 +313,7 @@ struct ObjException {
 struct ObjModule {
     Obj obj;
     ObjString* path;
+	ObjNamespace* namespace;
     ObjClosure* closure;
     bool isNative;
     IDMap valIndexes;
