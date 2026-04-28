@@ -200,7 +200,8 @@ void marshalDump(Marshaller* marshaller, ObjModule* module) {
 	ABORT_IFNULL(marshaller->bytes, "Failed to allocate memory for byte streams to perform marshal serialization.\n");
 	marshalSerializeModule(marshaller, marshaller->bytes, marshaller->module);
 
-	fwrite(marshaller->bytes->elements, sizeof(uint8_t), marshaller->bytes->count, file);
+	size_t bytesWritten = fwrite(marshaller->bytes->elements, sizeof(uint8_t), marshaller->bytes->count, file);
+	ABORT_IFTRUE(bytesWritten < marshaller->bytes->count, "Failed to write to file \"%s\" for marshal serialization.\n", fileName);
 	fclose(file);
 	marshalCleanup(marshaller);
 }

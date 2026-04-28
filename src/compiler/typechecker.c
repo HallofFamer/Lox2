@@ -624,6 +624,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 		SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL || item->type == NULL) return;
 		TypeInfo* classType = getInnerBaseType(item->type);
+
         if (strstr(classType->shortName->chars, " class") != NULL) {
 			ObjString* className = getClassNameFromMetaclass(typeChecker->vm, classType->fullName);
 			classType = getClassType(typeChecker, className, ast->symtab);
@@ -1249,6 +1250,7 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
 	FunctionTypeChecker* currentFunction = typeChecker->currentFunction->isLambda ? getCurrentMethodTypeChecker(typeChecker) : typeChecker->currentFunction;
     TypeInfo* expectedType = (currentFunction->type != NULL) ? currentFunction->type->returnType : NULL;
     if (expectedType == NULL || !astHasChild(ast)) return;
+    
     typeCheckChild(typeChecker, ast, 0);
     Ast* returnValue = astGetChild(ast, 0);
     TypeInfo* actualType = returnValue->type;
@@ -1555,8 +1557,8 @@ void typeCheck(TypeChecker* typeChecker, Ast* ast) {
     FunctionTypeChecker functionTypeChecker;
     initFunctionTypeChecker(typeChecker, &functionTypeChecker, syntheticToken("script"), NULL, ast->attribute.isAsync, false, false, false, false);
     typeCheckAst(typeChecker, ast);
-
     endFunctionTypeChecker(typeChecker);
+
     if (typeChecker->debugTypetab) {
         typeTableOutput(typeChecker->vm->typetab);
     }

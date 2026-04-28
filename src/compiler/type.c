@@ -1010,8 +1010,7 @@ static bool isCallableSubtypeOfType(CallableTypeInfo* type, TypeInfo* type2) {
 }
 
 static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
-    if (isEqualType(type->rawType, type2)) return true;
-    else if (IS_BEHAVIOR_TYPE(type->rawType)) {
+    if (IS_BEHAVIOR_TYPE(type->rawType)) {
         BehaviorTypeInfo* subtype = AS_BEHAVIOR_TYPE(type->rawType);
         if (IS_BEHAVIOR_TYPE(type2)) return isBehaviorSubtypeOfType(subtype, AS_BEHAVIOR_TYPE(type2));
         else if (IS_GENERIC_TYPE(type2)) {

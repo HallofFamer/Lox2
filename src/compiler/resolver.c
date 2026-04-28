@@ -16,6 +16,7 @@ typedef struct {
     bool isInitializer;
     bool isInstanceMethod;
     bool isLambda;
+    bool isReified;
     bool isVariadic;
     bool isVoid;
 } ResolverAttribute;
@@ -70,6 +71,7 @@ static ResolverAttribute resolverInitModifier() {
         .isInitializer = false,
         .isInstanceMethod = false,
         .isLambda = false,
+        .isReified = false,
         .isVariadic = false,
         .isVoid = false
     };
@@ -142,6 +144,7 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
     char* fullName = bufferNewCString(length);
     memcpy(fullName, resolver->currentNamespace->chars, resolver->currentNamespace->length);
     fullName[resolver->currentNamespace->length] = '.';
+
     memcpy(fullName + resolver->currentNamespace->length + 1, token.start, token.length);
     fullName[length] = '\0';
     return takeStringPerma(resolver->vm, fullName, length);

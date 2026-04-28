@@ -105,6 +105,7 @@ ObjString* astCreateQualifiedName(VM* vm, Ast* ast) {
     Ast* identifiers = astGetChild(ast, 0);
     identifiers->symtab = ast->symtab;
     Ast* identifier = astGetChild(identifiers, 0);
+
     identifier->symtab = identifiers->symtab;
     const char* start = identifier->token.start;
     int length = identifier->token.length;
@@ -146,6 +147,7 @@ bool astHasTypeParameters(Ast* ast) {
             if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
                 return (astNumChild(ast->parent) > 1);
             }
+            break;
         case AST_CATEGORY_DECL:
             if (ast->kind == AST_DECL_METHOD) {
                 return (astNumChild(ast) > 3);
@@ -153,6 +155,7 @@ bool astHasTypeParameters(Ast* ast) {
 		    else if (ast->kind == AST_DECL_TYPE) {
                 return (astNumChild(ast) > 1);
             }
+            break;
         default:
             break;
     }

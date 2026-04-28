@@ -1615,11 +1615,7 @@ static bool checkGenericReturnType(Parser* parser, bool* hasReturnType) {
 }
 
 static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnType) {
-    if (checkBehaviorReturnType(parser)) {
-        *hasReturnType = true;
-        return true;
-    }
-	else if (checkMetaclassReturnType(parser)) {
+    if (checkBehaviorReturnType(parser) || checkMetaclassReturnType(parser)) {
         *hasReturnType = true;
         return true;
     }
