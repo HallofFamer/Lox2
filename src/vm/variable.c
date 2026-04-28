@@ -47,7 +47,6 @@ static bool loadGlobalFromTable(VM* vm, Chunk* chunk, uint8_t byte, Value* value
     ObjString* name = AS_STRING(chunk->identifiers.values[byte]);
     if (loadGlobalValue(vm, chunk, byte, value)) return true;
     else if (loadGlobalVariable(vm, chunk, byte, value)) return true;
-	else if (tableGet(&vm->currentModule->namespace->values, name, value)) return true;
     else if (tableGet(&vm->currentNamespace->values, name, value)) return true;
 	else if (tableGet(&vm->langNamespace->values, name, value)) return true;
     else return tableGet(&vm->rootNamespace->values, name, value);

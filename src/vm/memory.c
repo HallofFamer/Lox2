@@ -47,7 +47,7 @@ static void freeGCRememeberedSet(VM* vm, GCRememberedSet* remSet) {
 
 static void initGCGenerations(GC* gc, size_t heapSizes[]) {
     for (int i = 0; i < GC_GENERATION_TYPE_COUNT; i++) {
-        gc->generations[i] = (GCGeneration*)malloc(sizeof(GCGeneration));
+        gc->generations[i] = ALLOCATE_STRUCT(GCGeneration);
         if (gc->generations[i] != NULL) {
             gc->generations[i]->bytesAllocated = 0;
             gc->generations[i]->heapSize = heapSizes[i]; 

@@ -94,7 +94,7 @@ LOX_FUNCTION(setenv) {
     const char* value = AS_CSTRING(args[1]);
 
     if (_putenv_s(name, value) != 0) {
-		THROW_EXCEPTION_FMT(clox.std.lang.UnsupportedOperationException, "Failed to set environment variable \"%s\".", name);
+		THROW_EXCEPTION_FMT(clox.std.lang.UnsupportedOperationException, "Failed to set environment variable '%s'.", name);
     }
 	RETURN_NIL;
 }

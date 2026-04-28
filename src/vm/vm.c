@@ -585,7 +585,7 @@ static void closeUpvalues(VM* vm, Value* last) {
 InterpretResult run(VM* vm) {
     CallFrame* frame = &vm->frames[vm->frameCount - 1];
 
-#define LOAD_FRAME() (frame = &vm->frames[vm->frameCount - 1], vm->currentModule = frame->closure->module)
+#define LOAD_FRAME() (frame = &vm->frames[vm->frameCount - 1], vm->currentNamespace = frame->closure->module->namespace)
 #define READ_BYTE() (*frame->ip++)
 #define READ_SHORT() (frame->ip += 2, (uint16_t)((frame->ip[-2] << 8) | frame->ip[-1]))
 #define READ_CONSTANT() (frame->closure->function->chunk.constants.values[READ_BYTE()])

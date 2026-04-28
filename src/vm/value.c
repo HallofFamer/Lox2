@@ -182,13 +182,15 @@ char* valueToString(VM* vm, Value value) {
     }
     else if (IS_INT(value)) {
         size_t bufSize = 12;
-        char* chars = ALLOCATE(char, bufSize, GC_GENERATION_TYPE_EDEN);
+		char* chars = (char*)malloc(sizeof(char) * bufSize);
+		ABORT_IFNULL(chars, "Failed to allocate memory for integer string conversion.");
         sprintf_s(chars, bufSize, "%d", AS_INT(value));
         return chars;
     }
     else if (IS_FLOAT(value)) {
         size_t bufSize = 32;
-        char* chars = ALLOCATE(char, bufSize, GC_GENERATION_TYPE_EDEN);
+		char* chars = (char*)malloc(sizeof(char) * bufSize);
+		ABORT_IFNULL(chars, "Failed to allocate memory for float string conversion.");
         sprintf_s(chars, bufSize, "%.14g", AS_FLOAT(value));
         return chars;
     }
@@ -198,7 +200,8 @@ char* valueToString(VM* vm, Value value) {
         else {
             size_t nameLen = (size_t)object->klass->name->length;
             size_t bufSize = 9 + nameLen + 1;
-            char* chars = ALLOCATE(char, bufSize, GC_GENERATION_TYPE_EDEN);
+			char* chars = (char*)malloc(sizeof(char) * bufSize);
+			ABORT_IFNULL(chars, "Failed to allocate memory for object string conversion.");
             sprintf_s(chars, bufSize, "<object %s>", object->klass->name->chars);
             return chars;
         }
