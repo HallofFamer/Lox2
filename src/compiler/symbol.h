@@ -38,6 +38,7 @@ typedef struct {
     Token token;
     SymbolCategory category;
     SymbolState state;
+	bool isImported;
     bool isMutable;
     TypeInfo* type;
 } SymbolItem;

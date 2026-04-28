@@ -12,6 +12,7 @@ SymbolItem* newSymbolItem(Token token, SymbolCategory category, SymbolState stat
         item->token = token;
         item->category = category;
         item->state = state;
+		item->isImported = false;
         item->isMutable = isMutable;
         item->type = NULL;
     }
