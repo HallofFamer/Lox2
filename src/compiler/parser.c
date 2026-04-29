@@ -1535,6 +1535,19 @@ static Ast* classDeclaration(Parser* parser) {
     return ast;
 }
 
+static bool matchBehaviorType(Parser* parser) {
+	return match(parser, TOKEN_SYMBOL_IDENTIFIER);
+}
+
+static bool matchMetaclassType(Parser* parser) {
+    if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) {
+        advance(parser);
+        advance(parser);
+        return true;
+	}
+    return false;
+}
+
 static bool checkBehaviorReturnType(Parser* parser) {
 	return checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER);
 }

@@ -1102,6 +1102,9 @@ static void resolveVariable(Resolver* resolver, Ast* ast) {
         if (item->state == SYMBOL_STATE_DECLARED && !tokensEqual(&item->token, &resolver->currentFunction->name)) {
             semanticError(resolver, "Cannot use variable '%s' before it is defined.", name->chars);
         }
+        else if (item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
+            resolver->currentFunction->attribute.isReified = true;
+        }
     }
     else {
         if (resolver->currentFunction->hasRequired) {
