@@ -346,6 +346,7 @@ static Ast* typeParameters(Parser* parser, Token token);
 static Ast* function(Parser* parser, Ast* returnType, bool isAsync, bool isLambda, bool isVoid);
 static Ast* declaration(Parser* parser);
 static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType);
+static bool matchType(Parser* parser);
 static ParseRule* getRule(TokenKind type);
 static Ast* parsePrecedence(Parser* parser, Precedence precedence);
 
@@ -1546,6 +1547,19 @@ static bool matchMetaclassType(Parser* parser) {
         return true;
 	}
     return false;
+}
+
+static bool matchType(Parser* parser) {
+    if (matchBehaviorType(parser) || matchMetaclassType(parser)) {
+        return true;
+    }
+    else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
+        return true;
+    }
+    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
+        return true;
+    }
+    else return false;
 }
 
 static bool checkBehaviorReturnType(Parser* parser) {

@@ -16,7 +16,6 @@ typedef struct {
     bool isInitializer;
     bool isInstanceMethod;
     bool isLambda;
-    bool isReified;
     bool isVariadic;
     bool isVoid;
 } ResolverAttribute;
@@ -29,6 +28,7 @@ struct ClassResolver {
     int scopeDepth;
     bool isAnonymous;
     bool isGeneric;
+    bool isReified;
     BehaviorType type;
 };
 
@@ -41,6 +41,7 @@ struct FunctionResolver {
     int numUpvalues;
     int numGlobals;
     bool hasRequired;
+    bool isReified;
     ResolverAttribute attribute;
 };
 
@@ -71,7 +72,6 @@ static ResolverAttribute resolverInitModifier() {
         .isInitializer = false,
         .isInstanceMethod = false,
         .isLambda = false,
-        .isReified = false,
         .isVariadic = false,
         .isVoid = false
     };
@@ -84,6 +84,7 @@ static void initClassResolver(Resolver* resolver, ClassResolver* _class, Token n
     _class->scopeDepth = scopeDepth;
     _class->isAnonymous = (name.length == 1 && name.start[0] == '@');
     _class->isGeneric = false;
+    _class->isReified = false;
     _class->type = type;
     resolver->currentClass = _class;
 }
@@ -99,8 +100,9 @@ static void initFunctionResolver(Resolver* resolver, FunctionResolver* function,
     function->numLocals = 0;
     function->numUpvalues = 0;
     function->numGlobals = 0;
-    function->hasRequired = false;
 
+    function->hasRequired = false;
+    function->isReified = false;
     function->scopeDepth = scopeDepth;
     function->attribute = resolverInitModifier();
     resolver->currentFunction = function;
@@ -1103,7 +1105,7 @@ static void resolveVariable(Resolver* resolver, Ast* ast) {
             semanticError(resolver, "Cannot use variable '%s' before it is defined.", name->chars);
         }
         else if (item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
-            resolver->currentFunction->attribute.isReified = true;
+            resolver->currentFunction->isReified = true;
         }
     }
     else {
