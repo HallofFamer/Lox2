@@ -1105,7 +1105,8 @@ static void resolveVariable(Resolver* resolver, Ast* ast) {
             semanticError(resolver, "Cannot use variable '%s' before it is defined.", name->chars);
         }
         else if (item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
-            resolver->currentFunction->isReified = true;
+            if (resolver->currentClass != NULL && resolver->currentClass->isGeneric) resolver->currentClass->isReified = true;
+            else resolver->currentFunction->isReified = true;
         }
     }
     else {

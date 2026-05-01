@@ -1540,6 +1540,10 @@ static bool matchBehaviorType(Parser* parser) {
 	return match(parser, TOKEN_SYMBOL_IDENTIFIER);
 }
 
+static bool matchVoidType(Parser* parser) {
+    return match(parser, TOKEN_SYMBOL_VOID);
+}
+
 static bool matchMetaclassType(Parser* parser) {
     if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) {
         advance(parser);
