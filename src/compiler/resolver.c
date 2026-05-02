@@ -36,6 +36,7 @@ struct FunctionResolver {
     FunctionResolver* enclosing;
     Token name;
     SymbolTable* symtab;
+	TypeInfoArray* typeParams;
     int scopeDepth;
     int numLocals;
     int numUpvalues;
@@ -97,19 +98,23 @@ static void initFunctionResolver(Resolver* resolver, FunctionResolver* function,
     function->enclosing = resolver->currentFunction;
     function->name = name;
     function->symtab = NULL;
+	function->typeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));;
+	ABORT_IFNULL(function->typeParams, "Not enough memory to initialize function resolver.");
+
     function->numLocals = 0;
     function->numUpvalues = 0;
     function->numGlobals = 0;
-
     function->hasRequired = false;
     function->isReified = false;
     function->scopeDepth = scopeDepth;
+    
     function->attribute = resolverInitModifier();
     resolver->currentFunction = function;
     if (resolver->currentFunction->enclosing != NULL) resolver->isTopLevel = false;
 }
 
 static void endFunctionResolver(Resolver* resolver) {
+	TypeInfoArrayFree(resolver->currentFunction->typeParams);
     resolver->currentFunction = resolver->currentFunction->enclosing;
     if (resolver->currentFunction == NULL || resolver->currentFunction->enclosing == NULL) {
         resolver->isTopLevel = true;

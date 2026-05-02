@@ -63,6 +63,7 @@ typedef struct {
     bool isInitializer;
     bool isInstanceMethod;
     bool isLambda;
+    bool isReified;
     bool isVariadic;
     bool isVoid;
 } CallableTypeAttribute;
@@ -123,6 +124,7 @@ static inline CallableTypeAttribute callableTypeInitAttribute() {
         .isInitializer = false,
         .isInstanceMethod = false,
         .isLambda = false,
+		.isReified = false,
         .isVariadic = false,
         .isVoid = false
     };
