@@ -1553,11 +1553,35 @@ static bool matchMetaclassType(Parser* parser) {
     return false;
 }
 
+static bool matchCallableType(Parser* parser) {
+    int index = parser->index;
+    Token current = parser->current;
+
+    // First we need to match a return type declaration, it can be a void keyword or any valid type annotation.
+	// If it doesn't match, then this isn't a callable type annotation and we should backtrack and try to parse it as an expression instead.
+    if (!match(parser, TOKEN_SYMBOL_VOID) || !matchType(parser)) {
+		return resetIndex(parser, index, current, false);
+    }
+
+	// Then we need to match the fun keyword and a list of parameter types in parentheses. 
+    // If any of this doesn't match, then we should backtrack and try to parse it as an expression instead.
+	if (!match(parser, TOKEN_SYMBOL_FUN)) return resetIndex(parser, index, current, false);
+	if (!match(parser, TOKEN_SYMBOL_LEFT_PAREN)) return resetIndex(parser, index, current, false);
+    do {
+        if (!matchType(parser)) return resetIndex(parser, index, current, false);
+	} while (match(parser, TOKEN_SYMBOL_COMMA));
+	
+	// Finally, we need to match the closing parenthesis. If it doesn't match, then we should backtrack and try to parse it as an expression instead. 
+    // If it does match, then this is a valid callable type annotation and we can return true.
+    if (!match(parser, TOKEN_SYMBOL_RIGHT_PAREN)) return resetIndex(parser, index, current, false);
+	return resetIndex(parser, index, current, true);
+}
+
 static bool matchType(Parser* parser) {
     if (matchBehaviorType(parser) || matchMetaclassType(parser)) {
         return true;
     }
-    else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
+    else if (matchCallableType(parser)) {
         return true;
     }
     else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {

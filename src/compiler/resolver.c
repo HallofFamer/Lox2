@@ -24,6 +24,8 @@ struct ClassResolver {
     ClassResolver* enclosing;
     Token name;
     Token superClass;
+	Token* typeParams;
+	int typeParamCount;
     SymbolTable* symtab;
     int scopeDepth;
     bool isAnonymous;
@@ -35,8 +37,9 @@ struct ClassResolver {
 struct FunctionResolver {
     FunctionResolver* enclosing;
     Token name;
+	Token* typeParams;
+	int typeParamCount;
     SymbolTable* symtab;
-	TypeInfoArray* typeParams;
     int scopeDepth;
     int numLocals;
     int numUpvalues;
@@ -91,30 +94,36 @@ static void initClassResolver(Resolver* resolver, ClassResolver* _class, Token n
 }
 
 static void endClassResolver(Resolver* resolver) {
+	if (resolver->currentClass->typeParamCount > 0) {
+        free(resolver->currentClass->typeParams);
+    }
+
     resolver->currentClass = resolver->currentClass->enclosing;
 }
 
 static void initFunctionResolver(Resolver* resolver, FunctionResolver* function, Token name, int scopeDepth) {
     function->enclosing = resolver->currentFunction;
     function->name = name;
+    function->typeParams = NULL;
+	function->typeParamCount = 0;
     function->symtab = NULL;
-	function->typeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));;
-	ABORT_IFNULL(function->typeParams, "Not enough memory to initialize function resolver.");
-
     function->numLocals = 0;
     function->numUpvalues = 0;
     function->numGlobals = 0;
+
     function->hasRequired = false;
     function->isReified = false;
-    function->scopeDepth = scopeDepth;
-    
+    function->scopeDepth = scopeDepth; 
     function->attribute = resolverInitModifier();
     resolver->currentFunction = function;
     if (resolver->currentFunction->enclosing != NULL) resolver->isTopLevel = false;
 }
 
 static void endFunctionResolver(Resolver* resolver) {
-	TypeInfoArrayFree(resolver->currentFunction->typeParams);
+    if (resolver->currentFunction->typeParamCount > 0) {
+        free(resolver->currentFunction->typeParams);
+	}
+
     resolver->currentFunction = resolver->currentFunction->enclosing;
     if (resolver->currentFunction == NULL || resolver->currentFunction->enclosing == NULL) {
         resolver->isTopLevel = true;
