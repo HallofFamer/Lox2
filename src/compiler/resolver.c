@@ -745,7 +745,7 @@ static void block(Resolver* resolver, Ast* ast) {
     }
 }
 
-static void typeParameters(Resolver* resolver, Ast* ast) {
+static void typeParameters(Resolver* resolver, Ast* ast, bool isClassDecl, bool isFunctionDecl) {
     Ast* typeParams = astGetTypeParameters(ast);
     if (typeParams == NULL) return;
     for (int i = 0; i < typeParams->children->count; i++) {
@@ -770,7 +770,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     beginScope(resolver, ast, scope);
 	if (astHasTypeParameters(ast)) {
         functionResolver.attribute.isGeneric = true;
-        typeParameters(resolver, ast);
+        typeParameters(resolver, ast, false, true);
     }
 
     Ast* returnType = astGetChild(ast, 0);
@@ -799,7 +799,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
 
     if (astHasTypeParameters(ast)) {
         classResolver.isGeneric = true;
-        typeParameters(resolver, ast);
+        typeParameters(resolver, ast, true, false);
     }
 
     if (type == BEHAVIOR_CLASS) {
@@ -1589,7 +1589,7 @@ static void resolveTypeDeclaration(Resolver* resolver, Ast* ast) {
     
 	beginScope(resolver, ast, SYMBOL_SCOPE_BLOCK);
     if (astHasTypeParameters(ast)) {
-		typeParameters(resolver, ast);
+		typeParameters(resolver, ast, false, false);
     }
 
     resolveChild(resolver, ast, 0);

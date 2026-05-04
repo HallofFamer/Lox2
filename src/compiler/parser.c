@@ -1577,6 +1577,21 @@ static bool matchCallableType(Parser* parser) {
 	return resetIndex(parser, index, current, true);
 }
 
+static bool matchGenericType(Parser* parser) {
+    int index = parser->index;
+    Token current = parser->current;
+
+	if (!match(parser, TOKEN_SYMBOL_IDENTIFIER)) return resetIndex(parser, index, current, false);
+	if (!match(parser, TOKEN_SYMBOL_LESS)) return resetIndex(parser, index, current, false);
+
+    do {
+        if (!matchType(parser)) return resetIndex(parser, index, current, false);
+	} while (match(parser, TOKEN_SYMBOL_COMMA));
+
+    if (!match(parser, TOKEN_SYMBOL_GREATER)) return resetIndex(parser, index, current, false);
+    return resetIndex(parser, index, current, true);
+}
+
 static bool matchType(Parser* parser) {
     if (matchBehaviorType(parser) || matchMetaclassType(parser)) {
         return true;
