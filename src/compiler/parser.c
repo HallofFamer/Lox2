@@ -1599,7 +1599,7 @@ static bool matchType(Parser* parser) {
     else if (matchCallableType(parser)) {
         return true;
     }
-    else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
+    else if (matchGenericType(parser)) {
         return true;
     }
     else return false;
