@@ -1593,16 +1593,7 @@ static bool matchGenericType(Parser* parser) {
 }
 
 static bool matchType(Parser* parser) {
-    if (matchBehaviorType(parser) || matchMetaclassType(parser)) {
-        return true;
-    }
-    else if (matchCallableType(parser)) {
-        return true;
-    }
-    else if (matchGenericType(parser)) {
-        return true;
-    }
-    else return false;
+	return matchBehaviorType(parser) || matchMetaclassType(parser) || matchCallableType(parser) || matchGenericType(parser);
 }
 
 static bool checkBehaviorReturnType(Parser* parser) {

@@ -748,14 +748,16 @@ static void block(Resolver* resolver, Ast* ast) {
 static void typeParameters(Resolver* resolver, Ast* ast, bool isClassDecl, bool isFunctionDecl) {
     Ast* typeParams = astGetTypeParameters(ast);
     if (typeParams == NULL) return;
-    if (isClassDecl) resolver->currentClass->typeParams = (Token*)malloc(sizeof(Token) * typeParams->children->count);
-	else if (isFunctionDecl) resolver->currentFunction->typeParams = (Token*)malloc(sizeof(Token) * typeParams->children->count);
+	Token* typeParamTokens = (Token*)malloc(sizeof(Token) * typeParams->children->count);
 
     for (int i = 0; i < typeParams->children->count; i++) {
         resolveChild(resolver, typeParams, i);
         Ast* typeParam = astGetChild(typeParams, i);
         insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_PLACEHOLDER, SYMBOL_STATE_DEFINED, NULL, false);
     }
+
+    if (isClassDecl) resolver->currentClass->typeParams = typeParamTokens;
+    else if (isFunctionDecl) resolver->currentFunction->typeParams = typeParamTokens;
 }
 
 static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) {
