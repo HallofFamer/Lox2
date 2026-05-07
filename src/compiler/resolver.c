@@ -749,11 +749,13 @@ static void typeParameters(Resolver* resolver, Ast* ast, bool isClassDecl, bool 
     Ast* typeParams = astGetTypeParameters(ast);
     if (typeParams == NULL) return;
 	Token* typeParamTokens = (Token*)malloc(sizeof(Token) * typeParams->children->count);
+	ABORT_IFNULL(typeParamTokens, "Failed to allocate memory for resolver type parameter tokens.");
 
     for (int i = 0; i < typeParams->children->count; i++) {
         resolveChild(resolver, typeParams, i);
         Ast* typeParam = astGetChild(typeParams, i);
         insertSymbol(resolver, typeParam->token, SYMBOL_CATEGORY_PLACEHOLDER, SYMBOL_STATE_DEFINED, NULL, false);
+		typeParamTokens[i] = typeParam->token;
     }
 
     if (isClassDecl) resolver->currentClass->typeParams = typeParamTokens;
