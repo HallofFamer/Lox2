@@ -27,6 +27,11 @@
 - Allow declaration of object instance/class fields outside of class initializer, which also enables optional static typing and default values.
 - Redesign of Iterator/Enumerator API for ease of use and implementation of iterable types, add new object type ObjIterator.
 
+### Lox2 v2.0.5
+- Implement configuration options `flagUnusedImport` in lox2.ini which decide whether to throw warnings/errors when a class/trait is imported but never used.
+- Fix a glitch that the resolver cannot find and load types from the same namespace without using statement, which causes typechecking errors in some cases.
+- Fix a potential heap corruption issue in function `valueToString` when converting certain values to string representation, which may cause segfaults in certain circumstances.
+
 ### Lox2 v2.0.4
 - Add name resolution table in order to be able to typecheck invoke expressions like namespace.className(..args)
 - Modify typechecker to check if provided object is an instance of `TEnumerable` or `String` in for statement.

@@ -128,10 +128,12 @@ Ast* astGetTypeParameters(Ast* ast) {
             if (ast->parent->kind == AST_DECL_CLASS || ast->parent->kind == AST_DECL_FUN || ast->parent->kind == AST_DECL_TRAIT) {
                 return astLastChild(ast->parent);
             }
+            break;
         case AST_CATEGORY_DECL:
             if (ast->kind == AST_DECL_METHOD || ast->kind == AST_DECL_TYPE) {
                 return astLastChild(ast);
             }
+            break;
     }
 
     return false;

@@ -762,6 +762,22 @@ static void typeParameters(Resolver* resolver, Ast* ast, bool isClassDecl, bool 
     else if (isFunctionDecl) resolver->currentFunction->typeParams = typeParamTokens;
 }
 
+static bool isBehaviorTypeParameter(Resolver* resolver, Token token) {
+    if (resolver->currentClass->typeParams == NULL) return false;
+    for (int i = 0; resolver->currentClass->typeParams[i].length != 0; i++) {
+        if (tokensEqual(&token, &resolver->currentClass->typeParams[i])) return true;
+    }
+    return false;
+}
+
+static bool isFunctionTypeParameter(Resolver* resolver, Token token) {
+    if (resolver->currentFunction->typeParams == NULL) return false;
+    for (int i = 0; resolver->currentFunction->typeParams[i].length != 0; i++) {
+        if (tokensEqual(&token, &resolver->currentFunction->typeParams[i])) return true;
+    }
+    return false;
+}
+
 static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) {
     FunctionResolver functionResolver;
     initFunctionResolver(resolver, &functionResolver, ast->token, resolver->currentFunction->scopeDepth + 1);

@@ -1559,7 +1559,7 @@ static bool matchCallableType(Parser* parser) {
 
     // First we need to match a return type declaration, it can be a void keyword or any valid type annotation.
 	// If it doesn't match, then this isn't a callable type annotation and we should backtrack and try to parse it as an expression instead.
-    if (!match(parser, TOKEN_SYMBOL_VOID) || !matchType(parser)) {
+    if (!match(parser, TOKEN_SYMBOL_VOID) && !matchType(parser)) {
 		return resetIndex(parser, index, current, false);
     }
 
@@ -1614,20 +1614,16 @@ static bool checkMetaclassReturnType(Parser* parser) {
 static bool checkCallableReturnType(Parser* parser, bool* hasReturnType) {
     int index = parser->index;
     Token current = parser->current;
-    advance(parser);
-    advance(parser);
-
-    do {
-        advance(parser);
-        if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER || nextTokenType(parser) == TOKEN_SYMBOL_IDENTIFIER) {
-            return resetIndex(parser, index, current, false);
-        }
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
-
-    advance(parser);
-    if (currentTokenType(parser) == TOKEN_SYMBOL_RIGHT_PAREN && nextTokenType(parser) == TOKEN_SYMBOL_LEFT_BRACKET) {
+	if (!matchCallableType(parser)) {
         return resetIndex(parser, index, current, false);
     }
+
+	// If the next token after the parameter list is a left bracket, then this is actually a function declaration without a return type annotation since the left bracket would be the start of the function body. 
+    // In this case, we should backtrack and try to parse it as a function declaration without a return type annotation instead of a function declaration with a return type annotation.
+    if (check(parser, TOKEN_SYMBOL_LEFT_BRACKET)) {
+        *hasReturnType = false;
+        return resetIndex(parser, index, current, false);
+	}
 
     *hasReturnType = true;
     return resetIndex(parser, index, current, true);

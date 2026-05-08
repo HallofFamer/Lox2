@@ -604,7 +604,8 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 
         CallableTypeInfo* calleeType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(typeChecker->vm), NULL);
         calleeType->attribute.isAsync = callee->attribute.isAsync;
-        deriveCalleeType(typeChecker, ast, calleeType);       
+        deriveCalleeType(typeChecker, ast, calleeType);   
+
         callee->type = (TypeInfo*)calleeType;
         TypeInfoArrayAdd(typeChecker->vm->tempTypes, callee->type);
         function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false, calleeType->attribute.isLambda);
@@ -635,7 +636,10 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 
 static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
     Ast* receiver = astGetChild(ast, 0);
-    if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type)) return;
+    if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type)) {
+        return;
+    }
+
     Ast* args = astGetChild(ast, 1);
     ObjString* methodName = createStringFromToken(typeChecker->vm, ast->token);
     TypeInfo* baseType = typeTableMethodLookup(receiver->type, methodName);
