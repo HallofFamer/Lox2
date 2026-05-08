@@ -117,11 +117,11 @@ static void consume(Parser* parser, TokenKind type, const char* message) {
 }
 
 static void consumerTerminator(Parser* parser, const char* message) {
-    if (parser->current.type == TOKEN_SYMBOL_SEMICOLON) {
+    if (parser->current.type == TOKEN_KIND_SEMICOLON) {
         advance(parser);
         return;
     }
-    else if (newLineBeforePrevious(parser) || parser->current.type == TOKEN_SYMBOL_RIGHT_BRACE || parser->current.type == TOKEN_SYMBOL_EOF) {
+    else if (newLineBeforePrevious(parser) || parser->current.type == TOKEN_KIND_RIGHT_BRACE || parser->current.type == TOKEN_SYMBOL_EOF) {
         return;
     }
     parseErrorAtCurrent(parser, message);
@@ -307,7 +307,7 @@ static void synchronize(Parser* parser) {
     parser->panicMode = false;
 
     while (parser->current.type != TOKEN_SYMBOL_EOF) {
-        if (previousTokenType(parser) == TOKEN_SYMBOL_SEMICOLON) return;
+        if (previousTokenType(parser) == TOKEN_KIND_SEMICOLON) return;
 
         switch (parser->current.type) {
             case TOKEN_SYMBOL_ASYNC:
@@ -354,16 +354,16 @@ static Ast* argumentList(Parser* parser) {
     Ast* argList = emptyAst(AST_LIST_EXPR, previousToken(parser));
     uint8_t argCount = 0;
 
-    if (!check(parser, TOKEN_SYMBOL_RIGHT_PAREN)) {
+    if (!check(parser, TOKEN_KIND_RIGHT_PAREN)) {
         do {
             Ast* child = expression(parser);
             if (argCount == UINT8_MAX) parseErrorAtPrevious(parser, "Can't have more than 255 arguments.");
             astAppendChild(argList, child);
             argCount++;
-        } while (match(parser, TOKEN_SYMBOL_COMMA));
+        } while (match(parser, TOKEN_KIND_COMMA));
     }
 
-    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after arguments.");
+    consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after arguments.");
     return argList;
 }
 
@@ -378,22 +378,22 @@ static Token identifierToken(Parser* parser, const char* message) {
         case TOKEN_SYMBOL_EQUAL_EQUAL:
         case TOKEN_SYMBOL_GREATER:
         case TOKEN_SYMBOL_LESS:
-        case TOKEN_SYMBOL_PLUS:
-        case TOKEN_SYMBOL_MINUS:
-        case TOKEN_SYMBOL_STAR:
-        case TOKEN_SYMBOL_SLASH:
-        case TOKEN_SYMBOL_MODULO:
+        case TOKEN_KIND_PLUS:
+        case TOKEN_KIND_MINUS:
+        case TOKEN_KIND_STAR:
+        case TOKEN_KIND_SLASH:
+        case TOKEN_KIND_MODULO:
         case TOKEN_SYMBOL_DOT_DOT:
             advance(parser);
             return previousToken(parser);
-        case TOKEN_SYMBOL_LEFT_BRACKET:
+        case TOKEN_KIND_LEFT_BRACKET:
             advance(parser);
-            if (match(parser, TOKEN_SYMBOL_RIGHT_BRACKET)) {
+            if (match(parser, TOKEN_KIND_RIGHT_BRACKET)) {
                 return syntheticToken(match(parser, TOKEN_SYMBOL_EQUAL) ? "[]=" : "[]");
             }
-        case TOKEN_SYMBOL_LEFT_PAREN:
+        case TOKEN_KIND_LEFT_PAREN:
             advance(parser);
-            if (match(parser, TOKEN_SYMBOL_RIGHT_PAREN)) {
+            if (match(parser, TOKEN_KIND_RIGHT_PAREN)) {
                 return syntheticToken("()");
             }
         default:
@@ -430,12 +430,12 @@ static Ast* callableType(Parser* parser) {
 
     consume(parser, TOKEN_SYMBOL_FUN, "Expect 'fun' keyword after return type declaration.");
     Token token = previousToken(parser);
-    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after 'fun' keyword.");
+    consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect '(' after 'fun' keyword.");
     Ast* paramTypes = emptyAst(AST_LIST_EXPR, previousToken(parser));
     Ast* paramType = NULL;
     int arity = 0;
 
-    if (!check(parser, TOKEN_SYMBOL_RIGHT_PAREN)) {
+    if (!check(parser, TOKEN_KIND_RIGHT_PAREN)) {
         do {
             arity++;
             if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
@@ -445,10 +445,10 @@ static Ast* callableType(Parser* parser) {
             }
             else paramType = behaviorType(parser);
             astAppendChild(paramTypes, paramType);
-        } while (match(parser, TOKEN_SYMBOL_COMMA));
+        } while (match(parser, TOKEN_KIND_COMMA));
     }
 
-    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after param types.");
+    consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after param types.");
     Ast* type = newAst(AST_EXPR_TYPE, token, 2, returnType, paramTypes);
     type->attribute.isFunction = true;
     return type;
@@ -485,7 +485,7 @@ static Ast* genericType(Parser* parser) {
         }
         else paramType = behaviorType(parser);
         astAppendChild(paramTypes, paramType);
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
+    } while (match(parser, TOKEN_KIND_COMMA));
 
     consume(parser, TOKEN_SYMBOL_GREATER, "Expect '>' after generic parameter declaration.");
     Ast* type = newAst(AST_EXPR_TYPE, token, 1, paramTypes);
@@ -517,7 +517,7 @@ static Ast* invoke(Parser* parser, Token property, Ast* left, bool canAssign) {
 
 static Ast* genericInvoke(Parser* parser, Token property, Ast* left, bool isSuper) {
     Ast* typeParams = typeParameters(parser, property);
-    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect left parenthesis after type parameters.");
+    consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect left parenthesis after type parameters.");
     Ast* right = argumentList(parser);
     if (isSuper) return newAst(AST_EXPR_SUPER_INVOKE, property, 2, right, typeParams);
     return newAst(AST_EXPR_INVOKE, property, 3, left, right, typeParams);
@@ -530,7 +530,7 @@ static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) {
         Ast* right = expression(parser);
         return newAst(AST_EXPR_PROPERTY_SET, property, 2, left, right);
     }
-    else if (match(parser, TOKEN_SYMBOL_LEFT_PAREN)) {
+    else if (match(parser, TOKEN_KIND_LEFT_PAREN)) {
         return invoke(parser, property, left, canAssign);
     }
     else if (check(parser, TOKEN_SYMBOL_LESS)) {
@@ -542,7 +542,7 @@ static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) {
         do {
             advance(parser);
 
-            if (currentTokenType(parser) == TOKEN_SYMBOL_COMMA) {
+            if (currentTokenType(parser) == TOKEN_KIND_COMMA) {
                 advance(parser);
                 continue;
             }
@@ -591,7 +591,7 @@ static Ast* or_(Parser* parser, Token token, Ast* left, bool canAssign) {
 
 static Ast* subscript(Parser* parser, Token token, Ast* left, bool canAssign) {
     Ast* index = expression(parser);
-    consume(parser, TOKEN_SYMBOL_RIGHT_BRACKET, "Expect ']' after subscript.");
+    consume(parser, TOKEN_KIND_RIGHT_BRACKET, "Expect ']' after subscript.");
 
     if (canAssign && match(parser, TOKEN_SYMBOL_EQUAL)) {
         Ast* right = expression(parser);
@@ -608,13 +608,13 @@ static Ast* question(Parser* parser, Token token, Ast* left, bool canAssign) {
     if (match(parser, TOKEN_SYMBOL_DOT)) {
         expr = dot(parser, token, left, canAssign);
     }
-    else if (match(parser, TOKEN_SYMBOL_LEFT_BRACKET)) {
+    else if (match(parser, TOKEN_KIND_LEFT_BRACKET)) {
         expr = subscript(parser, token, left, canAssign);
     }
-    else if (match(parser, TOKEN_SYMBOL_LEFT_PAREN)) {
+    else if (match(parser, TOKEN_KIND_LEFT_PAREN)) {
         expr = call(parser, token, left, canAssign);
     }
-    else if (match(parser, TOKEN_SYMBOL_QUESTION) || match(parser, TOKEN_SYMBOL_COLON)) {
+    else if (match(parser, TOKEN_KIND_QUESTION) || match(parser, TOKEN_KIND_COLON)) {
         expr = nil(parser, previousToken(parser), left, canAssign);
     }
 
@@ -630,7 +630,7 @@ static Ast* grouping(Parser* parser, Token token, bool canAssign) {
     Ast* expr = emptyAst(AST_EXPR_GROUPING, token);
     Ast* child = expression(parser);
     astAppendChild(expr, child);
-    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after expression.");
+    consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after expression.");
     return expr;
 }
 
@@ -677,7 +677,7 @@ static Ast* array(Parser* parser, Token token, Ast* element) {
     Ast* elements = newAst(AST_LIST_EXPR, token, 1, element);
     uint8_t elementCount = 1;
 
-    while (match(parser, TOKEN_SYMBOL_COMMA)) {
+    while (match(parser, TOKEN_KIND_COMMA)) {
         element = expression(parser);
         astAppendChild(elements, element);
 
@@ -687,7 +687,7 @@ static Ast* array(Parser* parser, Token token, Ast* element) {
         elementCount++;
     }
 
-    consume(parser, TOKEN_SYMBOL_RIGHT_BRACKET, "Expect ']' after elements.");
+    consume(parser, TOKEN_KIND_RIGHT_BRACKET, "Expect ']' after elements.");
     return newAst(AST_EXPR_ARRAY, token, 1, elements);
 }
 
@@ -696,10 +696,10 @@ static Ast* dictionary(Parser* parser, Token token, Ast* key, Ast* value) {
     Ast* values = newAst(AST_LIST_EXPR, token, 1, value);
     uint8_t entryCount = 1;
 
-    while (match(parser, TOKEN_SYMBOL_COMMA)) {
+    while (match(parser, TOKEN_KIND_COMMA)) {
         Ast* key = expression(parser);
         astAppendChild(keys, key);
-        consume(parser, TOKEN_SYMBOL_COLON, "Expect ':' after entry key.");
+        consume(parser, TOKEN_KIND_COLON, "Expect ':' after entry key.");
         Ast* value = expression(parser);
         astAppendChild(values, value);
 
@@ -709,15 +709,15 @@ static Ast* dictionary(Parser* parser, Token token, Ast* key, Ast* value) {
         entryCount++;
     }
 
-    consume(parser, TOKEN_SYMBOL_RIGHT_BRACKET, "Expect ']' after entries.");
+    consume(parser, TOKEN_KIND_RIGHT_BRACKET, "Expect ']' after entries.");
     return newAst(AST_EXPR_DICTIONARY, token, 2, keys, values);
 }
 
 static Ast* collection(Parser* parser, Token token, bool canAssign) { 
-    if (match(parser, TOKEN_SYMBOL_RIGHT_BRACKET)) return emptyAst(AST_EXPR_ARRAY, token);
+    if (match(parser, TOKEN_KIND_RIGHT_BRACKET)) return emptyAst(AST_EXPR_ARRAY, token);
     else {
         Ast* first = expression(parser);
-        if (match(parser, TOKEN_SYMBOL_COLON)) {
+        if (match(parser, TOKEN_KIND_COLON)) {
             Ast* firstValue = expression(parser);
             return dictionary(parser, token, first, firstValue);
         }
@@ -743,7 +743,7 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
     do {
         advance(parser);
 
-        if (currentTokenType(parser) == TOKEN_SYMBOL_COMMA) {
+        if (currentTokenType(parser) == TOKEN_KIND_COMMA) {
             advance(parser);
             continue;
         }
@@ -781,7 +781,7 @@ static Ast* variable(Parser* parser, Token token, bool canAssign) {
         Ast* expr = expression(parser);
         return newAst(AST_EXPR_ASSIGN, token, 1, expr);
     }
-    else if (check(parser, TOKEN_SYMBOL_FUN) && checkNext(parser, TOKEN_SYMBOL_LEFT_PAREN)) {
+    else if (check(parser, TOKEN_SYMBOL_FUN) && checkNext(parser, TOKEN_KIND_LEFT_PAREN)) {
         Ast* returnType = emptyAst(AST_EXPR_TYPE, token);
         advance(parser);
         return function(parser, returnType, false, false, false);
@@ -803,12 +803,12 @@ static Ast* parameterList(Parser* parser, bool isLambda, Token token) {
     Ast* params = emptyAst(AST_LIST_VAR, token);
     int arity = 0;
 
-    if (match(parser, TOKEN_SYMBOL_RIGHT_PAREN)) return params;
+    if (match(parser, TOKEN_KIND_RIGHT_PAREN)) return params;
     if (match(parser, TOKEN_SYMBOL_DOT_DOT)) {
         Ast* param = parameter(parser, isLambda, "Expect variadic parameter name.");
         param->attribute.isVariadic = true;
         astAppendChild(params, param);
-        if (match(parser, TOKEN_SYMBOL_COMMA)) parseErrorAtPrevious(parser, "Cannot have more parameters following variadic parameter.");
+        if (match(parser, TOKEN_KIND_COMMA)) parseErrorAtPrevious(parser, "Cannot have more parameters following variadic parameter.");
         return params;
     }
 
@@ -817,7 +817,7 @@ static Ast* parameterList(Parser* parser, bool isLambda, Token token) {
         if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 parameters.");
         Ast* param = parameter(parser, isLambda, "Expect parameter name");
         astAppendChild(params, param);
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
+    } while (match(parser, TOKEN_KIND_COMMA));
     return params;
 }
 
@@ -832,7 +832,7 @@ static Ast* typeParameters(Parser* parser, Token token) {
         consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect type parameter name.");
         Ast* typeParam = emptyAst(AST_EXPR_TYPE, previousToken(parser));
         astAppendChild(typeParams, typeParam);
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
+    } while (match(parser, TOKEN_KIND_COMMA));
 
     consume(parser, TOKEN_SYMBOL_GREATER, "Expect '>' after type parameters.");
     return typeParams;
@@ -840,18 +840,18 @@ static Ast* typeParameters(Parser* parser, Token token) {
 
 static Ast* functionParameters(Parser* parser) {
     Token token = previousToken(parser);
-    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after function keyword/name.");
-    Ast* params = check(parser, TOKEN_SYMBOL_RIGHT_PAREN) ? emptyAst(AST_LIST_VAR, token) : parameterList(parser, false, token);
-    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after parameters.");
-    consume(parser, TOKEN_SYMBOL_LEFT_BRACE, "Expect '{' before function body.");
+    consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect '(' after function keyword/name.");
+    Ast* params = check(parser, TOKEN_KIND_RIGHT_PAREN) ? emptyAst(AST_LIST_VAR, token) : parameterList(parser, false, token);
+    consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after parameters.");
+    consume(parser, TOKEN_KIND_LEFT_BRACE, "Expect '{' before function body.");
     return params;
 }
 
 static Ast* lambdaParameters(Parser* parser) {
     Token token = previousToken(parser);
-    if (!match(parser, TOKEN_SYMBOL_PIPE)) return emptyAst(AST_LIST_VAR, token);
+    if (!match(parser, TOKEN_KIND_PIPE)) return emptyAst(AST_LIST_VAR, token);
     Ast* params = parameterList(parser, true, token);
-    consume(parser, TOKEN_SYMBOL_PIPE, "Expect '|' after lambda parameters.");
+    consume(parser, TOKEN_KIND_PIPE, "Expect '|' after lambda parameters.");
     return params;
 }
 
@@ -924,14 +924,14 @@ static Ast* fields(Parser* parser, Token* name) {
 static Ast* methods(Parser* parser, Token* name) {
     Ast* methodList = emptyAst(AST_LIST_METHOD, *name);
 
-    while (!check(parser, TOKEN_SYMBOL_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
+    while (!check(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
         bool isAsync = false, isClass = false, isInitializer = false, isVoid = false, hasReturnType = false;
         Ast* returnType = NULL;
         if (match(parser, TOKEN_SYMBOL_ASYNC)) isAsync = true;
         if (match(parser, TOKEN_SYMBOL_CLASS)) isClass = true;
         if (match(parser, TOKEN_SYMBOL_VOID)) isVoid = true;
 
-        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER) || (check(parser, TOKEN_SYMBOL_IDENTIFIER) && tokenIsOperator(nextToken(parser)) && (checkNextN(parser, 2, TOKEN_SYMBOL_LEFT_PAREN) || checkNextN(parser, 3, TOKEN_SYMBOL_LEFT_PAREN)))) {
+        if (checkBoth(parser, TOKEN_SYMBOL_IDENTIFIER) || (check(parser, TOKEN_SYMBOL_IDENTIFIER) && tokenIsOperator(nextToken(parser)) && (checkNextN(parser, 2, TOKEN_KIND_LEFT_PAREN) || checkNextN(parser, 3, TOKEN_KIND_LEFT_PAREN)))) {
             hasReturnType = true;
             returnType = behaviorType(parser);
         }
@@ -994,7 +994,7 @@ static Ast* traits(Parser* parser, Token* name) {
 
         Ast* trait = type_(parser, false, false);
         astAppendChild(traitList, trait);
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
+    } while (match(parser, TOKEN_KIND_COMMA));
 
     return traitList;
 }
@@ -1003,21 +1003,21 @@ static Ast* class_(Parser* parser, Token token, bool canAssign) {
     Token className = syntheticToken("@");
     Ast* superClass = superclass_(parser);
     Ast* traitList = traits(parser, &className);
-    consume(parser, TOKEN_SYMBOL_LEFT_BRACE, "Expect '{' before class body.");
+    consume(parser, TOKEN_KIND_LEFT_BRACE, "Expect '{' before class body.");
 
     Ast* fieldList = fields(parser, &className);
     Ast* methodList = methods(parser, &className);
-    consume(parser, TOKEN_SYMBOL_RIGHT_BRACE, "Expect '}' after class body.");
+    consume(parser, TOKEN_KIND_RIGHT_BRACE, "Expect '}' after class body.");
     return newAst(AST_EXPR_CLASS, className, 4, superClass, traitList, fieldList, methodList);
 }
 
 static Ast* trait(Parser* parser, Token token, bool canAssign) {
     Token traitName = syntheticToken("@");
     Ast* traitList = traits(parser, &traitName);
-    consume(parser, TOKEN_SYMBOL_LEFT_BRACE, "Expect '{' before trait body.");
+    consume(parser, TOKEN_KIND_LEFT_BRACE, "Expect '{' before trait body.");
 
     Ast* methodList = methods(parser, &traitName);
-    consume(parser, TOKEN_SYMBOL_RIGHT_BRACE, "Expect '}' after trait body.");
+    consume(parser, TOKEN_KIND_RIGHT_BRACE, "Expect '}' after trait body.");
     return newAst(AST_EXPR_TRAIT, traitName, 2, traitList, methodList);
 }
 
@@ -1035,7 +1035,7 @@ static Ast* super_(Parser* parser, Token token, bool canAssign) {
         do {
             advance(parser);
 
-            if (currentTokenType(parser) == TOKEN_SYMBOL_COMMA) {
+            if (currentTokenType(parser) == TOKEN_KIND_COMMA) {
                 advance(parser);
                 continue;
             }
@@ -1066,7 +1066,7 @@ static Ast* super_(Parser* parser, Token token, bool canAssign) {
 
         return emptyAst(AST_EXPR_SUPER_GET, method);
     }
-    else if (match(parser, TOKEN_SYMBOL_LEFT_PAREN)) {
+    else if (match(parser, TOKEN_KIND_LEFT_PAREN)) {
         Ast* arguments = argumentList(parser);
         return newAst(AST_EXPR_SUPER_INVOKE, method, 1, arguments);
     }
@@ -1083,8 +1083,8 @@ static Ast* unary(Parser* parser, Token token, bool canAssign) {
 }
 
 static Ast* yield(Parser* parser, Token token, bool canAssign) {
-    if (match(parser, TOKEN_SYMBOL_RIGHT_PAREN) || match(parser, TOKEN_SYMBOL_RIGHT_BRACKET) || match(parser, TOKEN_SYMBOL_RIGHT_BRACE)
-        || match(parser, TOKEN_SYMBOL_COMMA) || match(parser, TOKEN_SYMBOL_SEMICOLON)) 
+    if (match(parser, TOKEN_KIND_RIGHT_PAREN) || match(parser, TOKEN_KIND_RIGHT_BRACKET) || match(parser, TOKEN_KIND_RIGHT_BRACE)
+        || match(parser, TOKEN_KIND_COMMA) || match(parser, TOKEN_KIND_SEMICOLON)) 
     {
         return emptyAst(AST_EXPR_YIELD, token);
     }
@@ -1100,7 +1100,7 @@ static Ast* async(Parser* parser, Token token, bool canAssign) {
     if (match(parser, TOKEN_SYMBOL_FUN)) {
         return function(parser, emptyAst(AST_EXPR_TYPE, emptyToken()), true, false, false);
     }
-    else if (match(parser, TOKEN_SYMBOL_LEFT_BRACE)) {
+    else if (match(parser, TOKEN_KIND_LEFT_BRACE)) {
         return function(parser, emptyAst(AST_EXPR_TYPE, emptyToken()), true, true, false);
     }
     else {
@@ -1115,22 +1115,22 @@ static Ast* await(Parser* parser, Token token, bool canAssign) {
 }
 
 ParseRule parseRules[] = {
-    [TOKEN_SYMBOL_LEFT_PAREN]     = {grouping,      call,        PREC_CALL,        true},
-    [TOKEN_SYMBOL_RIGHT_PAREN]    = {NULL,          NULL,        PREC_NONE,        false},
-    [TOKEN_SYMBOL_LEFT_BRACKET]   = {collection,    subscript,   PREC_CALL,        true},
-    [TOKEN_SYMBOL_RIGHT_BRACKET]  = {NULL,          NULL,        PREC_NONE,        false},
-    [TOKEN_SYMBOL_LEFT_BRACE]     = {lambda,        NULL,        PREC_NONE,        true},
-    [TOKEN_SYMBOL_RIGHT_BRACE]    = {NULL,          NULL,        PREC_NONE,        false},
-    [TOKEN_SYMBOL_COLON]          = {NULL,          NULL,        PREC_NONE,        false},
-    [TOKEN_SYMBOL_COMMA]          = {NULL,          NULL,        PREC_NONE,        false},
-    [TOKEN_SYMBOL_MINUS]          = {unary,         binary,      PREC_TERM,        true},
-    [TOKEN_SYMBOL_MODULO]         = {NULL,          binary,      PREC_FACTOR,      false},
-    [TOKEN_SYMBOL_PIPE]           = {NULL,          NULL,        PREC_NONE,        false},
-    [TOKEN_SYMBOL_PLUS]           = {NULL,          binary,      PREC_TERM,        false},
-    [TOKEN_SYMBOL_QUESTION]       = {NULL,          question,    PREC_CALL,        false},
-    [TOKEN_SYMBOL_SEMICOLON]      = {NULL,          NULL,        PREC_NONE,        true},
-    [TOKEN_SYMBOL_SLASH]          = {NULL,          binary,      PREC_FACTOR,      false},
-    [TOKEN_SYMBOL_STAR]           = {NULL,          binary,      PREC_FACTOR,      false},
+    [TOKEN_KIND_LEFT_PAREN]       = {grouping,      call,        PREC_CALL,        true},
+    [TOKEN_KIND_RIGHT_PAREN]      = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_KIND_LEFT_BRACKET]     = {collection,    subscript,   PREC_CALL,        true},
+    [TOKEN_KIND_RIGHT_BRACKET]    = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_KIND_LEFT_BRACE]       = {lambda,        NULL,        PREC_NONE,        true},
+    [TOKEN_KIND_RIGHT_BRACE]      = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_KIND_COLON]            = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_KIND_COMMA]            = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_KIND_MINUS]            = {unary,         binary,      PREC_TERM,        true},
+    [TOKEN_KIND_MODULO]           = {NULL,          binary,      PREC_FACTOR,      false},
+    [TOKEN_KIND_PIPE]             = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_KIND_PLUS]             = {NULL,          binary,      PREC_TERM,        false},
+    [TOKEN_KIND_QUESTION]         = {NULL,          question,    PREC_CALL,        false},
+    [TOKEN_KIND_SEMICOLON]        = {NULL,          NULL,        PREC_NONE,        true},
+    [TOKEN_KIND_SLASH]            = {NULL,          binary,      PREC_FACTOR,      false},
+    [TOKEN_KIND_STAR]             = {NULL,          binary,      PREC_FACTOR,      false},
     [TOKEN_SYMBOL_BANG]           = {unary,         NULL,        PREC_NONE,        true},
     [TOKEN_SYMBOL_BANG_EQUAL]     = {NULL,          binary,      PREC_EQUALITY,    false},   
     [TOKEN_SYMBOL_EQUAL]          = {NULL,          NULL,        PREC_NONE,        false},
@@ -1230,12 +1230,12 @@ static Ast* expression(Parser* parser) {
 static Ast* block(Parser* parser) {
     Token token = previousToken(parser);
     Ast* stmtList = emptyAst(AST_LIST_STMT, token);
-    while (!check(parser, TOKEN_SYMBOL_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
+    while (!check(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
         Ast* decl = declaration(parser);
         astAppendChild(stmtList, decl);
     }
 
-    consume(parser, TOKEN_SYMBOL_RIGHT_BRACE, "Expect '}' after block.");
+    consume(parser, TOKEN_KIND_RIGHT_BRACE, "Expect '}' after block.");
     return newAst(AST_STMT_BLOCK, token, 1, stmtList);
 }
 
@@ -1268,7 +1268,7 @@ static Ast* expressionStatement(Parser* parser) {
 static Ast* forStatement(Parser* parser) {
     Token token = previousToken(parser);
     Ast* stmt = emptyAst(AST_STMT_FOR, token);
-    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after 'for'.");
+    consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect '(' after 'for'.");
 
     if (!match(parser, TOKEN_SYMBOL_VAL) && !match(parser, TOKEN_SYMBOL_VAR)) {
         parseErrorAtCurrent(parser, "Expect 'val' or 'var' keyword after '(' in for loop.");
@@ -1276,16 +1276,16 @@ static Ast* forStatement(Parser* parser) {
     bool isMutable = (previousTokenType(parser) == TOKEN_SYMBOL_VAR);
     Ast* decl = emptyAst(AST_LIST_VAR, previousToken(parser));
 
-    if (match(parser, TOKEN_SYMBOL_LEFT_PAREN)) { 
+    if (match(parser, TOKEN_KIND_LEFT_PAREN)) { 
         Ast* key = identifier(parser, "Expect first variable name after '('.");
         key->attribute.isMutable = isMutable;
         astAppendChild(decl, key);
-        consume(parser, TOKEN_SYMBOL_COMMA, "Expect ',' after first variable declaration.");
+        consume(parser, TOKEN_KIND_COMMA, "Expect ',' after first variable declaration.");
         
         Ast* value = identifier(parser, "Expect second variable name after ','.");
         value->attribute.isMutable = isMutable;
         astAppendChild(decl, value);
-        consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after second variable declaration.");
+        consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after second variable declaration.");
     }
     else {
         Ast* element = identifier(parser, "Expect variable name after 'var'.");
@@ -1293,18 +1293,18 @@ static Ast* forStatement(Parser* parser) {
         astAppendChild(decl, element);
     }
 
-    consume(parser, TOKEN_SYMBOL_COLON, "Expect ':' after loop variable name.");
+    consume(parser, TOKEN_KIND_COLON, "Expect ':' after loop variable name.");
     Ast* expr = expression(parser);
-    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after loop expression.");
+    consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after loop expression.");
     Ast* body = statement(parser);
     return newAst(AST_STMT_FOR, token, 3, decl, expr, body);
 }
 
 static Ast* ifStatement(Parser* parser) {
     Token token = previousToken(parser);
-    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after 'if'.");
+    consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect '(' after 'if'.");
     Ast* condition = expression(parser);
-    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after condition.");
+    consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after condition.");
     Ast* thenBranch = statement(parser);
 
     Ast* stmt = newAst(AST_STMT_IF, token, 2, condition, thenBranch);
@@ -1324,7 +1324,7 @@ static Ast* requireStatement(Parser* parser) {
 
 static Ast* returnStatement(Parser* parser) {
     Token token = previousToken(parser);
-    if (match(parser, TOKEN_SYMBOL_SEMICOLON) || !getRule(parser->current.type)->startExpr) {
+    if (match(parser, TOKEN_KIND_SEMICOLON) || !getRule(parser->current.type)->startExpr) {
         return emptyAst(AST_STMT_RETURN, token);
     }
     else {
@@ -1336,18 +1336,18 @@ static Ast* returnStatement(Parser* parser) {
 
 static Ast* switchStatement(Parser* parser) {
     Ast* stmt = emptyAst(AST_STMT_SWITCH, previousToken(parser));
-    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after 'switch'.");
+    consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect '(' after 'switch'.");
     Ast* expr = expression(parser);
     astAppendChild(stmt, expr);
 
-    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after value.");
-    consume(parser, TOKEN_SYMBOL_LEFT_BRACE, "Expect '{' before switch cases.");
+    consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after value.");
+    consume(parser, TOKEN_KIND_LEFT_BRACE, "Expect '{' before switch cases.");
     Ast* caseListStmt = emptyAst(AST_LIST_STMT, previousToken(parser));
     astAppendChild(stmt, caseListStmt);
 
     int state = 0;
     int caseCount = 0;
-    while (!match(parser, TOKEN_SYMBOL_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
+    while (!match(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
         if (match(parser, TOKEN_SYMBOL_CASE) || match(parser, TOKEN_SYMBOL_DEFAULT)) {
             Token caseToken = previousToken(parser);
             if (state == 1) caseCount++;
@@ -1356,7 +1356,7 @@ static Ast* switchStatement(Parser* parser) {
             if (caseToken.type == TOKEN_SYMBOL_CASE) {
                 state = 1;
                 Ast* caseLabel = expression(parser);
-                consume(parser, TOKEN_SYMBOL_COLON, "Expect ':' after case value.");
+                consume(parser, TOKEN_KIND_COLON, "Expect ':' after case value.");
 
                 Token token = previousToken(parser);
                 Ast* caseBody = statement(parser);
@@ -1365,7 +1365,7 @@ static Ast* switchStatement(Parser* parser) {
             }
             else {
                 state = 2;
-                consume(parser, TOKEN_SYMBOL_COLON, "Expect ':' after 'default'.");
+                consume(parser, TOKEN_KIND_COLON, "Expect ':' after 'default'.");
                 Ast* defaultBody = statement(parser);
                 Ast* defaultStmt = newAst(AST_STMT_DEFAULT, syntheticToken("default"), 1, defaultBody);
                 astAppendChild(stmt, defaultStmt);
@@ -1389,12 +1389,12 @@ static Ast* tryStatement(Parser* parser) {
     astAppendChild(stmt, tryStmt);
 
     if (match(parser, TOKEN_SYMBOL_CATCH)) {
-        consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after 'catch'");
+        consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect '(' after 'catch'");
         consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect type name to catch");
         Token exceptionType = previousToken(parser);
         Ast* exceptionVar = identifier(parser, "Expect identifier after exception type.");
 
-        consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after 'catch' statement");
+        consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after 'catch' statement");
         Ast* catchBody = statement(parser);
         Ast* catchStmt = newAst(AST_STMT_CATCH, exceptionType, 2, exceptionVar, catchBody);
         astAppendChild(stmt, catchStmt);
@@ -1437,9 +1437,9 @@ static Ast* usingStatement(Parser* parser) {
 
 static Ast* whileStatement(Parser* parser) {
     Token token = previousToken(parser);
-    consume(parser, TOKEN_SYMBOL_LEFT_PAREN, "Expect '(' after 'while'.");
+    consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect '(' after 'while'.");
     Ast* condition = expression(parser);
-    consume(parser, TOKEN_SYMBOL_RIGHT_PAREN, "Expect ')' after loop condition.");
+    consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after loop condition.");
     Ast* body = statement(parser);
     return newAst(AST_STMT_WHILE, token, 2, condition, body);
 }
@@ -1447,7 +1447,7 @@ static Ast* whileStatement(Parser* parser) {
 static Ast* yieldStatement(Parser* parser) {
     Token token = previousToken(parser);
     bool isYieldFrom = match(parser, TOKEN_SYMBOL_FROM);
-    if (match(parser, TOKEN_SYMBOL_SEMICOLON) || !getRule(parser->current.type)->startExpr) {
+    if (match(parser, TOKEN_KIND_SEMICOLON) || !getRule(parser->current.type)->startExpr) {
         return emptyAst(AST_STMT_YIELD, token);
     }
 
@@ -1498,7 +1498,7 @@ static Ast* statement(Parser* parser) {
     else if (match(parser, TOKEN_SYMBOL_YIELD)) {
         return yieldStatement(parser);
     }
-    else if (check(parser, TOKEN_SYMBOL_LEFT_BRACE) && !checkNext(parser, TOKEN_SYMBOL_PIPE)) {
+    else if (check(parser, TOKEN_KIND_LEFT_BRACE) && !checkNext(parser, TOKEN_KIND_PIPE)) {
         advance(parser);
         return block(parser);
     }
@@ -1522,10 +1522,10 @@ static Ast* classDeclaration(Parser* parser) {
     Ast* superClass = superclass_(parser);
     Ast* traitList = traits(parser, &name);
 
-    consume(parser, TOKEN_SYMBOL_LEFT_BRACE, "Expect '{' before class body.");
+    consume(parser, TOKEN_KIND_LEFT_BRACE, "Expect '{' before class body.");
     Ast* fieldList = fields(parser, &name);
     Ast* methodList = methods(parser, &name);
-    consume(parser, TOKEN_SYMBOL_RIGHT_BRACE, "Expect '}' after class body.");
+    consume(parser, TOKEN_KIND_RIGHT_BRACE, "Expect '}' after class body.");
     Ast* _class = newAst(AST_EXPR_CLASS, name, 4, superClass, traitList, fieldList, methodList);
 
     Ast* ast = newAst(AST_DECL_CLASS, name, 1, _class);
@@ -1566,16 +1566,16 @@ static bool matchCallableType(Parser* parser) {
 	// Next we need to match the fun keyword and a list of parameter types in parentheses. 
     // If any of this doesn't match, then we should backtrack and try to parse it as an expression instead.
 	if (!match(parser, TOKEN_SYMBOL_FUN)) return resetIndex(parser, index, current, false);
-	if (!match(parser, TOKEN_SYMBOL_LEFT_PAREN)) return resetIndex(parser, index, current, false);
+	if (!match(parser, TOKEN_KIND_LEFT_PAREN)) return resetIndex(parser, index, current, false);
 
 	// Then, we need to match a list of parameter types. Each parameter type can be any valid type annotation, and they are separated by commas.
     do {
         if (!matchType(parser)) return resetIndex(parser, index, current, false);
-	} while (match(parser, TOKEN_SYMBOL_COMMA));
+	} while (match(parser, TOKEN_KIND_COMMA));
 	
 	// Finally, we need to match the closing parenthesis. If it doesn't match, then we should backtrack and try to parse it as an expression instead. 
     // If it does match, then this is a valid callable type annotation and we can return true.
-    if (!match(parser, TOKEN_SYMBOL_RIGHT_PAREN)) return resetIndex(parser, index, current, false);
+    if (!match(parser, TOKEN_KIND_RIGHT_PAREN)) return resetIndex(parser, index, current, false);
 	return resetIndex(parser, index, current, true);
 }
 
@@ -1591,7 +1591,7 @@ static bool matchGenericType(Parser* parser) {
 	// Then, we need to match a list of type parameters. Each type parameter can be any valid type annotation, and they are separated by commas. If any of the type parameters don't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead.
     do {
         if (!matchType(parser)) return resetIndex(parser, index, current, false);
-	} while (match(parser, TOKEN_SYMBOL_COMMA));
+	} while (match(parser, TOKEN_KIND_COMMA));
 
 	// Finally, we need to match the closing greater than symbol. 
     // If it doesn't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead. If it does match, then this is a valid generic type annotation and we can return true.
@@ -1620,7 +1620,7 @@ static bool checkCallableReturnType(Parser* parser, bool* hasReturnType) {
 
 	// If the next token after the parameter list is a left bracket, then this is actually a function declaration without a return type annotation since the left bracket would be the start of the function body. 
     // In this case, we should backtrack and try to parse it as a function declaration without a return type annotation instead of a function declaration with a return type annotation.
-    if (check(parser, TOKEN_SYMBOL_LEFT_BRACKET)) {
+    if (check(parser, TOKEN_KIND_LEFT_BRACKET)) {
         *hasReturnType = false;
         return resetIndex(parser, index, current, false);
 	}
@@ -1639,10 +1639,10 @@ static bool checkGenericReturnType(Parser* parser, bool* hasReturnType) {
         if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && currentTokenType(parser) != TOKEN_SYMBOL_VOID) {
             return resetIndex(parser, index, current, false);
         }
-        else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
+        else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_KIND_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
             return resetIndex(parser, index, current, false);
         }
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
+    } while (match(parser, TOKEN_KIND_COMMA));
 
     advance(parser);
     if (currentTokenType(parser) != TOKEN_SYMBOL_GREATER) return resetIndex(parser, index, current, false);
@@ -1651,9 +1651,9 @@ static bool checkGenericReturnType(Parser* parser, bool* hasReturnType) {
 	if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER) return resetIndex(parser, index, current, false);
 
     advance(parser); 
-    if (currentTokenType(parser) != TOKEN_SYMBOL_LEFT_PAREN) return resetIndex(parser, index, current, false);
+    if (currentTokenType(parser) != TOKEN_KIND_LEFT_PAREN) return resetIndex(parser, index, current, false);
     
-	if (nextTokenType(parser) == TOKEN_SYMBOL_RIGHT_PAREN) {
+	if (nextTokenType(parser) == TOKEN_KIND_RIGHT_PAREN) {
         *hasReturnType = true;
         return resetIndex(parser, index, current, true);
     }
@@ -1663,16 +1663,16 @@ static bool checkGenericReturnType(Parser* parser, bool* hasReturnType) {
         if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && currentTokenType(parser) != TOKEN_SYMBOL_VOID) {
             return resetIndex(parser, index, current, false);
         }
-        else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_SYMBOL_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
+        else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_KIND_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
             return resetIndex(parser, index, current, false);
         }
-    } while (match(parser, TOKEN_SYMBOL_COMMA));
+    } while (match(parser, TOKEN_KIND_COMMA));
 
     advance(parser);
-    if (currentTokenType(parser) != TOKEN_SYMBOL_RIGHT_PAREN) return resetIndex(parser, index, current, false);
+    if (currentTokenType(parser) != TOKEN_KIND_RIGHT_PAREN) return resetIndex(parser, index, current, false);
 
     advance(parser);
-    if (currentTokenType(parser) != TOKEN_SYMBOL_LEFT_BRACKET) return resetIndex(parser, index, current, false);
+    if (currentTokenType(parser) != TOKEN_KIND_LEFT_BRACKET) return resetIndex(parser, index, current, false);
 
 	*hasReturnType = true;
     return resetIndex(parser, index, current, true);
@@ -1800,9 +1800,9 @@ static Ast* traitDeclaration(Parser* parser) {
     Ast* typeParams = check(parser, TOKEN_SYMBOL_LESS) ? typeParameters(parser, name) : NULL;
     Ast* traitList = traits(parser, &name);
 
-    consume(parser, TOKEN_SYMBOL_LEFT_BRACE, "Expect '{' before trait body.");
+    consume(parser, TOKEN_KIND_LEFT_BRACE, "Expect '{' before trait body.");
     Ast* methodList = methods(parser, &name);
-    consume(parser, TOKEN_SYMBOL_RIGHT_BRACE, "Expect '}' after trait body.");
+    consume(parser, TOKEN_KIND_RIGHT_BRACE, "Expect '}' after trait body.");
     Ast* trait = newAst(AST_EXPR_TRAIT, name, 2, traitList, methodList);
     Ast* ast = newAst(AST_DECL_TRAIT, name, 1, trait);
 

@@ -6,22 +6,22 @@
 #include "../common/buffer.h"
 
 const char* tokenNames[] = {
-    [TOKEN_SYMBOL_LEFT_PAREN]     = "TOKEN_LEFT_PAREN",
-    [TOKEN_SYMBOL_RIGHT_PAREN]    = "TOKEN_RIGHT_PAREN",
-    [TOKEN_SYMBOL_LEFT_BRACKET]   = "TOKEN_LEFT_BRACKET",
-    [TOKEN_SYMBOL_RIGHT_BRACKET]  = "TOKEN_RIGHT_BRACKET",
-    [TOKEN_SYMBOL_LEFT_BRACE]     = "TOKEN_LEFT_BRACE",
-    [TOKEN_SYMBOL_RIGHT_BRACE]    = "TOKEN_RIGHT_BRACE",
-    [TOKEN_SYMBOL_COLON]          = "TOKEN_COLON",
-    [TOKEN_SYMBOL_COMMA]          = "TOKEN_COMMA",
-    [TOKEN_SYMBOL_MINUS]          = "TOKEN_MINUS",
-    [TOKEN_SYMBOL_MODULO]         = "TOKEN_MODULO",
-    [TOKEN_SYMBOL_PIPE]           = "TOKEN_PIPE",
-    [TOKEN_SYMBOL_PLUS]           = "TOKEN_PLUS",
-    [TOKEN_SYMBOL_QUESTION]       = "TOKEN_QUESTION",
-    [TOKEN_SYMBOL_SEMICOLON]      = "TOKEN_SEMICOLON",
-    [TOKEN_SYMBOL_SLASH]          = "TOKEN_SLASH",
-    [TOKEN_SYMBOL_STAR]           = "TOKEN_STAR", 
+    [TOKEN_KIND_LEFT_PAREN]     = "TOKEN_LEFT_PAREN",
+    [TOKEN_KIND_RIGHT_PAREN]    = "TOKEN_RIGHT_PAREN",
+    [TOKEN_KIND_LEFT_BRACKET]   = "TOKEN_LEFT_BRACKET",
+    [TOKEN_KIND_RIGHT_BRACKET]  = "TOKEN_RIGHT_BRACKET",
+    [TOKEN_KIND_LEFT_BRACE]     = "TOKEN_LEFT_BRACE",
+    [TOKEN_KIND_RIGHT_BRACE]    = "TOKEN_RIGHT_BRACE",
+    [TOKEN_KIND_COLON]          = "TOKEN_COLON",
+    [TOKEN_KIND_COMMA]          = "TOKEN_COMMA",
+    [TOKEN_KIND_MINUS]          = "TOKEN_MINUS",
+    [TOKEN_KIND_MODULO]         = "TOKEN_MODULO",
+    [TOKEN_KIND_PIPE]           = "TOKEN_PIPE",
+    [TOKEN_KIND_PLUS]           = "TOKEN_PLUS",
+    [TOKEN_KIND_QUESTION]       = "TOKEN_QUESTION",
+    [TOKEN_KIND_SEMICOLON]      = "TOKEN_SEMICOLON",
+    [TOKEN_KIND_SLASH]          = "TOKEN_SLASH",
+    [TOKEN_KIND_STAR]           = "TOKEN_STAR", 
     [TOKEN_SYMBOL_BANG]           = "TOKEN_BANG",
     [TOKEN_SYMBOL_BANG_EQUAL]     = "TOKEN_BANG_EQUAL",
     [TOKEN_SYMBOL_EQUAL]          = "TOKEN_EQUAL",
@@ -123,13 +123,13 @@ bool tokenIsOperator(Token token) {
         case TOKEN_SYMBOL_EQUAL_EQUAL:
         case TOKEN_SYMBOL_GREATER:
         case TOKEN_SYMBOL_LESS:
-        case TOKEN_SYMBOL_PLUS:
-        case TOKEN_SYMBOL_MINUS:
-        case TOKEN_SYMBOL_STAR:
-        case TOKEN_SYMBOL_SLASH:
-        case TOKEN_SYMBOL_MODULO:
+        case TOKEN_KIND_PLUS:
+        case TOKEN_KIND_MINUS:
+        case TOKEN_KIND_STAR:
+        case TOKEN_KIND_SLASH:
+        case TOKEN_KIND_MODULO:
         case TOKEN_SYMBOL_DOT_DOT:
-        case TOKEN_SYMBOL_LEFT_BRACKET:
+        case TOKEN_KIND_LEFT_BRACKET:
             return true;
         default:
             return false;
