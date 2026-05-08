@@ -1,0 +1,27 @@
+namespace examples.scripts
+
+using clox.std.util.Random
+
+val rand = Random()
+val num = rand.nextIntBounded(100)
+var guessed = nil
+var totalAttempts = 0
+
+try { 
+    while (totalAttempts < 10) { 
+        println("Enter your guess: ")
+        guessed = Int.parse(read())
+        
+        if (guessed > num) println("The guessed number is too high!")
+        else if (guessed < num) println("The guessed number is too low!")
+        else break
+        
+        totalAttempts = totalAttempts + 1
+    }
+
+    if (totalAttempts == 10) println("Game over: You have used up all 10 attempts.")
+    else println("Congratulations! You guessed the correct number ${num}!") 
+}
+catch(FormatException e) { 
+    println("Game Over: The guessed number must be a valid number.")
+}

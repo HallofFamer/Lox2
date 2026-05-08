@@ -1,15 +1,25 @@
-namespace test.features
-using clox.std.collection.Array
+namespace examples.library
 
 class Fraction {
+
+    class var shouldReduce = false
+    val Int numerator
+    val Int denominator
 
     __init__(Int numerator, Int denominator){
         if(denominator == 0){
             throw IllegalArgumentException("Denominator of a Fraction object cannot be 0.")
         }
 
-        this.numerator = numerator
-        this.denominator = denominator
+        if (Fraction.shouldReduce){
+            val gcd = numerator.gcd(denominator)
+            this.numerator = numerator / gcd
+            this.denominator = denominator / gcd
+        } 
+        else{
+            this.numerator = numerator
+            this.denominator = denominator
+        }
     }
 
     Fraction reduce(){

@@ -1,0 +1,15 @@
+namespace examples.scripts
+using examples.lib.Sort
+
+val array = [3, 1, 8, 10, 2, 6, 4, 9, 5, 7]
+println("Original array: ${array}")
+val bubbleSorted = Sort.bubbleSort(array)
+println("Bubble sorted: ${bubbleSorted}")
+val selectionSorted = Sort.selectionSort(array)
+println("Selection sorted: ${selectionSorted}")
+val insertionSorted = Sort.insertionSort(array)
+println("Insertion sorted: ${insertionSorted}")
+val mergeSorted = Sort.mergeSort(array)
+println("Merge sorted: ${mergeSorted}")
+val quickSorted = Sort.quickSort(array)
+println("Quick sorted: ${quickSorted}")

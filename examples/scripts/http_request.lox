@@ -1,0 +1,24 @@
+namespace examples.scripts
+using clox.std.net.HTTPClient
+using clox.std.net.URL
+
+println("Create HTTP Client.")
+val client = HTTPClient()
+    
+try { 
+    println("Send GET request to https://example.com")
+    val response = await client.getAsync("https://example.com")
+    if (response.status != 200) { 
+        throw Exception("HTTP error! Status: ${response.status}")
+    }
+    
+    println("HTML Content:")
+    println(response.content)
+}
+catch(Exception e) { 
+    println("Error: ${e.message}")
+}
+finally { 
+    println("Close HTTP Client.")
+    client.close()
+}

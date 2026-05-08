@@ -1,0 +1,127 @@
+namespace examples.lib
+
+class Sort {
+    
+    class Array<T> bubbleSort(Array<T> array) { 
+        val newArray = array.clone()
+        val length = array.length
+        var temp = nil
+
+        for (val i : 0..(length - 1)) { 
+            for (val j : 0..(length - 2)){ 
+                if (newArray[j] > newArray[j + 1]) { 
+                    temp = newArray[j]
+                    newArray[j] = newArray[j + 1]
+                    newArray[j + 1] = temp
+                }
+            }
+        }
+
+        return newArray
+    }
+
+    class Array<T> selectionSort(Array<T> array) { 
+        val newArray = array.clone()
+        val length = array.length
+        var minIndex = nil
+        var temp = nil
+
+        for (val i : 0..(length - 1)) { 
+            minIndex = i
+            for (val j : (i + 1)..(length - 1)) { 
+                if (newArray[j] < newArray[minIndex]) { 
+                    minIndex = j
+                }
+            }
+            temp = newArray[i]
+            newArray[i] = newArray[minIndex]
+            newArray[minIndex] = temp
+        }
+        return newArray
+    }
+
+    class Array<T> insertionSort(Array<T> array) { 
+        val newArray = array.clone()
+        val length = array.length
+        var key = nil
+        var j = nil
+
+        for (val i : 1..(length - 1)) { 
+            key = newArray[i]
+            j = i - 1
+            while (j >= 0 and newArray[j] > key) { 
+                newArray[j + 1] = newArray[j]
+                j = j - 1
+            }
+            newArray[j + 1] = key
+        }
+        return newArray
+    }
+
+    class Array<T> merge(Array<T> left, Array<T> right) { 
+        val result = []
+        var i = 0
+        var j = 0
+
+        while (i < left.length and j < right.length) { 
+            if (left[i] < right[j]) { 
+                result.add(left[i])
+                i = i + 1
+            } 
+            else { 
+                result.add(right[j])
+                j = j + 1
+            }
+        }
+
+        while (i < left.length) { 
+            result.add(left[i])
+            i = i + 1
+        }
+
+        while (j < right.length) { 
+            result.add(right[j])
+            j = j + 1
+        }
+        return result
+    }
+
+    class Array<T> mergeSort(Array<T> array) { 
+        if (array.length <= 1) { 
+            return array
+        }
+
+        val mid = array.length / 2
+        val left = this.mergeSort(array.slice(0, mid))
+        val right = this.mergeSort(array.slice(mid, array.length))
+        return this.merge(left, right)
+    }
+
+    class Array<T> quickSort(Array<T> array) { 
+        if (array.length <= 1) { 
+            return array
+        }
+
+        val pivot = array[array.length / 2]
+        val left = []
+        val right = []
+
+        for (val i : 0..(array.length - 1)) { 
+            if (i == array.length / 2) { 
+                continue
+            }
+
+            if (array[i] < pivot) { 
+                left.add(array[i])
+            } 
+            else { 
+                right.add(array[i])
+            }
+        }
+
+        val result = this.quickSort(left)
+        result.add(pivot)
+        result.addAll(this.quickSort(right))
+        return result
+    }
+}
