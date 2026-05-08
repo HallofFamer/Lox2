@@ -44,6 +44,7 @@ void _itoa_s(int value, char buffer[], size_t bufsz, int radix);
 
 int mkdir_p(const char* path);
 int fopen_p(FILE** file, const char* path, const char* mode);
+bool setTimezone(const char* tz);
 void runAtStartup();
 void runAtExit(void);
 

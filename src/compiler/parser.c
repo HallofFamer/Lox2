@@ -1747,9 +1747,9 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     Token name = previousToken(parser);
     Ast* typeParams = check(parser, TOKEN_SYMBOL_LESS) ? typeParameters(parser, name) : NULL;
     Ast* body = function(parser, returnType, isAsync, false, isVoid);
-
     Ast* ast = newAst(AST_DECL_FUN, name, 1, body);
     ast->attribute.isVoid = isVoid;
+
     if (typeParams != NULL) {
         ast->attribute.isGeneric = true;
         astAppendChild(ast, typeParams);

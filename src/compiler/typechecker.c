@@ -685,8 +685,8 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
     TypeInfo* superType = (typeChecker->currentClass->type != NULL) ? typeChecker->currentClass->type->superclassType : NULL;
     if (superType == NULL) return;
     Ast* args = astGetChild(ast, 0);
-
     ObjString* methodName = createStringFromToken(typeChecker->vm, ast->token);
+
     TypeInfo* baseType = typeTableMethodLookup(superType, methodName);
     if (baseType == NULL) return;
     MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);

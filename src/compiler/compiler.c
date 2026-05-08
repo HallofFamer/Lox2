@@ -339,6 +339,7 @@ static SymbolItem* findSymbolItemByToken(Compiler* compiler, SymbolTable* symtab
     if (symtab == NULL) return NULL;
     ObjString* name = copyStringPerma(compiler->vm, token.start, token.length);
     SymbolItem* item = symbolTableGet(symtab, name);
+
     if (item != NULL) {
 		*scope = symtab->scope;
         return item;

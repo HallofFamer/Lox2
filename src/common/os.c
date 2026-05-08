@@ -1,8 +1,9 @@
+#include <curl/curl.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <curl/curl.h>
+#include <time.h>
 
 #include "os.h"
 
@@ -106,6 +107,22 @@ int fopen_p(FILE** file, const char* path, const char* mode) {
         if (result != 0) return result;
     }
 	return fopen_s(file, path, mode);
+}
+
+bool setTimezone(const char* tz) {
+#ifdef _WIN32
+    char tzEnv[256];
+    snprintf(tzEnv, sizeof(tzEnv), "TZ=%s", tz);
+	bool result = _putenv_s("TZ", tz) == 0;
+    _tzset(); 
+	return result;
+#elif defined(__unix__) || defined(__APPLE__)
+	bool result = setenv("TZ", tz, 1) == 0;
+	tzset();
+	return result;
+#else
+	return false;
+#endif
 }
 
 void runAtStartup() {
