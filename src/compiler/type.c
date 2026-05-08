@@ -239,70 +239,91 @@ static char* createTempTypeName(TypeInfo* type) {
 char* createCallableTypeName(CallableTypeInfo* callableType) {
     char* callableName = bufferNewCString(UINT16_MAX);
     size_t length = 0;
+    size_t capacity = UINT16_MAX;
 
     if (callableType->returnType != NULL) {
         char* returnTypeName = createTempTypeName(callableType->returnType);
         size_t returnTypeLength = strlen(returnTypeName);
-        memcpy(callableName, returnTypeName, returnTypeLength);
-        length += returnTypeLength;
+        if (length + returnTypeLength < capacity) {
+            memcpy(callableName, returnTypeName, returnTypeLength);
+            length += returnTypeLength;
+        }
         if (isTempType(callableType->returnType)) free(returnTypeName);
     }
     else {
-        memcpy(callableName, "dynamic", 7);
-        length += 7;
+        if (length + 7 < capacity) {
+            memcpy(callableName, "dynamic", 7);
+            length += 7;
+        }
     }
 
-    memcpy(callableName + length, " fun", 4);
-    length += 4;
+    if (length + 4 < capacity) {
+        memcpy(callableName + length, " fun", 4);
+        length += 4;
+    }
     if (callableType->attribute.isGeneric) {
-        callableName[length++] = '<';
+        if (length + 1 < capacity) callableName[length++] = '<';
         for (int i = 0; i < callableType->formalTypeParams->count; i++) {
             TypeInfo* formalType = callableType->formalTypeParams->elements[i];
             if (i > 0) {
-                callableName[length++] = ',';
-                callableName[length++] = ' ';
+                if (length + 2 < capacity) {
+                    callableName[length++] = ',';
+                    callableName[length++] = ' ';
+                }
             }
             if (formalType != NULL) {
                 char* formalTypeName = createTempTypeName(formalType);
                 size_t formalTypeLength = strlen(formalTypeName);
-                memcpy(callableName + length, formalTypeName, formalTypeLength);
-                length += formalTypeLength;
+                if (length + formalTypeLength < capacity) {
+                    memcpy(callableName + length, formalTypeName, formalTypeLength);
+                    length += formalTypeLength;
+                }
                 if (isTempType(formalType)) free(formalTypeName);
             }
             else {
-                memcpy(callableName + length, "dynamic", 7);
-                length += 7;
+                if (length + 7 < capacity) {
+                    memcpy(callableName + length, "dynamic", 7);
+                    length += 7;
+                }
             }
         }
-		callableName[length++] = '>';
+		if (length + 1 < capacity) callableName[length++] = '>';
     }
 
-    callableName[length++] = '(';
+    if (length + 1 < capacity) callableName[length++] = '(';
     if (callableType->attribute.isVariadic) {
-        memcpy(callableName + length, "...", 3);
-        length += 3;
+        if (length + 3 < capacity) {
+            memcpy(callableName + length, "...", 3);
+            length += 3;
+        }
     }
 
     for (int i = 0; i < callableType->paramTypes->count; i++) {
         TypeInfo* paramType = callableType->paramTypes->elements[i];
         if (i > 0) {
-            callableName[length++] = ',';
-            callableName[length++] = ' ';
+            if (length + 2 < capacity) {
+                callableName[length++] = ',';
+                callableName[length++] = ' ';
+            }
         }
         if (paramType != NULL) {
             char* paramTypeName = createTempTypeName(paramType);
             size_t paramTypeLength = strlen(paramTypeName);
-            memcpy(callableName + length, paramTypeName, paramTypeLength);
-            length += paramTypeLength;
+            if (length + paramTypeLength < capacity) {
+                memcpy(callableName + length, paramTypeName, paramTypeLength);
+                length += paramTypeLength;
+            }
             if (isTempType(paramType)) free(paramTypeName);
         }
         else {
-            memcpy(callableName + length, "dynamic", 7);
-            length += 7;
+            if (length + 7 < capacity) {
+                memcpy(callableName + length, "dynamic", 7);
+                length += 7;
+            }
         }
     }
 
-    callableName[length++] = ')';
+    if (length + 1 < capacity) callableName[length++] = ')';
     callableName[length] = '\0';
     return callableName;
 }
@@ -604,7 +625,7 @@ static TypeEntry* findTypeEntry(TypeEntry* entries, int capacity, ObjString* key
 
 static void typeTableAdjustCapacity(TypeTable* typetab, int capacity) {
     int oldCapacity = typetab->capacity;
-    TypeEntry* entries = (TypeEntry*)malloc(sizeof(TypeTable) * capacity);
+    TypeEntry* entries = (TypeEntry*)calloc(capacity, sizeof(TypeTable));
     if (entries == NULL) exit(1);
 
     for (int i = 0; i < capacity; i++) {
