@@ -804,12 +804,16 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     Ast* params = astGetChild(ast, 1);
     params->symtab = ast->symtab;
     resolveChild(resolver, ast, 1);
-    insertCallableType(resolver, ast, functionResolver.attribute.isAsync, functionResolver.attribute.isGeneric, functionResolver.attribute.isLambda, functionResolver.attribute.isVariadic, functionResolver.attribute.isVoid);
+    CallableTypeInfo* type = insertCallableType(resolver, ast, functionResolver.attribute.isAsync, functionResolver.attribute.isGeneric, functionResolver.attribute.isLambda, functionResolver.attribute.isVariadic, functionResolver.attribute.isVoid);
 
     Ast* blk = astGetChild(ast, 2);
     blk->symtab = ast->symtab;
     block(resolver, blk);
     endScope(resolver);
+
+    if (functionResolver.isReified) {
+        type->attribute.isReified = true;
+    }
     endFunctionResolver(resolver);
 }
 

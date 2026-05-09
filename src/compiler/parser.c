@@ -1614,17 +1614,22 @@ static bool checkMetaclassReturnType(Parser* parser) {
 static bool checkCallableReturnType(Parser* parser, bool* hasReturnType) {
     int index = parser->index;
     Token current = parser->current;
+
+	// First, we need to match a valid callable type annotation for the return type. 
+    // If it doesn't match, then this isn't a valid function declaration with a return type annotation and we should backtrack and try to parse it as an expression instead.
 	if (!matchCallableType(parser)) {
         return resetIndex(parser, index, current, false);
     }
 
-	// If the next token after the parameter list is a left bracket, then this is actually a function declaration without a return type annotation since the left bracket would be the start of the function body. 
+	// Then, if the next token after the parameter list is a left bracket, it is actually a function declaration without a return type annotation since the left bracket would be the start of the function body. 
     // In this case, we should backtrack and try to parse it as a function declaration without a return type annotation instead of a function declaration with a return type annotation.
     if (check(parser, TOKEN_KIND_LEFT_BRACKET)) {
         *hasReturnType = false;
         return resetIndex(parser, index, current, false);
 	}
 
+	// Finally, if it does match and isn't followed by a left bracket, then this is a valid function declaration with a return type annotation. 
+    // In this case, set hasReturnType to true and return true.
     *hasReturnType = true;
     return resetIndex(parser, index, current, true);
 }
