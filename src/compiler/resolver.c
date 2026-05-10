@@ -763,7 +763,7 @@ static void typeParameters(Resolver* resolver, Ast* ast, bool isClassDecl, bool 
 }
 
 static bool isBehaviorTypeParameter(Resolver* resolver, Token token) {
-    if (resolver->currentClass->typeParams == NULL) return false;
+    if (resolver->currentClass == NULL || resolver->currentClass->typeParams == NULL) return false;
     for (int i = 0; resolver->currentClass->typeParams[i].length != 0; i++) {
         if (tokensEqual(&token, &resolver->currentClass->typeParams[i])) return true;
     }
