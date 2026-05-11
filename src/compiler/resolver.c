@@ -260,6 +260,7 @@ static void setCallableTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
     callableType->attribute.isInitializer = ast->attribute.isInitializer;
     callableType->attribute.isInstanceMethod = !ast->attribute.isClass;
     callableType->attribute.isLambda = ast->attribute.isLambda;
+	callableType->attribute.isReified = ast->attribute.isReified;
     callableType->attribute.isVariadic = ast->attribute.isVariadic;
     callableType->attribute.isVoid = ast->attribute.isVoid;
 }
@@ -812,7 +813,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     endScope(resolver);
 
     if (functionResolver.isReified) {
-        type->attribute.isReified = true;
+        ast->attribute.isReified = type->attribute.isReified = true;
     }
     endFunctionResolver(resolver);
 }
