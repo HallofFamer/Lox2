@@ -1621,10 +1621,9 @@ static bool checkCallableReturnType(Parser* parser, bool* hasReturnType) {
         return resetIndex(parser, index, current, false);
     }
 
-	// Then, if the next token after the parameter list is a left bracket, it is actually a function declaration without a return type annotation since the left bracket would be the start of the function body. 
-    // In this case, we should backtrack and try to parse it as a function declaration without a return type annotation instead of a function declaration with a return type annotation.
-    if (check(parser, TOKEN_KIND_LEFT_BRACKET)) {
-        *hasReturnType = false;
+	// Next, we need to match the function name identifier. 
+    // If it doesn't match, then this isn't a valid function declaration with a return type annotation and we should backtrack and try to parse it as an expression instead.
+    if (!match(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         return resetIndex(parser, index, current, false);
 	}
 
