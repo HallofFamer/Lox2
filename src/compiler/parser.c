@@ -1627,8 +1627,7 @@ static bool checkCallableReturnType(Parser* parser, bool* hasReturnType) {
         return resetIndex(parser, index, current, false);
 	}
 
-	// Finally, if it does match and isn't followed by a left bracket, then this is a valid function declaration with a return type annotation. 
-    // In this case, set hasReturnType to true and return true.
+    // Finally,this is a valid function declaration with a return type annotation, set hasReturnType to true and return true.
     *hasReturnType = true;
     return resetIndex(parser, index, current, true);
 }
@@ -1636,49 +1635,21 @@ static bool checkCallableReturnType(Parser* parser, bool* hasReturnType) {
 static bool checkGenericReturnType(Parser* parser, bool* hasReturnType) {
     int index = parser->index;
     Token current = parser->current;
-    advance(parser);
 
-    do {
-        advance(parser);
-        if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && currentTokenType(parser) != TOKEN_SYMBOL_VOID) {
-            return resetIndex(parser, index, current, false);
-        }
-        else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_KIND_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
-            return resetIndex(parser, index, current, false);
-        }
-    } while (match(parser, TOKEN_KIND_COMMA));
-
-    advance(parser);
-    if (currentTokenType(parser) != TOKEN_SYMBOL_GREATER) return resetIndex(parser, index, current, false);
-    
-    advance(parser);
-	if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER) return resetIndex(parser, index, current, false);
-
-    advance(parser); 
-    if (currentTokenType(parser) != TOKEN_KIND_LEFT_PAREN) return resetIndex(parser, index, current, false);
-    
-	if (nextTokenType(parser) == TOKEN_KIND_RIGHT_PAREN) {
-        *hasReturnType = true;
-        return resetIndex(parser, index, current, true);
+    // First, we need to match a valid generic type annotation for the return type. 
+    // If it doesn't match, then this isn't a valid function declaration with a return type annotation and we should backtrack and try to parse it as an expression instead.
+    if (!matchGenericType(parser)) {
+        return resetIndex(parser, index, current, false);
     }
 
-    do {
-        advance(parser);
-        if (currentTokenType(parser) != TOKEN_SYMBOL_IDENTIFIER && currentTokenType(parser) != TOKEN_SYMBOL_VOID) {
-            return resetIndex(parser, index, current, false);
-        }
-        else if (nextTokenType(parser) != TOKEN_SYMBOL_CLASS && nextTokenType(parser) != TOKEN_SYMBOL_FUN && nextTokenType(parser) != TOKEN_KIND_COMMA && nextTokenType(parser) != TOKEN_SYMBOL_GREATER && nextTokenType(parser) != TOKEN_SYMBOL_LESS) {
-            return resetIndex(parser, index, current, false);
-        }
-    } while (match(parser, TOKEN_KIND_COMMA));
+    // Next, we need to match the function name identifier. 
+    // If it doesn't match, then this isn't a valid function declaration with a return type annotation and we should backtrack and try to parse it as an expression instead.
+    if (!match(parser, TOKEN_SYMBOL_IDENTIFIER)) {
+        return resetIndex(parser, index, current, false);
+    }
 
-    advance(parser);
-    if (currentTokenType(parser) != TOKEN_KIND_RIGHT_PAREN) return resetIndex(parser, index, current, false);
-
-    advance(parser);
-    if (currentTokenType(parser) != TOKEN_KIND_LEFT_BRACKET) return resetIndex(parser, index, current, false);
-
-	*hasReturnType = true;
+    // Finally,this is a valid function declaration with a return type annotation, set hasReturnType to true and return true.
+    *hasReturnType = true;
     return resetIndex(parser, index, current, true);
 }
 

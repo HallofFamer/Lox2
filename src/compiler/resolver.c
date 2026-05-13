@@ -864,6 +864,10 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     resolveChild(resolver, ast, childIndex);
     if (type != BEHAVIOR_TRAIT) resolveChild(resolver, ast, childIndex + 1);
     endScope(resolver);
+
+    if (classResolver.isReified) {
+        ast->attribute.isReified = true;
+    }
     endClassResolver(resolver);
 }
 
