@@ -44,6 +44,7 @@ struct FunctionResolver {
     int numLocals;
     int numUpvalues;
     int numGlobals;
+    bool atFunctionBody;
     bool hasRequired;
     bool isReified;
     ResolverAttribute attribute;
@@ -111,6 +112,7 @@ static void initFunctionResolver(Resolver* resolver, FunctionResolver* function,
     function->numUpvalues = 0;
     function->numGlobals = 0;
 
+	function->atFunctionBody = false;
     function->hasRequired = false;
     function->isReified = false;
     function->scopeDepth = scopeDepth; 
@@ -809,6 +811,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
 
     Ast* blk = astGetChild(ast, 2);
     blk->symtab = ast->symtab;
+	functionResolver.atFunctionBody = true;
     block(resolver, blk);
     endScope(resolver);
 

@@ -1659,6 +1659,7 @@ static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnTyp
         return true;
     }
     else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
+		*hasReturnType = true;
         return checkCallableReturnType(parser, hasReturnType);
     }
     else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
