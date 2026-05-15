@@ -842,6 +842,7 @@ static Ast* functionParameters(Parser* parser) {
     Token token = previousToken(parser);
     consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect '(' after function keyword/name.");
     Ast* params = check(parser, TOKEN_KIND_RIGHT_PAREN) ? emptyAst(AST_LIST_VAR, token) : parameterList(parser, false, token);
+    
     consume(parser, TOKEN_KIND_RIGHT_PAREN, "Expect ')' after parameters.");
     consume(parser, TOKEN_KIND_LEFT_BRACE, "Expect '{' before function body.");
     return params;
@@ -1655,14 +1656,20 @@ static bool checkGenericReturnType(Parser* parser, bool* hasReturnType) {
 
 static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnType) {
     if (checkBehaviorReturnType(parser) || checkMetaclassReturnType(parser)) {
+		// If the declaration starts with a valid behavior or metaclass return type annotation followed by an identifier, it's a valid function declaration with a return type annotation. 
+        // Set hasReturnType to true and return true.
         *hasReturnType = true;
         return true;
     }
     else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
+		// If the declaration starts with a valid return type annotation (which can be either a void keyword or any valid type annotation) followed by the 'fun' keyword and an identifier, it's a valid function declaration with a return type annotation. 
+        // Set hasReturnType to true and return true.
 		*hasReturnType = true;
         return checkCallableReturnType(parser, hasReturnType);
     }
     else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
+		// If the declaration starts with a valid generic type annotation followed by an identifier, it's a valid function declaration with a return type annotation.
+		// Set hasReturnType to true and return true.
         *hasReturnType = true;
         return checkGenericReturnType(parser, hasReturnType);
     }

@@ -1133,9 +1133,18 @@ static void resolveType(Resolver* resolver, Ast* ast) {
     }
     else {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createStringFromToken(resolver->vm, ast->token));
-        if (item != NULL && item->category == SYMBOL_CATEGORY_PLACEHOLDER && item->state == SYMBOL_STATE_DEFINED) {
-            item->state = SYMBOL_STATE_ACCESSED;
+        if (item != NULL && item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
             item->type = getNativeType(resolver->vm, "Type");
+            if (item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
+            
+            if (resolver->currentFunction->atFunctionBody) {
+                if (isBehaviorTypeParameter(resolver, item->token)) {
+                    resolver->currentClass->isReified = true;
+                }
+                else if (isFunctionTypeParameter(resolver, item->token)) {
+                    resolver->currentFunction->isReified = true;
+                }
+            }
         }
         ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass, true);
     }
