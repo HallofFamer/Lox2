@@ -44,7 +44,7 @@ struct FunctionResolver {
     int numLocals;
     int numUpvalues;
     int numGlobals;
-    bool atFunctionBody;
+    bool atBody;
     bool hasRequired;
     bool isReified;
     ResolverAttribute attribute;
@@ -112,7 +112,7 @@ static void initFunctionResolver(Resolver* resolver, FunctionResolver* function,
     function->numUpvalues = 0;
     function->numGlobals = 0;
 
-	function->atFunctionBody = false;
+	function->atBody = false;
     function->hasRequired = false;
     function->isReified = false;
     function->scopeDepth = scopeDepth; 
@@ -811,7 +811,7 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
 
     Ast* blk = astGetChild(ast, 2);
     blk->symtab = ast->symtab;
-	functionResolver.atFunctionBody = true;
+	functionResolver.atBody = true;
     block(resolver, blk);
     endScope(resolver);
 
@@ -1137,7 +1137,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
             item->type = getNativeType(resolver->vm, "Type");
             if (item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
             
-            if (resolver->currentFunction->atFunctionBody) {
+            if (resolver->currentFunction->atBody) {
                 if (isBehaviorTypeParameter(resolver, item->token)) {
                     resolver->currentClass->isReified = true;
                 }

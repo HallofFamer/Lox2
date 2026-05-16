@@ -1663,14 +1663,10 @@ static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnTyp
     }
     else if (checkEither(parser, TOKEN_SYMBOL_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
 		// If the declaration starts with a valid return type annotation (which can be either a void keyword or any valid type annotation) followed by the 'fun' keyword and an identifier, it's a valid function declaration with a return type annotation. 
-        // Set hasReturnType to true and return true.
-		*hasReturnType = true;
         return checkCallableReturnType(parser, hasReturnType);
     }
     else if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_LESS)) {
 		// If the declaration starts with a valid generic type annotation followed by an identifier, it's a valid function declaration with a return type annotation.
-		// Set hasReturnType to true and return true.
-        *hasReturnType = true;
         return checkGenericReturnType(parser, hasReturnType);
     }
     else return false;
