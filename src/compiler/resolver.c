@@ -781,6 +781,15 @@ static bool isFunctionTypeParameter(Resolver* resolver, Token token) {
     return false;
 }
 
+static void reifyTypeParameters(Resolver* resolver, Token token) {
+    if (isBehaviorTypeParameter(resolver, token)) {
+        resolver->currentClass->isReified = true;
+    }
+    else if (isFunctionTypeParameter(resolver, token)) {
+        resolver->currentFunction->isReified = true;
+    }
+}
+
 static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) {
     FunctionResolver functionResolver;
     initFunctionResolver(resolver, &functionResolver, ast->token, resolver->currentFunction->scopeDepth + 1);

@@ -1673,6 +1673,8 @@ static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnTyp
 }
 
 static bool matchFunDeclarationWithoutReturnType(Parser* parser) {
+	// If the declaration starts with 'fun' or 'void' and is followed by an identifier, it's a valid function declaration without a return type annotation. 
+    // Advance the parser and return true in this case. Otherwise, return false.
     if (checkEither(parser, TOKEN_SYMBOL_FUN, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_IDENTIFIER)) {
         advance(parser);
 		return true;
