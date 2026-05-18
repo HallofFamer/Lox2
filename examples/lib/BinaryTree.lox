@@ -1,0 +1,43 @@
+namespace examples.lib
+
+class BinaryTree<T> {
+
+     var BinaryTreeNode<T> root
+    
+     __init__() {
+         this.root = nil
+     }
+     
+     void insert(T value) { 
+         this.root = this.insertAt(this.root, value)    
+     }
+     
+     BinaryTreeNode<T> insertAt(BinaryTreeNode<T> node, T value) { 
+         if (node == nil) return BinaryTreeNode<T>(value)
+         
+         if (value < node.value) { 
+             node.left = this.insertAt(node.left, value)
+         }
+         else if (value > node.value) {
+             node.right = this.insertAt(node.right, value)
+         }
+         else {
+             return node
+         }
+         
+         return node
+     }
+     
+     void traverse() { 
+         this.inOrderTraverse(this.root)
+     }
+     
+     void inOrderTraverse(BinaryTreeNode<T> node) { 
+         if (node != nil) { 
+             this.inOrderTraverse(node.left)
+             print("${node.value} ")
+             this.inOrderTraverse(node.right)
+         }
+     }
+
+}

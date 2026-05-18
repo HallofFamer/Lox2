@@ -1,0 +1,14 @@
+namespace examples.lib
+
+class BinaryTreeNode<T> {
+
+    val T value
+    var BinaryTreeNode<T> left
+    var BinaryTreeNode<T> right
+    
+    __init__(T value) { 
+        this.value = value
+        this.left = nil
+        this.right = nil    
+    }
+}

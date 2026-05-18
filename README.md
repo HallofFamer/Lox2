@@ -151,8 +151,8 @@ client.close()
 git clone -b v2.2.0 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 cmake -DCMAKE_TOOLCHAIN_FILE:STRING="[$VCPKG_PATH]/scripts/buildsystems/vcpkg.cmake" -S . -B ./build
-cmake --build ./build --config Release
-./x64/Release/Lox2
+cmake --build build --target install --config Release
+Lox2
 ```
 
 #### Linux(with git, cmake, curl and libuv, need to install one of the libcurl4-dev and libuv1.dev packages)
@@ -161,9 +161,8 @@ git clone -b v2.2.0 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 mkdir build
 cmake -S . -B ./build
-cmake --build ./build --config Release
+cmake --build build --target install --config Release
 sudo cp build/Lox2 /usr/local/bin
-sudo cp lox2.ini /etc
 Lox2
 ```
 
