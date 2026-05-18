@@ -416,6 +416,73 @@ static Ast* binary(Parser* parser, Token token, Ast* left, bool canAssign) {
     return newAst(AST_EXPR_BINARY, token, 2, left, right);
 }
 
+static bool matchBehaviorType(Parser* parser) {
+    return match(parser, TOKEN_SYMBOL_IDENTIFIER);
+}
+
+static bool matchVoidType(Parser* parser) {
+    return match(parser, TOKEN_SYMBOL_VOID);
+}
+
+static bool matchMetaclassType(Parser* parser) {
+    if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) {
+        advance(parser);
+        advance(parser);
+        return true;
+    }
+    return false;
+}
+
+static bool matchCallableType(Parser* parser) {
+    int index = parser->index;
+    Token current = parser->current;
+
+    // First we need to match a return type declaration, it can be a void keyword or any valid type annotation.
+    // If it doesn't match, then this isn't a callable type annotation and we should backtrack and try to parse it as an expression instead.
+    if (!match(parser, TOKEN_SYMBOL_VOID) && !matchType(parser)) {
+        return resetIndex(parser, index, current, false);
+    }
+
+    // Next we need to match the fun keyword and a list of parameter types in parentheses. 
+    // If any of this doesn't match, then we should backtrack and try to parse it as an expression instead.
+    if (!match(parser, TOKEN_SYMBOL_FUN)) return resetIndex(parser, index, current, false);
+    if (!match(parser, TOKEN_KIND_LEFT_PAREN)) return resetIndex(parser, index, current, false);
+
+    // Then, we need to match a list of parameter types. Each parameter type can be any valid type annotation, and they are separated by commas.
+    do {
+        if (!matchType(parser)) return resetIndex(parser, index, current, false);
+    } while (match(parser, TOKEN_KIND_COMMA));
+
+    // Finally, we need to match the closing parenthesis. If it doesn't match, then we should backtrack and try to parse it as an expression instead. 
+    // If it does match, then this is a valid callable type annotation and we can return true.
+    if (!match(parser, TOKEN_KIND_RIGHT_PAREN)) return resetIndex(parser, index, current, false);
+    return resetIndex(parser, index, current, true);
+}
+
+static bool matchGenericType(Parser* parser) {
+    int index = parser->index;
+    Token current = parser->current;
+
+    // First, we need to match an identifier for the generic type. If it doesn't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead.
+    if (!match(parser, TOKEN_SYMBOL_IDENTIFIER)) return resetIndex(parser, index, current, false);
+    // Second, we need to match a less than symbol. If it doesn't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead.
+    if (!match(parser, TOKEN_SYMBOL_LESS)) return resetIndex(parser, index, current, false);
+
+    // Then, we need to match a list of type parameters. Each type parameter can be any valid type annotation, and they are separated by commas. If any of the type parameters don't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead.
+    do {
+        if (!matchType(parser)) return resetIndex(parser, index, current, false);
+    } while (match(parser, TOKEN_KIND_COMMA));
+
+    // Finally, we need to match the closing greater than symbol. 
+    // If it doesn't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead. If it does match, then this is a valid generic type annotation and we can return true.
+    if (!match(parser, TOKEN_SYMBOL_GREATER)) return resetIndex(parser, index, current, false);
+    return resetIndex(parser, index, current, true);
+}
+
+static bool matchType(Parser* parser) {
+    return matchBehaviorType(parser) || matchMetaclassType(parser) || matchCallableType(parser) || matchGenericType(parser);
+}
+
 static Ast* behaviorType(Parser* parser) {
     consume(parser, TOKEN_SYMBOL_IDENTIFIER, "Expect behavior type.");
     return emptyAst(AST_EXPR_TYPE, previousToken(parser));
@@ -1535,73 +1602,6 @@ static Ast* classDeclaration(Parser* parser) {
         astAppendChild(ast, typeParams);
     }
     return ast;
-}
-
-static bool matchBehaviorType(Parser* parser) {
-	return match(parser, TOKEN_SYMBOL_IDENTIFIER);
-}
-
-static bool matchVoidType(Parser* parser) {
-    return match(parser, TOKEN_SYMBOL_VOID);
-}
-
-static bool matchMetaclassType(Parser* parser) {
-    if (check(parser, TOKEN_SYMBOL_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) {
-        advance(parser);
-        advance(parser);
-        return true;
-	}
-    return false;
-}
-
-static bool matchCallableType(Parser* parser) {
-    int index = parser->index;
-    Token current = parser->current;
-
-    // First we need to match a return type declaration, it can be a void keyword or any valid type annotation.
-	// If it doesn't match, then this isn't a callable type annotation and we should backtrack and try to parse it as an expression instead.
-    if (!match(parser, TOKEN_SYMBOL_VOID) && !matchType(parser)) {
-		return resetIndex(parser, index, current, false);
-    }
-
-	// Next we need to match the fun keyword and a list of parameter types in parentheses. 
-    // If any of this doesn't match, then we should backtrack and try to parse it as an expression instead.
-	if (!match(parser, TOKEN_SYMBOL_FUN)) return resetIndex(parser, index, current, false);
-	if (!match(parser, TOKEN_KIND_LEFT_PAREN)) return resetIndex(parser, index, current, false);
-
-	// Then, we need to match a list of parameter types. Each parameter type can be any valid type annotation, and they are separated by commas.
-    do {
-        if (!matchType(parser)) return resetIndex(parser, index, current, false);
-	} while (match(parser, TOKEN_KIND_COMMA));
-	
-	// Finally, we need to match the closing parenthesis. If it doesn't match, then we should backtrack and try to parse it as an expression instead. 
-    // If it does match, then this is a valid callable type annotation and we can return true.
-    if (!match(parser, TOKEN_KIND_RIGHT_PAREN)) return resetIndex(parser, index, current, false);
-	return resetIndex(parser, index, current, true);
-}
-
-static bool matchGenericType(Parser* parser) {
-    int index = parser->index;
-    Token current = parser->current;
-
-	// First, we need to match an identifier for the generic type. If it doesn't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead.
-	if (!match(parser, TOKEN_SYMBOL_IDENTIFIER)) return resetIndex(parser, index, current, false);
-	// Second, we need to match a less than symbol. If it doesn't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead.
-    if (!match(parser, TOKEN_SYMBOL_LESS)) return resetIndex(parser, index, current, false);
-
-	// Then, we need to match a list of type parameters. Each type parameter can be any valid type annotation, and they are separated by commas. If any of the type parameters don't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead.
-    do {
-        if (!matchType(parser)) return resetIndex(parser, index, current, false);
-	} while (match(parser, TOKEN_KIND_COMMA));
-
-	// Finally, we need to match the closing greater than symbol. 
-    // If it doesn't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead. If it does match, then this is a valid generic type annotation and we can return true.
-    if (!match(parser, TOKEN_SYMBOL_GREATER)) return resetIndex(parser, index, current, false);
-    return resetIndex(parser, index, current, true);
-}
-
-static bool matchType(Parser* parser) {
-	return matchBehaviorType(parser) || matchMetaclassType(parser) || matchCallableType(parser) || matchGenericType(parser);
 }
 
 static bool checkBehaviorReturnType(Parser* parser) {

@@ -729,7 +729,7 @@ static void astOutputListStmt(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     printf("listStmt(%d)\n", astNumChild(ast));
     for (int i = 0; i < ast->children->count; i++) {
-        astOutput(ast->children->elements[i], indentLevel + 1);
+        astOutput(astGetChild(ast, i), indentLevel + 1);
     }
 }
 
@@ -737,7 +737,7 @@ static void astOutputListVar(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     printf("listVar(%d)\n", astNumChild(ast));
     for (int i = 0; i < ast->children->count; i++) {
-        astOutput(ast->children->elements[i], indentLevel + 1);
+        astOutput(astGetChild(ast, i), indentLevel + 1);
     }
 }
 
@@ -745,7 +745,7 @@ static void astOutputScript(Ast* ast, int indentLevel) {
     printf("script\n");
     if (astHasChild(ast)) {
         for (int i = 0; i < ast->children->count; i++) {
-            astOutput(ast->children->elements[i], indentLevel + 1);
+            astOutput(astGetChild(ast, i), indentLevel + 1);
         }
     }
 }

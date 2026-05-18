@@ -31,6 +31,7 @@ BehaviorTypeInfo* newBehaviorTypeInfo(int id, TypeCategory category, ObjString* 
         if (behaviorType->formalTypeParams != NULL) TypeInfoArrayInit(behaviorType->formalTypeParams);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
+		behaviorType->isReified = false;
     }
     return behaviorType;
 }
@@ -45,6 +46,7 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
         if (behaviorType->formalTypeParams != NULL) TypeInfoArrayInit(behaviorType->formalTypeParams);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
+		behaviorType->isReified = false;
 
         if (behaviorType->traitTypes != NULL) {
             TypeInfoArrayInit(behaviorType->traitTypes);
@@ -71,6 +73,7 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithFormalParameters(int id, TypeCategory c
         behaviorType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
+		behaviorType->isReified = false;
 
         if (behaviorType->formalTypeParams != NULL) {
             TypeInfoArrayInit(behaviorType->formalTypeParams);
@@ -98,6 +101,7 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
         if (behaviorType->formalTypeParams != NULL) TypeInfoArrayInit(behaviorType->formalTypeParams);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = methods;
+		behaviorType->isReified = false;
     }
     return behaviorType;
 }

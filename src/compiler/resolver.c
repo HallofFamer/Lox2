@@ -1147,12 +1147,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
             if (item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
             
             if (resolver->currentFunction->atBody) {
-                if (isBehaviorTypeParameter(resolver, item->token)) {
-                    resolver->currentClass->isReified = true;
-                }
-                else if (isFunctionTypeParameter(resolver, item->token)) {
-                    resolver->currentFunction->isReified = true;
-                }
+				reifyTypeParameters(resolver, item->token);
             }
         }
         ast->type = getTypeForSymbol(resolver, ast->token, ast->attribute.isClass, true);
@@ -1172,12 +1167,7 @@ static void resolveVariable(Resolver* resolver, Ast* ast) {
             semanticError(resolver, "Cannot use variable '%s' before it is defined.", name->chars);
         }
         else if (item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
-			if (isBehaviorTypeParameter(resolver, item->token)) {
-                resolver->currentClass->isReified = true;
-            }
-            else if (isFunctionTypeParameter(resolver, item->token)) {
-				resolver->currentFunction->isReified = true;
-            }
+			reifyTypeParameters(resolver, item->token);
         }
     }
     else {

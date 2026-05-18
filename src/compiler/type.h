@@ -54,6 +54,7 @@ typedef struct {
     TypeInfoArray* formalTypeParams;
     TypeTable* fields;
     TypeTable* methods;
+    bool isReified;
 } BehaviorTypeInfo;
 
 typedef struct {
