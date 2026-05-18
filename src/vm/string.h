@@ -24,6 +24,7 @@ ObjString* capitalizeString(VM* vm, ObjString* string);
 ObjString* concatenateString(VM* vm, ObjString* string, ObjString* string2, const char* separator);
 ObjString* decapitalizeString(VM* vm, ObjString* string);
 ObjString* replaceString(VM* vm, ObjString* original, ObjString* target, ObjString* replace);
+ObjString* replaceAllString(VM* vm, ObjString* original, ObjString* target, ObjString* replace);
 ObjString* reverseString(VM* vm, ObjString* original);
 int searchString(VM* vm, ObjString* haystack, ObjString* needle, uint32_t start);
 ObjString* subString(VM* vm, ObjString* original, int fromIndex, int toIndex);

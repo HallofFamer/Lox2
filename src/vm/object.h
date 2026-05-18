@@ -320,6 +320,7 @@ struct ObjModule {
     ValueArray valFields;
     IDMap varIndexes;
     ValueArray varFields;
+    ValueArray dependencies;
 };
 
 struct ObjNamespace {

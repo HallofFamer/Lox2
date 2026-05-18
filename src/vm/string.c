@@ -209,6 +209,39 @@ ObjString* replaceString(VM* vm, ObjString* original, ObjString* target, ObjStri
     return takeString(vm, heapChars, (int)newLength);
 }
 
+ObjString* replaceAllString(VM* vm, ObjString* original, ObjString* target, ObjString* replace) {
+    if (original->length == 0 || target->length == 0 || original->length < target->length) return original;
+    int startIndex = searchString(vm, original, target, 0);
+    if (startIndex == -1) return original;
+
+	int numOccurrence = 0;
+	for (int offset = startIndex; offset != -1; offset = searchString(vm, original, target, offset + target->length)) {
+		numOccurrence++;
+	}
+
+    int newLength = original->length + numOccurrence * (replace->length - target->length);
+    push(vm, OBJ_VAL(target));
+    char* heapChars = ALLOCATE(char, (size_t)newLength + 1, GC_GENERATION_TYPE_EDEN);
+    pop(vm);
+
+	int offset = 0, occurrence = 0;
+	while (offset < original->length) {
+		if (occurrence < numOccurrence && offset == searchString(vm, original, target, offset)) {
+			for (int i = 0; i < replace->length; i++) {
+				heapChars[offset + i] = replace->chars[i];
+			}
+            offset += replace->length;
+			occurrence++;
+		}
+		else {
+			heapChars[offset] = original->chars[offset];
+			offset++;
+		}
+	}
+	heapChars[newLength] = '\0';
+	return takeString(vm, heapChars, (int)newLength);
+}
+
 ObjString* reverseString(VM* vm, ObjString* original) {
     char* heapChars = ALLOCATE(char, (size_t)original->length + 1, GC_GENERATION_TYPE_EDEN);
     int i = 0;

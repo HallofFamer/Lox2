@@ -1595,6 +1595,13 @@ LOX_METHOD(String, replace) {
     RETURN_OBJ(replaceString(vm, AS_STRING(receiver), AS_STRING(args[0]), AS_STRING(args[1])));
 }
 
+LOX_METHOD(String, replaceAll) {
+	ASSERT_ARG_COUNT("String::replaceAll(target, replacement)", 2);
+	ASSERT_ARG_TYPE("String::replaceAll(target, replacement)", 0, String);
+	ASSERT_ARG_TYPE("String::replaceAll(target, replacement)", 1, String);
+	RETURN_OBJ(replaceAllString(vm, AS_STRING(receiver), AS_STRING(args[0]), AS_STRING(args[1])));
+}
+
 LOX_METHOD(String, reverse) {
     ASSERT_ARG_COUNT("String::reverse()", 0);
     ObjString* self = AS_STRING(receiver);
@@ -2406,6 +2413,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->stringClass, String, iterator, 0, NATIVE_TYPE(StringIterator));
     DEF_METHOD(vm->stringClass, String, length, 0, NATIVE_TYPE(Int));
     DEF_METHOD(vm->stringClass, String, replace, 2, NATIVE_TYPE(String), NATIVE_TYPE(String), NATIVE_TYPE(String));
+	DEF_METHOD(vm->stringClass, String, replaceAll, 2, NATIVE_TYPE(String), NATIVE_TYPE(String), NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, reverse, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, split, 1, NATIVE_TYPE(Object), NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, startsWith, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(String));
