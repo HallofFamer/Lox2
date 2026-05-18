@@ -22,21 +22,21 @@ const char* tokenNames[] = {
     [TOKEN_KIND_SEMICOLON]      = "TOKEN_SEMICOLON",
     [TOKEN_KIND_SLASH]          = "TOKEN_SLASH",
     [TOKEN_KIND_STAR]           = "TOKEN_STAR", 
-    [TOKEN_SYMBOL_BANG]           = "TOKEN_BANG",
-    [TOKEN_SYMBOL_BANG_EQUAL]     = "TOKEN_BANG_EQUAL",
-    [TOKEN_SYMBOL_EQUAL]          = "TOKEN_EQUAL",
-    [TOKEN_SYMBOL_EQUAL_EQUAL]    = "TOKEN_EQUAL_EQUAL",
-    [TOKEN_SYMBOL_GREATER]        = "TOKEN_GREATER",
-    [TOKEN_SYMBOL_GREATER_EQUAL]  = "TOKEN_GREATER_EQUAL",
-    [TOKEN_SYMBOL_LESS]           = "TOKEN_LESS",
-    [TOKEN_SYMBOL_LESS_EQUAL]     = "TOKEN_LESS_EQUAL",
-    [TOKEN_SYMBOL_DOT]            = "TOKEN_DOT",
-    [TOKEN_SYMBOL_DOT_DOT]        = "TOKEN_DOT_DOT",
-    [TOKEN_SYMBOL_IDENTIFIER]     = "TOKEN_IDENTIFIER",
-    [TOKEN_SYMBOL_STRING]         = "TOKEN_STRING",
-    [TOKEN_SYMBOL_INTERPOLATION]  = "TOKEN_INTERPOLATION",
-    [TOKEN_SYMBOL_NUMBER]         = "TOKEN_NUMBER",
-    [TOKEN_SYMBOL_INT]            = "TOKEN_INT",
+    [TOKEN_KIND_BANG]           = "TOKEN_BANG",
+    [TOKEN_KIND_BANG_EQUAL]     = "TOKEN_BANG_EQUAL",
+    [TOKEN_KIND_EQUAL]          = "TOKEN_EQUAL",
+    [TOKEN_KIND_EQUAL_EQUAL]    = "TOKEN_EQUAL_EQUAL",
+    [TOKEN_KIND_GREATER]        = "TOKEN_GREATER",
+    [TOKEN_KIND_GREATER_EQUAL]  = "TOKEN_GREATER_EQUAL",
+    [TOKEN_KIND_LESS]           = "TOKEN_LESS",
+    [TOKEN_KIND_LESS_EQUAL]     = "TOKEN_LESS_EQUAL",
+    [TOKEN_KIND_DOT]            = "TOKEN_DOT",
+    [TOKEN_KIND_DOT_DOT]        = "TOKEN_DOT_DOT",
+    [TOKEN_KIND_IDENTIFIER]     = "TOKEN_IDENTIFIER",
+    [TOKEN_KIND_STRING]         = "TOKEN_STRING",
+    [TOKEN_KIND_INTERPOLATION]  = "TOKEN_INTERPOLATION",
+    [TOKEN_KIND_NUMBER]         = "TOKEN_NUMBER",
+    [TOKEN_KIND_INT]            = "TOKEN_INT",
     [TOKEN_SYMBOL_AND]            = "TOKEN_AND",
     [TOKEN_SYMBOL_AS]             = "TOKEN_AS",
     [TOKEN_SYMBOL_ASYNC]          = "TOKEN_ASYNC",
@@ -109,9 +109,9 @@ bool tokenIsLiteral(Token token) {
         case TOKEN_SYMBOL_NIL:
         case TOKEN_SYMBOL_TRUE:
         case TOKEN_SYMBOL_FALSE:
-        case TOKEN_SYMBOL_NUMBER:
-        case TOKEN_SYMBOL_INT:
-        case TOKEN_SYMBOL_STRING:
+        case TOKEN_KIND_NUMBER:
+        case TOKEN_KIND_INT:
+        case TOKEN_KIND_STRING:
             return true;
         default:
             return false;
@@ -120,15 +120,15 @@ bool tokenIsLiteral(Token token) {
 
 bool tokenIsOperator(Token token) {
     switch (token.type) {
-        case TOKEN_SYMBOL_EQUAL_EQUAL:
-        case TOKEN_SYMBOL_GREATER:
-        case TOKEN_SYMBOL_LESS:
+        case TOKEN_KIND_EQUAL_EQUAL:
+        case TOKEN_KIND_GREATER:
+        case TOKEN_KIND_LESS:
         case TOKEN_KIND_PLUS:
         case TOKEN_KIND_MINUS:
         case TOKEN_KIND_STAR:
         case TOKEN_KIND_SLASH:
         case TOKEN_KIND_MODULO:
-        case TOKEN_SYMBOL_DOT_DOT:
+        case TOKEN_KIND_DOT_DOT:
         case TOKEN_KIND_LEFT_BRACKET:
             return true;
         default:

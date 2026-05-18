@@ -290,11 +290,11 @@ static void astOutputExprLiteral(Ast* ast, int indentLevel) {
         case TOKEN_SYMBOL_NIL:
         case TOKEN_SYMBOL_TRUE:
         case TOKEN_SYMBOL_FALSE:
-        case TOKEN_SYMBOL_INT:
-        case TOKEN_SYMBOL_NUMBER:
+        case TOKEN_KIND_INT:
+        case TOKEN_KIND_NUMBER:
             printf("%s\n", token);
             break;
-        case TOKEN_SYMBOL_STRING:
+        case TOKEN_KIND_STRING:
             printf("\"%s\"\n", token);
             break;
         default: 

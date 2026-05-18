@@ -987,7 +987,7 @@ static void resolveInterpolation(Resolver* resolver, Ast* ast) {
         Ast* expr = astGetChild(exprs, count);
         expr->symtab = exprs->symtab;
 
-        if (expr->kind == AST_EXPR_LITERAL && expr->token.type == TOKEN_SYMBOL_STRING) {
+        if (expr->kind == AST_EXPR_LITERAL && expr->token.type == TOKEN_KIND_STRING) {
             resolveChild(resolver, exprs, count);
             concatenate = true;
             isString = true;
@@ -1018,13 +1018,13 @@ static void resolveLiteral(Resolver* resolver, Ast* ast) {
         case TOKEN_SYMBOL_FALSE:
             insertLiteralType(resolver, ast, "Bool");
             break;
-        case TOKEN_SYMBOL_INT:
+        case TOKEN_KIND_INT:
             insertLiteralType(resolver, ast, "Int");
             break;
-        case TOKEN_SYMBOL_NUMBER:
+        case TOKEN_KIND_NUMBER:
             insertLiteralType(resolver, ast, "Float");
             break;
-        case TOKEN_SYMBOL_STRING:
+        case TOKEN_KIND_STRING:
             insertLiteralType(resolver, ast, "String");
             break;
         default:

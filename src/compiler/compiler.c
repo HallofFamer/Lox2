@@ -784,18 +784,18 @@ static void compileBinary(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 1);
     
     switch (ast->token.type) {
-        case TOKEN_SYMBOL_BANG_EQUAL:        emitBytes(compiler, OP_EQUAL, OP_NOT); break;
-        case TOKEN_SYMBOL_EQUAL_EQUAL:       emitByte(compiler, OP_EQUAL); break;
-        case TOKEN_SYMBOL_GREATER:           emitByte(compiler, OP_GREATER); break;
-        case TOKEN_SYMBOL_GREATER_EQUAL:     emitBytes(compiler, OP_LESS, OP_NOT); break;
-        case TOKEN_SYMBOL_LESS:              emitByte(compiler, OP_LESS); break;
-        case TOKEN_SYMBOL_LESS_EQUAL:        emitBytes(compiler, OP_GREATER, OP_NOT); break;
+        case TOKEN_KIND_BANG_EQUAL:        emitBytes(compiler, OP_EQUAL, OP_NOT); break;
+        case TOKEN_KIND_EQUAL_EQUAL:       emitByte(compiler, OP_EQUAL); break;
+        case TOKEN_KIND_GREATER:           emitByte(compiler, OP_GREATER); break;
+        case TOKEN_KIND_GREATER_EQUAL:     emitBytes(compiler, OP_LESS, OP_NOT); break;
+        case TOKEN_KIND_LESS:              emitByte(compiler, OP_LESS); break;
+        case TOKEN_KIND_LESS_EQUAL:        emitBytes(compiler, OP_GREATER, OP_NOT); break;
         case TOKEN_KIND_PLUS:              emitByte(compiler, OP_ADD); break;
         case TOKEN_KIND_MINUS:             emitByte(compiler, OP_SUBTRACT); break;
         case TOKEN_KIND_STAR:              emitByte(compiler, OP_MULTIPLY); break;
         case TOKEN_KIND_SLASH:             emitByte(compiler, OP_DIVIDE); break;
         case TOKEN_KIND_MODULO:            emitByte(compiler, OP_MODULO); break;
-        case TOKEN_SYMBOL_DOT_DOT:           emitByte(compiler, OP_RANGE); break;
+        case TOKEN_KIND_DOT_DOT:           emitByte(compiler, OP_RANGE); break;
         default: return;
     }
 }
@@ -862,7 +862,7 @@ static void compileInterpolation(Compiler* compiler, Ast* ast) {
         bool isString = false;
         Ast* expr = astGetChild(exprs, count);
 
-        if (expr->kind == AST_EXPR_LITERAL && expr->token.type == TOKEN_SYMBOL_STRING) {
+        if (expr->kind == AST_EXPR_LITERAL && expr->token.type == TOKEN_KIND_STRING) {
             compileChild(compiler, exprs, count);
             if (count > 0) emitByte(compiler, OP_ADD);
             concatenate = true;
@@ -906,9 +906,9 @@ static void compileLiteral(Compiler* compiler, Ast* ast) {
         case TOKEN_SYMBOL_NIL: emitByte(compiler, OP_NIL); break;
         case TOKEN_SYMBOL_TRUE: emitByte(compiler, OP_TRUE); break;
         case TOKEN_SYMBOL_FALSE: emitByte(compiler, OP_FALSE); break;
-        case TOKEN_SYMBOL_INT: integer(compiler, ast->token); break;
-        case TOKEN_SYMBOL_NUMBER: number(compiler, ast->token); break;
-        case TOKEN_SYMBOL_STRING: string(compiler, ast->token); break;
+        case TOKEN_KIND_INT: integer(compiler, ast->token); break;
+        case TOKEN_KIND_NUMBER: number(compiler, ast->token); break;
+        case TOKEN_KIND_STRING: string(compiler, ast->token); break;
         default: compileError(compiler, "Invalid AST literal type.");
     }
 }
@@ -1007,7 +1007,7 @@ static void compileType(Compiler* compiler, Ast* ast) {
 static void compileUnary(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
     switch (ast->token.type) {
-        case TOKEN_SYMBOL_BANG: emitByte(compiler, OP_NOT); break;
+        case TOKEN_KIND_BANG: emitByte(compiler, OP_NOT); break;
         case TOKEN_KIND_MINUS: emitByte(compiler, OP_NEGATE); break;
         default: return;
     }
