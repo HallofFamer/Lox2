@@ -149,6 +149,18 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
     return takeStringPerma(resolver->vm, fullName, length);
 }
 
+static SymbolItem* insertSymbol(Resolver* resolver, Token token, SymbolCategory category, SymbolState state, TypeInfo* type, bool isMutable) {
+    ObjString* symbol = createSymbol(resolver, token);
+    SymbolItem* item = newSymbolItemWithType(token, category, state, isMutable, type);
+    bool inserted = symbolTableSet(resolver->currentSymtab, symbol, item);
+
+    if (inserted) return item;
+    else {
+        freeSymbolItem(item);
+        return NULL;
+    }
+}
+
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass) {
     ObjString* shortName = createSymbol(resolver, token);
     ObjString* originalName = shortName;
@@ -159,6 +171,13 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
     if (type == NULL) {
         fullName = concatenateString(resolver->vm, resolver->currentNamespace, shortName, ".");
         type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
+
+        struct stat fullPathStat;
+        ObjString* fullPath = locateSourceFileFromFullName(resolver->vm, fullName);
+        if ((stat(fullPath->chars, &fullPathStat) == 0) && loadModule(resolver->vm, fullPath)) {
+            type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
+            insertSymbol(resolver, token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        }
 
         if (type == NULL) {
             fullName = nameTableGet(resolver->nametab, originalName);
@@ -184,18 +203,6 @@ static void setCallableTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
     callableType->attribute.isLambda = ast->attribute.isLambda;
     callableType->attribute.isVariadic = ast->attribute.isVariadic;
     callableType->attribute.isVoid = ast->attribute.isVoid;
-}
-
-static SymbolItem* insertSymbol(Resolver* resolver, Token token, SymbolCategory category, SymbolState state, TypeInfo* type, bool isMutable) {
-    ObjString* symbol = createSymbol(resolver, token);
-    SymbolItem* item = newSymbolItemWithType(token, category, state, isMutable, type);
-    bool inserted = symbolTableSet(resolver->currentSymtab, symbol, item);
-
-    if (inserted) return item;
-    else {
-        freeSymbolItem(item);
-        return NULL;
-    }
 }
 
 static SymbolItem* findThis(Resolver* resolver) {
@@ -264,6 +271,18 @@ static void bindTraitTypes(Resolver* resolver, Token currentClass, Ast* ast) {
         bindTraitType(resolver, currentClass, trait->token);
     }
 }
+
+static void checkUnusedImports(Resolver* resolver, int flag) {
+    for (int i = 0; i < resolver->currentSymtab->capacity; i++) {
+        SymbolEntry* entry = &resolver->currentSymtab->entries[i];
+        if (entry->key == NULL) continue;
+        else if (entry->value->isImported && entry->value->state == SYMBOL_STATE_DEFINED) {
+            if (flag == 1) semanticWarning(resolver, "Type '%s' is imported but never used.", entry->key->chars);
+            else if (flag == 2) semanticError(resolver, "Type '%s' is imported but never used.", entry->key->chars);
+        }
+    }
+}
+
 
 static void checkUnusedVariables(Resolver* resolver, int flag) {
     for (int i = 0; i < resolver->currentSymtab->capacity; i++) {
@@ -508,6 +527,13 @@ static SymbolItem* getVariable(Resolver* resolver, Ast* ast) {
     return (item != NULL) ? item : findGlobal(resolver, ast);
 }
 
+static void checkImportedSymbol(Resolver* resolver, Token token) {
+    SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createSymbol(resolver, token));
+    if (item != NULL && item->isImported && item->state == SYMBOL_STATE_DEFINED) {
+        item->state = SYMBOL_STATE_ACCESSED;
+    }
+}
+
 static void parameters(Resolver* resolver, Ast* ast) {
     if (!astHasChild(ast)) return;
     for (int i = 0; i < ast->children->count; i++) {
@@ -747,7 +773,13 @@ static void resolveOr(Resolver* resolver, Ast* ast) {
 static void resolveParam(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
     item->state = (resolver->currentFunction->attribute.isLambda) ? SYMBOL_STATE_ACCESSED : SYMBOL_STATE_DEFINED;
-    insertParamType(resolver, ast, astHasChild(ast));
+    bool hasChild = astHasChild(ast);
+
+    if (hasChild) {
+        Ast* paramType = astGetChild(ast, 0);
+        checkImportedSymbol(resolver, paramType->token);
+    }
+    insertParamType(resolver, ast, hasChild);
     if (ast->attribute.isVariadic) resolver->currentFunction->attribute.isVariadic = true;
 }
 
@@ -1105,12 +1137,14 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
     if (astNumChild(ast) > 1) {
         Ast* alias = astGetChild(ast, 1);
         alias->symtab = _namespace->symtab;
-        insertSymbol(resolver, alias->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        SymbolItem* item = insertSymbol(resolver, alias->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_DEFINED, type, false);
+        item->isImported = true;
         nameTableSet(resolver->nametab, createSymbol(resolver, alias->token), fullName);
     }
     else {
         shortName->symtab = _namespace->symtab;
-        insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        SymbolItem* item = insertSymbol(resolver, shortName->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_DEFINED, type, false);
+        item->isImported = true;
         nameTableSet(resolver->nametab, createSymbol(resolver, shortName->token), fullName);
     }
 }
@@ -1231,8 +1265,12 @@ static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
     item->state = SYMBOL_STATE_ACCESSED;
     ObjString* name = createSymbol(resolver, item->token);
     resolveChild(resolver, ast, 0);
+
     Ast* function = astGetChild(ast, 0);
-    Ast* returnType = astGetChild(function, 0);
+    if (astNumChild(function) > 0) {
+        Ast* returnType = astGetChild(function, 0);
+        checkImportedSymbol(resolver, returnType->token);
+    }
 
     if (function->type != NULL && IS_CALLABLE_TYPE(function->type)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(function->type);
@@ -1368,6 +1406,7 @@ NameTable* resolve(Resolver* resolver, Ast* ast) {
     resolveAst(resolver, ast);
     endFunctionResolver(resolver);
 
+    checkUnusedImports(resolver, resolver->vm->config.flagUnusedImport);
     if (resolver->debugSymtab) {
         symbolTableOutput(resolver->rootSymtab);
         symbolTableOutput(resolver->vm->symtab);
