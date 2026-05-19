@@ -1543,6 +1543,12 @@ static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
     item->type = insertBehaviorType(resolver, ast, TYPE_CATEGORY_CLASS);
     item->state = SYMBOL_STATE_ACCESSED;
     resolveChild(resolver, ast, 0);
+
+	Ast* _class = astGetChild(ast, 0);
+    if (_class->attribute.isReified) {
+		BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(item->type);
+		classType->isReified = true;
+    }
 }
 
 static void resolveFieldDeclaration(Resolver* resolver, Ast* ast) {
