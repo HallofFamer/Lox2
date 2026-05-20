@@ -561,11 +561,21 @@ static Ast* genericType(Parser* parser) {
 }
 
 static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
-    if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_LESS)) return genericType(parser);
-    else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) return metaclassType(parser);
-    else if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) return callableType(parser);
-    else if ((checkParam && checkBoth(parser, TOKEN_KIND_IDENTIFIER)) || (!checkParam && check(parser, TOKEN_KIND_IDENTIFIER))) return behaviorType(parser);
-    else if (allowEmpty) return emptyAst(AST_EXPR_TYPE, emptyToken());
+    if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_LESS)) {
+        return genericType(parser);
+    }
+    else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) {
+        return metaclassType(parser);
+    }
+    else if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
+        return callableType(parser);
+    }
+    else if ((checkParam && checkBoth(parser, TOKEN_KIND_IDENTIFIER)) || (!checkParam && check(parser, TOKEN_KIND_IDENTIFIER))) {
+        return behaviorType(parser);
+    }
+    else if (allowEmpty) {
+        return emptyAst(AST_EXPR_TYPE, emptyToken());
+    }
     else {
         parseErrorAtCurrent(parser, "Invalid type specified.");
         return NULL;
@@ -704,6 +714,7 @@ static Ast* grouping(Parser* parser, Token token, bool canAssign) {
 static Ast* string(Parser* parser, Token token, bool canAssign) {
     int length = 0;
     char* str = parseString(parser, &length);
+
     Token strToken = {
         .length = length,
         .line = token.line,
@@ -1605,10 +1616,14 @@ static Ast* classDeclaration(Parser* parser) {
 }
 
 static bool checkBehaviorReturnType(Parser* parser) {
+	// A valid behavior return type annotation must be in the format of 'Identifier Identifier'
+    // The first identifier is the return type and the second identifier is the function name.
 	return checkBoth(parser, TOKEN_KIND_IDENTIFIER);
 }
 
 static bool checkMetaclassReturnType(Parser* parser) {
+	// A valid metaclass return type annotation must be in the format of 'Identifier class Identifier'
+	// The first identifier is the return type, followed by the 'class' keyword and then the function name identifier.
     return (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS) && checkNextN(parser, 2, TOKEN_KIND_IDENTIFIER));
 }
 
@@ -1628,7 +1643,7 @@ static bool checkCallableReturnType(Parser* parser, bool* hasReturnType) {
         return resetIndex(parser, index, current, false);
 	}
 
-    // Finally,this is a valid function declaration with a return type annotation, set hasReturnType to true and return true.
+    // Finally,this is a valid function declaration with a callable return type annotation, set hasReturnType to true and return true.
     *hasReturnType = true;
     return resetIndex(parser, index, current, true);
 }
@@ -1649,7 +1664,7 @@ static bool checkGenericReturnType(Parser* parser, bool* hasReturnType) {
         return resetIndex(parser, index, current, false);
     }
 
-    // Finally,this is a valid function declaration with a return type annotation, set hasReturnType to true and return true.
+    // Finally,this is a valid function declaration with a generic return type annotation, set hasReturnType to true and return true.
     *hasReturnType = true;
     return resetIndex(parser, index, current, true);
 }

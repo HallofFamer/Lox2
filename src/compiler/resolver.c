@@ -1633,6 +1633,12 @@ static void resolveTraitDeclaration(Resolver* resolver, Ast* ast) {
     item->type = insertBehaviorType(resolver, ast, TYPE_CATEGORY_TRAIT);
     item->state = SYMBOL_STATE_ACCESSED;
     resolveChild(resolver, ast, 0);
+
+    Ast* trait = astGetChild(ast, 0);
+    if (trait->attribute.isReified) {
+        BehaviorTypeInfo* traitType = AS_BEHAVIOR_TYPE(item->type);
+        traitType->isReified = true;
+    }
 }
 
 static void resolveTypeDeclaration(Resolver* resolver, Ast* ast) {
