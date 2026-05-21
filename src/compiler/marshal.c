@@ -183,6 +183,12 @@ static void marshalSerializeModule(Marshaller* marshaller, ByteArray* bytes, Obj
 			marshalSerializeInt(bytes, (uint32_t)entry->value);
 		}
 	}
+
+	marshalSerializeInt(bytes, (uint32_t)module->dependencies.count);
+	for (int i = 0; i < module->dependencies.capacity; i++) {
+		Value entry = &module->dependencies.values[i];
+		marshalSerializeString(bytes, AS_STRING(entry));		
+	}
 	marshalSerializeFunction(marshaller, bytes, function);
 }
 

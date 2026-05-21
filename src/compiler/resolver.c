@@ -328,6 +328,8 @@ static void bindSuperclassType(Resolver* resolver, Token currentClass, Ast* supe
 
     BehaviorTypeInfo* superclassBehaviorType = AS_BEHAVIOR_TYPE(getInnerBaseType(superclassType));
     BehaviorTypeInfo* currentMetaclassType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, currentClassType->baseType.fullName)));
+	if (superclassBehaviorType->isReified) currentClassType->isReified = true;
+    
     TypeInfo* superMetaclassType = typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, superclassBehaviorType->baseType.fullName));
     currentMetaclassType->superclassType = superMetaclassType;
     typeTableFieldsInherit(currentClassType, superclassType);
@@ -342,6 +344,9 @@ static void bindTraitType(Resolver* resolver, Token currentClass, Token trait) {
         TypeInfo* existingTraitType = currentClassType->traitTypes->elements[i];
         if (existingTraitType->id == traitType->id) return;
     }
+
+	BehaviorTypeInfo* traitBehaviorType = AS_BEHAVIOR_TYPE(traitType);
+	if (traitBehaviorType->isReified) currentClassType->isReified = true;
     TypeInfoArrayAdd(currentClassType->traitTypes, traitType);
 }
 
