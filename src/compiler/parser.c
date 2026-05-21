@@ -135,6 +135,20 @@ static bool checkNext(Parser* parser, TokenSymbol type) {
     return nextTokenType(parser) == type;
 }
 
+static bool checkNextN(Parser* parser, int length, TokenSymbol type) {
+    int offset = 1;
+    for (int i = 1; i <= length; i++) {
+        Token token = parser->tokens->elements[parser->index + offset];
+        if (token.type == TOKEN_NEW_LINE) {
+            offset++;
+            token = parser->tokens->elements[parser->index + offset];
+        }
+        if (i == length && token.type == type) return true;
+        offset++;
+    }
+    return false;
+}
+
 static bool checkEither(Parser* parser, TokenSymbol type1, TokenSymbol type2) {
     return check(parser, type1) || check(parser, type2);
 }
@@ -717,7 +731,7 @@ static Ast* fields(Parser* parser, Token* name) {
         advance(parser);
 
         Ast* fieldType = NULL;
-        if (checkBoth(parser, TOKEN_IDENTIFIER)) {
+        if (checkBoth(parser, TOKEN_IDENTIFIER) && !checkNextN(parser, 2, TOKEN_LEFT_PAREN)) {
             hasFieldType = true;
             fieldType = behaviorType(parser, "Expect field type.");
         }

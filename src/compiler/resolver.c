@@ -172,25 +172,27 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
         fullName = concatenateString(resolver->vm, resolver->currentNamespace, shortName, ".");
         type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
 
-        struct stat fullPathStat;
-        ObjString* fullPath = locateSourceFileFromFullName(resolver->vm, fullName);
-        if ((stat(fullPath->chars, &fullPathStat) == 0) && loadModule(resolver->vm, fullPath)) {
-            type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
-            insertSymbol(resolver, token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
-        }
-
         if (type == NULL) {
-            fullName = nameTableGet(resolver->nametab, originalName);
-            if (fullName != NULL) {
-                if(isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
+            struct stat fullPathStat;
+            ObjString* fullPath = locateSourceFileFromFullName(resolver->vm, fullName);
+            if ((stat(fullPath->chars, &fullPathStat) == 0) && loadModule(resolver->vm, fullPath)) {
                 type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
+                insertSymbol(resolver, token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
             }
 
             if (type == NULL) {
-                fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
-                type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
+                fullName = nameTableGet(resolver->nametab, originalName);
+                if (fullName != NULL) {
+                    if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
+                    type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
+                }
+
+                if (type == NULL) {
+                    fullName = concatenateString(resolver->vm, resolver->vm->langNamespace->fullName, shortName, ".");
+                    type = typeTableGet(resolver->vm->behaviorTypetab, fullName);
+                }
             }
-        }
+        } 
     }
     return type;
 }
