@@ -350,6 +350,12 @@ static void marshalDeserializeModule(Marshaller* marshaller) {
 		valueArrayWrite(marshaller->vm, &marshaller->module->varFields, NIL_VAL);
 	}
 
+	int numDependencies = marshalDeserializeInt(marshaller);
+	for (int i = 0; i < numDependencies; i++) {
+		ObjString* dependency = marshalDeserializeString(marshaller);
+		valueArrayWrite(marshaller->vm, &marshaller->module->dependencies, OBJ_VAL(dependency));
+	}
+
 	ObjFunction* function = marshalDeserializeFunction(marshaller);
 	ABORT_IFNULL(function, "Failed to deserialize program for file \"%s\".\n", marshaller->module->path->chars);
 	push(marshaller->vm, OBJ_VAL(function));

@@ -962,7 +962,7 @@ static Ast* fields(Parser* parser, Token* name) {
         advance(parser);
 
         Ast* fieldType = NULL;
-        if (checkBoth(parser, TOKEN_KIND_IDENTIFIER)) {
+        if (checkBoth(parser, TOKEN_KIND_IDENTIFIER) && !checkNextN(parser, 2, TOKEN_KIND_LEFT_PAREN)) {
             hasFieldType = true;
             fieldType = behaviorType(parser);
         }
