@@ -1442,6 +1442,7 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
         if (sourceFileExists(filePath)) {
             bool result = loadModule(resolver->vm, filePath);
             if (!result) semanticError(resolver, "Failed to load module '%s'.", fullName->chars);
+			else valueArrayWrite(resolver->vm, &resolver->vm->currentModule->dependencies, OBJ_VAL(filePath));
         }
         else {
             ObjString* directoryPath = locateSourceDirectoryFromFullName(resolver->vm, fullName);
