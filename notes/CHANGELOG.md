@@ -1,11 +1,16 @@
 # Change Log
 
-### Lox2 v2.1.3(current version)
+### Lox2 v2.1.4(current version)
+- Implement configuration options `flagUnusedImport` in lox2.ini which decide whether to throw warnings/errors when a class/trait is imported but never used.
+- Fix a glitch that the resolver cannot find and load types from the same namespace without using statement, which causes typechecking errors in some cases.
+- Address a parser bug that causes incorrect parsing of field declarations without initializers if the next line is method declaration.
+
+### Lox2 v2.1.3(last version)
 - Add type checking to immediate function calls with anonymous functions and lambda expressions as parameters.
 - Modify parser to allow callable type annotations without parameters such as `Int fun()` and `void fun()`.
 - Fix incorrect type annotations for enumeration methods on class `Dictionary` in package `clox.std.collection`.
 
-### Lox2 v2.1.2(last version)
+### Lox2 v2.1.2
 - Establish `Object` as top type for all types including function and metaclass types.
 - Update type.c to print function parameters properly if the first parameter has dynamic type.
 - Fix a minor bug in lexer which used to display incorrect line number when generating lexer error.
@@ -20,6 +25,11 @@
 - Dedicated syntax for declaring function types and metaclass types, enabling anonymous functions/lambda to be type inferred. 
 - Allow declaration of object instance/class fields outside of class initializer, which also enables optional static typing and default values.
 - Redesign of Iterator/Enumerator API for ease of use and implementation of iterable types, add new object type ObjIterator.
+
+### Lox2 v2.0.5
+- Implement configuration options `flagUnusedImport` in lox2.ini which decide whether to throw warnings/errors when a class/trait is imported but never used.
+- Fix a glitch that the resolver cannot find and load types from the same namespace without using statement, which causes typechecking errors in some cases.
+- Fix a potential heap corruption issue in function `valueToString` when converting certain values to string representation, which may cause segfaults in some cases.
 
 ### Lox2 v2.0.4
 - Add name resolution table in order to be able to typecheck invoke expressions like namespace.className(..args)
