@@ -956,28 +956,25 @@ static Ast* fields(Parser* parser, Token* name) {
     Ast* fieldList = emptyAst(AST_LIST_FIELD, *name);
 
     while (isFieldDeclaration(parser)) {
-        bool hasFieldType = false, hasInitializer = false;
+        bool hasFieldType = true, hasInitializer = false;
         bool isClass = match(parser, TOKEN_SYMBOL_CLASS);
         bool isMutable = (currentTokenType(parser) == TOKEN_SYMBOL_VAR);
         advance(parser);
 
         Ast* fieldType = NULL;
         if (checkBoth(parser, TOKEN_KIND_IDENTIFIER) && !checkNextN(parser, 2, TOKEN_KIND_LEFT_PAREN)) {
-            hasFieldType = true;
             fieldType = behaviorType(parser);
         }
         else if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
-            hasFieldType = true;
             fieldType = callableType(parser);
         }
         else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) {
-            hasFieldType = true;
             fieldType = metaclassType(parser);
         }
         else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_LESS)) {
-            hasFieldType = true;
             fieldType = genericType(parser);
         }
+		else hasFieldType = false;
 
         Token fieldName = identifierToken(parser, "Expect field name.");
         Ast* initializer = NULL;
