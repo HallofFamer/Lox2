@@ -228,11 +228,11 @@ static uint32_t marshalDeserializeInt(Marshaller* marshaller) {
 }
 
 static double marshalDeserializeDouble(Marshaller* marshaller) {
-	uint64_t numBits = ((uint64_t)marshalDeserializeByte(marshaller) << 56) | ((uint64_t)marshalDeserializeByte(marshaller) << 48) |
+	uint64_t value = ((uint64_t)marshalDeserializeByte(marshaller) << 56) | ((uint64_t)marshalDeserializeByte(marshaller) << 48) |
 		((uint64_t)marshalDeserializeByte(marshaller) << 40) | ((uint64_t)marshalDeserializeByte(marshaller) << 32) |
 		((uint64_t)marshalDeserializeByte(marshaller) << 24) | ((uint64_t)marshalDeserializeByte(marshaller) << 16) |
 		((uint64_t)marshalDeserializeByte(marshaller) << 8) | (uint64_t)marshalDeserializeByte(marshaller);
-	return AS_NUMBER(numBits);
+	return AS_NUMBER(value);
 }
 
 static ObjString* marshalDeserializeString(Marshaller* marshaller) {

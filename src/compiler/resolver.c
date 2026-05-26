@@ -200,6 +200,19 @@ static void importSymbols(Resolver* resolver, Ast* ast, ObjString* fullName, Typ
     nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, ast->token), fullName);
 }
 
+static TypeInfo* getTypeFromCurrentNamespace(Resolver* resolver, Token token, ObjString* fullName) {
+	TypeInfo* type = NULL;
+    ObjString* fullPath = locateSourceFileFromFullName(resolver->vm, fullName);
+
+    if (sourceFileExists(fullPath) && loadModule(resolver->vm, fullPath)) {
+        valueArrayWrite(resolver->vm, &resolver->vm->currentModule->dependencies, OBJ_VAL(fullPath));
+        ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, fullName);
+        type = typeTableGet(resolver->vm->typetab, metaclassName);
+        insertSymbol(resolver, token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
+        insertTypeParamSymbols(resolver, fullName);
+    }
+}
+
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {
 	if (token.length == 0) return NULL;
     ObjString* shortName = createStringFromToken(resolver->vm, token);
