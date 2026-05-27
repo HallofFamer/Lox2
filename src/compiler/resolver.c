@@ -231,14 +231,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
             type = typeTableGet(resolver->vm->typetab, fullName);
 
             if (type == NULL) {
-				ObjString* fullPath = locateSourceFileFromFullName(resolver->vm, fullName);
-                if (sourceFileExists(fullPath) && loadModule(resolver->vm, fullPath)) {
-					valueArrayWrite(resolver->vm, &resolver->vm->currentModule->dependencies, OBJ_VAL(fullPath));
-                    ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, fullName);
-                    type = typeTableGet(resolver->vm->typetab, metaclassName);
-                    insertSymbol(resolver, token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
-                    insertTypeParamSymbols(resolver, fullName);
-                }
+				type = getTypeFromCurrentNamespace(resolver, token, fullName);
 
                 if (type == NULL) {
                     fullName = nameTableGet(resolver->nametab, originalName);

@@ -1007,7 +1007,12 @@ static Ast* methods(Parser* parser, Token* name) {
         if (match(parser, TOKEN_SYMBOL_CLASS)) isClass = true;
         if (match(parser, TOKEN_SYMBOL_VOID)) isVoid = true;
 
-        if (checkBoth(parser, TOKEN_KIND_IDENTIFIER) || (check(parser, TOKEN_KIND_IDENTIFIER) && tokenIsOperator(nextToken(parser)) && (checkNextN(parser, 2, TOKEN_KIND_LEFT_PAREN) || checkNextN(parser, 3, TOKEN_KIND_LEFT_PAREN)))) {
+        if (checkBoth(parser, TOKEN_KIND_IDENTIFIER) || (
+            check(parser, TOKEN_KIND_IDENTIFIER) && 
+            tokenIsOperator(nextToken(parser)) && 
+            (checkNextN(parser, 2, TOKEN_KIND_LEFT_PAREN) || checkNextN(parser, 3, TOKEN_KIND_LEFT_PAREN)))
+        ) 
+        {
             hasReturnType = true;
             returnType = behaviorType(parser);
         }
