@@ -1,0 +1,77 @@
+namespace examples.lib
+using clox.std.collection.Array
+
+class EightQueens {
+
+    val Int size = 8
+    val Array<Int> queens = []
+    val Array<Array<String>> solutions = []
+
+    __init__(Int size) {
+        this.size = size
+        this.queens.fill(this.size, -1)
+    }
+
+    Array<Array<String>> solve() { 
+        this.placeQueen(0)
+        return this.solutions
+    }
+
+    void placeQueen(Int row) {
+        if (row == this.size) {
+            val solution = this.formatBoard()
+            this.solutions.add(solution)
+            return
+        }
+
+        var col = 0
+        while (col < this.size) {
+            if (this.isSafe(row, col)) {
+                this.queens[row] = col
+                this.placeQueen(row + 1)
+                this.queens[row] = -1
+            }
+            col = col + 1
+        }
+    }
+
+    Bool isSafe(Int row, Int col) {
+        if (row == 0) return true;
+        var i = 0;
+        while (i < row) {
+            if (this.queens[i] == col or 
+                this.queens[i] - i == col - row or 
+                this.queens[i] + i == col + row) 
+            {
+                return false
+            }
+            i = i + 1
+        }
+        return true
+    }
+
+    Array<String> formatBoard() {
+        val boards = []
+        
+        var i = 0;
+        while (i < this.size) {
+            var row = ""
+            var j = 0;
+
+            while (j < this.size) {
+                if (this.queens[i] == j) {
+                    row = row + "Q "
+                } 
+                else {
+                    row = row + ". "
+                }
+                j = j + 1
+            }
+            
+            row = row + "\n";
+            boards.add(row)
+            i = i + 1
+        }
+        return boards
+    }
+}

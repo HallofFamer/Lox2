@@ -1,0 +1,14 @@
+namespace test.types
+using clox.std.util.UUID
+
+String identity<T>(T arg) { 
+    return arg.toString()
+}
+
+String identityName<T>(T arg) {
+    return "${T}(${arg})"
+}
+
+val id = UUID()
+println(identity<UUID>(id))
+println(identityName<UUID>(id))

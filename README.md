@@ -119,7 +119,7 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 
 ### Lox2 v2.8.0
 - Extension methods which allow adding new methods to existing classes without modifying their source code.
-- Further improvement of JIT compiler with introduction of SSA IR form that enables more optimiation for generated native code.
+- Further improvement of JIT compiler with introduction of SSA IR form that enables more optimizations for generated native code.
 - Function and Method parameter labels similar to Smalltalk, Objective C and Swift using `label:` notation.
 - Introduction of Lox2's package manager(name to be determined) which allows installing Lox2 packages from a central repository.
 
@@ -128,7 +128,7 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 The following code shows how to send a simple asynchronous HTTP request and prints its status and contents to the console. This example makes uses of various features from Lox2 such as namespace declaration/import, immutable variable, async/await, and string interpolation. 
 
 ```
-namespace Lox2Example
+namespace examples.scripts
 using clox.std.net.HTTPClient
 using clox.std.net.URL
 
