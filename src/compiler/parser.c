@@ -1001,7 +1001,7 @@ static Ast* methods(Parser* parser, Token* name) {
     Ast* methodList = emptyAst(AST_LIST_METHOD, *name);
 
     while (!check(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
-        bool isAsync = false, isClass = false, isInitializer = false, isVoid = false, hasReturnType = false;
+        bool isAsync = false, isClass = false, isInitializer = false, isVoid = false, hasReturnType = true;
         Ast* returnType = NULL;
         if (match(parser, TOKEN_SYMBOL_ASYNC)) isAsync = true;
         if (match(parser, TOKEN_SYMBOL_CLASS)) isClass = true;
@@ -1013,22 +1013,21 @@ static Ast* methods(Parser* parser, Token* name) {
             (checkNextN(parser, 2, TOKEN_KIND_LEFT_PAREN) || checkNextN(parser, 3, TOKEN_KIND_LEFT_PAREN)))
         ) 
         {
-            hasReturnType = true;
             returnType = behaviorType(parser);
         }
         else if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_SYMBOL_VOID) && checkNext(parser, TOKEN_SYMBOL_FUN)) {
-            hasReturnType = true;
             returnType = callableType(parser);
         }
         else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_SYMBOL_CLASS)) {
-            hasReturnType = true;
             returnType = metaclassType(parser);
         }
         else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_LESS)) {
-            hasReturnType = true;
             returnType = genericType(parser);
         }
-        else returnType = emptyAst(AST_EXPR_TYPE, emptyToken());
+        else {
+			hasReturnType = false;
+            returnType = emptyAst(AST_EXPR_TYPE, emptyToken());
+        }
 
         Token methodName = identifierToken(parser, "Expect method name.");
         if (previousToken(parser).length == 8 && memcmp(previousToken(parser).start, "__init__", 8) == 0) {

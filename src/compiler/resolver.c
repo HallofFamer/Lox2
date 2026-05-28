@@ -180,7 +180,7 @@ static SymbolItem* insertSymbol(Resolver* resolver, Token token, SymbolCategory 
     }
 }
 
-static void insertTypeParamSymbols(Resolver* resolver, ObjString* className) {
+static void insertTypeParams(Resolver* resolver, ObjString* className) {
     TypeInfo* behaviorType = typeTableGet(resolver->vm->typetab, className);
     if (hasGenericParameters(behaviorType)) {
         TypeInfo* typeType = getNativeType(resolver->vm, "Type");
@@ -196,7 +196,7 @@ static void insertTypeParamSymbols(Resolver* resolver, ObjString* className) {
 static void importSymbols(Resolver* resolver, Ast* ast, ObjString* fullName, TypeInfo* type) {
     SymbolItem* item = insertSymbol(resolver, ast->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_DEFINED, type, false);
     item->isImported = true;
-    insertTypeParamSymbols(resolver, fullName);
+    insertTypeParams(resolver, fullName);
     nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, ast->token), fullName);
 }
 
@@ -209,8 +209,9 @@ static TypeInfo* getTypeFromCurrentNamespace(Resolver* resolver, Token token, Ob
         ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, fullName);
         type = typeTableGet(resolver->vm->typetab, metaclassName);
         insertSymbol(resolver, token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, type, false);
-        insertTypeParamSymbols(resolver, fullName);
+        insertTypeParams(resolver, fullName);
     }
+    return type;
 }
 
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {

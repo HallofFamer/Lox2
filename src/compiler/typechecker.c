@@ -547,9 +547,7 @@ static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolIte
 
 static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* callableType) {
     if (callableType == NULL || callableType->returnType == NULL) return;
-    if (callableType->returnType->category == TYPE_CATEGORY_VOID) {
-        ast->type = typeChecker->voidType;
-    }
+    if (callableType->returnType->category == TYPE_CATEGORY_VOID) ast->type = typeChecker->voidType;
     else ast->type = callableType->returnType;
 }
 

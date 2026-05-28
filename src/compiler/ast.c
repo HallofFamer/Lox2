@@ -505,6 +505,7 @@ static void astOutputStmtIf(Ast* ast, int indentLevel) {
     printf("ifStmt\n");
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
+
     if (astNumChild(ast) > 2) {
         astOutputChild(ast, indentLevel + 1, 2);
     }
