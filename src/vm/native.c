@@ -368,11 +368,10 @@ ObjClass* getNativeClass(VM* vm, const char* fullName) {
 TypeInfo* getNativeType(VM* vm, const char* name) {
     if (name == NULL || strcmp(name, "dynamic") == 0) return NULL;
     ObjString* shortName = newStringPerma(vm, name);
-    ObjString* fullName = NULL;
     TypeInfo* type = typeTableGet(vm->typetab, shortName);
 
     if (type == NULL) {
-        fullName = concatenateString(vm, vm->currentNamespace->fullName, shortName, ".");
+        ObjString* fullName = concatenateString(vm, vm->currentNamespace->fullName, shortName, ".");
         type = typeTableGet(vm->typetab, fullName);
 
         if (type == NULL) {

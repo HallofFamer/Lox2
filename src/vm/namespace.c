@@ -145,8 +145,26 @@ ObjString* locateSourceDirectoryFromFullName(VM* vm, ObjString* fullName) {
     return takeString(vm, heapChars, fullName->length);
 }
 
+static void loadModuleDependencies(VM* vm, ObjModule* module) {
+	for (int i = 0; i < module->dependencies.count; i++) {
+		ObjString* dependencyPath = AS_STRING(module->dependencies.values[i]);
+		Value value;
+
+		if (!tableGet(&vm->modules, dependencyPath, &value)) {
+			if (!loadModule(vm, dependencyPath)) {
+				fprintf(stderr, "Failed to load module dependency '%s' for module '%s'.\n", dependencyPath->chars, module->path->chars);
+				exit(70);
+			}
+		}
+	}
+}
+
 InterpretResult runModule(VM* vm, ObjModule* module, bool isRootModule) {
+    if (module->dependencies.count > 0) {
+        loadModuleDependencies(vm, module);
+    }
     push(vm, OBJ_VAL(module->closure));
+
     if (module->closure->function->isAsync) {
         Value result = runGeneratorAsync(vm, OBJ_VAL(module->closure), newArray(vm));
         return result ? INTERPRET_OK : INTERPRET_RUNTIME_ERROR;

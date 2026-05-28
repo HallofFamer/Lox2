@@ -637,8 +637,8 @@ InterpretResult run(VM* vm) {
         disassembleInstruction(&frame->closure->function->chunk, (int)(frame->ip - frame->closure->function->chunk.code));
 #endif
 
-        uint8_t instruction;
-        switch (instruction = READ_BYTE()) {
+        uint8_t instruction = READ_BYTE();
+        switch (instruction) {
             case OP_CONSTANT: push(vm, READ_CONSTANT()); break;
             case OP_NIL: push(vm, NIL_VAL); break;
             case OP_TRUE: push(vm, BOOL_VAL(true)); break;
