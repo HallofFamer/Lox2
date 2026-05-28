@@ -287,9 +287,9 @@ static void astOutputExprLiteral(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     char* token = tokenToCString(ast->token);
     switch (ast->token.type) {
-        case TOKEN_SYMBOL_NIL:
-        case TOKEN_SYMBOL_TRUE:
-        case TOKEN_SYMBOL_FALSE:
+        case TOKEN_KIND_NIL:
+        case TOKEN_KIND_TRUE:
+        case TOKEN_KIND_FALSE:
         case TOKEN_KIND_INT:
         case TOKEN_KIND_NUMBER:
             printf("%s\n", token);
