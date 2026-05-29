@@ -773,8 +773,14 @@ static void typeParameters(Resolver* resolver, Ast* ast, bool isClassDecl, bool 
 		typeParamTokens[i] = typeParam->token;
     }
 
-    if (isClassDecl) resolver->currentClass->typeParams = typeParamTokens;
-    else if (isFunctionDecl) resolver->currentFunction->typeParams = typeParamTokens;
+    if (isClassDecl) {
+        resolver->currentClass->typeParams = typeParamTokens; 
+		resolver->currentClass->typeParamCount = typeParams->children->count;
+    }
+    else if (isFunctionDecl) {
+        resolver->currentFunction->typeParams = typeParamTokens;
+		resolver->currentFunction->typeParamCount = typeParams->children->count;
+    }
 }
 
 static bool isBehaviorTypeParameter(Resolver* resolver, Token token) {

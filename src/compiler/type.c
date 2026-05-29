@@ -397,7 +397,7 @@ void freeTypeInfo(TypeInfo* type) {
     if (IS_BEHAVIOR_TYPE(type)) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
-        if (behaviorType->formalTypeParams != NULL) TypeInfoArrayFree(behaviorType->formalTypeParams);  
+        if (behaviorType->formalTypeParams != NULL) TypeInfoArrayFree(behaviorType->formalTypeParams);
         freeTypeTable(behaviorType->fields);
         freeTypeTable(behaviorType->methods);
         free(behaviorType);
@@ -417,7 +417,7 @@ void freeTypeInfo(TypeInfo* type) {
         AliasTypeInfo* aliasType = AS_ALIAS_TYPE(type);
         if (aliasType->formalTypeParams != NULL) TypeInfoArrayFree(aliasType->formalTypeParams);
         free(aliasType);
-	}
+    }
     else free(type);
 }
 
@@ -977,6 +977,10 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
     if (IS_BEHAVIOR_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) {
         return (type->id == type2->id);
     }
+
+	if (IS_BEHAVIOR_TYPE(type) && IS_GENERIC_TYPE(type2)) {
+        return isEqualType(type, getInnerBaseType(type2));
+	}
 
     if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
 		return isCallableEqualType(AS_CALLABLE_TYPE(type), AS_CALLABLE_TYPE(type2));
