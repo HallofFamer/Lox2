@@ -1094,6 +1094,7 @@ static void resolveSuperGet(Resolver* resolver, Ast* ast) {
     if (resolver->currentClass == NULL) {
         semanticError(resolver, "Cannot use 'super' outside of a class/trait.");
     }
+
     findThis(resolver);
     resolveChild(resolver, ast, 0);
 	astHandleInitializer(resolver, ast);

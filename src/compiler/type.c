@@ -981,6 +981,10 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 	if (IS_BEHAVIOR_TYPE(type) && IS_GENERIC_TYPE(type2)) {
         return isEqualType(type, getInnerBaseType(type2));
 	}
+    
+	if (IS_GENERIC_TYPE(type) && IS_BEHAVIOR_TYPE(type2)) {
+		return isEqualType(getInnerBaseType(type), type2);
+	}
 
     if (IS_CALLABLE_TYPE(type) && IS_CALLABLE_TYPE(type2)) {
 		return isCallableEqualType(AS_CALLABLE_TYPE(type), AS_CALLABLE_TYPE(type2));
