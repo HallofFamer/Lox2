@@ -597,13 +597,17 @@ static void behaviorTypeParametersAtInitializer(Compiler* compiler, Ast* ast) {
 
 static void callableTypeParameters(Compiler* compiler, Ast* ast) {
     Ast* typeParams = astGetTypeParameters(ast);
+    if (ast->type != NULL && IS_CALLABLE_TYPE(ast->type)) {
+		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(ast->type);
+        if (!callableType->attribute.isReified) return;
 
-    for (int i = 0; i < typeParams->children->count; i++) {
-        compiler->function->arity++;
-        compiler->function->typeParamCount++;
-        Ast* typeParam = astGetChild(typeParams, i);
-        uint8_t index = makeVariable(compiler, &typeParam->token, "Expect type parameter name.");
-        defineVariable(compiler, index, false);
+        for (int i = 0; i < typeParams->children->count; i++) {
+            compiler->function->arity++;
+            compiler->function->typeParamCount++;
+            Ast* typeParam = astGetChild(typeParams, i);
+            uint8_t index = makeVariable(compiler, &typeParam->token, "Expect type parameter name.");
+            defineVariable(compiler, index, false);
+        }
     }
 }
 
