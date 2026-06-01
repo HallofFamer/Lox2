@@ -674,9 +674,7 @@ static Ast* subscript(Parser* parser, Token token, Ast* left, bool canAssign) {
         Ast* right = expression(parser);
         return newAst(AST_EXPR_SUBSCRIPT_SET, token, 3, left, index, right);
     }
-    else {
-        return newAst(AST_EXPR_SUBSCRIPT_GET, token, 2, left, index);
-    }
+    else return newAst(AST_EXPR_SUBSCRIPT_GET, token, 2, left, index);
 }
 
 static Ast* question(Parser* parser, Token token, Ast* left, bool canAssign) { 
@@ -1740,8 +1738,8 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     bool isVoid = (previousTokenType(parser) == TOKEN_KIND_VOID);
     Ast* returnType = hasReturnType ? type_(parser, false, false) : emptyAst(AST_EXPR_TYPE, emptyToken());
     consume(parser, TOKEN_KIND_IDENTIFIER, "Expect function name.");
-
     Token name = previousToken(parser);
+
     Ast* typeParams = check(parser, TOKEN_KIND_LESS) ? typeParameters(parser, name) : NULL;
     Ast* body = function(parser, returnType, isAsync, false, isVoid);
     Ast* ast = newAst(AST_DECL_FUN, name, 1, body);

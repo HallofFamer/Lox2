@@ -598,8 +598,12 @@ static void behaviorTypeParametersAtInitializer(Compiler* compiler, Ast* ast) {
 static void callableTypeParameters(Compiler* compiler, Ast* ast) {
     Ast* typeParams = astGetTypeParameters(ast);
     if (ast->type != NULL && IS_CALLABLE_TYPE(ast->type)) {
-		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(ast->type);
-        if (!callableType->attribute.isReified) return;
+		Ast* callee = astGetChild(ast, 0);
+		SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(compiler->vm, callee->token));
+        if (item->type != NULL && IS_CALLABLE_TYPE(item->type)) {
+			CallableTypeInfo* callableType = AS_CALLABLE_TYPE(item->type);
+			if (!callableType->attribute.isReified) return;
+        }
 
         for (int i = 0; i < typeParams->children->count; i++) {
             compiler->function->arity++;
