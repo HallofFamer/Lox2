@@ -578,6 +578,7 @@ static void behaviorTypeParametersAtInitializer(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
     BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, classItem->type->fullName)));
+    if (!classType->isReified) return;
 
     for (int i = 0; i < classType->formalTypeParams->count; i++) {
         TypeInfo* formalTypeParamType = classType->formalTypeParams->elements[i];

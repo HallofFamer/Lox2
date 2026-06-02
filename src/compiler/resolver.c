@@ -214,6 +214,11 @@ static TypeInfo* getTypeFromCurrentNamespace(Resolver* resolver, Token token, Ob
     return type;
 }
 
+static TypeInfo* getTypeFromFullName(Resolver* resolver, ObjString* fullName, bool isMetaclass) {
+    if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
+    return typeTableGet(resolver->vm->typetab, fullName);
+}
+
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {
 	if (token.length == 0) return NULL;
     ObjString* shortName = createStringFromToken(resolver->vm, token);
