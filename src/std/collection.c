@@ -415,6 +415,7 @@ LOX_METHOD(Array, __init__) {
 
 LOX_METHOD(Array, add) {
     ASSERT_ARG_COUNT("Array::add(element)", 1);
+	PROCESS_WRITE_BARRIER(AS_OBJ(receiver), args[0]);
     valueArrayWrite(vm, &AS_ARRAY(receiver)->elements, args[0]);
     RETURN_OBJ(receiver);
 }

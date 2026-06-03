@@ -214,9 +214,13 @@ static TypeInfo* getTypeFromCurrentNamespace(Resolver* resolver, Token token, Ob
     return type;
 }
 
-static TypeInfo* getTypeFromFullName(Resolver* resolver, ObjString* fullName, bool isMetaclass) {
-    if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
-    return typeTableGet(resolver->vm->typetab, fullName);
+static TypeInfo* getTypeFromFullName(Resolver* resolver, ObjString* originalName, bool isMetaclass) {
+    ObjString* fullName = nameTableGet(resolver->nametab, originalName);
+    if (fullName != NULL) {
+        if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
+        return typeTableGet(resolver->vm->typetab, fullName);
+    }
+    return NULL;
 }
 
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {
@@ -1615,7 +1619,7 @@ static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
 
     Ast* function = astGetChild(ast, 0);
     if (function->type != NULL && IS_CALLABLE_TYPE(function->type)) {
-        item->type = function->type;
+		item->type = function->type;
     }
 }
 
