@@ -599,8 +599,7 @@ static void behaviorTypeParametersAtInitializer(Compiler* compiler, Ast* ast) {
 static void callableTypeParameters(Compiler* compiler, Ast* ast) {
     Ast* typeParams = astGetTypeParameters(ast);
     if (ast->type != NULL && IS_CALLABLE_TYPE(ast->type)) {
-		Ast* callee = astGetChild(ast, 0);
-		SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(compiler->vm, callee->token));
+		SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(compiler->vm, ast->token));
         if (item->type != NULL && IS_CALLABLE_TYPE(item->type)) {
 			CallableTypeInfo* callableType = AS_CALLABLE_TYPE(item->type);
 			if (!callableType->attribute.isReified) return;
@@ -617,11 +616,18 @@ static void callableTypeParameters(Compiler* compiler, Ast* ast) {
 }
 
 static int typeArgumentsAtInvocation(Compiler* compiler, Ast* ast) {
-    for (int i = 0; i < ast->children->count; i++) {
-        Ast* typeArg = astGetChild(ast, i);
+    Ast* typeArgs = astGetChild(ast, 0);
+	SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(compiler->vm, ast->token));
+    if (item->type != NULL && IS_CALLABLE_TYPE(item->type)) {
+		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(item->type);
+		if (!callableType->attribute.isReified) return 0;
+    }
+
+    for (int i = 0; i < typeArgs->children->count; i++) {
+        Ast* typeArg = astGetChild(typeArgs, i);
         getVariable(compiler, typeArg->symtab, typeArg->token);
     }
-    return ast->children->count;
+    return typeArgs->children->count;
 }
 
 static int typeArgumentsAtInit(Compiler* compiler, Ast* ast, TypeInfo* type) {
@@ -817,8 +823,7 @@ static void compileCall(Compiler* compiler, Ast* ast) {
     int typeArgCount = 0;
 
     if (callee->attribute.isGeneric) {
-		Ast* typeArgs = astGetChild(callee, 0);
-        typeArgCount = typeArgumentsAtInvocation(compiler, typeArgs);
+        typeArgCount = typeArgumentsAtInvocation(compiler, callee);
     }
     else if (callee->type != NULL){
         if (IS_BEHAVIOR_TYPE(callee->type)) {

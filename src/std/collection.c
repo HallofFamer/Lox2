@@ -423,6 +423,7 @@ LOX_METHOD(Array, add) {
 LOX_METHOD(Array, addAll) {
     ASSERT_ARG_COUNT("Array::addAll(array)", 1);
     ASSERT_ARG_TYPE("Array::addAll(array)", 0, Array);
+	PROCESS_WRITE_BARRIER(AS_OBJ(receiver), args[0]);
     valueArrayAddAll(vm, &AS_ARRAY(args[0])->elements, &AS_ARRAY(receiver)->elements);
     RETURN_NIL;
 }
