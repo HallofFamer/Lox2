@@ -597,32 +597,51 @@ static void behaviorTypeParametersAtInitializer(Compiler* compiler, Ast* ast) {
 }
 
 static void callableTypeParameters(Compiler* compiler, Ast* ast) {
-    Ast* typeParams = astGetTypeParameters(ast);
-    if (ast->type != NULL && IS_CALLABLE_TYPE(ast->type)) {
-		SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(compiler->vm, ast->token));
-        if (item->type != NULL && IS_CALLABLE_TYPE(item->type)) {
-			CallableTypeInfo* callableType = AS_CALLABLE_TYPE(item->type);
-			if (!callableType->attribute.isReified) return;
-        }
-
-        for (int i = 0; i < typeParams->children->count; i++) {
-            compiler->function->arity++;
-            compiler->function->typeParamCount++;
-            Ast* typeParam = astGetChild(typeParams, i);
-            uint8_t index = makeVariable(compiler, &typeParam->token, "Expect type parameter name.");
-            defineVariable(compiler, index, false);
-        }
+    for (int i = 0; i < ast->children->count; i++) {
+        compiler->function->arity++;
+        compiler->function->typeParamCount++;
+        Ast* typeParam = astGetChild(ast, i);
+        uint8_t index = makeVariable(compiler, &typeParam->token, "Expect type parameter name.");
+        defineVariable(compiler, index, false);
     }
 }
 
-static int typeArgumentsAtInvocation(Compiler* compiler, Ast* ast) {
-    Ast* typeArgs = astGetChild(ast, 0);
+static void callableTypeParametersAtFunction(Compiler* compiler, Ast* ast) {
+    Ast* typeParams = astGetTypeParameters(ast);
+    SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(compiler->vm, ast->token));
+
+    if (item->type != NULL && IS_CALLABLE_TYPE(item->type)) {
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(item->type);
+        if (!callableType->attribute.isReified) return;
+        callableTypeParameters(compiler, typeParams);
+    }
+}
+
+static void callableTypeParametersAtMethod(Compiler* compiler, Ast* ast) {
+	ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
+	SymbolItem* item = symbolTableLookup(ast->symtab, className);
+	if (item == NULL) return;
+	
+    ObjString* classFullName = getClassNameFromMetaclass(compiler->vm, item->type->fullName);
+	TypeInfo* receiverType = typeTableGet(compiler->vm->typetab, classFullName);
+	TypeInfo* methodType = typeTableMethodLookup(receiverType, createStringFromToken(compiler->vm, ast->token));
+
+    if (methodType == NULL) return;
+	CallableTypeInfo* callableType = AS_METHOD_TYPE(methodType)->declaredType;
+    if (!callableType->attribute.isReified) return;
+	
+    Ast* typeParams = astGetTypeParameters(ast);
+	callableTypeParameters(compiler, typeParams);
+}
+
+static int typeArgumentsAtCall(Compiler* compiler, Ast* ast) {
 	SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(compiler->vm, ast->token));
     if (item->type != NULL && IS_CALLABLE_TYPE(item->type)) {
 		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(item->type);
 		if (!callableType->attribute.isReified) return 0;
     }
 
+    Ast* typeArgs = astGetChild(ast, 0);
     for (int i = 0; i < typeArgs->children->count; i++) {
         Ast* typeArg = astGetChild(typeArgs, i);
         getVariable(compiler, typeArg->symtab, typeArg->token);
@@ -652,6 +671,36 @@ static int typeArgumentsAtSuperInit(Compiler* compiler, Ast* ast) {
     return typeArgumentsAtInit(compiler, ast, AS_BEHAVIOR_TYPE(classType)->superclassType);
 }
 
+static int typeArgumentsAtInvoke(Compiler* compiler, Ast* ast) {
+	Ast* receiver = astGetChild(ast, 0);
+	SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(compiler->vm, receiver->token));
+	
+    if (item->type != NULL) {
+        TypeInfo* receiverType = getInnerBaseType(item->type);
+		TypeInfo* methodType = typeTableMethodLookup(receiverType, createStringFromToken(compiler->vm, ast->token));
+        if (methodType != NULL) {
+			CallableTypeInfo* callableType = AS_METHOD_TYPE(methodType)->declaredType;
+            if (!callableType->attribute.isReified) return 0;
+        }
+    }
+
+	Ast* typeArgs = astGetChild(ast, 2);
+    for (int i = 0; i < typeArgs->children->count; i++) {
+        Ast* typeArg = astGetChild(typeArgs, i);
+        getVariable(compiler, typeArg->symtab, typeArg->token);
+    }
+    return typeArgs->children->count;
+}
+
+static int typeArgumentsAtSuperInvoke(Compiler* compiler, Ast* ast) {
+    Ast* typeArgs = astGetChild(ast, 1);
+    for (int i = 0; i < typeArgs->children->count; i++) {
+        Ast* typeArg = astGetChild(typeArgs, i);
+        getVariable(compiler, typeArg->symtab, typeArg->token);
+    }
+    return ast->children->count;
+}
+
 static void block(Compiler* compiler, Ast* ast) {
     Ast* stmts = astGetChild(ast, 0);
     for (int i = 0; i < stmts->children->count; i++) {
@@ -668,7 +717,8 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
 		behaviorTypeParametersAtInitializer(&compiler, ast);
     }
     else if (astHasTypeParameters(ast)) {
-        callableTypeParameters(&compiler, ast);
+        if (ast->kind == AST_DECL_METHOD) callableTypeParametersAtMethod(&compiler, ast);
+        else callableTypeParametersAtFunction(&compiler, ast);
     }
 
     parameters(&compiler, astGetChild(ast, 1));
@@ -822,8 +872,8 @@ static void compileCall(Compiler* compiler, Ast* ast) {
 	Ast* callee = astGetChild(ast, 0);
     int typeArgCount = 0;
 
-    if (callee->attribute.isGeneric) {
-        typeArgCount = typeArgumentsAtInvocation(compiler, callee);
+    if (callee->attribute.isGeneric) {		
+        typeArgCount = typeArgumentsAtCall(compiler, callee);
     }
     else if (callee->type != NULL){
         if (IS_BEHAVIOR_TYPE(callee->type)) {
@@ -904,8 +954,7 @@ static void compileInvoke(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
 	int typeArgCount = 0;
     if (astNumChild(ast) > 2) {
-        Ast* typeArgs = astGetChild(ast, 2);
-        typeArgCount = typeArgumentsAtInvocation(compiler, typeArgs);
+        typeArgCount = typeArgumentsAtInvoke(compiler, ast);
     }
 
     Ast* args = astGetChild(ast, 1);
@@ -996,8 +1045,7 @@ static void compileSuperInvoke(Compiler* compiler, Ast* ast) {
         typeArgCount = typeArgumentsAtSuperInit(compiler, ast);
     }
     else if (astNumChild(ast) > 1) {
-        Ast* typeArgs = astGetChild(ast, 1);
-        typeArgCount = typeArgumentsAtInvocation(compiler, typeArgs);
+        typeArgCount = typeArgumentsAtSuperInvoke(compiler, ast);
     }
 
     Ast* args = astGetChild(ast, 0);
