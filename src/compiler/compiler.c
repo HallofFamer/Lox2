@@ -576,8 +576,9 @@ static void behaviorTypeParametersAtDeclaration(Compiler* compiler, Ast* ast) {
 
 static void behaviorTypeParametersAtInitializer(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
-    SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
-    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, getClassNameFromMetaclass(compiler->vm, classItem->type->fullName)));
+    SymbolItem* item = symbolTableLookup(ast->symtab, className);
+	ObjString* classFullName = getClassNameFromMetaclass(compiler->vm, item->type->fullName);
+    BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, classFullName));
     if (!classType->isReified) return;
 
     for (int i = 0; i < classType->formalTypeParams->count; i++) {
@@ -636,9 +637,17 @@ static void callableTypeParametersAtMethod(Compiler* compiler, Ast* ast) {
 
 static int typeArgumentsAtCall(Compiler* compiler, Ast* ast) {
 	SymbolItem* item = symbolTableLookup(ast->symtab, createStringFromToken(compiler->vm, ast->token));
-    if (item->type != NULL && IS_CALLABLE_TYPE(item->type)) {
-		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(item->type);
-		if (!callableType->attribute.isReified) return 0;
+    if (item->type != NULL) {
+        if (IS_CALLABLE_TYPE(item->type)) {
+            CallableTypeInfo* callableType = AS_CALLABLE_TYPE(item->type);
+            if (!callableType->attribute.isReified) return 0;
+        }
+		else if (IS_BEHAVIOR_TYPE(item->type)) {
+			ObjString* classFullName = getClassNameFromMetaclass(compiler->vm, item->type->fullName);
+            BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, classFullName));
+            if (!classType->isReified) return;
+		}
+		else return 0;
     }
 
     Ast* typeArgs = astGetChild(ast, 0);

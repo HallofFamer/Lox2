@@ -1576,7 +1576,8 @@ static void resolveClassDeclaration(Resolver* resolver, Ast* ast) {
 
 	Ast* _class = astGetChild(ast, 0);
     if (_class->attribute.isReified) {
-		BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(item->type);
+		ObjString* className = getClassNameFromMetaclass(resolver->vm, item->type->fullName);
+		BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, className));
 		classType->isReified = true;
     }
 }
