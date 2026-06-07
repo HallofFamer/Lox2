@@ -645,7 +645,7 @@ static int typeArgumentsAtCall(Compiler* compiler, Ast* ast) {
 		else if (IS_BEHAVIOR_TYPE(item->type)) {
 			ObjString* classFullName = getClassNameFromMetaclass(compiler->vm, item->type->fullName);
             BehaviorTypeInfo* classType = AS_BEHAVIOR_TYPE(typeTableGet(compiler->vm->typetab, classFullName));
-            if (!classType->isReified) return;
+            if (!classType->isReified) return 0;
 		}
 		else return 0;
     }
@@ -659,6 +659,11 @@ static int typeArgumentsAtCall(Compiler* compiler, Ast* ast) {
 }
 
 static int typeArgumentsAtInit(Compiler* compiler, Ast* ast, TypeInfo* type) {
+	if (type != NULL && IS_BEHAVIOR_TYPE(type)) {
+		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+        if (!behaviorType->isReified) return 0;
+	}
+
     if (hasGenericParameters(type)) {
         TypeInfoArray* typeArgs = getTypeParameters(type);
         for (int i = 0; i < typeArgs->count; i++) {
@@ -675,9 +680,11 @@ static int typeArgumentsAtSuperInit(Compiler* compiler, Ast* ast) {
     ObjString* className = copyStringPerma(compiler->vm, compiler->currentClass->name.start, compiler->currentClass->name.length);
     SymbolItem* classItem = symbolTableLookup(ast->symtab, className);
     if (classItem == NULL) return 0;
+
 	ObjString* classFullName = getClassNameFromMetaclass(compiler->vm, classItem->type->fullName);
     TypeInfo* classType = typeTableGet(compiler->vm->typetab, classFullName);
-    return typeArgumentsAtInit(compiler, ast, AS_BEHAVIOR_TYPE(classType)->superclassType);
+	TypeInfo* superclassType = AS_BEHAVIOR_TYPE(classType)->superclassType;
+    return typeArgumentsAtInit(compiler, ast, superclassType);
 }
 
 static int typeArgumentsAtInvoke(Compiler* compiler, Ast* ast) {
