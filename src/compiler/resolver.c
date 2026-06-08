@@ -85,6 +85,8 @@ static ResolverAttribute resolverInitModifier() {
 static void initClassResolver(Resolver* resolver, ClassResolver* _class, Token name, int scopeDepth, BehaviorType type) {
     _class->enclosing = resolver->currentClass;
     _class->name = name;
+    _class->typeParams = NULL;
+    _class->typeParamCount = 0;
     _class->symtab = NULL;
     _class->scopeDepth = scopeDepth;
     _class->isAnonymous = (name.length == 1 && name.start[0] == '@');

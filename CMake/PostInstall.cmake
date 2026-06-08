@@ -141,28 +141,7 @@ elseif(UNIX)
     else()
         message(WARNING "HOME not defined; cannot persist LOX2_HOME on Unix")
     endif()
-
-    # Attempt to copy only the installed executable to /usr/local/bin so it can
-    # be invoked system-wide as: Lox2 --args
-    set(_src_exe "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}")
-    set(_dst_exe "/usr/local/bin/${PROJECT_NAME}")
-    if(EXISTS "${_src_exe}")
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -E copy "${_src_exe}" "${_dst_exe}"
-            RESULT_VARIABLE _copy_res
-            OUTPUT_VARIABLE _copy_out
-            ERROR_VARIABLE _copy_err
-        )
-        if(_copy_res EQUAL 0)
-            execute_process(COMMAND ${CMAKE_COMMAND} -E chmod 0755 "${_dst_exe}")
-            message(STATUS "Copied ${_src_exe} to ${_dst_exe} and set executable permissions.")
-        else()
-            message(WARNING "Failed to copy ${_src_exe} to ${_dst_exe}: ${_copy_err}. You may need to run: sudo cmake --install . --prefix /usr/local or manually copy the file with sudo.")
-        endif()
-    else()
-        message(STATUS "Source executable ${_src_exe} not found; skipping copy to /usr/local/bin")
-    endif()
-
+    
 else()
     message(WARNING "Unsupported platform for persisting LOX2_HOME")
 endif()

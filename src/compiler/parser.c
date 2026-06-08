@@ -1742,6 +1742,7 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
 
     Ast* typeParams = check(parser, TOKEN_KIND_LESS) ? typeParameters(parser, name) : NULL;
     Ast* body = function(parser, returnType, isAsync, false, isVoid);
+	body->token = name; 
     Ast* ast = newAst(AST_DECL_FUN, name, 1, body);
     ast->attribute.isVoid = isVoid;
 

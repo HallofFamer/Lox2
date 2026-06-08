@@ -225,6 +225,7 @@ static TypeInfo* getAstGenericDynamicType(TypeChecker* typeChecker, Ast* ast, Ty
     for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
         TypeInfoArrayAdd(genericType->actualTypeParams, NULL);
     }
+
     char* genericTypeName = createGenericTypeName(genericType);
     genericType->baseType.fullName = genericType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
     return (TypeInfo*)genericType;

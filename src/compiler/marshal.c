@@ -245,7 +245,7 @@ static ObjString* marshalDeserializeString(Marshaller* marshaller) {
 	}
 
 	chars[length] = '\0';
-	ObjString* string = takeString(marshaller->vm, chars, length);
+	ObjString* string = takeStringPerma(marshaller->vm, chars, length);
 	return string;
 }
 
