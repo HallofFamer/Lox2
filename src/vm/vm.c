@@ -333,8 +333,11 @@ static bool callBoundMethod(VM* vm, ObjBoundMethod* boundMethod, int argCount) {
 }
 
 static bool callClass(VM* vm, ObjClass* klass, int argCount) {
-    vm->stackTop[-argCount - 1] = emptyObject(vm, klass);
+	Value obj = emptyObject(vm, klass);
+	if (IS_OBJ(obj)) AS_OBJ(obj)->klass = klass;
+    vm->stackTop[-argCount - 1] = obj;
     Value initializer;
+
     if (tableGet(&klass->methods, vm->initString, &initializer)) {
         return callMethod(vm, initializer, argCount);
     }

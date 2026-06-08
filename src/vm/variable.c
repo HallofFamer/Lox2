@@ -140,7 +140,7 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
             ObjFile* file = (ObjFile*)object;
             if (index == 0) push(vm, OBJ_VAL(file->name));
             else if (index == 1) push(vm, OBJ_VAL(file->mode));
-            else if (index == 2) push(vm, OBJ_VAL(file->isOpen));
+            else if (index == 2) push(vm, BOOL_VAL(file->isOpen));
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }

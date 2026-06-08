@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "vm.h"
+#include "../common/os.h"
 #include "../inc/ini.h"
 
 #define HAS_CONFIG_SECTION(s) strcmp(section, (s)) == 0
@@ -67,6 +68,26 @@ static int parseDebugSection(void* data, const char* name, const char* value) {
     return 1;
 }
 
+static int parseFlagSection(void* data, const char* name, const char* value) {
+    Configuration* config = (Configuration*)data;
+    if (HAS_CONFIG_NAME("flagUnusedImport")) {
+        config->flagUnusedImport = (uint8_t)atoi(value);
+    }
+    else if (HAS_CONFIG_NAME("flagUnusedVariable")) {
+        config->flagUnusedVariable = (uint8_t)atoi(value);
+    }
+    else if (HAS_CONFIG_NAME("flagMutableVariable")) {
+        config->flagMutableVariable = (uint8_t)atoi(value);
+    }
+    else if (HAS_CONFIG_NAME("flagUndefinedType")) {
+        config->flagUndefinedType = (uint8_t)atoi(value);
+    }
+    else {
+        return 0;
+    }
+    return 1;
+}
+
 static int parseGCSection(void* data, const char* name, const char* value) {
     Configuration* config = (Configuration*)data;
     if (HAS_CONFIG_NAME("gcType")) {
@@ -103,26 +124,6 @@ static int parseMarshalSection(void* data, const char* name, const char* value) 
     }
     else if (HAS_CONFIG_NAME("marshalOutputPath")) {
         config->marshalOutputPath = _strdup(value);
-    }
-    else {
-        return 0;
-    }
-    return 1;
-}
-
-static int parseFlagSection(void* data, const char* name, const char* value) {
-    Configuration* config = (Configuration*)data;
-    if (HAS_CONFIG_NAME("flagUnusedImport")) {
-        config->flagUnusedImport = (uint8_t)atoi(value);
-    }
-    else if (HAS_CONFIG_NAME("flagUnusedVariable")) {
-        config->flagUnusedVariable = (uint8_t)atoi(value);
-    }
-    else if (HAS_CONFIG_NAME("flagMutableVariable")) {
-        config->flagMutableVariable = (uint8_t)atoi(value);
-    }
-    else if (HAS_CONFIG_NAME("flagUndefinedType")) {
-        config->flagUndefinedType = (uint8_t)atoi(value);
     }
     else {
         return 0;

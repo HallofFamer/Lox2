@@ -748,20 +748,17 @@ static void sweep(VM* vm, GCGenerationType generation) {
     GCGeneration* nextHeap = (generation >= GC_GENERATION_TYPE_PERMANENT) ? NULL : GET_GC_GENERATION(generation + 1);
     if (nextHeap == NULL) return;
     Obj* object = currentHeap->objects;
+    currentHeap->objects = NULL;
 
     while (object != NULL) {
+        Obj* next = object->next;
         if (object->isMarked) {
             object->isMarked = false;
-            Obj* reached = object;
-            object = object->next;
-            promoteObject(vm, reached, generation);
-        } 
-        else {
-            Obj* unreached = object;
-            object = object->next;
-            freeObject(vm, unreached);
+            promoteObject(vm, object, generation);
+        } else {
+            freeObject(vm, object);
         }
-        currentHeap->objects = object;
+        object = next;
     }
 }
 
@@ -772,11 +769,11 @@ static void processRememberedSet(VM* vm, GCGenerationType generation) {
 
     for (int i = 0; i < currentRemSet->capacity; i++) {
         GCRememberedEntry* entry = &currentRemSet->entries[i];
-        if (entry->object != NULL) {
-            entry->object->isMarked = false;
-            if (entry->object->generation > generation + 1) {
-                rememberedSetPutObject(vm, nextRemSet, entry->object);
-            }
+        if (entry->object == NULL) continue;
+
+        entry->object->isMarked = false;
+        if (entry->object->generation > generation + 1) {
+            rememberedSetPutObject(vm, nextRemSet, entry->object);
         }
     }
     freeGCRememeberedSet(vm, currentRemSet);
@@ -796,8 +793,8 @@ void collectGarbage(VM* vm, GCGenerationType generation) {
     markRoots(vm, generation);
     traceReferences(vm, generation);
     tableRemoveWhite(&vm->strings);
-    sweep(vm, generation);
     processRememberedSet(vm, generation);
+    sweep(vm, generation);
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end for generation %d\n", generation);

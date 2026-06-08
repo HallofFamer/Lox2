@@ -65,7 +65,7 @@ LOX_FUNCTION(println){
 LOX_FUNCTION(read) {
     ASSERT_ARG_COUNT("read()", 0);
     uint64_t inputSize = 128;
-    char* line = malloc(inputSize);
+    char* line = (char*)malloc(inputSize);
     ABORT_IFNULL(line, "Not enough memory to read line.");
 
     int c = EOF;
@@ -163,12 +163,14 @@ void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type
     if (klass->classType == OBJ_INSTANCE || klass->classType == OBJ_CLASS) {
         klass->defaultShapeID = createShapeFromParent(vm, klass->defaultShapeID, fieldName);
     }
+	PROCESS_WRITE_BARRIER((Obj*)klass, defaultValue);
     valueArrayWrite(vm, &klass->defaultInstanceFields, defaultValue);
 
     if (klass->behaviorType == BEHAVIOR_METACLASS) {
         Value value;
         tableGet(&vm->classes, subString(vm, klass->fullName, 0, klass->fullName->length - 7), &value);
         klass = AS_CLASS(value);
+
         PROCESS_WRITE_BARRIER((Obj*)klass, defaultValue);
         valueArrayWrite(vm, &klass->fields, defaultValue);
         idMapSet(vm, &klass->indexes, fieldName, klass->fields.count - 1);
