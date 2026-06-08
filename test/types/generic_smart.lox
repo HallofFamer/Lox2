@@ -1,4 +1,5 @@
 namespace test.types
+using clox.std.collection.Array
 using clox.std.util.UUID
 
 String identity<T>(T arg) { 
@@ -10,5 +11,104 @@ String identityName<T>(T arg) {
 }
 
 val id = UUID()
+println("Testing smart reification for generic functions: ")
 println(identity<UUID>(id))
 println(identityName<UUID>(id))
+
+class IdentityClass {
+
+    String identity<T>(T arg) { 
+        return arg.toString()
+    }
+
+    String identityName<T>(T arg) {
+        return "${T}(${arg})"
+    }
+}
+
+println("\nTesting smart reification for generic methods: ")
+val identityObject = IdentityClass()
+println(identityObject.identity<UUID>(id))
+println(identityObject.identityName<UUID>(id))
+
+class IdentityBox<T> {
+
+    val T value
+    
+    __init__(T value) {
+        this.value = value
+    }
+    
+    String identity() { 
+        return this.value.toString()
+    }
+}
+
+class IdentityNameBox<T> {
+
+    val T value
+    
+    __init__(T value) {
+        this.value = value
+    }
+    
+    String identityName() { 
+        return "${T}(${this.value})"
+    }
+}
+
+println("\nTesting smart reification for generic classes: ")
+val identityBox = IdentityBox<UUID>(id)
+println(identityBox.identity())
+val identityNameBox = IdentityNameBox<UUID>(id)
+println(identityNameBox.identityName())
+
+class DualIdentityBox<T, U> extends IdentityBox<T> {
+
+    val U value2
+    
+    __init__(T value, U value2) {
+        super.__init__(value)
+        this.value2 = value2
+    }
+    
+    String identity() { 
+        return "${this.value.toString()} and ${this.value2.toString()}"
+    }
+}
+
+class DualIdentityNameBox<T, U> extends IdentityNameBox<T> {
+
+    val U value2
+    
+    __init__(T value, U value2) {
+        super.__init__(value)
+        this.value2 = value2
+    }
+    
+    String identityName() { 
+        return "${T}(${this.value.toString()}) and ${U}(${this.value2.toString()})"
+    }
+}
+
+println("\nTesting smart reification for generic inheritance: ")
+val dualIdentityBox = DualIdentityBox<UUID, String>(id, "Hello")
+println(dualIdentityBox.identity())
+val dualIdentityNameBox = DualIdentityNameBox<UUID, String>(id, "Hello")
+println(dualIdentityNameBox.identityName())
+
+class Deque<E> extends Array<E> {
+
+    void pushFront(E element) {
+        this.insertAt(0, element)
+    }
+    
+    E popFront() {
+        return this.removeAt(0)
+    }
+}
+
+println("\nTesting smart reification for generic inheritance with built-in types: ")
+val deque = Deque<UUID>()
+deque.pushFront(id)
+println(deque.popFront())

@@ -24,28 +24,25 @@ class EightQueens {
             return
         }
 
-        var col = 0
-        while (col < this.size) {
+        for (val col : 0..(this.size - 1)) {
             if (this.isSafe(row, col)) {
                 this.queens[row] = col
                 this.placeQueen(row + 1)
                 this.queens[row] = -1
             }
-            col = col + 1
         }
     }
 
     Bool isSafe(Int row, Int col) {
-        if (row == 0) return true;
-        var i = 0;
-        while (i < row) {
+        if (row == 0) return true
+
+        for (val i : 0..(row - 1)) {
             if (this.queens[i] == col or 
                 this.queens[i] - i == col - row or 
                 this.queens[i] + i == col + row) 
             {
                 return false
             }
-            i = i + 1
         }
         return true
     }
@@ -53,24 +50,18 @@ class EightQueens {
     Array<String> formatBoard() {
         val boards = []
         
-        var i = 0;
-        while (i < this.size) {
+        for (val i : 0..(this.size - 1)) {
             var row = ""
-            var j = 0;
-
-            while (j < this.size) {
+            for (val j : 0..(this.size - 1)) {
                 if (this.queens[i] == j) {
                     row = row + "Q "
                 } 
                 else {
                     row = row + ". "
                 }
-                j = j + 1
             }
-            
             row = row + "\n";
             boards.add(row)
-            i = i + 1
         }
         return boards
     }

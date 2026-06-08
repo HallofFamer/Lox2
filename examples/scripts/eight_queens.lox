@@ -1,5 +1,4 @@
 namespace examples.scripts
-using clox.std.collection.Array
 using examples.lib.EightQueens
 
 val eightQueens = EightQueens(8)
@@ -7,6 +6,8 @@ val solutions = eightQueens.solve()
 
 println("Number of solutions for 8 queens: ${solutions.length}")
 println("Solutions for 8 queens:")
-for (val solution : solutions) {
+for (val (i, solution) : solutions) {
+    println("Solution: ${i + 1}")
 	println(solution)
+	println("\n")
 }

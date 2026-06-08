@@ -162,7 +162,6 @@ cd Lox2
 mkdir build
 cmake -S . -B ./build
 cmake --build build --target install --config Release
-sudo cp build/Lox2 /usr/local/bin
 Lox2
 ```
 

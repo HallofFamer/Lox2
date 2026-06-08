@@ -6,7 +6,12 @@
 - Capability of serializing compiled bytecodes into disk as .loxo files, skipping compilation for faster startup time.
 - Refactor classes in the existing standard library to use generics(in `clox.std` parent package), such as `Array<E>` and `Promise<T>`.
 
-### Lox2 v2.1.3(last version)
+### Lox2 v2.1.4(last version)
+- Implement configuration options `flagUnusedImport` in lox2.ini which decide whether to throw warnings/errors when a class/trait is imported but never used.
+- Fix a glitch that the resolver cannot find and load types from the same namespace without using statement, which causes typechecking errors in some cases.
+- Address a parser bug that causes incorrect parsing of field declarations without initializers if the next line is method declaration.
+
+### Lox2 v2.1.3
 - Add type checking to immediate function calls with anonymous functions and lambda expressions as parameters.
 - Modify parser to allow callable type annotations without parameters such as `Int fun()` and `void fun()`.
 - Fix incorrect type annotations for enumeration methods on class `Dictionary` in package `clox.std.collection`.
