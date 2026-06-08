@@ -39,7 +39,7 @@ static TokenKind currentTokenType(Parser* parser) {
 
 static Token previousToken(Parser* parser) {
     Token previousToken = parser->tokens->elements[parser->index - 1];
-    if (previousToken.type == TOKEN_SYMBOL_NEW_LINE) return parser->tokens->elements[parser->index - 2];
+    if (previousToken.type == TOKEN_KIND_NEW_LINE) return parser->tokens->elements[parser->index - 2];
     return previousToken;
 }
 
@@ -49,7 +49,7 @@ static TokenKind previousTokenType(Parser* parser) {
 
 static Token nextToken(Parser* parser) {
     Token nextToken = parser->tokens->elements[parser->index + 1];
-    if (nextToken.type == TOKEN_SYMBOL_NEW_LINE) return parser->tokens->elements[parser->index + 2];
+    if (nextToken.type == TOKEN_KIND_NEW_LINE) return parser->tokens->elements[parser->index + 2];
     return nextToken;
 }
 
@@ -58,11 +58,11 @@ static TokenKind nextTokenType(Parser* parser) {
 }
 
 static bool newLineBeforePrevious(Parser* parser) {
-    return (parser->tokens->elements[parser->index - 1].type == TOKEN_SYMBOL_NEW_LINE || parser->tokens->elements[parser->index - 2].type == TOKEN_SYMBOL_NEW_LINE);
+    return (parser->tokens->elements[parser->index - 1].type == TOKEN_KIND_NEW_LINE || parser->tokens->elements[parser->index - 2].type == TOKEN_KIND_NEW_LINE);
 }
 
 static bool newLineAfterCurrent(Parser* parser) {
-    return (parser->tokens->elements[parser->index + 1].type == TOKEN_SYMBOL_NEW_LINE);
+    return (parser->tokens->elements[parser->index + 1].type == TOKEN_KIND_NEW_LINE);
 }
 
 static void parseError(Parser* parser, Token token, const char* message) {
@@ -70,7 +70,7 @@ static void parseError(Parser* parser, Token token, const char* message) {
     parser->panicMode = true;
     fprintf(stderr, "[line %d] Parse Error", token.line);
 
-    if (token.type == TOKEN_SYMBOL_EOF) fprintf(stderr, " at end");
+    if (token.type == TOKEN_KIND_EOF) fprintf(stderr, " at end");
     else fprintf(stderr, " at '%.*s'", token.length, token.start);
 
     fprintf(stderr, ": %s\n", message);
@@ -88,7 +88,7 @@ static void parseErrorAtCurrent(Parser* parser, const char* message) {
 
 static void advance(Parser* parser) {
     parser->current = parser->tokens->elements[++parser->index];
-    if (parser->current.type == TOKEN_SYMBOL_NEW_LINE) {
+    if (parser->current.type == TOKEN_KIND_NEW_LINE) {
         parser->current = parser->tokens->elements[++parser->index];
     }
 }
@@ -96,7 +96,7 @@ static void advance(Parser* parser) {
 static void backtrack(Parser* parser) {
     if (parser->index > 0) {
         parser->current = parser->tokens->elements[--parser->index];
-        if (parser->current.type == TOKEN_SYMBOL_NEW_LINE) {
+        if (parser->current.type == TOKEN_KIND_NEW_LINE) {
             parser->current = parser->tokens->elements[--parser->index];
         }
     }
@@ -121,7 +121,7 @@ static void consumerTerminator(Parser* parser, const char* message) {
         advance(parser);
         return;
     }
-    else if (newLineBeforePrevious(parser) || parser->current.type == TOKEN_KIND_RIGHT_BRACE || parser->current.type == TOKEN_SYMBOL_EOF) {
+    else if (newLineBeforePrevious(parser) || parser->current.type == TOKEN_KIND_RIGHT_BRACE || parser->current.type == TOKEN_KIND_EOF) {
         return;
     }
     parseErrorAtCurrent(parser, message);
@@ -139,7 +139,7 @@ static bool checkNextN(Parser* parser, int length, TokenKind type) {
     int offset = 1;
 	for (int i = 1; i <= length; i++) {
         Token token = parser->tokens->elements[parser->index + offset];
-        if (token.type == TOKEN_SYMBOL_NEW_LINE) {
+        if (token.type == TOKEN_KIND_NEW_LINE) {
             offset++;
 			token = parser->tokens->elements[parser->index + offset];
         }
@@ -306,7 +306,7 @@ static char* parseString(Parser* parser, int* length) {
 static void synchronize(Parser* parser) {
     parser->panicMode = false;
 
-    while (parser->current.type != TOKEN_SYMBOL_EOF) {
+    while (parser->current.type != TOKEN_KIND_EOF) {
         if (previousTokenType(parser) == TOKEN_KIND_SEMICOLON) return;
 
         switch (parser->current.type) {
@@ -998,7 +998,7 @@ static Ast* fields(Parser* parser, Token* name) {
 static Ast* methods(Parser* parser, Token* name) {
     Ast* methodList = emptyAst(AST_LIST_METHOD, *name);
 
-    while (!check(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
+    while (!check(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_KIND_EOF)) {
         bool isAsync = false, isClass = false, isInitializer = false, isVoid = false, hasReturnType = true;
         Ast* returnType = NULL;
         if (match(parser, TOKEN_KIND_ASYNC)) isAsync = true;
@@ -1262,10 +1262,10 @@ ParseRule parseRules[] = {
     [TOKEN_KIND_WHILE]            = {NULL,          NULL,        PREC_NONE,        false},
     [TOKEN_KIND_WITH]             = {NULL,          NULL,        PREC_NONE,        false},
     [TOKEN_KIND_YIELD]            = {yield,         NULL,        PREC_NONE,        true},
-    [TOKEN_SYMBOL_ERROR]          = {NULL,          NULL,        PREC_NONE,        false},
-    [TOKEN_SYMBOL_EMPTY]          = {NULL,          NULL,        PREC_NONE,        true},
-    [TOKEN_SYMBOL_NEW_LINE]       = {NULL,          NULL,        PREC_NONE,        true},
-    [TOKEN_SYMBOL_EOF]            = {NULL,          NULL,        PREC_NONE,        true},
+    [TOKEN_KIND_ERROR]            = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_KIND_EMPTY]            = {NULL,          NULL,        PREC_NONE,        true},
+    [TOKEN_KIND_NEW_LINE]         = {NULL,          NULL,        PREC_NONE,        true},
+    [TOKEN_KIND_EOF]              = {NULL,          NULL,        PREC_NONE,        true},
 };
 
 static Ast* parsePrefix(Parser* parser, Precedence precedence, bool canAssign) {
@@ -1308,7 +1308,7 @@ static Ast* expression(Parser* parser) {
 static Ast* block(Parser* parser) {
     Token token = previousToken(parser);
     Ast* stmtList = emptyAst(AST_LIST_STMT, token);
-    while (!check(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
+    while (!check(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_KIND_EOF)) {
         Ast* decl = declaration(parser);
         astAppendChild(stmtList, decl);
     }
@@ -1425,7 +1425,7 @@ static Ast* switchStatement(Parser* parser) {
 
     int state = 0;
     int caseCount = 0;
-    while (!match(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_SYMBOL_EOF)) {
+    while (!match(parser, TOKEN_KIND_RIGHT_BRACE) && !check(parser, TOKEN_KIND_EOF)) {
         if (match(parser, TOKEN_KIND_CASE) || match(parser, TOKEN_KIND_DEFAULT)) {
             Token caseToken = previousToken(parser);
             if (state == 1) caseCount++;
@@ -1893,7 +1893,7 @@ void initParser(Parser* parser, TokenStream* tokens, bool debugAst) {
 
 Ast* parse(Parser* parser) {
     Ast* ast = emptyAst(AST_KIND_NONE, emptyToken());
-    while (!match(parser, TOKEN_SYMBOL_EOF)) {
+    while (!match(parser, TOKEN_KIND_EOF)) {
         if (setjmp(parser->jumpBuffer) == 0) {
             Ast* decl = declaration(parser);
             astAppendChild(ast, decl);

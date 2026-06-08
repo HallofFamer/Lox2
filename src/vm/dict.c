@@ -59,6 +59,8 @@ bool dictGet(ObjDictionary* dict, Value key, Value* value) {
 }
 
 bool dictSet(VM* vm, ObjDictionary* dict, Value key, Value value) {
+    PROCESS_WRITE_BARRIER((Obj*)dict, key);
+    PROCESS_WRITE_BARRIER((Obj*)dict, value);
     if (dict->count + 1 > dict->capacity * TABLE_MAX_LOAD) {
         int capacity = GROW_CAPACITY(dict->capacity);
         dictAdjustCapacity(vm, dict, capacity);

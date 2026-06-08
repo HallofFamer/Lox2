@@ -837,8 +837,6 @@ InterpretResult run(VM* vm) {
                     Value value = pop(vm);
                     Value key = pop(vm);
                     ObjDictionary* dictionary = AS_DICTIONARY(pop(vm));
-                    PROCESS_WRITE_BARRIER((Obj*)dictionary, key);
-                    PROCESS_WRITE_BARRIER((Obj*)dictionary, value);
                     dictSet(vm, dictionary, key, value);
                     push(vm, OBJ_VAL(dictionary));
                 }

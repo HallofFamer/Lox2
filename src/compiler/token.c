@@ -75,15 +75,15 @@ const char* tokenNames[] = {
     [TOKEN_KIND_WHILE]          = "TOKEN_WHILE",
     [TOKEN_KIND_WITH]           = "TOKEN_WITH",
     [TOKEN_KIND_YIELD]          = "TOKEN_YIELD",
-    [TOKEN_SYMBOL_ERROR]          = "TOKEN_ERROR", 
-    [TOKEN_SYMBOL_EMPTY]          = "TOKEN_EMPTY",
-    [TOKEN_SYMBOL_NEW_LINE]       = "TOKEN_NEW_LINE",
-    [TOKEN_SYMBOL_EOF]            = "TOKEN_EOF"
+    [TOKEN_KIND_ERROR]          = "TOKEN_ERROR", 
+    [TOKEN_KIND_EMPTY]          = "TOKEN_EMPTY",
+    [TOKEN_KIND_NEW_LINE]       = "TOKEN_NEW_LINE",
+    [TOKEN_KIND_EOF]            = "TOKEN_EOF"
 };
 
 Token syntheticToken(const char* text) {
     return (Token) {
-        .type = TOKEN_SYMBOL_EMPTY,
+        .type = TOKEN_KIND_EMPTY,
         .start = text,
         .length = (int)strlen(text),
         .line = 0
@@ -92,7 +92,7 @@ Token syntheticToken(const char* text) {
 
 Token syntheticTokenAtLine(const char* text, int line) {
 	return (Token) {
-        .type = TOKEN_SYMBOL_EMPTY, 
+        .type = TOKEN_KIND_EMPTY, 
         .start = text, 
         .length = (int)strlen(text),
         .line = line
