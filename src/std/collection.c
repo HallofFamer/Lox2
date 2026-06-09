@@ -1267,6 +1267,7 @@ LOX_METHOD(Entry, getValue) {
 LOX_METHOD(Entry, setValue) {
     ASSERT_ARG_COUNT("Entry::setValue(value)", 1);
     ObjEntry* self = AS_ENTRY(receiver);
+	PROCESS_WRITE_BARRIER((Obj*)self, args[0]);
     self->value = args[0];
     RETURN_VAL(self->value);
 }

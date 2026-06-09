@@ -898,7 +898,7 @@ static void compileCall(Compiler* compiler, Ast* ast) {
             typeArgCount = typeArgumentsAtInit(compiler, ast, initClassType);
         }
         else if (IS_ALIAS_TYPE(callee->type)) {
-			TypeInfo* targetType = getAliasTargetType(callee->type);
+			TypeInfo* targetType = getInnerBaseType(callee->type);
             typeArgCount = typeArgumentsAtInit(compiler, ast, targetType);
         }
     }
