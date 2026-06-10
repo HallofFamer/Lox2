@@ -243,15 +243,14 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
             type = typeTableGet(resolver->vm->typetab, fullName);
 
             if (type == NULL) {
-				type = getTypeFromCurrentNamespace(resolver, token, fullName);
+                fullName = nameTableGet(resolver->nametab, originalName);
+                if (fullName != NULL) {
+                    if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
+                    type = typeTableGet(resolver->vm->typetab, fullName);
+                }
 
                 if (type == NULL) {
-                    fullName = nameTableGet(resolver->nametab, originalName);
-                    if (fullName != NULL) {
-                        if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
-                        type = typeTableGet(resolver->vm->typetab, fullName);
-                    }
-
+                    type = getTypeFromCurrentNamespace(resolver, token, fullName);
                     if (type == NULL) {
                         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
                         if (item != NULL) {
@@ -892,14 +891,19 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
             semanticError(resolver, "A class cannot inherit from a metaclass type.");
         }
 
-        if(!classResolver.isAnonymous) bindSuperclassType(resolver, resolver->currentClass->name, superclass);
+        if (!classResolver.isAnonymous) bindSuperclassType(resolver, resolver->currentClass->name, superclass);
+        else {
+			SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createStringFromToken(resolver->vm, superclass->token));
+            ast->type = item->type;
+        }
     }
+    else ast->type = getNativeType(resolver->vm, "Trait class");
 
     Ast* traitList = astGetChild(ast, childIndex);
     traitList->symtab = ast->symtab;
     if (astNumChild(traitList) > 0) {
         resolveChild(resolver, ast, childIndex);
-        bindTraitTypes(resolver, resolver->currentClass->name, traitList);
+        if (!classResolver.isAnonymous) bindTraitTypes(resolver, resolver->currentClass->name, traitList);
     }
 
     childIndex++;
@@ -1693,7 +1697,9 @@ static void resolveVarDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, ast->attribute.isMutable);
     if (astHasChild(ast)) {
         resolveChild(resolver, ast, 0);
-        defineVariable(resolver, ast);
+        SymbolItem* item = defineVariable(resolver, ast);
+		Ast* child = astGetChild(ast, 0);
+        item->type = child->type;
     }
     else if (!ast->attribute.isMutable) {
         semanticError(resolver, "Immutable variables must be initialized upon declaration.");

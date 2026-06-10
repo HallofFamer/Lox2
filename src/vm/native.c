@@ -216,7 +216,7 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     }
     va_end(args);
 
-    if (isInitializer && behaviorType->formalTypeParams->count > 0) {
+    if (isInitializer && behaviorType->isReified) {
         nativeMethod->arity += behaviorType->formalTypeParams->count;
     }
 }

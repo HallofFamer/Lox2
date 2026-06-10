@@ -1699,7 +1699,6 @@ static bool matchFunDeclarationWithoutReturnType(Parser* parser) {
 static bool matchFunDeclarationWithAsync(Parser* parser, bool* hasReturnType) {
     if (matchFunDeclarationWithoutReturnType(parser)) {
 		// If the declaration starts with 'async' and is followed by 'fun' or 'void' and an identifier, it's a valid async function declaration without a return type annotation. Set hasReturnType to false and return true.
-        advance(parser);
         *hasReturnType = false;
         return true;
     }

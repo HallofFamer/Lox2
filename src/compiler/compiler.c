@@ -659,9 +659,12 @@ static int typeArgumentsAtCall(Compiler* compiler, Ast* ast) {
 }
 
 static int typeArgumentsAtInit(Compiler* compiler, Ast* ast, TypeInfo* type) {
-	if (type != NULL && IS_BEHAVIOR_TYPE(type)) {
-		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
-        if (!behaviorType->isReified) return 0;
+	if (type != NULL) {
+		TypeInfo* baseType = getInnerBaseType(type);
+        if (IS_BEHAVIOR_TYPE(baseType)) {
+            BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(baseType);
+            if (!behaviorType->isReified) return 0;
+        }
 	}
 
     if (hasGenericParameters(type)) {
@@ -897,7 +900,7 @@ static void compileCall(Compiler* compiler, Ast* ast) {
             TypeInfo* initClassType = findClassTypeWithInitializer(compiler, classType);
             typeArgCount = typeArgumentsAtInit(compiler, ast, initClassType);
         }
-        else if (IS_ALIAS_TYPE(callee->type)) {
+        else if (IS_GENERIC_TYPE(callee->type) || IS_ALIAS_TYPE(callee->type)) {
 			TypeInfo* targetType = getInnerBaseType(callee->type);
             typeArgCount = typeArgumentsAtInit(compiler, ast, targetType);
         }

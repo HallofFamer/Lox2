@@ -509,8 +509,8 @@ LOX_METHOD(Array, fill) {
     ASSERT_ARG_TYPE("Array::fill(num, value)", 0, Int);
     ObjArray* array = AS_ARRAY(receiver);
     int num = AS_INT(args[0]);
-
     PROCESS_WRITE_BARRIER(AS_OBJ(receiver), args[1]);
+    
     for (int i = 0; i < num; i++) {
         valueArrayWrite(vm, &array->elements, args[1]);
     }
