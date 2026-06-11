@@ -243,10 +243,10 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
             type = typeTableGet(resolver->vm->typetab, fullName);
 
             if (type == NULL) {
-                fullName = nameTableGet(resolver->nametab, originalName);
-                if (fullName != NULL) {
-                    if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
-                    type = typeTableGet(resolver->vm->typetab, fullName);
+                ObjString* importedName = nameTableGet(resolver->nametab, originalName);
+                if (importedName != NULL) {
+                    if (isMetaclass) importedName = getMetaclassNameFromClass(resolver->vm, importedName);
+                    type = typeTableGet(resolver->vm->typetab, importedName);
                 }
 
                 if (type == NULL) {
@@ -540,6 +540,7 @@ static SymbolItem* findGlobal(Resolver* resolver, Ast* ast) {
             return insertSymbol(resolver, ast->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, item->type, item->isMutable);
         }
     }
+	else if (item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
     return item;
 }
 

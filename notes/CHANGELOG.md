@@ -1,12 +1,17 @@
 # Change Log
 
-### Lox2 v2.2.0(current version)
+### Lox2 v2.2.1(current version)
+- Smart reified generics that only passes type objects as instance fields or function arguments if they are actually being used/inspected. 
+- Implement configuration options `flagUnusedImport` and `flagUndefinedType` in lox2.ini which decide whether to throw warnings/errors when encountering unused imports or undefined type annotations.
+- Fix a glitch that the resolver cannot find and load types from the same namespace without using statement, which causes typechecking errors in some cases.
+
+### Lox2 v2.2.0(last version)
 - Enhanced type system with basic support for generics/parametric polymorphism.
 - `type` keyword used as declaration of type alias, useful for complex callable or generic types.
 - Capability of serializing compiled bytecodes into disk as .loxo files, skipping compilation for faster startup time.
 - Refactor classes in the existing standard library to use generics(in `clox.std` parent package), such as `Array<E>` and `Promise<T>`.
 
-### Lox2 v2.1.4(last version)
+### Lox2 v2.1.4
 - Implement configuration options `flagUnusedImport` in lox2.ini which decide whether to throw warnings/errors when a class/trait is imported but never used.
 - Fix a glitch that the resolver cannot find and load types from the same namespace without using statement, which causes typechecking errors in some cases.
 - Address a parser bug that causes incorrect parsing of field declarations without initializers if the next line is method declaration.

@@ -464,9 +464,9 @@ LOX_METHOD(DurationClass, ofSeconds) {
 
 LOX_METHOD(Promise, __init__) {
     ASSERT_ARG_COUNT("Promise::__init__(executor)", 1);
-    ASSERT_ARG_TCALLABLE("Promise::__init__(executor)", 1);
+    ASSERT_ARG_TCALLABLE("Promise::__init__(executor)", 0);
     ObjPromise* self = AS_PROMISE(receiver);
-    self->executor = args[1];
+    self->executor = args[0];
     promiseExecute(vm, self);
     RETURN_OBJ(self);
 }
