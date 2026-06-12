@@ -517,12 +517,6 @@ LOX_METHOD(Function, isNative) {
     RETURN_BOOL(IS_NATIVE_FUNCTION(receiver));
 }
 
-LOX_METHOD(Function, isReified) {
-	ASSERT_ARG_COUNT("Function::isReified()", 0);
-	if (IS_NATIVE_FUNCTION(receiver)) RETURN_FALSE;
-	return AS_CLOSURE(receiver)->function->isReified;
-}
-
 LOX_METHOD(Function, isVariadic) {
     ASSERT_ARG_COUNT("Function::isVariadic()", 0);
     RETURN_BOOL(AS_CLOSURE(receiver)->function->arity == -1);
@@ -2467,7 +2461,6 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->functionClass, Function, isAnonymous, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->functionClass, Function, isAsync, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->functionClass, Function, isNative, 0, NATIVE_TYPE(Bool));
-	DEF_METHOD(vm->functionClass, Function, isReified, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->functionClass, Function, isVariadic, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->functionClass, Function, name, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->functionClass, Function, toString, 0, NATIVE_TYPE(String));
