@@ -177,7 +177,6 @@ ObjFunction* newFunction(VM* vm, ObjString* name, bool isAsync) {
     function->upvalueCount = 0;
     function->isGenerator = false;
     function->isAsync = isAsync;
-	function->isReified = false;
     function->name = name;
 
     initChunk(&function->chunk, function->obj.generation);

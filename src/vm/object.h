@@ -152,7 +152,6 @@ typedef struct {
     int upvalueCount;
     bool isGenerator;
     bool isAsync;
-    bool isReified;
     Chunk chunk;
     ObjString* name;
 } ObjFunction;
