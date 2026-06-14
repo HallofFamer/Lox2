@@ -677,6 +677,7 @@ InterpretResult run(VM* vm) {
                 ObjString* name = READ_STRING();
                 Value value = peek(vm, 0);
                 int index;
+                
                 if (idMapGet(&vm->currentModule->varIndexes, name, &index)) {
                     vm->currentModule->varFields.values[index] = value;
                 }
@@ -701,6 +702,7 @@ InterpretResult run(VM* vm) {
                 ObjString* name = READ_STRING();
                 Value value = peek(vm, 0);
                 int index;
+                
                 if (idMapGet(&vm->currentModule->varIndexes, name, &index)) vm->currentModule->varFields.values[index] = value;
                 else RUNTIME_ERROR("Undefined variable '%s'.", name->chars);
                 break;
@@ -830,6 +832,7 @@ InterpretResult run(VM* vm) {
                     Value element = pop(vm);
                     int index = AS_INT(pop(vm));
                     ObjArray* array = AS_ARRAY(pop(vm));
+                    
                     PROCESS_WRITE_BARRIER((Obj*)array, element);
                     valueArrayPut(vm, &array->elements, index, element);
                     push(vm, OBJ_VAL(array));
@@ -1068,6 +1071,7 @@ InterpretResult run(VM* vm) {
                 ObjFunction* function = AS_FUNCTION(READ_CONSTANT());
                 ObjClosure* closure = newClosure(vm, function);
                 push(vm, OBJ_VAL(closure));
+
                 for (int i = 0; i < closure->upvalueCount; i++) {
                     uint8_t isLocal = READ_BYTE();
                     uint8_t index = READ_BYTE();
@@ -1123,6 +1127,7 @@ InterpretResult run(VM* vm) {
                 uint8_t behaviorCount = READ_BYTE();
                 ObjArray* traits = makeTraitArray(vm, behaviorCount);
                 if (traits == NULL) RUNTIME_ERROR("Only traits can be implemented by class or another trait.");
+                
                 ObjClass* klass = AS_CLASS(peek(vm, 1));
                 implementTraits(vm, klass, &traits->elements);
                 pop(vm);
@@ -1283,6 +1288,7 @@ InterpretResult run(VM* vm) {
                 uint8_t byte = READ_BYTE();
                 uint16_t handlerAddress = READ_SHORT();
                 uint16_t finallyAddress = READ_SHORT();
+                
                 Value value;
                 if (!loadGlobal(vm, &frame->closure->function->chunk, byte, &value)) {
                     ObjString* exceptionClass = AS_STRING(frame->closure->function->chunk.identifiers.values[byte]);

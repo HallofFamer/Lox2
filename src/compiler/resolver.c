@@ -477,6 +477,7 @@ static SymbolItem* findLocal(Resolver* resolver, Ast* ast) {
         currentSymtab = currentSymtab->parent;
     } while (currentSymtab != NULL);
 
+    if (item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
     return item;
 }
 
@@ -514,6 +515,7 @@ static SymbolItem* findUpvalue(Resolver* resolver, Ast* ast) {
         if (functionResolver->enclosing == NULL) break;
         item = symbolTableGet(currentSymtab, symbol);
         if (item != NULL && item->category != SYMBOL_CATEGORY_GLOBAL) {
+			if (item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
             return addUpvalue(resolver, item);
         }
 
@@ -746,11 +748,7 @@ static AliasTypeInfo* insertGenericAliasType(Resolver* resolver, Ast* ast) {
 static SymbolItem* getVariable(Resolver* resolver, Ast* ast) {
     ObjString* symbol = createStringFromToken(resolver->vm, ast->token);
     SymbolItem* item = findLocal(resolver, ast);
-
-    if (item != NULL) {
-        if (item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
-        return item;
-    }
+    if (item != NULL) return item;
 
     item = findUpvalue(resolver, ast);
     return (item != NULL) ? item : findGlobal(resolver, ast);
