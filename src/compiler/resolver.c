@@ -477,7 +477,7 @@ static SymbolItem* findLocal(Resolver* resolver, Ast* ast) {
         currentSymtab = currentSymtab->parent;
     } while (currentSymtab != NULL);
 
-    if (item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
+    if (item != NULL && item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
     return item;
 }
 

@@ -1537,6 +1537,7 @@ static void compileMethodDeclaration(Compiler* compiler, Ast* ast) {
     uint8_t index = identifierConstant(compiler, &ast->token);
     CompileType type = ast->attribute.isInitializer ? COMPILE_TYPE_INITIALIZER : COMPILE_TYPE_METHOD;
     function(compiler, type, ast, ast->attribute.isAsync);
+    
     emitByte(compiler, OP_METHOD);
     emitByte(compiler, index);
     emitByte(compiler, ast->attribute.isClass ? 1 : 0);
