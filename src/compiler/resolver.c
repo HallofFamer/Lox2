@@ -202,6 +202,15 @@ static void importSymbols(Resolver* resolver, Ast* ast, ObjString* fullName, Typ
     nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, ast->token), fullName);
 }
 
+static TypeInfo* getTypeFromImportedNames(Resolver* resolver, ObjString* originalName, bool isMetaclass) {
+    ObjString* fullName = nameTableGet(resolver->nametab, originalName);
+    if (fullName != NULL) {
+        if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
+        return typeTableGet(resolver->vm->typetab, fullName);
+    }
+	return NULL;
+}
+
 static TypeInfo* getTypeFromCurrentNamespace(Resolver* resolver, Token token, ObjString* fullName) {
 	TypeInfo* type = NULL;
     ObjString* fullPath = locateSourceFileFromFullName(resolver->vm, fullName);

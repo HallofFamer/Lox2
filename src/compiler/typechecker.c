@@ -1483,6 +1483,7 @@ static void typeCheckTypeDeclaration(TypeChecker* typeChecker, Ast* ast) {
     ObjString* typeName = createStringFromToken(typeChecker->vm, ast->token);
     SymbolItem* item = symbolTableLookup(ast->symtab, typeName);
     TypeInfo* aliasType = typeTableGet(typeChecker->vm->typetab, typeName);
+    
     ast->type = (TypeInfo*)aliasType;
     item->type = ast->type;
     typeCheckChild(typeChecker, ast, 0);
