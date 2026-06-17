@@ -525,6 +525,7 @@ static Ast* metaclassType(Parser* parser) {
     consume(parser, TOKEN_KIND_IDENTIFIER, "Expect class name.");
     Token token = previousToken(parser);
     consume(parser, TOKEN_KIND_CLASS, "Expect 'class' keyword after metaclass type declaration.");
+    
     Ast* type = emptyAst(AST_EXPR_TYPE, token);
     type->attribute.isClass = true;
     return type;

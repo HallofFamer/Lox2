@@ -202,7 +202,7 @@ static void importSymbols(Resolver* resolver, Ast* ast, ObjString* fullName, Typ
     nameTableSet(resolver->nametab, createStringFromToken(resolver->vm, ast->token), fullName);
 }
 
-static TypeInfo* getTypeFromImportedNames(Resolver* resolver, ObjString* originalName, bool isMetaclass) {
+static TypeInfo* getTypeFromImportedName(Resolver* resolver, ObjString* originalName, bool isMetaclass) {
     ObjString* fullName = nameTableGet(resolver->nametab, originalName);
     if (fullName != NULL) {
         if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
@@ -252,11 +252,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
             type = typeTableGet(resolver->vm->typetab, fullName);
 
             if (type == NULL) {
-                ObjString* importedName = nameTableGet(resolver->nametab, originalName);
-                if (importedName != NULL) {
-                    if (isMetaclass) importedName = getMetaclassNameFromClass(resolver->vm, importedName);
-                    type = typeTableGet(resolver->vm->typetab, importedName);
-                }
+				type = getTypeFromImportedName(resolver, originalName, isMetaclass);
 
                 if (type == NULL) {
                     type = getTypeFromCurrentNamespace(resolver, token, fullName);
