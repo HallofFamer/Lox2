@@ -1,6 +1,5 @@
 namespace test.concurrency
 using clox.std.io.File
-using clox.std.io.FileWriteStream
 
 println("Creating a write stream for output file.")
 val fileWriter = await File.openAsync("test/others/file_output.txt", "w")

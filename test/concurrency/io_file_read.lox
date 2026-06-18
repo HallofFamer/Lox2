@@ -1,6 +1,5 @@
 namespace test.concurrency
 using clox.std.io.File
-using clox.std.io.FileReadStream
 
 println("Creating a read stream for input file.")
 val fileReader = await File.openAsync("test/others/file_input.txt", "r")

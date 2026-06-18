@@ -1,5 +1,4 @@
 namespace test.concurrency
-using clox.std.io.BinaryWriteStream
 using clox.std.io.File
 
 println("Creating a binary write stream.")

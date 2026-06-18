@@ -1,6 +1,5 @@
 namespace test.concurrency
 using clox.std.net.HTTPClient
-using clox.std.util.Promise
 
 val client = HTTPClient()
 print("Initializing HTTP Client: ")
