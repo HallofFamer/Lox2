@@ -84,10 +84,10 @@ Value valueArrayDelete(VM* vm, ValueArray* array, int index) {
     return value;
 }
 
-bool valueArraysEqual(ValueArray* aArray, ValueArray* bArray) {
-    if (aArray->count != bArray->count) return false;
-    for (int i = 0; i < aArray->count; i++) {
-        if (aArray->values[i] != bArray->values[i]) return false;
+bool valueArraysEqual(ValueArray* array, ValueArray* array2) {
+    if (array->count != array2->count) return false;
+    for (int i = 0; i < array->count; i++) {
+        if (array->values[i] != array2->values[i]) return false;
     }
     return true;
 }

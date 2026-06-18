@@ -163,7 +163,7 @@ void valueArrayInsert(VM* vm, ValueArray* array, int index, Value value);
 int valueArrayFirstIndex(VM* vm, ValueArray* array, Value value);
 int valueArrayLastIndex(VM* vm, ValueArray* array, Value value);
 Value valueArrayDelete(VM* vm, ValueArray* array, int index);
-bool valueArraysEqual(ValueArray* aArray, ValueArray* bArray);
+bool valueArraysEqual(ValueArray* array, ValueArray* array2);
 ObjString* valueArrayToString(VM* vm, ValueArray* array);
 void printValue(Value value);
 

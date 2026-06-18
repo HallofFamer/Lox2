@@ -14,6 +14,7 @@ TypeInfo* newTypeInfo(int id, size_t size, TypeCategory category, ObjString* sho
     if (type != NULL) {
         type->id = id;
         type->category = category;
+        type->hash = 0;
         type->shortName = shortName;
         type->fullName = fullName;   
     }
@@ -427,6 +428,80 @@ void freeTempTypes(TypeInfoArray* typeArray) {
         if (type != NULL && type->id == -1) freeTypeInfo(type);
     }
     free(typeArray);
+}
+
+uint32_t hashTypeInfo(TypeInfo* type) {
+    if (type == NULL) return 0;
+
+    /* Return cached hash when available and not in-progress */
+    const uint32_t IN_PROGRESS = 0xFFFFFFFFu;
+    if (type->hash != 0 && type->hash != IN_PROGRESS) return type->hash;
+    /* If a recursive cycle is detected, return 0 (treat as dynamic/unknown for now) */
+    if (type->hash == IN_PROGRESS) return 0;
+
+    /* mark as in-progress to break cycles */
+    type->hash = IN_PROGRESS;
+
+    uint32_t nameHash = 0;
+    if (type->fullName != NULL) nameHash = type->fullName->hash;
+    else if (type->shortName != NULL) nameHash = type->shortName->hash;
+
+    /* seed with category and name hash */
+    uint32_t h = ((uint32_t)type->category * 2166136261u) ^ nameHash;
+
+    /* helper mix */
+    #define MIX(a,b) ((a) = ((a) * 16777619u) ^ (b))
+
+    /* include nested/type-parameter identities for compound types */
+    if (IS_CALLABLE_TYPE(type)) {
+        CallableTypeInfo* c = AS_CALLABLE_TYPE(type);
+        /* return type (may be NULL => dynamic => hash 0) */
+        MIX(h, hashTypeInfo(c->returnType));
+        /* parameter types (elements may be NULL => dynamic) */
+        if (c->paramTypes != NULL) {
+            for (int i = 0; i < c->paramTypes->count; i++) {
+                TypeInfo* p = c->paramTypes->elements[i];
+                MIX(h, hashTypeInfo(p));
+            }
+        }
+    }
+    else if (IS_GENERIC_TYPE(type)) {
+        GenericTypeInfo* g = AS_GENERIC_TYPE(type);
+        /* include raw type */
+        MIX(h, hashTypeInfo(g->rawType));
+        /* actual type parameters (may contain NULLs) */
+        if (g->actualTypeParams != NULL) {
+            for (int i = 0; i < g->actualTypeParams->count; i++) {
+                TypeInfo* p = g->actualTypeParams->elements[i];
+                MIX(h, hashTypeInfo(p));
+            }
+        }
+    }
+    else if (IS_BEHAVIOR_TYPE(type)) {
+        BehaviorTypeInfo* b = AS_BEHAVIOR_TYPE(type);
+        /* formal type parameters (may contain NULLs) */
+        if (b->formalTypeParams != NULL) {
+            for (int i = 0; i < b->formalTypeParams->count; i++) {
+                TypeInfo* p = b->formalTypeParams->elements[i];
+                MIX(h, hashTypeInfo(p));
+            }
+        }
+    }
+
+    /* final avalanche (32-bit mix) */
+    h ^= h >> 16;
+    h *= 0x85ebca6bu;
+    h ^= h >> 13;
+    h *= 0xc2b2ae35u;
+    h ^= h >> 16;
+
+    /* reserve 0 as a sentinel (optional) */
+    if (h == 0) h = 1;
+
+    /* cache and return */
+    type->hash = h;
+    #undef MIX
+    return h;
 }
 
 TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name) {

@@ -43,6 +43,7 @@ typedef enum {
 struct TypeInfo {
     int id;
     TypeCategory category;
+    uint32_t hash;
     ObjString* shortName;
     ObjString* fullName;
 };
@@ -151,6 +152,8 @@ char* createGenericTypeName(GenericTypeInfo* genericType);
 char* createAliasTypeName(AliasTypeInfo* aliasType);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
+uint32_t hashTypeInfo(TypeInfo* type);
+
 TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name);
 TypeInfo* getAliasTargetType(TypeInfo* type);
 TypeInfo* getInnerBaseType(TypeInfo* type);
