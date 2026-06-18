@@ -357,8 +357,8 @@ static Value createTypeObjFromTypeInfo(VM* vm, TypeInfo* type) {
 ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
 	TypeInfo* targetType = getAliasTargetType(typeInfo);
     ObjType* type = ALLOCATE_OBJ_GEN(ObjType, OBJ_TYPE, vm->typeClass, GC_GENERATION_TYPE_PERMANENT);
-    type->name = name;
     type->category = targetType->category;
+    type->name = name;
     type->isAlias = IS_ALIAS_TYPE(typeInfo);
     type->behavior = getClassFromTypeInfo(vm, targetType);
     initValueArray(&type->parameters, GC_GENERATION_TYPE_PERMANENT);

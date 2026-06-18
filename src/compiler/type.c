@@ -449,31 +449,31 @@ uint32_t hashTypeInfo(TypeInfo* type) {
     /* seed with category and name hash */
     uint32_t h = ((uint32_t)type->category * 2166136261u) ^ nameHash;
 
-    /* helper mix */
-    #define MIX(a,b) ((a) = ((a) * 16777619u) ^ (b))
+    /* helper macro MIX_TYPE_HASH */
+    #define MIX_TYPE_HASH(a,b) ((a) = ((a) * 16777619u) ^ (b))
 
     /* include nested/type-parameter identities for compound types */
     if (IS_CALLABLE_TYPE(type)) {
         CallableTypeInfo* c = AS_CALLABLE_TYPE(type);
         /* return type (may be NULL => dynamic => hash 0) */
-        MIX(h, hashTypeInfo(c->returnType));
+        MIX_TYPE_HASH(h, hashTypeInfo(c->returnType));
         /* parameter types (elements may be NULL => dynamic) */
         if (c->paramTypes != NULL) {
             for (int i = 0; i < c->paramTypes->count; i++) {
                 TypeInfo* p = c->paramTypes->elements[i];
-                MIX(h, hashTypeInfo(p));
+                MIX_TYPE_HASH(h, hashTypeInfo(p));
             }
         }
     }
     else if (IS_GENERIC_TYPE(type)) {
         GenericTypeInfo* g = AS_GENERIC_TYPE(type);
         /* include raw type */
-        MIX(h, hashTypeInfo(g->rawType));
+        MIX_TYPE_HASH(h, hashTypeInfo(g->rawType));
         /* actual type parameters (may contain NULLs) */
         if (g->actualTypeParams != NULL) {
             for (int i = 0; i < g->actualTypeParams->count; i++) {
                 TypeInfo* p = g->actualTypeParams->elements[i];
-                MIX(h, hashTypeInfo(p));
+                MIX_TYPE_HASH(h, hashTypeInfo(p));
             }
         }
     }
@@ -483,7 +483,7 @@ uint32_t hashTypeInfo(TypeInfo* type) {
         if (b->formalTypeParams != NULL) {
             for (int i = 0; i < b->formalTypeParams->count; i++) {
                 TypeInfo* p = b->formalTypeParams->elements[i];
-                MIX(h, hashTypeInfo(p));
+                MIX_TYPE_HASH(h, hashTypeInfo(p));
             }
         }
     }
@@ -500,7 +500,7 @@ uint32_t hashTypeInfo(TypeInfo* type) {
 
     /* cache and return */
     type->hash = h;
-    #undef MIX
+    #undef MIX_TYPE_HASH
     return h;
 }
 

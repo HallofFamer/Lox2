@@ -172,7 +172,8 @@ static ObjString* getSymbolFullName(Resolver* resolver, Token token) {
 
 static SymbolItem* insertSymbol(Resolver* resolver, Token token, SymbolCategory category, SymbolState state, TypeInfo* type, bool isMutable) {
     ObjString* symbol = createStringFromToken(resolver->vm, token);
-    SymbolItem* item = newSymbolItemWithType(token, category, state, isMutable, type);
+    SymbolItem* item = newSymbolItemWithType(token, category, state, type);
+	item->isMutable = isMutable;
     bool inserted = symbolTableSet(resolver->currentSymtab, symbol, item);
 
     if (inserted) return item;
@@ -296,7 +297,7 @@ static SymbolItem* findThis(Resolver* resolver) {
     if (item == NULL) {
         ObjString* className = getSymbolFullName(resolver, resolver->currentClass->name);
         SymbolCategory category = (resolver->currentFunction->symtab->scope == SYMBOL_SCOPE_METHOD) ? SYMBOL_CATEGORY_LOCAL : SYMBOL_CATEGORY_UPVALUE;
-        item = newSymbolItem(resolver->thisVar, category, SYMBOL_STATE_ACCESSED, false);
+        item = newSymbolItem(resolver->thisVar, category, SYMBOL_STATE_ACCESSED);
 
         if (resolver->currentFunction->attribute.isClassMethod) {
             ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, className);
@@ -1211,7 +1212,7 @@ static void resolveVariable(Resolver* resolver, Ast* ast) {
     }
     else {
         if (resolver->currentFunction->hasRequired) {
-            item = newSymbolItem(ast->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, false);
+            item = newSymbolItem(ast->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED);
             symbolTableSet(resolver->globalSymtab, name, item);
         }
         else {

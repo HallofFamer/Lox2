@@ -59,8 +59,8 @@ struct SymbolTable {
     SymbolEntry* entries;
 };
 
-SymbolItem* newSymbolItem(Token token, SymbolCategory category, SymbolState state, bool isMutable);
-SymbolItem* newSymbolItemWithType(Token token, SymbolCategory category, SymbolState state, bool isMutable, TypeInfo* type);
+SymbolItem* newSymbolItem(Token token, SymbolCategory category, SymbolState state);
+SymbolItem* newSymbolItemWithType(Token token, SymbolCategory category, SymbolState state, TypeInfo* type);
 void freeSymbolItem(SymbolItem* item);
 SymbolTable* newSymbolTable(int id, SymbolTable* parent, SymbolScope scope, uint8_t depth);
 void freeSymbolTable(SymbolTable* symTab);

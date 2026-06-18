@@ -361,8 +361,8 @@ struct ObjString {
 
 struct ObjType {
     Obj obj;
-    ObjString* name;
     TypeCategory category;
+    ObjString* name;
     bool isAlias;
     ObjClass* behavior;
     ValueArray parameters;

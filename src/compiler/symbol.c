@@ -6,21 +6,21 @@
 #include "../common/buffer.h"
 #include "../vm/object.h"
 
-SymbolItem* newSymbolItem(Token token, SymbolCategory category, SymbolState state, bool isMutable) {
+SymbolItem* newSymbolItem(Token token, SymbolCategory category, SymbolState state) {
     SymbolItem* item = (SymbolItem*)malloc(sizeof(SymbolItem));
     if (item != NULL) {
         item->token = token;
         item->category = category;
         item->state = state;
         item->isImported = false;
-        item->isMutable = isMutable;
+        item->isMutable = false;
         item->type = NULL;
     }
     return item;
 }
 
-SymbolItem* newSymbolItemWithType(Token token, SymbolCategory category, SymbolState state, bool isMutable, TypeInfo* type) {
-    SymbolItem* item = newSymbolItem(token, category, state, isMutable);
+SymbolItem* newSymbolItemWithType(Token token, SymbolCategory category, SymbolState state, TypeInfo* type) {
+    SymbolItem* item = newSymbolItem(token, category, state);
     if (item != NULL) item->type = type;
     return item;
 }
