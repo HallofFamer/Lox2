@@ -454,7 +454,7 @@ static void inferAstTypeFromUnary(TypeChecker* typeChecker, Ast* ast, SymbolItem
     Ast* child = astGetChild(ast, 0);
     if (child->type == NULL) return;
 
-    switch (ast->token.type) {
+    switch (ast->token.kind) {
         case TOKEN_KIND_BANG:
             defineAstType(typeChecker, ast, "Bool", item);
             break;
@@ -500,7 +500,7 @@ static void inferAstTypeFromBinary(TypeChecker* typeChecker, Ast* ast, SymbolIte
     Ast* right = astGetChild(ast, 1);
     if (left->type == NULL || right->type == NULL) return;
 
-    switch (ast->token.type) {
+    switch (ast->token.kind) {
         case TOKEN_KIND_PLUS:
             if (isSubtypeOfType(left->type, typeChecker->stringType) && isSubtypeOfType(right->type, typeChecker->stringType)) {
                 defineAstType(typeChecker, ast, "String", item);
@@ -955,7 +955,7 @@ static void typeCheckInterpolation(TypeChecker* typeChecker, Ast* ast) {
         bool isString = false;
         Ast* expr = astGetChild(exprs, count);
 
-        if (expr->kind == AST_EXPR_LITERAL && expr->token.type == TOKEN_KIND_STRING) {
+        if (expr->kind == AST_EXPR_LITERAL && expr->token.kind == TOKEN_KIND_STRING) {
             concatenate = true;
             isString = true;
             count++;

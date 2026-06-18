@@ -753,7 +753,7 @@ static void function(Compiler* enclosing, CompileType type, Ast* ast, bool isAsy
 
 static void behavior(Compiler* compiler, BehaviorType type, Ast* ast) {
     Token name = ast->token;
-    bool isAnonymous = (name.type == TOKEN_KIND_EMPTY && name.length == 1);
+    bool isAnonymous = (name.kind == TOKEN_KIND_EMPTY && name.length == 1);
     if (isAnonymous) {
         emitBytes(compiler, OP_ANONYMOUS, type);
         emitByte(compiler, OP_DUP);
@@ -869,7 +869,7 @@ static void compileBinary(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
     compileChild(compiler, ast, 1);
     
-    switch (ast->token.type) {
+    switch (ast->token.kind) {
         case TOKEN_KIND_BANG_EQUAL:        emitBytes(compiler, OP_EQUAL, OP_NOT); break;
         case TOKEN_KIND_EQUAL_EQUAL:       emitByte(compiler, OP_EQUAL); break;
         case TOKEN_KIND_GREATER:           emitByte(compiler, OP_GREATER); break;
@@ -947,7 +947,7 @@ static void compileInterpolation(Compiler* compiler, Ast* ast) {
         bool isString = false;
         Ast* expr = astGetChild(exprs, count);
 
-        if (expr->kind == AST_EXPR_LITERAL && expr->token.type == TOKEN_KIND_STRING) {
+        if (expr->kind == AST_EXPR_LITERAL && expr->token.kind == TOKEN_KIND_STRING) {
             compileChild(compiler, exprs, count);
             if (count > 0) emitByte(compiler, OP_ADD);
             concatenate = true;
@@ -986,7 +986,7 @@ static void compileInvoke(Compiler* compiler, Ast* ast) {
 }
 
 static void compileLiteral(Compiler* compiler, Ast* ast) {
-    switch (ast->token.type) {
+    switch (ast->token.kind) {
         case TOKEN_KIND_NIL: emitByte(compiler, OP_NIL); break;
         case TOKEN_KIND_TRUE: emitByte(compiler, OP_TRUE); break;
         case TOKEN_KIND_FALSE: emitByte(compiler, OP_FALSE); break;
@@ -1000,8 +1000,8 @@ static void compileLiteral(Compiler* compiler, Ast* ast) {
 static void compileNil(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
     compileChild(compiler, ast, 1);
-    if (ast->token.type == TOKEN_KIND_QUESTION) emitByte(compiler, OP_NIL_COALESCING);
-    else if (ast->token.type == TOKEN_KIND_COLON) emitByte(compiler, OP_ELVIS);
+    if (ast->token.kind == TOKEN_KIND_QUESTION) emitByte(compiler, OP_NIL_COALESCING);
+    else if (ast->token.kind == TOKEN_KIND_COLON) emitByte(compiler, OP_ELVIS);
     else compileError(compiler, "Invalid nil handling operator specified.");
 }
 
@@ -1089,7 +1089,7 @@ static void compileType(Compiler* compiler, Ast* ast) {
 
 static void compileUnary(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
-    switch (ast->token.type) {
+    switch (ast->token.kind) {
         case TOKEN_KIND_BANG: emitByte(compiler, OP_NOT); break;
         case TOKEN_KIND_MINUS: emitByte(compiler, OP_NEGATE); break;
         default: return;

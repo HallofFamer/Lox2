@@ -286,7 +286,7 @@ static void astOutputExprInterpolation(Ast* ast, int indentLevel) {
 static void astOutputExprLiteral(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
     char* token = tokenToCString(ast->token);
-    switch (ast->token.type) {
+    switch (ast->token.kind) {
         case TOKEN_KIND_NIL:
         case TOKEN_KIND_TRUE:
         case TOKEN_KIND_FALSE:

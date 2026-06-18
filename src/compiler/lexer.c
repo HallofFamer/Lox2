@@ -53,9 +53,9 @@ static bool match(Lexer* lexer, char expected) {
     return true;
 }
 
-static Token makeToken(Lexer* lexer, TokenKind type) {
+static Token makeToken(Lexer* lexer, TokenKind kind) {
     return (Token) {
-        .type = type,
+        .kind = kind,
         .start = lexer->start,
         .length = (int)(lexer->current - lexer->start),
         .line = lexer->line
@@ -64,7 +64,7 @@ static Token makeToken(Lexer* lexer, TokenKind type) {
 
 static Token errorToken(Lexer* lexer, const char* message) {
     Token token = {
-        .type = TOKEN_KIND_ERROR,
+        .kind = TOKEN_KIND_ERROR,
         .start = message,
         .length = (int)strlen(message),
         .line = lexer->line
@@ -130,9 +130,9 @@ static void skipWhitespace(Lexer* lexer) {
     }
 }
 
-static TokenKind checkKeyword(Lexer* lexer, int start, int length, const char* rest, TokenKind type) {
+static TokenKind checkKeyword(Lexer* lexer, int start, int length, const char* rest, TokenKind kind) {
     if (lexer->current - lexer->start == start + length && memcmp(lexer->start + start, rest, length) == 0) {
-        return type;
+        return kind;
     }
     return TOKEN_KIND_IDENTIFIER;
 }
@@ -389,7 +389,7 @@ TokenStream* lex(Lexer* lexer) {
     while (!isAtEnd(lexer)) {
         previousToken = tokens->elements[tokens->count - 1];
         Token currentToken = scanToken(lexer);
-        if (currentToken.type == TOKEN_KIND_NEW_LINE && previousToken.type == TOKEN_KIND_NEW_LINE) continue;
+        if (currentToken.kind == TOKEN_KIND_NEW_LINE && previousToken.kind == TOKEN_KIND_NEW_LINE) continue;
         tokenStreamAdd(tokens, currentToken);
     }
     tokenStreamAdd(tokens, makeToken(lexer, TOKEN_KIND_EOF));

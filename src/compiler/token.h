@@ -35,7 +35,7 @@ typedef enum {
 } TokenKind;
 
 typedef struct {
-    TokenKind type;
+    TokenKind kind;
     const char* start;
     int length;
     int line;

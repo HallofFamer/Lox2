@@ -1025,7 +1025,7 @@ static void resolveInterpolation(Resolver* resolver, Ast* ast) {
         Ast* expr = astGetChild(exprs, count);
         expr->symtab = exprs->symtab;
 
-        if (expr->kind == AST_EXPR_LITERAL && expr->token.type == TOKEN_KIND_STRING) {
+        if (expr->kind == AST_EXPR_LITERAL && expr->token.kind == TOKEN_KIND_STRING) {
             resolveChild(resolver, exprs, count);
             concatenate = true;
             isString = true;
@@ -1048,7 +1048,7 @@ static void resolveInvoke(Resolver* resolver, Ast* ast) {
 }
 
 static void resolveLiteral(Resolver* resolver, Ast* ast) {
-    switch (ast->token.type) {
+    switch (ast->token.kind) {
         case TOKEN_KIND_NIL: 
             insertLiteralType(resolver, ast, "Nil");
             break;

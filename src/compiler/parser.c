@@ -34,35 +34,35 @@ static Token currentToken(Parser* parser) {
 }
 
 static TokenKind currentTokenType(Parser* parser) {
-    return parser->current.type;
+    return parser->current.kind;
 }
 
 static Token previousToken(Parser* parser) {
     Token previousToken = parser->tokens->elements[parser->index - 1];
-    if (previousToken.type == TOKEN_KIND_NEW_LINE) return parser->tokens->elements[parser->index - 2];
+    if (previousToken.kind == TOKEN_KIND_NEW_LINE) return parser->tokens->elements[parser->index - 2];
     return previousToken;
 }
 
 static TokenKind previousTokenType(Parser* parser) {
-    return previousToken(parser).type;
+    return previousToken(parser).kind;
 }
 
 static Token nextToken(Parser* parser) {
     Token nextToken = parser->tokens->elements[parser->index + 1];
-    if (nextToken.type == TOKEN_KIND_NEW_LINE) return parser->tokens->elements[parser->index + 2];
+    if (nextToken.kind == TOKEN_KIND_NEW_LINE) return parser->tokens->elements[parser->index + 2];
     return nextToken;
 }
 
 static TokenKind nextTokenType(Parser* parser) {
-    return nextToken(parser).type;
+    return nextToken(parser).kind;
 }
 
 static bool newLineBeforePrevious(Parser* parser) {
-    return (parser->tokens->elements[parser->index - 1].type == TOKEN_KIND_NEW_LINE || parser->tokens->elements[parser->index - 2].type == TOKEN_KIND_NEW_LINE);
+    return (parser->tokens->elements[parser->index - 1].kind == TOKEN_KIND_NEW_LINE || parser->tokens->elements[parser->index - 2].kind == TOKEN_KIND_NEW_LINE);
 }
 
 static bool newLineAfterCurrent(Parser* parser) {
-    return (parser->tokens->elements[parser->index + 1].type == TOKEN_KIND_NEW_LINE);
+    return (parser->tokens->elements[parser->index + 1].kind == TOKEN_KIND_NEW_LINE);
 }
 
 static void parseError(Parser* parser, Token token, const char* message) {
@@ -70,7 +70,7 @@ static void parseError(Parser* parser, Token token, const char* message) {
     parser->panicMode = true;
     fprintf(stderr, "[line %d] Parse Error", token.line);
 
-    if (token.type == TOKEN_KIND_EOF) fprintf(stderr, " at end");
+    if (token.kind == TOKEN_KIND_EOF) fprintf(stderr, " at end");
     else fprintf(stderr, " at '%.*s'", token.length, token.start);
 
     fprintf(stderr, ": %s\n", message);
@@ -88,7 +88,7 @@ static void parseErrorAtCurrent(Parser* parser, const char* message) {
 
 static void advance(Parser* parser) {
     parser->current = parser->tokens->elements[++parser->index];
-    if (parser->current.type == TOKEN_KIND_NEW_LINE) {
+    if (parser->current.kind == TOKEN_KIND_NEW_LINE) {
         parser->current = parser->tokens->elements[++parser->index];
     }
 }
@@ -96,7 +96,7 @@ static void advance(Parser* parser) {
 static void backtrack(Parser* parser) {
     if (parser->index > 0) {
         parser->current = parser->tokens->elements[--parser->index];
-        if (parser->current.type == TOKEN_KIND_NEW_LINE) {
+        if (parser->current.kind == TOKEN_KIND_NEW_LINE) {
             parser->current = parser->tokens->elements[--parser->index];
         }
     }
@@ -109,7 +109,7 @@ static bool resetIndex(Parser* parser, int index, Token current, bool value) {
 }
 
 static void consume(Parser* parser, TokenKind type, const char* message) {
-    if (parser->current.type == type) {
+    if (parser->current.kind == type) {
         advance(parser);
         return;
     }
@@ -117,11 +117,11 @@ static void consume(Parser* parser, TokenKind type, const char* message) {
 }
 
 static void consumerTerminator(Parser* parser, const char* message) {
-    if (parser->current.type == TOKEN_KIND_SEMICOLON) {
+    if (parser->current.kind == TOKEN_KIND_SEMICOLON) {
         advance(parser);
         return;
     }
-    else if (newLineBeforePrevious(parser) || parser->current.type == TOKEN_KIND_RIGHT_BRACE || parser->current.type == TOKEN_KIND_EOF) {
+    else if (newLineBeforePrevious(parser) || parser->current.kind == TOKEN_KIND_RIGHT_BRACE || parser->current.kind == TOKEN_KIND_EOF) {
         return;
     }
     parseErrorAtCurrent(parser, message);
@@ -139,11 +139,11 @@ static bool checkNextN(Parser* parser, int length, TokenKind type) {
     int offset = 1;
 	for (int i = 1; i <= length; i++) {
         Token token = parser->tokens->elements[parser->index + offset];
-        if (token.type == TOKEN_KIND_NEW_LINE) {
+        if (token.kind == TOKEN_KIND_NEW_LINE) {
             offset++;
 			token = parser->tokens->elements[parser->index + offset];
         }
-		if (i == length && token.type == type) return true;
+		if (i == length && token.kind == type) return true;
         offset++;
     }
     return false;
@@ -306,10 +306,10 @@ static char* parseString(Parser* parser, int* length) {
 static void synchronize(Parser* parser) {
     parser->panicMode = false;
 
-    while (parser->current.type != TOKEN_KIND_EOF) {
+    while (parser->current.kind != TOKEN_KIND_EOF) {
         if (previousTokenType(parser) == TOKEN_KIND_SEMICOLON) return;
 
-        switch (parser->current.type) {
+        switch (parser->current.kind) {
             case TOKEN_KIND_ASYNC:
             case TOKEN_KIND_AWAIT:
             case TOKEN_KIND_CLASS:
@@ -373,7 +373,7 @@ static Ast* identifier(Parser* parser, const char* message) {
 }
 
 static Token identifierToken(Parser* parser, const char* message) {
-    switch (parser->current.type) {
+    switch (parser->current.kind) {
         case TOKEN_KIND_IDENTIFIER:
         case TOKEN_KIND_EQUAL_EQUAL:
         case TOKEN_KIND_GREATER:
@@ -491,7 +491,7 @@ static Ast* behaviorType(Parser* parser) {
 static Ast* callableType(Parser* parser) {
     advance(parser);
     Ast* returnType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
-    if (returnType->token.type == TOKEN_KIND_VOID) {
+    if (returnType->token.kind == TOKEN_KIND_VOID) {
         returnType->attribute.isVoid = true;
     }
 
@@ -718,7 +718,7 @@ static Ast* string(Parser* parser, Token token, bool canAssign) {
         .length = length,
         .line = token.line,
         .start = str,
-        .type = TOKEN_KIND_STRING
+        .kind = TOKEN_KIND_STRING
     };
     return emptyAst(AST_EXPR_LITERAL, strToken);
 }
@@ -811,7 +811,7 @@ static Ast* lambda(Parser* parser, Token token, bool canAssign) {
 }
 
 static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
-    if (left->token.type != TOKEN_KIND_IDENTIFIER) return binary(parser, token, left, canAssign);
+    if (left->token.kind != TOKEN_KIND_IDENTIFIER) return binary(parser, token, left, canAssign);
     int index = parser->index;
     Token current = parser->current;
     Token previous2 = parser->tokens->elements[index - 2];
@@ -1279,7 +1279,7 @@ static Ast* parsePrefix(Parser* parser, Precedence precedence, bool canAssign) {
 }
 
 static Ast* parseInfix(Parser* parser, Precedence precedence, Ast* left, bool canAssign) {
-    while (precedence <= getRule(parser->current.type)->precedence) {
+    while (precedence <= getRule(parser->current.kind)->precedence) {
         advance(parser);
         ParseInfixFn infixRule = getRule(previousTokenType(parser))->infix;
         left = infixRule(parser, previousToken(parser), left, canAssign);
@@ -1403,7 +1403,7 @@ static Ast* requireStatement(Parser* parser) {
 
 static Ast* returnStatement(Parser* parser) {
     Token token = previousToken(parser);
-    if (match(parser, TOKEN_KIND_SEMICOLON) || !getRule(parser->current.type)->startExpr) {
+    if (match(parser, TOKEN_KIND_SEMICOLON) || !getRule(parser->current.kind)->startExpr) {
         return emptyAst(AST_STMT_RETURN, token);
     }
     else {
@@ -1432,7 +1432,7 @@ static Ast* switchStatement(Parser* parser) {
             if (state == 1) caseCount++;
             if (state == 2) parseErrorAtPrevious(parser, "Can't have another 'case' or 'default' after the default case.");
 
-            if (caseToken.type == TOKEN_KIND_CASE) {
+            if (caseToken.kind == TOKEN_KIND_CASE) {
                 state = 1;
                 Ast* caseLabel = expression(parser);
                 consume(parser, TOKEN_KIND_COLON, "Expect ':' after case value.");
@@ -1526,7 +1526,7 @@ static Ast* whileStatement(Parser* parser) {
 static Ast* yieldStatement(Parser* parser) {
     Token token = previousToken(parser);
     bool isYieldFrom = match(parser, TOKEN_KIND_FROM);
-    if (match(parser, TOKEN_KIND_SEMICOLON) || !getRule(parser->current.type)->startExpr) {
+    if (match(parser, TOKEN_KIND_SEMICOLON) || !getRule(parser->current.kind)->startExpr) {
         return emptyAst(AST_STMT_YIELD, token);
     }
 

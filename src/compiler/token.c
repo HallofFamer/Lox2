@@ -83,7 +83,7 @@ const char* tokenNames[] = {
 
 Token syntheticToken(const char* text) {
     return (Token) {
-        .type = TOKEN_KIND_EMPTY,
+        .kind = TOKEN_KIND_EMPTY,
         .start = text,
         .length = (int)strlen(text),
         .line = 0
@@ -92,7 +92,7 @@ Token syntheticToken(const char* text) {
 
 Token syntheticTokenAtLine(const char* text, int line) {
 	return (Token) {
-        .type = TOKEN_KIND_EMPTY, 
+        .kind = TOKEN_KIND_EMPTY, 
         .start = text, 
         .length = (int)strlen(text),
         .line = line
@@ -105,7 +105,7 @@ bool tokensEqual(Token* token, Token* token2) {
 }
 
 bool tokenIsLiteral(Token token) {
-    switch (token.type) {
+    switch (token.kind) {
         case TOKEN_KIND_NIL:
         case TOKEN_KIND_TRUE:
         case TOKEN_KIND_FALSE:
@@ -119,7 +119,7 @@ bool tokenIsLiteral(Token token) {
 }
 
 bool tokenIsOperator(Token token) {
-    switch (token.type) {
+    switch (token.kind) {
         case TOKEN_KIND_EQUAL_EQUAL:
         case TOKEN_KIND_GREATER:
         case TOKEN_KIND_LESS:
@@ -150,7 +150,7 @@ char* tokenToCString(Token token) {
 }
 
 void outputToken(Token token) {
-    printf("Scanning Token type %s at line %d\n", tokenNames[token.type], token.line);
+    printf("Scanning Token kind %s at line %d\n", tokenNames[token.kind], token.line);
 }
 
 void initTokenStream(TokenStream* tokenStream) {
