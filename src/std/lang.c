@@ -1931,12 +1931,6 @@ LOX_METHOD(Type, isClass) {
     RETURN_BOOL(self->category == TYPE_CATEGORY_CLASS);
 }
 
-LOX_METHOD(Type, isPlaceholder) {
-    ASSERT_ARG_COUNT("Type::isPlaceholder()", 0);
-    ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_PLACEHOLDER);
-}
-
 LOX_METHOD(Type, isGeneric) {
     ASSERT_ARG_COUNT("Type::isGeneric()", 0);
     ObjType* self = AS_TYPE(receiver);
@@ -1953,6 +1947,12 @@ LOX_METHOD(Type, isNative) {
     ASSERT_ARG_COUNT("Type::isNative()", 0);
     ObjType* self = AS_TYPE(receiver);
     RETURN_BOOL(self->behavior->isNative);
+}
+
+LOX_METHOD(Type, isPlaceholder) {
+    ASSERT_ARG_COUNT("Type::isPlaceholder()", 0);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(self->category == TYPE_CATEGORY_PLACEHOLDER);
 }
 
 LOX_METHOD(Type, isTrait) {

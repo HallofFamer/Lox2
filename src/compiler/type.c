@@ -487,6 +487,16 @@ uint32_t hashTypeInfo(TypeInfo* type) {
             }
         }
     }
+	else if (IS_ALIAS_TYPE(type)) {
+		AliasTypeInfo* a = AS_ALIAS_TYPE(type);
+		/* formal type parameters (may contain NULLs) */
+		if (a->formalTypeParams != NULL) {
+			for (int i = 0; i < a->formalTypeParams->count; i++) {
+				TypeInfo* p = a->formalTypeParams->elements[i];
+				MIX_TYPE_HASH(h, hashTypeInfo(p));
+			}
+		}
+	}
 
     /* final avalanche (32-bit mix) */
     h ^= h >> 16;
