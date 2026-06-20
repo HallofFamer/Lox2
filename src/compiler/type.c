@@ -447,7 +447,7 @@ uint32_t hashTypeInfo(TypeInfo* type) {
     else if (type->shortName != NULL) nameHash = type->shortName->hash;
 
     /* seed with category and name hash */
-    uint32_t h = ((uint32_t)type->category * 2166136261u) ^ nameHash;
+    uint32_t hash = ((uint32_t)type->category * 2166136261u) ^ nameHash;
 
     /* helper macro MIX_TYPE_HASH */
     #define MIX_TYPE_HASH(a,b) ((a) = ((a) * 16777619u) ^ (b))
@@ -456,24 +456,32 @@ uint32_t hashTypeInfo(TypeInfo* type) {
     if (IS_CALLABLE_TYPE(type)) {
         CallableTypeInfo* c = AS_CALLABLE_TYPE(type);
         /* return type (may be NULL => dynamic => hash 0) */
-        MIX_TYPE_HASH(h, hashTypeInfo(c->returnType));
+        MIX_TYPE_HASH(hash, hashTypeInfo(c->returnType));
         /* parameter types (elements may be NULL => dynamic) */
         if (c->paramTypes != NULL) {
             for (int i = 0; i < c->paramTypes->count; i++) {
                 TypeInfo* p = c->paramTypes->elements[i];
-                MIX_TYPE_HASH(h, hashTypeInfo(p));
+                MIX_TYPE_HASH(hash, hashTypeInfo(p));
             }
         }
+
+        /* formal type parameters (may contain NULLs) */
+		if (c->formalTypeParams != NULL) {
+			for (int i = 0; i < c->formalTypeParams->count; i++) {
+				TypeInfo* p = c->formalTypeParams->elements[i];
+				MIX_TYPE_HASH(hash, hashTypeInfo(p));
+			}
+		}
     }
     else if (IS_GENERIC_TYPE(type)) {
         GenericTypeInfo* g = AS_GENERIC_TYPE(type);
         /* include raw type */
-        MIX_TYPE_HASH(h, hashTypeInfo(g->rawType));
+        MIX_TYPE_HASH(hash, hashTypeInfo(g->rawType));
         /* actual type parameters (may contain NULLs) */
         if (g->actualTypeParams != NULL) {
             for (int i = 0; i < g->actualTypeParams->count; i++) {
                 TypeInfo* p = g->actualTypeParams->elements[i];
-                MIX_TYPE_HASH(h, hashTypeInfo(p));
+                MIX_TYPE_HASH(hash, hashTypeInfo(p));
             }
         }
     }
@@ -483,7 +491,7 @@ uint32_t hashTypeInfo(TypeInfo* type) {
         if (b->formalTypeParams != NULL) {
             for (int i = 0; i < b->formalTypeParams->count; i++) {
                 TypeInfo* p = b->formalTypeParams->elements[i];
-                MIX_TYPE_HASH(h, hashTypeInfo(p));
+                MIX_TYPE_HASH(hash, hashTypeInfo(p));
             }
         }
     }
@@ -493,25 +501,25 @@ uint32_t hashTypeInfo(TypeInfo* type) {
 		if (a->formalTypeParams != NULL) {
 			for (int i = 0; i < a->formalTypeParams->count; i++) {
 				TypeInfo* p = a->formalTypeParams->elements[i];
-				MIX_TYPE_HASH(h, hashTypeInfo(p));
+				MIX_TYPE_HASH(hash, hashTypeInfo(p));
 			}
 		}
 	}
 
     /* final avalanche (32-bit mix) */
-    h ^= h >> 16;
-    h *= 0x85ebca6bu;
-    h ^= h >> 13;
-    h *= 0xc2b2ae35u;
-    h ^= h >> 16;
+    hash ^= hash >> 16;
+    hash *= 0x85ebca6bu;
+    hash ^= hash >> 13;
+    hash *= 0xc2b2ae35u;
+    hash ^= hash >> 16;
 
     /* reserve 0 as a sentinel (optional) */
-    if (h == 0) h = 1;
+    if (hash == 0) hash = 1;
 
     /* cache and return */
-    type->hash = h;
+    type->hash = hash;
     #undef MIX_TYPE_HASH
-    return h;
+    return hash;
 }
 
 TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name) {
