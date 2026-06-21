@@ -453,7 +453,17 @@ uint32_t hashTypeInfo(TypeInfo* type) {
     #define MIX_TYPE_HASH(a,b) ((a) = ((a) * 16777619u) ^ (b))
 
     /* include nested/type-parameter identities for compound types */
-    if (IS_CALLABLE_TYPE(type)) {
+    if (IS_BEHAVIOR_TYPE(type)) {
+        BehaviorTypeInfo* b = AS_BEHAVIOR_TYPE(type);
+        /* formal type parameters (may contain NULLs) */
+        if (b->formalTypeParams != NULL) {
+            for (int i = 0; i < b->formalTypeParams->count; i++) {
+                TypeInfo* p = b->formalTypeParams->elements[i];
+                MIX_TYPE_HASH(hash, hashTypeInfo(p));
+            }
+        }
+    }
+    else if (IS_CALLABLE_TYPE(type)) {
         CallableTypeInfo* c = AS_CALLABLE_TYPE(type);
         /* return type (may be NULL => dynamic => hash 0) */
         MIX_TYPE_HASH(hash, hashTypeInfo(c->returnType));
@@ -481,16 +491,6 @@ uint32_t hashTypeInfo(TypeInfo* type) {
         if (g->actualTypeParams != NULL) {
             for (int i = 0; i < g->actualTypeParams->count; i++) {
                 TypeInfo* p = g->actualTypeParams->elements[i];
-                MIX_TYPE_HASH(hash, hashTypeInfo(p));
-            }
-        }
-    }
-    else if (IS_BEHAVIOR_TYPE(type)) {
-        BehaviorTypeInfo* b = AS_BEHAVIOR_TYPE(type);
-        /* formal type parameters (may contain NULLs) */
-        if (b->formalTypeParams != NULL) {
-            for (int i = 0; i < b->formalTypeParams->count; i++) {
-                TypeInfo* p = b->formalTypeParams->elements[i];
                 MIX_TYPE_HASH(hash, hashTypeInfo(p));
             }
         }

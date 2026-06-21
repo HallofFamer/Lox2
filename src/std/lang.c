@@ -1916,7 +1916,7 @@ LOX_METHOD(Type, hasMethod) {
 LOX_METHOD(Type, isAlias) {
     ASSERT_ARG_COUNT("Type::isAlias()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_ALIAS);
+    RETURN_BOOL(self->isAlias);
 }
 
 LOX_METHOD(Type, isBehavior) {
