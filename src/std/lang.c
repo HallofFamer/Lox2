@@ -1913,6 +1913,12 @@ LOX_METHOD(Type, hasMethod) {
     RETURN_BOOL(tableGet(&self->behavior->methods, AS_STRING(args[0]), &value));
 }
 
+LOX_METHOD(Type, hasTypeParameters) {
+	ASSERT_ARG_COUNT("Type::hasTypeParameters()", 0);
+	ObjType* self = AS_TYPE(receiver);
+	RETURN_BOOL(self->parameters.count > 0);
+}
+
 LOX_METHOD(Type, isAlias) {
     ASSERT_ARG_COUNT("Type::isAlias()", 0);
     ObjType* self = AS_TYPE(receiver);
@@ -2249,6 +2255,7 @@ void registerLangPackage(VM* vm) {
     DEF_INTERCEPTOR(vm->typeClass, Type, INTERCEPTOR_INIT, __init__, 2, NATIVE_TYPE(Type), NATIVE_TYPE(String), NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, getMethod, 1, NATIVE_TYPE(Method), NATIVE_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, hasMethod, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(String));
+	DEF_METHOD(vm->typeClass, Type, hasTypeParameters, 0, NATIVE_TYPE(Bool));
 	DEF_METHOD(vm->typeClass, Type, isAlias, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isBehavior, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isCallable, 0, NATIVE_TYPE(Bool));

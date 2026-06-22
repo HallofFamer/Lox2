@@ -443,10 +443,13 @@ uint32_t hashTypeInfo(TypeInfo* type) {
     type->hash = IN_PROGRESS;
 
     uint32_t nameHash = 0;
-    if (type->fullName != NULL) nameHash = type->fullName->hash;
-    else if (type->shortName != NULL) nameHash = type->shortName->hash;
+    /* only include name for behavior types and placeholders */
+    if (IS_BEHAVIOR_TYPE(type) || IS_PLACEHOLDER_TYPE(type)) {
+        if (type->fullName != NULL) nameHash = type->fullName->hash;
+        else if (type->shortName != NULL) nameHash = type->shortName->hash;
+    }
 
-    /* seed with category and name hash */
+    /* seed with category (and name only for behaviors/placeholders) */
     uint32_t hash = ((uint32_t)type->category * 2166136261u) ^ nameHash;
 
     /* helper macro MIX_TYPE_HASH */
