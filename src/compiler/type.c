@@ -457,53 +457,53 @@ uint32_t hashTypeInfo(TypeInfo* type) {
 
     /* include nested/type-parameter identities for compound types */
     if (IS_BEHAVIOR_TYPE(type)) {
-        BehaviorTypeInfo* b = AS_BEHAVIOR_TYPE(type);
+        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         /* formal type parameters (may contain NULLs) */
-        if (b->formalTypeParams != NULL) {
-            for (int i = 0; i < b->formalTypeParams->count; i++) {
-                TypeInfo* p = b->formalTypeParams->elements[i];
+        if (behaviorType->formalTypeParams != NULL) {
+            for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
+                TypeInfo* p = behaviorType->formalTypeParams->elements[i];
                 MIX_TYPE_HASH(hash, hashTypeInfo(p));
             }
         }
     }
     else if (IS_CALLABLE_TYPE(type)) {
-        CallableTypeInfo* c = AS_CALLABLE_TYPE(type);
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
         /* return type (may be NULL => dynamic => hash 0) */
-        MIX_TYPE_HASH(hash, hashTypeInfo(c->returnType));
+        MIX_TYPE_HASH(hash, hashTypeInfo(callableType->returnType));
         /* parameter types (elements may be NULL => dynamic) */
-        if (c->paramTypes != NULL) {
-            for (int i = 0; i < c->paramTypes->count; i++) {
-                TypeInfo* p = c->paramTypes->elements[i];
+        if (callableType->paramTypes != NULL) {
+            for (int i = 0; i < callableType->paramTypes->count; i++) {
+                TypeInfo* p = callableType->paramTypes->elements[i];
                 MIX_TYPE_HASH(hash, hashTypeInfo(p));
             }
         }
 
         /* formal type parameters (may contain NULLs) */
-		if (c->formalTypeParams != NULL) {
-			for (int i = 0; i < c->formalTypeParams->count; i++) {
-				TypeInfo* p = c->formalTypeParams->elements[i];
+		if (callableType->formalTypeParams != NULL) {
+			for (int i = 0; i < callableType->formalTypeParams->count; i++) {
+				TypeInfo* p = callableType->formalTypeParams->elements[i];
 				MIX_TYPE_HASH(hash, hashTypeInfo(p));
 			}
 		}
     }
     else if (IS_GENERIC_TYPE(type)) {
-        GenericTypeInfo* g = AS_GENERIC_TYPE(type);
+        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
         /* include raw type */
-        MIX_TYPE_HASH(hash, hashTypeInfo(g->rawType));
+        MIX_TYPE_HASH(hash, hashTypeInfo(genericType->rawType));
         /* actual type parameters (may contain NULLs) */
-        if (g->actualTypeParams != NULL) {
-            for (int i = 0; i < g->actualTypeParams->count; i++) {
-                TypeInfo* p = g->actualTypeParams->elements[i];
+        if (genericType->actualTypeParams != NULL) {
+            for (int i = 0; i < genericType->actualTypeParams->count; i++) {
+                TypeInfo* p = genericType->actualTypeParams->elements[i];
                 MIX_TYPE_HASH(hash, hashTypeInfo(p));
             }
         }
     }
 	else if (IS_ALIAS_TYPE(type)) {
-		AliasTypeInfo* a = AS_ALIAS_TYPE(type);
+		AliasTypeInfo* aliasType = AS_ALIAS_TYPE(type);
 		/* formal type parameters (may contain NULLs) */
-		if (a->formalTypeParams != NULL) {
-			for (int i = 0; i < a->formalTypeParams->count; i++) {
-				TypeInfo* p = a->formalTypeParams->elements[i];
+		if (aliasType->formalTypeParams != NULL) {
+			for (int i = 0; i < aliasType->formalTypeParams->count; i++) {
+				TypeInfo* p = aliasType->formalTypeParams->elements[i];
 				MIX_TYPE_HASH(hash, hashTypeInfo(p));
 			}
 		}

@@ -1905,6 +1905,19 @@ LOX_METHOD(Type, getMethod) {
     else RETURN_NIL;
 }
 
+LOX_METHOD(Type, getTypeParameters) {
+	ASSERT_ARG_COUNT("Type::getTypeParameters()", 0);
+	ObjType* self = AS_TYPE(receiver);
+	ObjArray* parameters = newArray(vm);
+	push(vm, OBJ_VAL(parameters));
+
+	for (int i = 0; i < self->parameters.count; i++) {
+		valueArrayWrite(vm, &parameters->elements, self->parameters.values[i]);
+	}
+	pop(vm);
+	RETURN_OBJ(parameters);
+}
+
 LOX_METHOD(Type, hasMethod) {
     ASSERT_ARG_COUNT("Type::hasMethod(name)", 1);
     ASSERT_ARG_TYPE("Type::hasMethod(name)", 0, String);
@@ -2254,6 +2267,7 @@ void registerLangPackage(VM* vm) {
     bindSuperclass(vm, vm->typeClass, behaviorClass);
     DEF_INTERCEPTOR(vm->typeClass, Type, INTERCEPTOR_INIT, __init__, 2, NATIVE_TYPE(Type), NATIVE_TYPE(String), NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, getMethod, 1, NATIVE_TYPE(Method), NATIVE_TYPE(String));
+	DEF_METHOD(vm->typeClass, Type, getTypeParameters, 0, NATIVE_TYPE(Object));
     DEF_METHOD(vm->typeClass, Type, hasMethod, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(String));
 	DEF_METHOD(vm->typeClass, Type, hasTypeParameters, 0, NATIVE_TYPE(Bool));
 	DEF_METHOD(vm->typeClass, Type, isAlias, 0, NATIVE_TYPE(Bool));
