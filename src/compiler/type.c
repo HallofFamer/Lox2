@@ -430,6 +430,61 @@ void freeTempTypes(TypeInfoArray* typeArray) {
     free(typeArray);
 }
 
+#define MIX_TYPE_HASH(a,b) ((a) = ((a) * 16777619u) ^ (b))
+
+static uint32_t hashBehaviorTypeInfo(TypeInfo* type) {
+	BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+	ObjString* name = type->fullName != NULL ? type->fullName : type->shortName;
+	uint32_t hash = ((uint32_t)type->category * 2166136261u) ^ name->hash;
+
+	for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
+		TypeInfo* formalTypeParam = behaviorType->formalTypeParams->elements[i];
+		MIX_TYPE_HASH(hash, formalTypeParam->fullName->hash);
+	}
+	return hash;
+}
+
+static uint32_t hashCallableTypeInfo(TypeInfo* type) {
+	CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
+	uint32_t hash = ((uint32_t)type->category * 2166136261u);
+	if (callableType->returnType != NULL) MIX_TYPE_HASH(hash, callableType->returnType->fullName->hash);
+	
+    for (int i = 0; i < callableType->paramTypes->count; i++) {
+		TypeInfo* paramType = callableType->paramTypes->elements[i];
+		if (paramType != NULL) MIX_TYPE_HASH(hash, paramType->fullName->hash);
+	}
+	
+    for (int i = 0; i < callableType->formalTypeParams->count; i++) {
+		TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];
+		MIX_TYPE_HASH(hash, formalTypeParam->fullName->hash);
+	}
+	return hash;
+}
+
+static uint32_t hashGenericTypeInfo(TypeInfo* type) {
+	GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
+	uint32_t hash = ((uint32_t)type->category * 2166136261u);
+	MIX_TYPE_HASH(hash, genericType->rawType->fullName->hash);
+	
+    for (int i = 0; i < genericType->actualTypeParams->count; i++) {
+		TypeInfo* actualTypeParam = genericType->actualTypeParams->elements[i];
+		if (actualTypeParam != NULL) MIX_TYPE_HASH(hash, actualTypeParam->fullName->hash);
+	}
+	return hash;
+}
+
+static uint32_t hashAliasTypeInfo(TypeInfo* type) {
+	AliasTypeInfo* aliasType = AS_ALIAS_TYPE(type);
+	uint32_t hash = ((uint32_t)type->category * 2166136261u);
+	MIX_TYPE_HASH(hash, aliasType->targetType->fullName->hash);
+
+	for (int i = 0; i < aliasType->formalTypeParams->count; i++) {
+		TypeInfo* formalTypeParam = aliasType->formalTypeParams->elements[i];
+		if (formalTypeParam != NULL) MIX_TYPE_HASH(hash, formalTypeParam->fullName->hash);
+	}
+	return hash;
+}
+
 uint32_t hashTypeInfo(TypeInfo* type) {
     if (type == NULL) return 0;
 
@@ -451,9 +506,6 @@ uint32_t hashTypeInfo(TypeInfo* type) {
 
     /* seed with category (and name only for behaviors/placeholders) */
     uint32_t hash = ((uint32_t)type->category * 2166136261u) ^ nameHash;
-
-    /* helper macro MIX_TYPE_HASH */
-    #define MIX_TYPE_HASH(a,b) ((a) = ((a) * 16777619u) ^ (b))
 
     /* include nested/type-parameter identities for compound types */
     if (IS_BEHAVIOR_TYPE(type)) {
@@ -521,9 +573,10 @@ uint32_t hashTypeInfo(TypeInfo* type) {
 
     /* cache and return */
     type->hash = hash;
-    #undef MIX_TYPE_HASH
     return hash;
 }
+
+#undef MIX_TYPE_HASH
 
 TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name) {
     if (type == NULL) return NULL;

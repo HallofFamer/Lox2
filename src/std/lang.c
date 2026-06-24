@@ -658,6 +658,7 @@ LOX_METHOD(Generator, throws) {
     ASSERT_ARG_COUNT("Generator::throws(exception)", 1);
     ASSERT_ARG_TYPE("Generator::throws(exception)", 0, Exception);
     ObjGenerator* self = AS_GENERATOR(receiver);
+    
     if (self->state == GENERATOR_RETURN) THROW_EXCEPTION(clox.std.lang.UnsupportedOperationException, "Generator has already returned.");
     else {
         ObjException* exception = AS_EXCEPTION(args[0]);
@@ -817,6 +818,7 @@ LOX_METHOD(Int, upTo) {
     ASSERT_ARG_COUNT("Int::upTo(to, closure)", 2);
     ASSERT_ARG_TYPE("Int::upTo(to, closure)", 0, Int);
     ASSERT_ARG_TCALLABLE("Int::upTo(to, closure)", 1);
+    
     int self = AS_INT_INSTANCE(receiver);
     int to = AS_INT_INSTANCE(args[0]);
     Value closure = args[1];
@@ -1374,6 +1376,7 @@ LOX_METHOD(Object, clone) {
     ASSERT_ARG_COUNT("Object::clone()", 0);
     ObjInstance* thisObject = AS_INSTANCE(receiver);
     ObjInstance* thatObject = newInstance(vm, OBJ_KLASS(receiver));
+    
     push(vm, OBJ_VAL(thatObject));
     copyObjFields(vm, thisObject, thatObject);
     pop(vm);
@@ -1620,10 +1623,12 @@ LOX_METHOD(String, split) {
     char* string = _strdup(self->chars);
     char* next = NULL;
     char* token = strtok_s(string, delimiter->chars, &next);
+
     while (token != NULL) {
         valueArrayWrite(vm, &array->elements, OBJ_VAL(newString(vm, token)));
         token = strtok_s(NULL, delimiter->chars, &next);
     }
+
     free(string);
     pop(vm);
     RETURN_OBJ(array);
@@ -1737,6 +1742,7 @@ LOX_METHOD(StringIterator, moveNext) {
     ASSERT_ARG_COUNT("StringIterator::moveNext()", 0);
     ObjIterator* iterator = AS_ITERATOR(receiver);
     ObjString* string = AS_STRING(iterator->iterable);
+
     if (iterator->position < string->length - 1) {
         iterator->position += utf8CodePointOffset(vm, string->chars, iterator->position);
         iterator->value = OBJ_VAL(utf8CodePointAtIndex(vm, string->chars, iterator->position));
