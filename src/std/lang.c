@@ -2021,6 +2021,12 @@ LOX_METHOD(Type, name) {
     RETURN_OBJ(self->name);
 }
 
+LOX_METHOD(Type, toBehavior) {
+	ASSERT_ARG_COUNT("Type::toBehavior()", 0);
+	ObjType* self = AS_TYPE(receiver);
+	RETURN_OBJ(self->behavior);
+}
+
 LOX_METHOD(Type, toString) {
     ASSERT_ARG_COUNT("Type::toString()", 0);
     ObjType* self = AS_TYPE(receiver);
@@ -2287,6 +2293,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, isTrait, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, methods, 0, NATIVE_TYPE(Object));
     DEF_METHOD(vm->typeClass, Type, name, 0, NATIVE_TYPE(String));
+	DEF_METHOD(vm->typeClass, Type, toBehavior, 0, NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, toString, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, traits, 0, NATIVE_TYPE(Object));
     DEF_OPERATOR(vm->typeClass, Type, (), __invoke__, -1, NATIVE_TYPE(Object));

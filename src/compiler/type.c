@@ -497,83 +497,27 @@ uint32_t hashTypeInfo(TypeInfo* type) {
     /* mark as in-progress to break cycles */
     type->hash = IN_PROGRESS;
 
-    uint32_t nameHash = 0;
-    /* only include name for behavior types and placeholders */
-    if (IS_BEHAVIOR_TYPE(type) || IS_PLACEHOLDER_TYPE(type)) {
-        if (type->fullName != NULL) nameHash = type->fullName->hash;
-        else if (type->shortName != NULL) nameHash = type->shortName->hash;
-    }
-
-    /* seed with category (and name only for behaviors/placeholders) */
-    uint32_t hash = ((uint32_t)type->category * 2166136261u) ^ nameHash;
-
-    /* include nested/type-parameter identities for compound types */
-    if (IS_BEHAVIOR_TYPE(type)) {
-        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
-        /* formal type parameters (may contain NULLs) */
-        if (behaviorType->formalTypeParams != NULL) {
-            for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
-                TypeInfo* p = behaviorType->formalTypeParams->elements[i];
-                MIX_TYPE_HASH(hash, hashTypeInfo(p));
-            }
-        }
-    }
-    else if (IS_CALLABLE_TYPE(type)) {
-        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
-        /* return type (may be NULL => dynamic => hash 0) */
-        MIX_TYPE_HASH(hash, hashTypeInfo(callableType->returnType));
-        /* parameter types (elements may be NULL => dynamic) */
-        if (callableType->paramTypes != NULL) {
-            for (int i = 0; i < callableType->paramTypes->count; i++) {
-                TypeInfo* p = callableType->paramTypes->elements[i];
-                MIX_TYPE_HASH(hash, hashTypeInfo(p));
-            }
-        }
-
-        /* formal type parameters (may contain NULLs) */
-		if (callableType->formalTypeParams != NULL) {
-			for (int i = 0; i < callableType->formalTypeParams->count; i++) {
-				TypeInfo* p = callableType->formalTypeParams->elements[i];
-				MIX_TYPE_HASH(hash, hashTypeInfo(p));
-			}
-		}
-    }
-    else if (IS_GENERIC_TYPE(type)) {
-        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
-        /* include raw type */
-        MIX_TYPE_HASH(hash, hashTypeInfo(genericType->rawType));
-        /* actual type parameters (may contain NULLs) */
-        if (genericType->actualTypeParams != NULL) {
-            for (int i = 0; i < genericType->actualTypeParams->count; i++) {
-                TypeInfo* p = genericType->actualTypeParams->elements[i];
-                MIX_TYPE_HASH(hash, hashTypeInfo(p));
-            }
-        }
-    }
-	else if (IS_ALIAS_TYPE(type)) {
-		AliasTypeInfo* aliasType = AS_ALIAS_TYPE(type);
-		/* formal type parameters (may contain NULLs) */
-		if (aliasType->formalTypeParams != NULL) {
-			for (int i = 0; i < aliasType->formalTypeParams->count; i++) {
-				TypeInfo* p = aliasType->formalTypeParams->elements[i];
-				MIX_TYPE_HASH(hash, hashTypeInfo(p));
-			}
-		}
+	if (IS_BEHAVIOR_TYPE(type)) type->hash = hashBehaviorTypeInfo(type);
+	else if (IS_CALLABLE_TYPE(type)) type->hash = hashCallableTypeInfo(type);
+	else if (IS_GENERIC_TYPE(type)) type->hash = hashGenericTypeInfo(type);
+	else if (IS_ALIAS_TYPE(type)) type->hash = hashAliasTypeInfo(type);
+	else {
+		ObjString* name = type->fullName != NULL ? type->fullName : type->shortName;
+		type->hash = ((uint32_t)type->category * 2166136261u) ^ name->hash;
 	}
 
     /* final avalanche (32-bit mix) */
-    hash ^= hash >> 16;
-    hash *= 0x85ebca6bu;
-    hash ^= hash >> 13;
-    hash *= 0xc2b2ae35u;
-    hash ^= hash >> 16;
+    type->hash ^= type->hash >> 16;
+    type->hash *= 0x85ebca6bu;
+    type->hash ^= type->hash >> 13;
+    type->hash *= 0xc2b2ae35u;
+    type->hash ^= type->hash >> 16;
 
     /* reserve 0 as a sentinel (optional) */
-    if (hash == 0) hash = 1;
+    if (type->hash == 0) type->hash = 1;
 
     /* cache and return */
-    type->hash = hash;
-    return hash;
+    return type->hash;
 }
 
 #undef MIX_TYPE_HASH
