@@ -2110,12 +2110,10 @@ static ObjClass* defineSpecialClass(VM* vm, const char* name, BehaviorType behav
 
 static ObjNamespace* defineRootNamespace(VM* vm) {
     ObjString* name = newStringPerma(vm, "");
-    push(vm, OBJ_VAL(name));
     ObjNamespace* rootNamespace = newNamespace(vm, name, NULL);
     rootNamespace->isRoot = true;
     push(vm, OBJ_VAL(rootNamespace));
     tableSet(vm, &vm->namespaces, name, OBJ_VAL(rootNamespace));
-    pop(vm);
     pop(vm);
     return rootNamespace;
 }
