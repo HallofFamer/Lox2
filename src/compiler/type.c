@@ -495,9 +495,8 @@ static uint32_t hashAliasTypeInfo(TypeInfo* type) {
 
 uint32_t hashTypeInfo(TypeInfo* type) {
     if (type == NULL) return 0;
-	if (IS_VOID_TYPE(type)) return 1219850847u;
-	uint32_t hash = 2166136261u;
-	if (IS_PLACEHOLDER_TYPE(type)) return mixTypeNameHash(hash, type->shortName->chars, type->shortName->length);
+    if (IS_BEHAVIOR_TYPE(type) || IS_PLACEHOLDER_TYPE(type) || IS_VOID_TYPE(type)) return type->fullName->hash;
+    uint32_t hash = 2166136261u;
 
     /* Return cached hash when available and not in-progress */
     const uint32_t IN_PROGRESS = 0xFFFFFFFFu;
