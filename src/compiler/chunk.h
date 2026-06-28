@@ -62,6 +62,7 @@ typedef enum {
     OP_DECLARE_NAMESPACE,
     OP_GET_NAMESPACE,
     OP_USING_NAMESPACE,
+    OP_TYPE,
     OP_THROW,
     OP_TRY,
     OP_CATCH,

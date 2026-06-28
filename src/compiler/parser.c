@@ -33,7 +33,7 @@ static Token currentToken(Parser* parser) {
     return parser->current;
 }
 
-static TokenKind currentTokenType(Parser* parser) {
+static TokenKind currentTokenKind(Parser* parser) {
     return parser->current.kind;
 }
 
@@ -43,7 +43,7 @@ static Token previousToken(Parser* parser) {
     return previousToken;
 }
 
-static TokenKind previousTokenType(Parser* parser) {
+static TokenKind previousTokenKind(Parser* parser) {
     return previousToken(parser).kind;
 }
 
@@ -53,7 +53,7 @@ static Token nextToken(Parser* parser) {
     return nextToken;
 }
 
-static TokenKind nextTokenType(Parser* parser) {
+static TokenKind nextTokenKind(Parser* parser) {
     return nextToken(parser).kind;
 }
 
@@ -128,11 +128,11 @@ static void consumerTerminator(Parser* parser, const char* message) {
 }
 
 static bool check(Parser* parser, TokenKind type) {
-    return currentTokenType(parser) == type;
+    return currentTokenKind(parser) == type;
 }
 
 static bool checkNext(Parser* parser, TokenKind type) {
-    return nextTokenType(parser) == type;
+    return nextTokenKind(parser) == type;
 }
 
 static bool checkNextN(Parser* parser, int length, TokenKind type) {
@@ -307,7 +307,7 @@ static void synchronize(Parser* parser) {
     parser->panicMode = false;
 
     while (parser->current.kind != TOKEN_KIND_EOF) {
-        if (previousTokenType(parser) == TOKEN_KIND_SEMICOLON) return;
+        if (previousTokenKind(parser) == TOKEN_KIND_SEMICOLON) return;
 
         switch (parser->current.kind) {
             case TOKEN_KIND_ASYNC:
@@ -405,13 +405,13 @@ static Token identifierToken(Parser* parser, const char* message) {
 }
 
 static Ast* and_(Parser* parser, Token token, Ast* left, bool canAssign) {
-    ParseRule* rule = getRule(previousTokenType(parser));
+    ParseRule* rule = getRule(previousTokenKind(parser));
     Ast* right = parsePrecedence(parser, PREC_AND);
     return newAst(AST_EXPR_AND, token, 2, left, right);
 }
 
 static Ast* binary(Parser* parser, Token token, Ast* left, bool canAssign) {
-    ParseRule* rule = getRule(previousTokenType(parser));
+    ParseRule* rule = getRule(previousTokenKind(parser));
     Ast* right = parsePrecedence(parser, (Precedence)(rule->precedence + 1));
     return newAst(AST_EXPR_BINARY, token, 2, left, right);
 }
@@ -620,20 +620,20 @@ static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) {
         do {
             advance(parser);
 
-            if (currentTokenType(parser) == TOKEN_KIND_COMMA) {
+            if (currentTokenKind(parser) == TOKEN_KIND_COMMA) {
                 advance(parser);
                 continue;
             }
-            else if (previousTokenType(parser) != TOKEN_KIND_IDENTIFIER && previousTokenType(parser) != TOKEN_KIND_VOID) {
+            else if (previousTokenKind(parser) != TOKEN_KIND_IDENTIFIER && previousTokenKind(parser) != TOKEN_KIND_VOID) {
                 resetIndex(parser, index, current, false);
                 break;
             }
-            else if (currentTokenType(parser) == TOKEN_KIND_LESS) {
+            else if (currentTokenKind(parser) == TOKEN_KIND_LESS) {
                 genericDepth++;
                 advance(parser);
                 continue;
             }
-            else if (currentTokenType(parser) == TOKEN_KIND_GREATER) {
+            else if (currentTokenKind(parser) == TOKEN_KIND_GREATER) {
                 while (match(parser, TOKEN_KIND_GREATER)) {
                     genericDepth--;
                 }
@@ -643,7 +643,7 @@ static Ast* dot(Parser* parser, Token token, Ast* left, bool canAssign) {
                     return genericInvoke(parser, property, left, false);
                 }
             }
-            else if (nextTokenType(parser) != TOKEN_KIND_CLASS && nextTokenType(parser) != TOKEN_KIND_FUN && nextTokenType(parser) != TOKEN_KIND_GREATER && nextTokenType(parser) != TOKEN_KIND_LESS) {
+            else if (nextTokenKind(parser) != TOKEN_KIND_CLASS && nextTokenKind(parser) != TOKEN_KIND_FUN && nextTokenKind(parser) != TOKEN_KIND_GREATER && nextTokenKind(parser) != TOKEN_KIND_LESS) {
                 resetIndex(parser, index, current, false);
                 break;
             }
@@ -662,7 +662,7 @@ static Ast* nil(Parser* parser, Token token, Ast* left, bool canAssign) {
 }
 
 static Ast* or_(Parser* parser, Token token, Ast* left, bool canAssign) {
-    ParseRule* rule = getRule(previousTokenType(parser));
+    ParseRule* rule = getRule(previousTokenKind(parser));
     Ast* right = parsePrecedence(parser, PREC_OR);
     return newAst(AST_EXPR_OR, token, 2, left, right);
 }
@@ -820,20 +820,20 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
     do {
         advance(parser);
 
-        if (currentTokenType(parser) == TOKEN_KIND_COMMA) {
+        if (currentTokenKind(parser) == TOKEN_KIND_COMMA) {
             advance(parser);
             continue;
         }
-        else if (previousTokenType(parser) != TOKEN_KIND_IDENTIFIER && previousTokenType(parser) != TOKEN_KIND_VOID) {
+        else if (previousTokenKind(parser) != TOKEN_KIND_IDENTIFIER && previousTokenKind(parser) != TOKEN_KIND_VOID) {
             resetIndex(parser, index, current, false);
             break;
         }
-        else if (currentTokenType(parser) == TOKEN_KIND_LESS) {
+        else if (currentTokenKind(parser) == TOKEN_KIND_LESS) {
             genericDepth++;
             advance(parser);
             continue;
         }
-        else if (currentTokenType(parser) == TOKEN_KIND_GREATER) {
+        else if (currentTokenKind(parser) == TOKEN_KIND_GREATER) {
             while (match(parser, TOKEN_KIND_GREATER)) {
                 genericDepth--;
             }
@@ -844,7 +844,7 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
                 return genericType(parser);
             }
         }
-        else if (nextTokenType(parser) != TOKEN_KIND_CLASS && nextTokenType(parser) != TOKEN_KIND_FUN && nextTokenType(parser) != TOKEN_KIND_GREATER && nextTokenType(parser) != TOKEN_KIND_LESS) {
+        else if (nextTokenKind(parser) != TOKEN_KIND_CLASS && nextTokenKind(parser) != TOKEN_KIND_FUN && nextTokenKind(parser) != TOKEN_KIND_GREATER && nextTokenKind(parser) != TOKEN_KIND_LESS) {
             resetIndex(parser, index, current, false);
             break;
         }
@@ -957,7 +957,7 @@ static Ast* fields(Parser* parser, Token* name) {
     while (isFieldDeclaration(parser)) {
         bool hasFieldType = true, hasInitializer = false;
         bool isClass = match(parser, TOKEN_KIND_CLASS);
-        bool isMutable = (currentTokenType(parser) == TOKEN_KIND_VAR);
+        bool isMutable = (currentTokenKind(parser) == TOKEN_KIND_VAR);
         advance(parser);
 
         Ast* fieldType = NULL;
@@ -1114,20 +1114,20 @@ static Ast* super_(Parser* parser, Token token, bool canAssign) {
         do {
             advance(parser);
 
-            if (currentTokenType(parser) == TOKEN_KIND_COMMA) {
+            if (currentTokenKind(parser) == TOKEN_KIND_COMMA) {
                 advance(parser);
                 continue;
             }
-            else if (previousTokenType(parser) != TOKEN_KIND_IDENTIFIER && previousTokenType(parser) != TOKEN_KIND_VOID) {
+            else if (previousTokenKind(parser) != TOKEN_KIND_IDENTIFIER && previousTokenKind(parser) != TOKEN_KIND_VOID) {
                 resetIndex(parser, index, current, false);
                 break;
             }
-            else if (currentTokenType(parser) == TOKEN_KIND_LESS) {
+            else if (currentTokenKind(parser) == TOKEN_KIND_LESS) {
                 genericDepth++;
                 advance(parser);
                 continue;
             }
-            else if (currentTokenType(parser) == TOKEN_KIND_GREATER) {
+            else if (currentTokenKind(parser) == TOKEN_KIND_GREATER) {
                 while (match(parser, TOKEN_KIND_GREATER)) {
                     genericDepth--;
                 }
@@ -1137,7 +1137,7 @@ static Ast* super_(Parser* parser, Token token, bool canAssign) {
                     return genericInvoke(parser, method, NULL, true);
                 }
             }
-            else if (nextTokenType(parser) != TOKEN_KIND_CLASS && nextTokenType(parser) != TOKEN_KIND_FUN && nextTokenType(parser) != TOKEN_KIND_GREATER && nextTokenType(parser) != TOKEN_KIND_LESS) {
+            else if (nextTokenKind(parser) != TOKEN_KIND_CLASS && nextTokenKind(parser) != TOKEN_KIND_FUN && nextTokenKind(parser) != TOKEN_KIND_GREATER && nextTokenKind(parser) != TOKEN_KIND_LESS) {
                 resetIndex(parser, index, current, false);
                 break;
             }
@@ -1270,7 +1270,7 @@ ParseRule parseRules[] = {
 };
 
 static Ast* parsePrefix(Parser* parser, Precedence precedence, bool canAssign) {
-    ParsePrefixFn prefixRule = getRule(previousTokenType(parser))->prefix;
+    ParsePrefixFn prefixRule = getRule(previousTokenKind(parser))->prefix;
     if (prefixRule == NULL) {
         parseErrorAtPrevious(parser, "Expect expression.");
         return NULL;
@@ -1281,7 +1281,7 @@ static Ast* parsePrefix(Parser* parser, Precedence precedence, bool canAssign) {
 static Ast* parseInfix(Parser* parser, Precedence precedence, Ast* left, bool canAssign) {
     while (precedence <= getRule(parser->current.kind)->precedence) {
         advance(parser);
-        ParseInfixFn infixRule = getRule(previousTokenType(parser))->infix;
+        ParseInfixFn infixRule = getRule(previousTokenKind(parser))->infix;
         left = infixRule(parser, previousToken(parser), left, canAssign);
     }
 
@@ -1352,7 +1352,7 @@ static Ast* forStatement(Parser* parser) {
     if (!match(parser, TOKEN_KIND_VAL) && !match(parser, TOKEN_KIND_VAR)) {
         parseErrorAtCurrent(parser, "Expect 'val' or 'var' keyword after '(' in for loop.");
     }
-    bool isMutable = (previousTokenType(parser) == TOKEN_KIND_VAR);
+    bool isMutable = (previousTokenKind(parser) == TOKEN_KIND_VAR);
     Ast* decl = emptyAst(AST_LIST_VAR, previousToken(parser));
 
     if (match(parser, TOKEN_KIND_LEFT_PAREN)) { 
@@ -1735,7 +1735,7 @@ static bool matchFunDeclaration(Parser* parser, bool* isAsync, bool* hasReturnTy
 }
 
 static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
-    bool isVoid = (previousTokenType(parser) == TOKEN_KIND_VOID);
+    bool isVoid = (previousTokenKind(parser) == TOKEN_KIND_VOID);
     Ast* returnType = hasReturnType ? type_(parser, false, false) : emptyAst(AST_EXPR_TYPE, emptyToken());
     consume(parser, TOKEN_KIND_IDENTIFIER, "Expect function name.");
     Token name = previousToken(parser);

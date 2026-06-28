@@ -126,6 +126,7 @@ int opCodeOffset(Chunk* chunk, int ip) {
         case OP_DECLARE_NAMESPACE: return 2;
         case OP_GET_NAMESPACE: return 2;
         case OP_USING_NAMESPACE: return 2;
+        case OP_TYPE: return 2;
         case OP_THROW: return 1;
         case OP_TRY: return 6;
         case OP_CATCH: return 1;

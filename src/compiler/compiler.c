@@ -1565,9 +1565,11 @@ static void compileTraitDeclaration(Compiler* compiler, Ast* ast) {
 }
 
 static void compileTypeDeclaration(Compiler* compiler, Ast* ast) {
-	uint8_t index = makeVariable(compiler, &ast->token, "Expect type name.");
+    Token* name = &ast->token;
+    uint8_t index = identifierConstant(compiler, name);
+    declareVariable(compiler, name);
+    emitBytes(compiler, OP_TYPE, index);
     compileChild(compiler, ast, 0);
-	defineVariable(compiler, index, false);
 }
 
 static void compileVarDeclaration(Compiler* compiler, Ast* ast) {
