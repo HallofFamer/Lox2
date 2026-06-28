@@ -226,15 +226,6 @@ static TypeInfo* getTypeFromCurrentNamespace(Resolver* resolver, Token token, Ob
     return type;
 }
 
-static TypeInfo* getTypeFromFullName(Resolver* resolver, ObjString* originalName, bool isMetaclass) {
-    ObjString* fullName = nameTableGet(resolver->nametab, originalName);
-    if (fullName != NULL) {
-        if (isMetaclass) fullName = getMetaclassNameFromClass(resolver->vm, fullName);
-        return typeTableGet(resolver->vm->typetab, fullName);
-    }
-    return NULL;
-}
-
 static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetaclass, bool checkFormalParam) {
 	if (token.length == 0) return NULL;
     ObjString* shortName = createStringFromToken(resolver->vm, token);
@@ -257,6 +248,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
 
                 if (type == NULL) {
                     type = getTypeFromCurrentNamespace(resolver, token, fullName);
+                    
                     if (type == NULL) {
                         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
                         if (item != NULL) {

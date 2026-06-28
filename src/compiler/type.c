@@ -440,20 +440,21 @@ static uint32_t mixTypeNameHash(uint32_t hash, const char* typeName, int length)
 	return hash;
 }
 
-static uint32_t hashCallableTypeInfo(TypeInfo* type) {
+static uint32_t hashCallableTypeInfo(TypeInfo* type, uint32_t initialHash) {
 	CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
-	uint32_t hash = ((uint32_t)type->category * 2166136261u);
-	if (callableType->returnType != NULL) MIX_TYPE_HASH(hash, callableType->returnType->fullName->hash);
-	
+	uint32_t hash = initialHash;
+	if (callableType->returnType != NULL) hash = mixHashTypeInfo(callableType->returnType, hash);
+	else hash = mixTypeNameHash(hash, "dynamic", 7);
+	hash = mixTypeNameHash(hash, " fun(", 5);
+    
     for (int i = 0; i < callableType->paramTypes->count; i++) {
+		if (i > 0) hash = mixTypeNameHash(hash, ", ", 2);
 		TypeInfo* paramType = callableType->paramTypes->elements[i];
-		if (paramType != NULL) MIX_TYPE_HASH(hash, paramType->fullName->hash);
+		if (paramType != NULL) hash = mixHashTypeInfo(paramType, hash);
+		else hash = mixTypeNameHash(hash, "dynamic", 7);
 	}
-	
-    for (int i = 0; i < callableType->formalTypeParams->count; i++) {
-		TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];
-		MIX_TYPE_HASH(hash, formalTypeParam->fullName->hash);
-	}
+
+	hash = mixTypeNameHash(hash, ")", 1);
 	return hash;
 }
 
@@ -484,8 +485,11 @@ static uint32_t hashAliasTypeInfo(TypeInfo* type) {
 uint32_t hashTypeInfo(TypeInfo* type) {
     if (type == NULL) return 0;
     if (IS_BEHAVIOR_TYPE(type) || IS_PLACEHOLDER_TYPE(type) || IS_VOID_TYPE(type)) return type->fullName->hash;
-    uint32_t hash = 2166136261u;
+	uint32_t initialHash = 2166136261u;
+	return mixHashTypeInfo(type, initialHash);
+}
 
+uint32_t mixHashTypeInfo(TypeInfo* type, uint32_t initialHash) {
     /* Return cached hash when available and not in-progress */
     const uint32_t IN_PROGRESS = 0xFFFFFFFFu;
     if (type->hash != 0 && type->hash != IN_PROGRESS) return type->hash;
@@ -495,13 +499,13 @@ uint32_t hashTypeInfo(TypeInfo* type) {
     /* mark as in-progress to break cycles */
     type->hash = IN_PROGRESS;
 
-	if (IS_CALLABLE_TYPE(type)) type->hash = hashCallableTypeInfo(type);
-	else if (IS_GENERIC_TYPE(type)) type->hash = hashGenericTypeInfo(type);
-	else if (IS_ALIAS_TYPE(type)) type->hash = hashAliasTypeInfo(type);
-	else {
-		ObjString* name = type->fullName != NULL ? type->fullName : type->shortName;
-		type->hash = ((uint32_t)type->category * 2166136261u) ^ name->hash;
-	}
+    if (IS_CALLABLE_TYPE(type)) type->hash = hashCallableTypeInfo(type, initialHash);
+    else if (IS_GENERIC_TYPE(type)) type->hash = hashGenericTypeInfo(type);
+    else if (IS_ALIAS_TYPE(type)) type->hash = hashAliasTypeInfo(type);
+    else {
+        ObjString* name = type->fullName != NULL ? type->fullName : type->shortName;
+        type->hash = ((uint32_t)type->category * 2166136261u) ^ name->hash;
+    }
 
     /* final avalanche (32-bit mix) */
     type->hash ^= type->hash >> 16;

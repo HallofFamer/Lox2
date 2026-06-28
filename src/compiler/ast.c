@@ -377,7 +377,10 @@ static void astOutputExprSuperInvoke(Ast* ast, int indentLevel) {
     char* method = tokenToCString(ast->token);
     printf("superInvoke %s\n", method);
     astOutputChild(ast, indentLevel + 1, 0);
-	if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
+
+    if (astNumChild(ast) > 1) {
+        astOutputChild(ast, indentLevel + 1, 1);
+    }
     free(method);
 }
 

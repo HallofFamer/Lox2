@@ -238,6 +238,14 @@ static void defineAstType(TypeChecker* typeChecker, Ast* ast, const char* name, 
     if (item != NULL) item->type = ast->type;
 }
 
+static void defineAstTypeWithDynamicParameters(TypeChecker* typeChecker, Ast* ast, const char* name, SymbolItem* item) {
+    ObjString* typeName = newStringPerma(typeChecker->vm, name);
+    TypeInfo* type = getNativeType(typeChecker->vm, name);
+    if (hasGenericParameters(type)) type = getAstGenericDynamicType(typeChecker, ast, type);
+    ast->type = type;
+    if (item != NULL) item->type = ast->type;
+}
+
 static bool hasAstType(TypeChecker* typeChecker, Ast* ast, const char* name) {
     if (ast->type == NULL || ast->type->id == typeChecker->objectType->id) return true;
     ObjString* typeName = newStringPerma(typeChecker->vm, name);
