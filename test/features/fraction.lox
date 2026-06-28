@@ -1,0 +1,35 @@
+namespace test.features
+
+class Fraction {
+
+    class var shouldReduce = false
+    val Int numerator
+    val Int denominator
+
+    __init__(Int numerator, Int denominator){
+        if(denominator == 0){
+            throw IllegalArgumentException("Denominator of a Fraction object cannot be 0.")
+        }
+
+        if (Fraction.shouldReduce){
+            val gcd = numerator.gcd(denominator)
+            this.numerator = (numerator / gcd).toInt()
+            this.denominator = (denominator / gcd).toInt()
+        } 
+        else{
+            this.numerator = numerator
+            this.denominator = denominator
+        }
+    }
+
+    Fraction reduce(){
+        val gcd = this.numerator.gcd(this.denominator)
+        val numerator = this.numerator / gcd
+        val denominator = this.denominator / gcd
+        return Fraction(numerator.toInt(), denominator.toInt())
+    }
+
+    String toString(){
+        return "${this.numerator} / ${this.denominator}"
+    }
+}

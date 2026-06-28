@@ -2,7 +2,7 @@ namespace test.features
 using clox.std.collection.LinkedList
 using clox.std.util.Date
 using clox.std.util.UUID
-using test.features.Fraction
+using examples.lib.Fraction
 
 println("Testing Object ID for special values: ")
 println("ID for nil: ${nil.objectID()}")
