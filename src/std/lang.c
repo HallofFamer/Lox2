@@ -814,6 +814,12 @@ LOX_METHOD(Int, toString) {
     RETURN_STRING_FMT("%d", AS_INT_INSTANCE(receiver));
 }
 
+LOX_METHOD(Int, until) {
+    ASSERT_ARG_COUNT("Int::until(other)", 1);
+    ASSERT_ARG_TYPE("Int::until(other)", 0, Int);
+    RETURN_OBJ(newRange(vm, AS_INT_INSTANCE(receiver), AS_INT_INSTANCE(args[0]) - 1));
+}
+
 LOX_METHOD(Int, upTo) {
     ASSERT_ARG_COUNT("Int::upTo(to, closure)", 2);
     ASSERT_ARG_TYPE("Int::upTo(to, closure)", 0, Int);
@@ -2392,6 +2398,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->intClass, Int, toHexadecimal, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toOctal, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toString, 0, NATIVE_TYPE(String));
+    DEF_METHOD(vm->intClass, Int, until, 1, NATIVE_TYPE(Object), NATIVE_TYPE(Int));
     DEF_METHOD(vm->intClass, Int, upTo, 2, NATIVE_TYPE(void), NATIVE_TYPE(Int), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(void), 1, NATIVE_TYPE(Int)));
     DEF_OPERATOR(vm->intClass, Int, +, __add__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->intClass, Int, -, __subtract__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));

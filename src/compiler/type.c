@@ -440,18 +440,6 @@ static uint32_t mixTypeNameHash(uint32_t hash, const char* typeName, int length)
 	return hash;
 }
 
-static uint32_t hashBehaviorTypeInfo(TypeInfo* type) {
-	BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
-	ObjString* name = type->fullName != NULL ? type->fullName : type->shortName;
-	uint32_t hash = ((uint32_t)type->category * 2166136261u) ^ name->hash;
-
-	for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
-		TypeInfo* formalTypeParam = behaviorType->formalTypeParams->elements[i];
-		MIX_TYPE_HASH(hash, formalTypeParam->fullName->hash);
-	}
-	return hash;
-}
-
 static uint32_t hashCallableTypeInfo(TypeInfo* type) {
 	CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
 	uint32_t hash = ((uint32_t)type->category * 2166136261u);
@@ -507,8 +495,7 @@ uint32_t hashTypeInfo(TypeInfo* type) {
     /* mark as in-progress to break cycles */
     type->hash = IN_PROGRESS;
 
-	if (IS_BEHAVIOR_TYPE(type)) type->hash = hashBehaviorTypeInfo(type);
-	else if (IS_CALLABLE_TYPE(type)) type->hash = hashCallableTypeInfo(type);
+	if (IS_CALLABLE_TYPE(type)) type->hash = hashCallableTypeInfo(type);
 	else if (IS_GENERIC_TYPE(type)) type->hash = hashGenericTypeInfo(type);
 	else if (IS_ALIAS_TYPE(type)) type->hash = hashAliasTypeInfo(type);
 	else {

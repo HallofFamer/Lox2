@@ -274,7 +274,7 @@ ObjClass* getClassFromTypeInfo(VM* vm, TypeInfo* type) {
         return vm->functionClass;
     }
     else if (IS_GENERIC_TYPE(type)) {
-        return getClassFromTypeInfo(vm, AS_GENERIC_TYPE(type)->rawType);
+        return getClassFromTypeInfo(vm, getInnerBaseType(type));
     }
     else if (IS_PLACEHOLDER_TYPE(type) || IS_ALIAS_TYPE(type)) {
         return vm->typeClass;

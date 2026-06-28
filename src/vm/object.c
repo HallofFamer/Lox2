@@ -54,7 +54,6 @@ Value emptyObject(VM* vm, ObjClass* klass) {
         default: return NIL_VAL;
     }
 
-	obj->klass = klass;
 	return OBJ_VAL(obj);
 }
 

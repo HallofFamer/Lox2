@@ -104,8 +104,8 @@ ObjClass* defineNativeClass(VM* vm, const char* name) {
     ObjClass* nativeClass = newClass(vm, className, OBJ_INSTANCE);
     nativeClass->isNative = true;
     nativeClass->obj.klass->isNative = true;
-    push(vm, OBJ_VAL(nativeClass));
 
+    push(vm, OBJ_VAL(nativeClass));
     tableSet(vm, &vm->classes, nativeClass->fullName, OBJ_VAL(nativeClass));
     tableSet(vm, &vm->currentNamespace->values, className, OBJ_VAL(nativeClass)); 
     pop(vm);
