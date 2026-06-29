@@ -458,15 +458,20 @@ static uint32_t hashCallableTypeInfo(TypeInfo* type, uint32_t initialHash) {
 	return hash;
 }
 
-static uint32_t hashGenericTypeInfo(TypeInfo* type) {
+static uint32_t hashGenericTypeInfo(TypeInfo* type, uint32_t initialHash) {
 	GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
-	uint32_t hash = ((uint32_t)type->category * 2166136261u);
-	MIX_TYPE_HASH(hash, genericType->rawType->fullName->hash);
-	
+	uint32_t hash = initialHash;
+	hash = mixHashTypeInfo(genericType->rawType, hash);
+	hash = mixTypeNameHash(hash, "<", 1);
+
     for (int i = 0; i < genericType->actualTypeParams->count; i++) {
+		if (i > 0) hash = mixTypeNameHash(hash, ", ", 2);
 		TypeInfo* actualTypeParam = genericType->actualTypeParams->elements[i];
-		if (actualTypeParam != NULL) MIX_TYPE_HASH(hash, actualTypeParam->fullName->hash);
+		if (actualTypeParam != NULL) hash = mixHashTypeInfo(actualTypeParam, hash);
+		else hash = mixTypeNameHash(hash, "dynamic", 7);
 	}
+
+	hash = mixTypeNameHash(hash, ">", 1);
 	return hash;
 }
 
@@ -500,7 +505,7 @@ uint32_t mixHashTypeInfo(TypeInfo* type, uint32_t initialHash) {
     type->hash = IN_PROGRESS;
 
     if (IS_CALLABLE_TYPE(type)) type->hash = hashCallableTypeInfo(type, initialHash);
-    else if (IS_GENERIC_TYPE(type)) type->hash = hashGenericTypeInfo(type);
+    else if (IS_GENERIC_TYPE(type)) type->hash = hashGenericTypeInfo(type, initialHash);
     else if (IS_ALIAS_TYPE(type)) type->hash = hashAliasTypeInfo(type);
     else {
         ObjString* name = type->fullName != NULL ? type->fullName : type->shortName;

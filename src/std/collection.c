@@ -408,6 +408,21 @@ static ObjString* setToString(VM* vm, ObjInstance* set) {
     }
 }
 
+static ObjInstance* setUnion(VM* vm, ObjInstance* set1, ObjInstance* set2) {
+	ObjDictionary* dict1 = AS_DICTIONARY(getObjField(vm, set1, "dict"));
+	ObjDictionary* dict2 = AS_DICTIONARY(getObjField(vm, set2, "dict"));
+	ObjDictionary* unionDict = newDictionary(vm);
+
+	push(vm, OBJ_VAL(unionDict));
+	dictAddAll(vm, dict1, unionDict);
+	dictAddAll(vm, dict2, unionDict);
+	pop(vm);
+
+	ObjInstance* unionSet = newInstance(vm, getNativeClass(vm, "clox.std.collection.Set"));
+	setObjField(vm, unionSet, "dict", OBJ_VAL(unionDict));
+	return unionSet;
+}
+
 LOX_METHOD(Array, __init__) {
     ASSERT_ARG_COUNT("Array::__init__()", 0);
     RETURN_VAL(receiver);
@@ -1985,6 +2000,14 @@ LOX_METHOD(Set, toString) {
     RETURN_OBJ(setToString(vm, self));
 }
 
+LOX_METHOD(Set, union) {
+	ASSERT_ARG_COUNT("Set::union(other)", 1);
+	ASSERT_ARG_INSTANCE_OF("Set::union(other)", 0, clox.std.collection.Set);
+	ObjInstance* self = AS_INSTANCE(receiver);
+	ObjInstance* other = AS_INSTANCE(args[0]);
+	RETURN_OBJ(setUnion(vm, self, other));
+}
+
 LOX_METHOD(SetIterator, __init__) {
     ASSERT_ARG_COUNT("SetIterator::__init__(iterable)", 1);
     ASSERT_ARG_INSTANCE_OF("SetIterator::__init__(iterable)", 0, clox.std.collection.Set);
@@ -2327,6 +2350,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(setClass, Set, remove, 1, NATIVE_TYPE(E), NATIVE_TYPE(E));
     DEF_METHOD(setClass, Set, toArray, 0, NATIVE_TYPE(clox.std.collection.Array));
     DEF_METHOD(setClass, Set, toString, 0, NATIVE_TYPE(String));
+	DEF_METHOD(setClass, Set, union, 1, NATIVE_TYPE(clox.std.collection.Set), NATIVE_TYPE(clox.std.collection.Set));
 
     bindSuperclass(vm, setIteratorClass, vm->iteratorClass);
     DEF_INTERCEPTOR(setIteratorClass, SetIterator, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(clox.std.collection.SetIterator), NATIVE_TYPE(Object));
