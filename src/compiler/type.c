@@ -432,7 +432,7 @@ void freeTempTypes(TypeInfoArray* typeArray) {
 
 #define MIX_TYPE_HASH(a,b) ((a) = ((a) * 16777619u) ^ (b))
 
-static uint32_t mixTypeNameHash(uint32_t hash, const char* typeName, int length) {
+static uint32_t mixHashTypeName(uint32_t hash, const char* typeName, int length) {
 	for (int i = 0; i < length; i++) {
 		hash ^= (uint32_t)typeName[i];
 		hash *= 16777619u;
@@ -444,17 +444,17 @@ static uint32_t hashCallableTypeInfo(TypeInfo* type, uint32_t initialHash) {
 	CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
 	uint32_t hash = initialHash;
 	if (callableType->returnType != NULL) hash = mixHashTypeInfo(callableType->returnType, hash);
-	else hash = mixTypeNameHash(hash, "dynamic", 7);
-	hash = mixTypeNameHash(hash, " fun(", 5);
+	else hash = mixHashTypeName(hash, "dynamic", 7);
+	hash = mixHashTypeName(hash, " fun(", 5);
     
     for (int i = 0; i < callableType->paramTypes->count; i++) {
-		if (i > 0) hash = mixTypeNameHash(hash, ", ", 2);
+		if (i > 0) hash = mixHashTypeName(hash, ", ", 2);
 		TypeInfo* paramType = callableType->paramTypes->elements[i];
 		if (paramType != NULL) hash = mixHashTypeInfo(paramType, hash);
-		else hash = mixTypeNameHash(hash, "dynamic", 7);
+		else hash = mixHashTypeName(hash, "dynamic", 7);
 	}
 
-	hash = mixTypeNameHash(hash, ")", 1);
+	hash = mixHashTypeName(hash, ")", 1);
 	return hash;
 }
 
@@ -462,34 +462,28 @@ static uint32_t hashGenericTypeInfo(TypeInfo* type, uint32_t initialHash) {
 	GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
 	uint32_t hash = initialHash;
 	hash = mixHashTypeInfo(genericType->rawType, hash);
-	hash = mixTypeNameHash(hash, "<", 1);
+	hash = mixHashTypeName(hash, "<", 1);
 
     for (int i = 0; i < genericType->actualTypeParams->count; i++) {
-		if (i > 0) hash = mixTypeNameHash(hash, ", ", 2);
+		if (i > 0) hash = mixHashTypeName(hash, ", ", 2);
 		TypeInfo* actualTypeParam = genericType->actualTypeParams->elements[i];
 		if (actualTypeParam != NULL) hash = mixHashTypeInfo(actualTypeParam, hash);
-		else hash = mixTypeNameHash(hash, "dynamic", 7);
+		else hash = mixHashTypeName(hash, "dynamic", 7);
 	}
 
-	hash = mixTypeNameHash(hash, ">", 1);
+	hash = mixHashTypeName(hash, ">", 1);
 	return hash;
 }
 
-static uint32_t hashAliasTypeInfo(TypeInfo* type) {
+static uint32_t hashAliasTypeInfo(TypeInfo* type, uint32_t initialHash) {
 	AliasTypeInfo* aliasType = AS_ALIAS_TYPE(type);
-	uint32_t hash = ((uint32_t)type->category * 2166136261u);
-	MIX_TYPE_HASH(hash, aliasType->targetType->fullName->hash);
-
-	for (int i = 0; i < aliasType->formalTypeParams->count; i++) {
-		TypeInfo* formalTypeParam = aliasType->formalTypeParams->elements[i];
-		if (formalTypeParam != NULL) MIX_TYPE_HASH(hash, formalTypeParam->fullName->hash);
-	}
-	return hash;
+	uint32_t hash = initialHash;
+	return mixHashTypeInfo(aliasType->targetType, hash);
 }
 
 uint32_t hashTypeInfo(TypeInfo* type) {
     if (type == NULL) return 0;
-    if (IS_BEHAVIOR_TYPE(type) || IS_PLACEHOLDER_TYPE(type) || IS_VOID_TYPE(type)) return type->fullName->hash;
+    if (IS_BEHAVIOR_TYPE(type) || IS_PLACEHOLDER_TYPE(type) || IS_ALIAS_TYPE(type) || IS_VOID_TYPE(type)) return type->fullName->hash;
 	uint32_t initialHash = 2166136261u;
 	return mixHashTypeInfo(type, initialHash);
 }
@@ -504,20 +498,10 @@ uint32_t mixHashTypeInfo(TypeInfo* type, uint32_t initialHash) {
     /* mark as in-progress to break cycles */
     type->hash = IN_PROGRESS;
 
-    if (IS_CALLABLE_TYPE(type)) type->hash = hashCallableTypeInfo(type, initialHash);
+	if (IS_CALLABLE_TYPE(type)) type->hash = hashCallableTypeInfo(type, initialHash);
     else if (IS_GENERIC_TYPE(type)) type->hash = hashGenericTypeInfo(type, initialHash);
-    else if (IS_ALIAS_TYPE(type)) type->hash = hashAliasTypeInfo(type);
-    else {
-        ObjString* name = type->fullName != NULL ? type->fullName : type->shortName;
-        type->hash = ((uint32_t)type->category * 2166136261u) ^ name->hash;
-    }
-
-    /* final avalanche (32-bit mix) */
-    type->hash ^= type->hash >> 16;
-    type->hash *= 0x85ebca6bu;
-    type->hash ^= type->hash >> 13;
-    type->hash *= 0xc2b2ae35u;
-    type->hash ^= type->hash >> 16;
+    else if (IS_ALIAS_TYPE(type)) type->hash = hashAliasTypeInfo(type, initialHash);
+    else type->hash = mixHashTypeName(initialHash, type->fullName->chars, type->fullName->length);
 
     /* reserve 0 as a sentinel (optional) */
     if (type->hash == 0) type->hash = 1;

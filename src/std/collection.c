@@ -367,6 +367,28 @@ static ObjInstance* setCopy(VM* vm, ObjInstance* original) {
     return copied;
 }
 
+static ObjInstance* setIntersection(VM* vm, ObjInstance* set1, ObjInstance* set2) {
+	ObjDictionary* dict1 = AS_DICTIONARY(getObjField(vm, set1, "dict"));
+	ObjDictionary* dict2 = AS_DICTIONARY(getObjField(vm, set2, "dict"));
+	ObjDictionary* intersectionDict = newDictionary(vm);
+	push(vm, OBJ_VAL(intersectionDict));
+
+	for (int i = 0; i < dict1->capacity; i++) {
+		ObjEntry* entry = &dict1->entries[i];
+		if (IS_UNDEFINED(entry->key)) continue;
+		Value key = entry->key;
+
+		if (dictContainsKey(dict2, key)) {
+			dictSet(vm, intersectionDict, key, entry->value);
+		}
+	}
+
+	pop(vm);
+	ObjInstance* intersectionSet = newInstance(vm, getNativeClass(vm, "clox.std.collection.Set"));
+	setObjField(vm, intersectionSet, "dict", OBJ_VAL(intersectionDict));
+	return intersectionSet;
+}
+
 static ObjString* setToString(VM* vm, ObjInstance* set) {
     ObjDictionary* dict = AS_DICTIONARY(getObjField(vm, set, "dict"));
     if (dict->count == 0) return copyStringPerma(vm, "[]", 2);
@@ -1950,6 +1972,14 @@ LOX_METHOD(Set, equals) {
     RETURN_BOOL(dictsEqual(dict, dict2));
 }
 
+LOX_METHOD(Set, intersection) {
+	ASSERT_ARG_COUNT("Set::intersection(other)", 1);
+	ASSERT_ARG_INSTANCE_OF("Set::intersection(other)", 0, clox.std.collection.Set);
+	ObjInstance* self = AS_INSTANCE(receiver);
+	ObjInstance* other = AS_INSTANCE(args[0]);
+	RETURN_OBJ(setIntersection(vm, self, other));
+}
+
 LOX_METHOD(Set, isEmpty) {
     ASSERT_ARG_COUNT("Set::isEmpty()", 0);
     ObjDictionary* dict = AS_DICTIONARY(getObjField(vm, AS_INSTANCE(receiver), "dict"));
@@ -2344,6 +2374,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(setClass, Set, clone, 0, NATIVE_TYPE(clox.std.collection.Set));
     DEF_METHOD(setClass, Set, contains, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(E));
     DEF_METHOD(setClass, Set, equals, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
+    DEF_METHOD(setClass, Set, intersection, 1, NATIVE_TYPE(clox.std.collection.Set), NATIVE_TYPE(clox.std.collection.Set));
     DEF_METHOD(setClass, Set, isEmpty, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(setClass, Set, iterator, 0, NATIVE_TYPE(clox.std.collection.SetIterator));
     DEF_METHOD(setClass, Set, length, 0, NATIVE_TYPE(Int));
