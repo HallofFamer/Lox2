@@ -489,25 +489,10 @@ uint32_t hashTypeInfo(TypeInfo* type) {
 }
 
 uint32_t mixHashTypeInfo(TypeInfo* type, uint32_t initialHash) {
-    /* Return cached hash when available and not in-progress */
-    const uint32_t IN_PROGRESS = 0xFFFFFFFFu;
-    if (type->hash != 0 && type->hash != IN_PROGRESS) return type->hash;
-    /* If a recursive cycle is detected, return 0 (treat as dynamic/unknown for now) */
-    if (type->hash == IN_PROGRESS) return 0;
-
-    /* mark as in-progress to break cycles */
-    type->hash = IN_PROGRESS;
-
-	if (IS_CALLABLE_TYPE(type)) type->hash = hashCallableTypeInfo(type, initialHash);
-    else if (IS_GENERIC_TYPE(type)) type->hash = hashGenericTypeInfo(type, initialHash);
-    else if (IS_ALIAS_TYPE(type)) type->hash = hashAliasTypeInfo(type, initialHash);
-    else type->hash = mixHashTypeName(initialHash, type->fullName->chars, type->fullName->length);
-
-    /* reserve 0 as a sentinel (optional) */
-    if (type->hash == 0) type->hash = 1;
-
-    /* cache and return */
-    return type->hash;
+	if (IS_CALLABLE_TYPE(type)) return hashCallableTypeInfo(type, initialHash);
+    else if (IS_GENERIC_TYPE(type)) return hashGenericTypeInfo(type, initialHash);
+    else if (IS_ALIAS_TYPE(type)) return hashAliasTypeInfo(type, initialHash);
+    else return mixHashTypeName(initialHash, type->fullName->chars, type->fullName->length);
 }
 
 #undef MIX_TYPE_HASH
