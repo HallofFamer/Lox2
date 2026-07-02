@@ -430,8 +430,6 @@ void freeTempTypes(TypeInfoArray* typeArray) {
     free(typeArray);
 }
 
-#define MIX_TYPE_HASH(a,b) ((a) = ((a) * 16777619u) ^ (b))
-
 static uint32_t mixHashTypeName(uint32_t hash, const char* typeName, int length) {
 	for (int i = 0; i < length; i++) {
 		hash ^= (uint32_t)typeName[i];
@@ -494,8 +492,6 @@ uint32_t mixHashTypeInfo(TypeInfo* type, uint32_t initialHash) {
     else if (IS_ALIAS_TYPE(type)) return hashAliasTypeInfo(type, initialHash);
     else return mixHashTypeName(initialHash, type->fullName->chars, type->fullName->length);
 }
-
-#undef MIX_TYPE_HASH
 
 TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name) {
     if (type == NULL) return NULL;

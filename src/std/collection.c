@@ -411,6 +411,36 @@ static ObjInstance* setIntersection(VM* vm, ObjInstance* set1, ObjInstance* set2
 	return intersectionSet;
 }
 
+static ObjInstance* setSymmetricDifference(VM* vm, ObjInstance* set1, ObjInstance* set2) {
+	ObjDictionary* dict1 = AS_DICTIONARY(getObjField(vm, set1, "dict"));
+	ObjDictionary* dict2 = AS_DICTIONARY(getObjField(vm, set2, "dict"));
+	ObjDictionary* symmetricDifferenceDict = newDictionary(vm);
+	push(vm, OBJ_VAL(symmetricDifferenceDict));
+
+	for (int i = 0; i < dict1->capacity; i++) {
+		ObjEntry* entry = &dict1->entries[i];
+		if (IS_UNDEFINED(entry->key)) continue;
+		Value key = entry->key;
+		if (!dictContainsKey(dict2, key)) {
+			dictSet(vm, symmetricDifferenceDict, key, entry->value);
+		}
+	}
+
+	for (int i = 0; i < dict2->capacity; i++) {
+		ObjEntry* entry = &dict2->entries[i];
+		if (IS_UNDEFINED(entry->key)) continue;
+		Value key = entry->key;
+		if (!dictContainsKey(dict1, key)) {
+			dictSet(vm, symmetricDifferenceDict, key, entry->value);
+		}
+	}
+
+	pop(vm);
+	ObjInstance* symmetricDifferenceSet = newInstance(vm, getNativeClass(vm, "clox.std.collection.Set"));
+	setObjField(vm, symmetricDifferenceSet, "dict", OBJ_VAL(symmetricDifferenceDict));
+	return symmetricDifferenceSet;
+}
+
 static ObjString* setToString(VM* vm, ObjInstance* set) {
     ObjDictionary* dict = AS_DICTIONARY(getObjField(vm, set, "dict"));
     if (dict->count == 0) return copyStringPerma(vm, "[]", 2);
@@ -2040,6 +2070,14 @@ LOX_METHOD(Set, remove) {
     RETURN_VAL(value);
 }
 
+LOX_METHOD(Set, symmetricDifference) {
+	ASSERT_ARG_COUNT("Set::symmetricDifference(other)", 1);
+	ASSERT_ARG_INSTANCE_OF("Set::symmetricDifference(other)", 0, clox.std.collection.Set);
+	ObjInstance* self = AS_INSTANCE(receiver);
+	ObjInstance* other = AS_INSTANCE(args[0]);
+	RETURN_OBJ(setSymmetricDifference(vm, self, other));
+}
+
 LOX_METHOD(Set, toArray) {
     ASSERT_ARG_COUNT("Set::toArray()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
@@ -2410,6 +2448,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(setClass, Set, iterator, 0, NATIVE_TYPE(clox.std.collection.SetIterator));
     DEF_METHOD(setClass, Set, length, 0, NATIVE_TYPE(Int));
     DEF_METHOD(setClass, Set, remove, 1, NATIVE_TYPE(E), NATIVE_TYPE(E));
+	DEF_METHOD(setClass, Set, symmetricDifference, 1, NATIVE_TYPE(clox.std.collection.Set), NATIVE_TYPE(clox.std.collection.Set));
     DEF_METHOD(setClass, Set, toArray, 0, NATIVE_TYPE(clox.std.collection.Array));
     DEF_METHOD(setClass, Set, toString, 0, NATIVE_TYPE(String));
 	DEF_METHOD(setClass, Set, union, 1, NATIVE_TYPE(clox.std.collection.Set), NATIVE_TYPE(clox.std.collection.Set));
