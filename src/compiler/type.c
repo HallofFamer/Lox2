@@ -167,7 +167,9 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
 }
 
 TypeInfo* newPlaceholderTypeInfo(int id, ObjString* name) {
-    return newTypeInfo(id, sizeof(TypeInfo), TYPE_CATEGORY_PLACEHOLDER, name, name);
+    TypeInfo* placeholderType = newTypeInfo(id, sizeof(TypeInfo), TYPE_CATEGORY_PLACEHOLDER, name, name);
+    if (placeholderType != NULL) placeholderType->hash = hashTypeInfo(placeholderType);
+    return placeholderType;
 }
 
 GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType) {
@@ -779,6 +781,7 @@ TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
 BehaviorTypeInfo* typeTableInsertBehavior(TypeTable* typetab, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType) {
     int id = typetab->count + 1;
     BehaviorTypeInfo* behaviorType = newBehaviorTypeInfo(id, category, shortName, fullName, superclassType);
+	behaviorType->baseType.hash = hashTypeInfo((TypeInfo*)behaviorType);
     typeTableSet(typetab, fullName, (TypeInfo*)behaviorType);
     return behaviorType;
 }
@@ -786,6 +789,7 @@ BehaviorTypeInfo* typeTableInsertBehavior(TypeTable* typetab, TypeCategory categ
 CallableTypeInfo* typeTableInsertCallable(TypeTable* typetab, TypeCategory category, ObjString* name, TypeInfo* returnType) {
     int id = typetab->count + 1;
     CallableTypeInfo* callableType = newCallableTypeInfo(id, category, name, returnType);
+    callableType->baseType.hash = hashTypeInfo((TypeInfo*)callableType);
     typeTableSet(typetab, name, (TypeInfo*)callableType);
     return callableType;
 }
@@ -807,6 +811,7 @@ MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, TypeI
 GenericTypeInfo* typeTableInsertGeneric(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* rawType) {
     int id = typetab->count + 1;
     GenericTypeInfo* genericType = newGenericTypeInfo(id, shortName, fullName, rawType);
+	genericType->baseType.hash = hashTypeInfo((TypeInfo*)genericType);
     typeTableSet(typetab, fullName, (TypeInfo*)genericType);
     return genericType;
 }
@@ -814,6 +819,7 @@ GenericTypeInfo* typeTableInsertGeneric(TypeTable* typetab, ObjString* shortName
 AliasTypeInfo* typeTableInsertAlias(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* targetType) {
     int id = typetab->count + 1;
     AliasTypeInfo* aliasType = newAliasTypeInfo(id, shortName, fullName, targetType);
+	aliasType->baseType.hash = hashTypeInfo((TypeInfo*)aliasType);
     typeTableSet(typetab, fullName, (TypeInfo*)aliasType);
     return aliasType;
 }
