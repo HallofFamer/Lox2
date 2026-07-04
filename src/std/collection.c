@@ -389,6 +389,22 @@ static ObjInstance* setDifference(VM* vm, ObjInstance* set1, ObjInstance* set2) 
 	return differenceSet;
 }
 
+static bool setDisjointFrom(VM* vm, ObjInstance* set1, ObjInstance* set2) {
+	ObjDictionary* dict1 = AS_DICTIONARY(getObjField(vm, set1, "dict"));
+	ObjDictionary* dict2 = AS_DICTIONARY(getObjField(vm, set2, "dict"));
+
+	for (int i = 0; i < dict1->capacity; i++) {
+		ObjEntry* entry = &dict1->entries[i];
+		if (IS_UNDEFINED(entry->key)) continue;
+		Value key = entry->key;
+
+		if (dictContainsKey(dict2, key)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 static ObjInstance* setIntersection(VM* vm, ObjInstance* set1, ObjInstance* set2) {
 	ObjDictionary* dict1 = AS_DICTIONARY(getObjField(vm, set1, "dict"));
 	ObjDictionary* dict2 = AS_DICTIONARY(getObjField(vm, set2, "dict"));
@@ -2039,6 +2055,14 @@ LOX_METHOD(Set, difference) {
 	RETURN_OBJ(setDifference(vm, self, other));
 }
 
+LOX_METHOD(Set, disjointFrom) {
+	ASSERT_ARG_COUNT("Set::disjointFrom(other)", 1);
+	ASSERT_ARG_INSTANCE_OF("Set::disjointFrom(other)", 0, clox.std.collection.Set);
+	ObjInstance* self = AS_INSTANCE(receiver);
+	ObjInstance* other = AS_INSTANCE(args[0]);
+	RETURN_BOOL(setDisjointFrom(vm, self, other));
+}
+
 LOX_METHOD(Set, equals) {
     ASSERT_ARG_COUNT("Set::equals(other)", 1);
     ObjInstance* self = AS_INSTANCE(receiver);
@@ -2466,6 +2490,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(setClass, Set, clone, 0, NATIVE_TYPE(clox.std.collection.Set));
     DEF_METHOD(setClass, Set, contains, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(E));
 	DEF_METHOD(setClass, Set, difference, 1, NATIVE_TYPE(clox.std.collection.Set), NATIVE_TYPE(clox.std.collection.Set));
+	DEF_METHOD(setClass, Set, disjointFrom, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(clox.std.collection.Set));
     DEF_METHOD(setClass, Set, equals, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
     DEF_METHOD(setClass, Set, intersection, 1, NATIVE_TYPE(clox.std.collection.Set), NATIVE_TYPE(clox.std.collection.Set));
     DEF_METHOD(setClass, Set, isEmpty, 0, NATIVE_TYPE(Bool));

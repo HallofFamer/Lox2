@@ -33,6 +33,7 @@ BehaviorTypeInfo* newBehaviorTypeInfo(int id, TypeCategory category, ObjString* 
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 		behaviorType->isReified = false;
+		behaviorType->baseType.hash = hashTypeInfo(behaviorType);
     }
     return behaviorType;
 }
@@ -48,6 +49,7 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 		behaviorType->isReified = false;
+        behaviorType->baseType.hash = hashTypeInfo(behaviorType);
 
         if (behaviorType->traitTypes != NULL) {
             TypeInfoArrayInit(behaviorType->traitTypes);
@@ -70,11 +72,12 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithFormalParameters(int id, TypeCategory c
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
-
         behaviorType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 		behaviorType->isReified = false;
+        behaviorType->baseType.hash = hashTypeInfo(behaviorType);
 
         if (behaviorType->formalTypeParams != NULL) {
             TypeInfoArrayInit(behaviorType->formalTypeParams);
@@ -97,12 +100,13 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
-
         behaviorType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+
         if (behaviorType->formalTypeParams != NULL) TypeInfoArrayInit(behaviorType->formalTypeParams);
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = methods;
 		behaviorType->isReified = false;
+        behaviorType->baseType.hash = hashTypeInfo(behaviorType);
     }
     return behaviorType;
 }
@@ -482,7 +486,7 @@ static uint32_t hashAliasTypeInfo(TypeInfo* type, uint32_t initialHash) {
 }
 
 uint32_t hashTypeInfo(TypeInfo* type) {
-    if (type == NULL) return 0;
+    if (type == NULL || IS_FIELD_TYPE(type) || IS_METHOD_TYPE(type)) return 0;
     if (IS_BEHAVIOR_TYPE(type) || IS_PLACEHOLDER_TYPE(type) || IS_ALIAS_TYPE(type) || IS_VOID_TYPE(type)) return type->fullName->hash;
 	uint32_t initialHash = 2166136261u;
 	return mixHashTypeInfo(type, initialHash);
@@ -705,6 +709,8 @@ TypeInfo* typeTableGet(TypeTable* typetab, ObjString* key) {
 }
 
 bool typeTableSet(TypeTable* typetab, ObjString* key, TypeInfo* value) {
+	if (value->hash == 0) value->hash = hashTypeInfo(value);
+
     if (typetab->count + 1 > typetab->capacity * TYPE_TABLE_MAX_LOAD) {
         int capacity = bufferGrowCapacity(typetab->capacity);
         typeTableAdjustCapacity(typetab, capacity);
@@ -789,7 +795,6 @@ BehaviorTypeInfo* typeTableInsertBehavior(TypeTable* typetab, TypeCategory categ
 CallableTypeInfo* typeTableInsertCallable(TypeTable* typetab, TypeCategory category, ObjString* name, TypeInfo* returnType) {
     int id = typetab->count + 1;
     CallableTypeInfo* callableType = newCallableTypeInfo(id, category, name, returnType);
-    callableType->baseType.hash = hashTypeInfo((TypeInfo*)callableType);
     typeTableSet(typetab, name, (TypeInfo*)callableType);
     return callableType;
 }
@@ -811,7 +816,6 @@ MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, TypeI
 GenericTypeInfo* typeTableInsertGeneric(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* rawType) {
     int id = typetab->count + 1;
     GenericTypeInfo* genericType = newGenericTypeInfo(id, shortName, fullName, rawType);
-	genericType->baseType.hash = hashTypeInfo((TypeInfo*)genericType);
     typeTableSet(typetab, fullName, (TypeInfo*)genericType);
     return genericType;
 }
