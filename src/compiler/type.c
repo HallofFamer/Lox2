@@ -244,6 +244,7 @@ AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjS
 static char* createTempTypeName(TypeInfo* type) {
     if (IS_CALLABLE_TYPE(type)) return createCallableTypeName(AS_CALLABLE_TYPE(type));
     else if (IS_GENERIC_TYPE(type)) return createGenericTypeName(AS_GENERIC_TYPE(type));
+	else if (IS_ALIAS_TYPE(type)) return createAliasTypeName(AS_ALIAS_TYPE(type));
     else return type->shortName->chars;
 }
 
@@ -451,6 +452,10 @@ static uint32_t hashCallableTypeInfo(TypeInfo* type, uint32_t initialHash) {
 	else hash = mixHashTypeName(hash, "dynamic", 7);
 	hash = mixHashTypeName(hash, " fun(", 5);
     
+	if (callableType->attribute.isVariadic) {
+		hash = mixHashTypeName(hash, "...", 3);
+	}
+
     for (int i = 0; i < callableType->paramTypes->count; i++) {
 		if (i > 0) hash = mixHashTypeName(hash, ", ", 2);
 		TypeInfo* paramType = callableType->paramTypes->elements[i];
