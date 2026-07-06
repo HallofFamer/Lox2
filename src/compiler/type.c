@@ -14,9 +14,9 @@ TypeInfo* newTypeInfo(int id, size_t size, TypeCategory category, ObjString* sho
     if (type != NULL) {
         type->id = id;
         type->category = category;
-        type->hash = 0;
+        type->hash = (IS_BEHAVIOR_TYPE(type) || IS_PLACEHOLDER_TYPE(type) || IS_ALIAS_TYPE(type) || IS_VOID_TYPE(type)) ? fullName->hash : 0;
         type->shortName = shortName;
-        type->fullName = fullName;   
+        type->fullName = fullName;
     }
     return type;
 }
@@ -33,7 +33,6 @@ BehaviorTypeInfo* newBehaviorTypeInfo(int id, TypeCategory category, ObjString* 
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 		behaviorType->isReified = false;
-		behaviorType->baseType.hash = hashTypeInfo(behaviorType);
     }
     return behaviorType;
 }
@@ -49,7 +48,6 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 		behaviorType->isReified = false;
-        behaviorType->baseType.hash = hashTypeInfo(behaviorType);
 
         if (behaviorType->traitTypes != NULL) {
             TypeInfoArrayInit(behaviorType->traitTypes);
@@ -77,7 +75,6 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithFormalParameters(int id, TypeCategory c
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 		behaviorType->isReified = false;
-        behaviorType->baseType.hash = hashTypeInfo(behaviorType);
 
         if (behaviorType->formalTypeParams != NULL) {
             TypeInfoArrayInit(behaviorType->formalTypeParams);
@@ -106,7 +103,6 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = methods;
 		behaviorType->isReified = false;
-        behaviorType->baseType.hash = hashTypeInfo(behaviorType);
     }
     return behaviorType;
 }
@@ -171,9 +167,7 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
 }
 
 TypeInfo* newPlaceholderTypeInfo(int id, ObjString* name) {
-    TypeInfo* placeholderType = newTypeInfo(id, sizeof(TypeInfo), TYPE_CATEGORY_PLACEHOLDER, name, name);
-    if (placeholderType != NULL) placeholderType->hash = hashTypeInfo(placeholderType);
-    return placeholderType;
+    return newTypeInfo(id, sizeof(TypeInfo), TYPE_CATEGORY_PLACEHOLDER, name, name);
 }
 
 GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType) {
@@ -334,7 +328,6 @@ char* createGenericTypeName(GenericTypeInfo* genericType) {
         length += 7;
     }
 	genericName[length++] = '<';
-
 
     for (int i = 0; i < genericType->actualTypeParams->count; i++) {
         TypeInfo* paramType = genericType->actualTypeParams->elements[i];

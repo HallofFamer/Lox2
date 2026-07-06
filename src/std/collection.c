@@ -345,17 +345,17 @@ static Value newCollection(VM* vm, ObjClass* klass) {
     switch (klass->obj.category) {
         case OBJ_ARRAY: {
 			ObjArray* array = newArray(vm);
-			array->obj.klass = klass;
+			if(klass != vm->arrayClass) array->obj.klass = klass;
             return OBJ_VAL(array);
         }
         case OBJ_DICTIONARY: {
 			ObjDictionary* dict = newDictionary(vm);
-			dict->obj.klass = klass;
+			if(klass != vm->dictionaryClass) dict->obj.klass = klass;
             return OBJ_VAL(dict);
         }
         case OBJ_RANGE: {
 			ObjRange* range = newRange(vm, 0, 0);
-			range->obj.klass = klass;
+			if(klass != vm->rangeClass) range->obj.klass = klass;
             return OBJ_VAL(range);
         }
         default: {
