@@ -443,8 +443,20 @@ static uint32_t hashCallableTypeInfo(TypeInfo* type, uint32_t initialHash) {
 	uint32_t hash = initialHash;
 	if (callableType->returnType != NULL) hash = mixHashTypeInfo(callableType->returnType, hash);
 	else hash = mixHashTypeName(hash, "dynamic", 7);
-	hash = mixHashTypeName(hash, " fun(", 5);
+	hash = mixHashTypeName(hash, " fun", 4);
     
+    if (callableType->attribute.isGeneric) {
+		hash = mixHashTypeName(hash, "<", 1);
+        for (int i = 0; i < callableType->formalTypeParams->count; i++) {
+            if (i > 0) hash = mixHashTypeName(hash, ", ", 2);
+            TypeInfo* formalType = callableType->formalTypeParams->elements[i];
+            if (formalType != NULL) hash = mixHashTypeInfo(formalType, hash);
+            else hash = mixHashTypeName(hash, "dynamic", 7);
+        }
+		hash = mixHashTypeName(hash, ">", 1);
+    }
+
+	hash = mixHashTypeName(hash, "(", 1);
 	if (callableType->attribute.isVariadic) {
 		hash = mixHashTypeName(hash, "...", 3);
 	}
