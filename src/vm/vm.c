@@ -1261,6 +1261,10 @@ InterpretResult run(VM* vm) {
             case OP_TYPE: {
                 ObjString* typeName = READ_STRING();
                 TypeInfo* typeInfo = typeTableGet(vm->typetab, typeName);
+				if (typeInfo == NULL) {
+					RUNTIME_ERROR("The specified type %s is undefined.", typeName->chars);
+				}
+
                 if (!IS_ALIAS_TYPE(typeInfo)) {
                     RUNTIME_ERROR("The specified type alias %s is invalid.", typeName->chars);
                 }

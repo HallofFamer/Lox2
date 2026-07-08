@@ -282,7 +282,7 @@ static size_t sizeOfObject(Obj* object) {
         }
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
-            return sizeof(ObjType) + sizeof(TypeInfo) + type->parameters.capacity * sizeof(Value);
+            return sizeof(ObjType) + sizeof(TypeInfo) + type->typeParameters.capacity * sizeof(Value);
         }
         case OBJ_UPVALUE:
             return sizeof(ObjUpvalue);
@@ -467,7 +467,7 @@ static void blackenObject(VM* vm, Obj* object, GCGenerationType generation) {
             ObjType* type = (ObjType*)object;
             markObject(vm, (Obj*)type->name, generation);
             markObject(vm, (Obj*)type->behavior, generation);
-            markArray(vm, &type->parameters, generation);
+            markArray(vm, &type->typeParameters, generation);
             break;
         }
         case OBJ_UPVALUE:
@@ -633,7 +633,7 @@ static void freeObject(VM* vm, Obj* object) {
         }
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
-            freeValueArray(vm, &type->parameters);
+            freeValueArray(vm, &type->typeParameters);
             FREE(ObjType, object, object->generation);
             break;
         }
@@ -698,7 +698,7 @@ static void promoteObject(VM* vm, Obj* object, GCGenerationType generation) {
         }
         case OBJ_TYPE: {
             ObjType* type = (ObjType*)object;
-            type->parameters.generation++;
+            type->typeParameters.generation++;
             break;
         }
         case OBJ_VALUE_INSTANCE: {

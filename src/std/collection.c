@@ -345,35 +345,25 @@ static Value newCollection(VM* vm, ObjClass* klass) {
     switch (klass->obj.category) {
         case OBJ_ARRAY: {
 			ObjArray* array = newArray(vm);
-            if (klass != vm->arrayClass) {
-                array->obj.klass = klass;
-                Value initMethod = getObjMethod(vm, OBJ_VAL(array), "__init__");
-                callReentrantMethod(vm, OBJ_VAL(array), initMethod);
-            }
+            array->obj.klass = klass;
             return OBJ_VAL(array);
         }
         case OBJ_DICTIONARY: {
 			ObjDictionary* dict = newDictionary(vm);
-			if(klass != vm->dictionaryClass) {
-                dict->obj.klass = klass;
-                Value initMethod = getObjMethod(vm, OBJ_VAL(dict), "__init__");
-                callReentrantMethod(vm, OBJ_VAL(dict), initMethod);
-            }
+			dict->obj.klass = klass;
             return OBJ_VAL(dict);
         }
         case OBJ_RANGE: {
 			ObjRange* range = newRange(vm, 0, 0);
-			if(klass != vm->rangeClass) {
-                range->obj.klass = klass;
-                Value initMethod = getObjMethod(vm, OBJ_VAL(range), "__init__");
-                callReentrantMethod(vm, OBJ_VAL(range), initMethod);
-            }
+			range->obj.klass = klass;
             return OBJ_VAL(range);
         }
         default: {
             ObjInstance* collection = newInstance(vm, klass);
-            Value initMethod = getObjMethod(vm, OBJ_VAL(collection), "__init__");
-            callReentrantMethod(vm, OBJ_VAL(collection), initMethod);
+            if (klass->isNative) {
+                Value initMethod = getObjMethod(vm, OBJ_VAL(collection), "__init__");
+                callReentrantMethod(vm, OBJ_VAL(collection), initMethod);
+            }
             return OBJ_VAL(collection);
         }
     }

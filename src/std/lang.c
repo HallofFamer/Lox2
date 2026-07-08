@@ -1924,8 +1924,8 @@ LOX_METHOD(Type, getTypeParameters) {
 	ObjArray* parameters = newArray(vm);
 	push(vm, OBJ_VAL(parameters));
 
-	for (int i = 0; i < self->parameters.count; i++) {
-		valueArrayWrite(vm, &parameters->elements, self->parameters.values[i]);
+	for (int i = 0; i < self->typeParameters.count; i++) {
+		valueArrayWrite(vm, &parameters->elements, self->typeParameters.values[i]);
 	}
 	pop(vm);
 	RETURN_OBJ(parameters);
@@ -1942,7 +1942,7 @@ LOX_METHOD(Type, hasMethod) {
 LOX_METHOD(Type, hasTypeParameters) {
 	ASSERT_ARG_COUNT("Type::hasTypeParameters()", 0);
 	ObjType* self = AS_TYPE(receiver);
-	RETURN_BOOL(self->parameters.count > 0);
+	RETURN_BOOL(self->typeParameters.count > 0);
 }
 
 LOX_METHOD(Type, isAlias) {
@@ -2120,6 +2120,7 @@ static ObjNamespace* defineRootNamespace(VM* vm) {
     ObjString* name = newStringPerma(vm, "");
     ObjNamespace* rootNamespace = newNamespace(vm, name, NULL);
     rootNamespace->isRoot = true;
+
     push(vm, OBJ_VAL(rootNamespace));
     tableSet(vm, &vm->namespaces, name, OBJ_VAL(rootNamespace));
     pop(vm);

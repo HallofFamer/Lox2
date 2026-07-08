@@ -365,7 +365,7 @@ struct ObjType {
     ObjString* name;
     bool isAlias;
     ObjClass* behavior;
-    ValueArray parameters;
+    ValueArray typeParameters;
 };
 
 Obj* allocateObject(VM* vm, size_t size, ObjCategory category, ObjClass* klass, GCGenerationType generation);

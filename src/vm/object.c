@@ -360,21 +360,21 @@ ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
     type->name = name;
     type->isAlias = IS_ALIAS_TYPE(typeInfo);
     type->behavior = getClassFromTypeInfo(vm, targetType);
-    initValueArray(&type->parameters, GC_GENERATION_TYPE_PERMANENT);
+    initValueArray(&type->typeParameters, GC_GENERATION_TYPE_PERMANENT);
 
     if (targetType != NULL && IS_CALLABLE_TYPE(targetType)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(targetType);
-        valueArrayWrite(vm, &type->parameters, createTypeObjFromTypeInfo(vm, callableType->returnType));
+        valueArrayWrite(vm, &type->typeParameters, createTypeObjFromTypeInfo(vm, callableType->returnType));
         for (int i = 0; i < callableType->paramTypes->count; i++) {
             TypeInfo* paramType = callableType->paramTypes->elements[i];
-            valueArrayWrite(vm, &type->parameters, createTypeObjFromTypeInfo(vm, paramType));
+            valueArrayWrite(vm, &type->typeParameters, createTypeObjFromTypeInfo(vm, paramType));
         }
     }
     else if (targetType != NULL && IS_GENERIC_TYPE(targetType)) {
         GenericTypeInfo* genericType = AS_GENERIC_TYPE(targetType);
         for (int i = 0; i < genericType->actualTypeParams->count; i++) {
             TypeInfo* paramType = genericType->actualTypeParams->elements[i];
-            valueArrayWrite(vm, &type->parameters, createTypeObjFromTypeInfo(vm, paramType));
+            valueArrayWrite(vm, &type->typeParameters, createTypeObjFromTypeInfo(vm, paramType));
         }
     }
 
@@ -517,19 +517,19 @@ static void printType(ObjType* type) {
     printf("<type %s: ", type->name->chars);
     if (IS_BEHAVIOR_TYPE(type)) printf("%s", type->behavior->name->chars);
     else if (IS_CALLABLE_TYPE(type)) {
-        printf("%s fun(", AS_TYPE(type->parameters.values[0])->name->chars);
-        for (int i = 1; i < type->parameters.count; i++) {
+        printf("%s fun(", AS_TYPE(type->typeParameters.values[0])->name->chars);
+        for (int i = 1; i < type->typeParameters.count; i++) {
             if (i > 1) printf(", ");
-            printf("%s", AS_TYPE(type->parameters.values[i])->name->chars);
+            printf("%s", AS_TYPE(type->typeParameters.values[i])->name->chars);
         }
         printf(")");
     }
     else if (IS_PLACEHOLDER_TYPE(type)) printf("%s", type->name->chars);
     else if (IS_GENERIC_TYPE(type)) {
         printf("%s<", type->name->chars);
-        for (int i = 0; i < type->parameters.count; i++) {
+        for (int i = 0; i < type->typeParameters.count; i++) {
             if (i > 0) printf(", ");
-            printf("%s", AS_TYPE(type->parameters.values[i])->name->chars);
+            printf("%s", AS_TYPE(type->typeParameters.values[i])->name->chars);
         }
         printf(">");
         return;
