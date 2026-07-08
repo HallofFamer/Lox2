@@ -168,8 +168,7 @@ void tokenStreamAdd(TokenStream* tokens, Token token) {
     if (tokens->capacity < tokens->count + 1) {
         int oldCapacity = tokens->capacity; 
         tokens->capacity = bufferGrowCapacity(oldCapacity); 
-        Token* elements = (Token*)realloc(tokens->elements, sizeof(Token) * tokens->capacity); 
-        
+        Token* elements = (Token*)realloc(tokens->elements, sizeof(Token) * tokens->capacity);        
         if (elements != NULL) tokens->elements = elements; 
         else exit(1);
     } 

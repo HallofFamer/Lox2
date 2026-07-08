@@ -54,8 +54,8 @@ ObjClass* defineNativeTrait(VM* vm, const char* name);
 ObjClass* defineNativeGenericTrait(VM* vm, const char* name, int numParams, ...);
 ObjNamespace* defineNativeNamespace(VM* vm, const char* name, ObjNamespace* enclosing);
 ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass);
-TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType, int numParams, ...);
-TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* rawType, int numParams, ...);
+TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...);
+TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawType, int numParams, ...);
 
 TypeInfo* declareNativeTypeParameter(VM* vm, const char* shortName);
 ObjClass* getNativeClass(VM* vm, const char* fullName);

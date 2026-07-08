@@ -150,6 +150,7 @@ AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjS
 char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullName);
 char* createGenericTypeName(GenericTypeInfo* genericType, bool isFullName);
 char* createAliasTypeName(AliasTypeInfo* aliasType, bool isFullName);
+char* createTypeName(TypeInfo* type, bool isFullName);
 void freeTypeInfo(TypeInfo* type);
 void freeTempTypes(TypeInfoArray* typeArray);
 uint32_t hashTypeInfo(TypeInfo* type);

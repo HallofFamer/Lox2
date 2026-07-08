@@ -145,9 +145,11 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Typ
         TypeInfoArrayAdd(functionType->paramTypes, paramType);
     }
     
-    char* functionTypeName = createCallableTypeName(functionType, false);
+    char* shortName = createTypeName((TypeInfo*)functionType, false);
+	char* fullName = createTypeName((TypeInfo*)functionType, true);
     item->type = (TypeInfo*)functionType;
-    item->type->fullName = item->type->shortName = takeStringPerma(vm, functionTypeName, (int)strlen(functionTypeName));
+    item->type->shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
+	item->type->fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
     TypeInfoArrayAdd(vm->tempTypes, item->type);
     va_end(args);
 }
@@ -312,8 +314,8 @@ ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass) 
     return exceptionClass;
 }
 
-TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* shortName, TypeInfo* returnType, int numParams, ...) {
-    CallableTypeInfo* callableType = newCallableTypeInfo(-1, category, shortName, returnType);
+TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...) {
+    CallableTypeInfo* callableType = newCallableTypeInfo(-1, category, name, returnType);
     if (numParams > 0) {
         va_list args;
         va_start(args, numParams);
@@ -325,13 +327,16 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
         va_end(args);
     }
 
-    char* name = createCallableTypeName(callableType, false);
-    callableType->baseType.fullName = callableType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
+    char* shortName = createTypeName((TypeInfo*)callableType, false);
+	char* fullName = createTypeName((TypeInfo*)callableType, true);
+    callableType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
+	callableType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
+    TypeInfoArrayAdd(vm->tempTypes, (TypeInfo*)callableType);
     return (TypeInfo*)callableType;
 }
 
-TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* rawType, int numParams, ...) {
-    GenericTypeInfo* genericType = newGenericTypeInfo(-1, shortName, shortName, rawType);
+TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawType, int numParams, ...) {
+    GenericTypeInfo* genericType = newGenericTypeInfo(-1, name, name, rawType);
     va_list args;
     va_start(args, numParams);
 
@@ -342,8 +347,11 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* 
     }
     va_end(args);
 
-    char* name = createGenericTypeName(genericType, false);
-    genericType->baseType.fullName = genericType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
+    char* shortName = createTypeName((TypeInfo*)genericType, false);
+    char* fullName = createTypeName((TypeInfo*)genericType, true);
+    genericType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
+    genericType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
+	TypeInfoArrayAdd(vm->tempTypes, (TypeInfo*)genericType);
     return (TypeInfo*)genericType;
 }
 

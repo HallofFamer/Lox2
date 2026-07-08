@@ -614,9 +614,13 @@ static void astHandleInitializer(Resolver* resolver, Ast* ast) {
     }
 }
 
-static void astInsertTempType(Resolver* resolver, Ast* ast, TypeInfo* type, char* typeName) {
+static void astInsertTempType(Resolver* resolver, Ast* ast, TypeInfo* type) {
+    char* shortName = createTypeName(type, false);
+	char* fullName = createTypeName(type, true);
     ast->type = type;
-	ast->type->fullName = ast->type->shortName = takeStringPerma(resolver->vm, typeName, (int)strlen(typeName));
+	ast->type->shortName = takeStringPerma(resolver->vm, shortName, (int)strlen(shortName));
+	ast->type->fullName =takeStringPerma(resolver->vm, fullName, (int)strlen(fullName));
+    TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
 }
 
 static TypeInfo* findCallableTypeParams(Resolver* resolver, Ast* ast, Token* token) {
@@ -669,8 +673,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
             }
         }
 
-		astInsertTempType(resolver, ast, (TypeInfo*)callableType, createCallableTypeName(callableType, false));
-        TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
+		astInsertTempType(resolver, ast, (TypeInfo*)callableType);
     }
     return callableType;
 }
@@ -698,8 +701,7 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
             Ast* typeParam = typeParams->children->elements[i];
             insertTypeParameter(resolver, typeParam, i, genericType);
         }
-        astInsertTempType(resolver, ast, (TypeInfo*)genericType, createGenericTypeName(genericType, false));
-        TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
+        astInsertTempType(resolver, ast, (TypeInfo*)genericType);
     }
     return genericType;
 }
@@ -738,8 +740,7 @@ static AliasTypeInfo* insertGenericAliasType(Resolver* resolver, Ast* ast) {
         TypeInfoArrayAdd(aliasType->formalTypeParams, type);
     }
 
-    astInsertTempType(resolver, ast, (TypeInfo*)aliasType, createAliasTypeName(aliasType, false));
-    TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
+    astInsertTempType(resolver, ast, (TypeInfo*)aliasType);
 	return aliasType;
 }
 

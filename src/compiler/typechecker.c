@@ -127,18 +127,22 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
+static void insertTempType(TypeChecker* typeChecker, TypeInfo* type) {
+	if (type == NULL) return;
+	if (IS_GENERIC_TYPE(type) || IS_CALLABLE_TYPE(type)) {
+		char* shortName = createTypeName(type, false);
+		char* fullName = createTypeName(type, true);
+        type->shortName = takeStringPerma(typeChecker->vm, shortName, (int)strlen(shortName));
+		type->fullName = takeStringPerma(typeChecker->vm, fullName, (int)strlen(fullName));
+		TypeInfoArrayAdd(typeChecker->vm->tempTypes, type);
+	}
+}
+
 static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
 	TypeInfo* instantiatedType = instantiateTypeParameter(type, formalParams, actualParams);
 	if (instantiatedType == NULL) return NULL;
-    else if (IS_GENERIC_TYPE(instantiatedType)) {
-		char* instantiatedTypeName = createGenericTypeName(AS_GENERIC_TYPE(instantiatedType), false);
-		instantiatedType->fullName = instantiatedType->shortName = takeStringPerma(typeChecker->vm, instantiatedTypeName, (int)strlen(instantiatedTypeName));
-        TypeInfoArrayAdd(typeChecker->vm->tempTypes, instantiatedType);
-    }
-    else if (IS_CALLABLE_TYPE(instantiatedType)) {
-        char* instantiatedTypeName = createCallableTypeName(AS_CALLABLE_TYPE(instantiatedType), false);
-        instantiatedType->fullName = instantiatedType->shortName = takeStringPerma(typeChecker->vm, instantiatedTypeName, (int)strlen(instantiatedTypeName));
-        TypeInfoArrayAdd(typeChecker->vm->tempTypes, instantiatedType);
+    else if (IS_CALLABLE_TYPE(instantiatedType) || IS_GENERIC_TYPE(instantiatedType)) {
+		insertTempType(typeChecker, instantiatedType);
     }
 	return instantiatedType;
 }
@@ -164,10 +168,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
         TypeInfoArrayAdd(instantiatedFunctionType->paramTypes, paramType);
     }
     
-    TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedFunctionType);
-    char* instantiatedFunctionTypeName = createCallableTypeName(instantiatedFunctionType, false);
-    instantiatedFunctionType->baseType.fullName = instantiatedFunctionType->baseType.shortName = 
-        takeStringPerma(typeChecker->vm, instantiatedFunctionTypeName, (int)strlen(instantiatedFunctionTypeName));
+	insertTempType(typeChecker, (TypeInfo*)instantiatedFunctionType);
     return instantiatedFunctionType;
 }
 
@@ -211,10 +212,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
         TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
     }
     
-    TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedMethodType);
-    char* instantiatedCallableTypeName = createCallableTypeName(instantiatedMethodType, false);
-    instantiatedMethodType->baseType.fullName = instantiatedMethodType->baseType.shortName = 
-        takeStringPerma(typeChecker->vm, instantiatedCallableTypeName, (int)strlen(instantiatedCallableTypeName));
+	insertTempType(typeChecker, (TypeInfo*)instantiatedMethodType);
     return instantiatedMethodType;
 }
 
@@ -226,8 +224,7 @@ static TypeInfo* getAstGenericDynamicType(TypeChecker* typeChecker, Ast* ast, Ty
         TypeInfoArrayAdd(genericType->actualTypeParams, NULL);
     }
 
-    char* genericTypeName = createGenericTypeName(genericType, false);
-    genericType->baseType.fullName = genericType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
+	insertTempType(typeChecker, (TypeInfo*)genericType);
     return (TypeInfo*)genericType;
 }
 
@@ -286,9 +283,6 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
         }
         else TypeInfoArrayAdd(calleeType->paramTypes, param->type);
     }
-
-    char* callableTypeName = createCallableTypeName(calleeType, false);
-    calleeType->baseType.fullName = calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, callableTypeName, (int)strlen(callableTypeName));
 }
 
 static void checkTypeParameters(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
@@ -586,8 +580,8 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
             for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
                 TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
             }
-            char* genericTypeName = createGenericTypeName(calleeType, false);
-            calleeType->baseType.fullName = calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
+
+			insertTempType(typeChecker, (TypeInfo*)calleeType);
             ast->type = (TypeInfo*)calleeType;
         }
     }
@@ -614,7 +608,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         deriveCalleeType(typeChecker, ast, calleeType);   
 
         callee->type = (TypeInfo*)calleeType;
-        TypeInfoArrayAdd(typeChecker->vm->tempTypes, callee->type);
+		insertTempType(typeChecker, (TypeInfo*)calleeType);
         function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false, calleeType->attribute.isLambda);
     }
     else if (IS_CALLABLE_TYPE(rawType)) {

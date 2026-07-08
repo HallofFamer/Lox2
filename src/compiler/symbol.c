@@ -77,8 +77,8 @@ static void symbolTableAdjustCapacity(SymbolTable* symtab, int capacity) {
         entries[i].key = NULL;
         entries[i].value = NULL;
     }
-
     symtab->count = 0;
+
     for (int i = 0; i < symtab->capacity; i++) {
         SymbolEntry* entry = &symtab->entries[i];
         if (entry->key == NULL) continue;
