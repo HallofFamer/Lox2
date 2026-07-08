@@ -597,7 +597,10 @@ static Ast* genericInvoke(Parser* parser, Token property, Ast* left, bool isSupe
     Ast* typeParams = typeParameters(parser, property);
     consume(parser, TOKEN_KIND_LEFT_PAREN, "Expect left parenthesis after type parameters.");
     Ast* right = argumentList(parser);
-    if (isSuper) return newAst(AST_EXPR_SUPER_INVOKE, property, 2, right, typeParams);
+
+    if (isSuper) {
+        return newAst(AST_EXPR_SUPER_INVOKE, property, 2, right, typeParams);
+    }
     return newAst(AST_EXPR_INVOKE, property, 3, left, right, typeParams);
 }
 

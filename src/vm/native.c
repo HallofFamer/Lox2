@@ -145,7 +145,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Typ
         TypeInfoArrayAdd(functionType->paramTypes, paramType);
     }
     
-    char* functionTypeName = createCallableTypeName(functionType);
+    char* functionTypeName = createCallableTypeName(functionType, false);
     item->type = (TypeInfo*)functionType;
     item->type->fullName = item->type->shortName = takeStringPerma(vm, functionTypeName, (int)strlen(functionTypeName));
     TypeInfoArrayAdd(vm->tempTypes, item->type);
@@ -325,7 +325,7 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
         va_end(args);
     }
 
-    char* name = createCallableTypeName(callableType);
+    char* name = createCallableTypeName(callableType, false);
     callableType->baseType.fullName = callableType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
     return (TypeInfo*)callableType;
 }
@@ -342,7 +342,7 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* shortName, TypeInfo* 
     }
     va_end(args);
 
-    char* name = createGenericTypeName(genericType);
+    char* name = createGenericTypeName(genericType, false);
     genericType->baseType.fullName = genericType->baseType.shortName = takeStringPerma(vm, name, (int)strlen(name));
     return (TypeInfo*)genericType;
 }

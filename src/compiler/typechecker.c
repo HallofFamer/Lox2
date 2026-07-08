@@ -131,12 +131,12 @@ static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, Type
 	TypeInfo* instantiatedType = instantiateTypeParameter(type, formalParams, actualParams);
 	if (instantiatedType == NULL) return NULL;
     else if (IS_GENERIC_TYPE(instantiatedType)) {
-		char* instantiatedTypeName = createGenericTypeName(AS_GENERIC_TYPE(instantiatedType));
+		char* instantiatedTypeName = createGenericTypeName(AS_GENERIC_TYPE(instantiatedType), false);
 		instantiatedType->fullName = instantiatedType->shortName = takeStringPerma(typeChecker->vm, instantiatedTypeName, (int)strlen(instantiatedTypeName));
         TypeInfoArrayAdd(typeChecker->vm->tempTypes, instantiatedType);
     }
     else if (IS_CALLABLE_TYPE(instantiatedType)) {
-        char* instantiatedTypeName = createCallableTypeName(AS_CALLABLE_TYPE(instantiatedType));
+        char* instantiatedTypeName = createCallableTypeName(AS_CALLABLE_TYPE(instantiatedType), false);
         instantiatedType->fullName = instantiatedType->shortName = takeStringPerma(typeChecker->vm, instantiatedTypeName, (int)strlen(instantiatedTypeName));
         TypeInfoArrayAdd(typeChecker->vm->tempTypes, instantiatedType);
     }
@@ -165,7 +165,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
     }
     
     TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedFunctionType);
-    char* instantiatedFunctionTypeName = createCallableTypeName(instantiatedFunctionType);
+    char* instantiatedFunctionTypeName = createCallableTypeName(instantiatedFunctionType, false);
     instantiatedFunctionType->baseType.fullName = instantiatedFunctionType->baseType.shortName = 
         takeStringPerma(typeChecker->vm, instantiatedFunctionTypeName, (int)strlen(instantiatedFunctionTypeName));
     return instantiatedFunctionType;
@@ -212,7 +212,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     }
     
     TypeInfoArrayAdd(typeChecker->vm->tempTypes, (TypeInfo*)instantiatedMethodType);
-    char* instantiatedCallableTypeName = createCallableTypeName(instantiatedMethodType);
+    char* instantiatedCallableTypeName = createCallableTypeName(instantiatedMethodType, false);
     instantiatedMethodType->baseType.fullName = instantiatedMethodType->baseType.shortName = 
         takeStringPerma(typeChecker->vm, instantiatedCallableTypeName, (int)strlen(instantiatedCallableTypeName));
     return instantiatedMethodType;
@@ -226,7 +226,7 @@ static TypeInfo* getAstGenericDynamicType(TypeChecker* typeChecker, Ast* ast, Ty
         TypeInfoArrayAdd(genericType->actualTypeParams, NULL);
     }
 
-    char* genericTypeName = createGenericTypeName(genericType);
+    char* genericTypeName = createGenericTypeName(genericType, false);
     genericType->baseType.fullName = genericType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
     return (TypeInfo*)genericType;
 }
@@ -287,7 +287,7 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
         else TypeInfoArrayAdd(calleeType->paramTypes, param->type);
     }
 
-    char* callableTypeName = createCallableTypeName(calleeType);
+    char* callableTypeName = createCallableTypeName(calleeType, false);
     calleeType->baseType.fullName = calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, callableTypeName, (int)strlen(callableTypeName));
 }
 
@@ -586,7 +586,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
             for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
                 TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
             }
-            char* genericTypeName = createGenericTypeName(calleeType);
+            char* genericTypeName = createGenericTypeName(calleeType, false);
             calleeType->baseType.fullName = calleeType->baseType.shortName = takeStringPerma(typeChecker->vm, genericTypeName, (int)strlen(genericTypeName));
             ast->type = (TypeInfo*)calleeType;
         }
