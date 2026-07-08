@@ -1,7 +1,7 @@
 namespace test.types
 using clox.std.collection.Array
 
-Array filterArray(Array array, Bool fun(Int) filter) {
+Array<Int> filterArray(Array<Int> array, Bool fun(Int) filter) {
     val result = []
     for (val item : array) {
         if (filter(item)) {

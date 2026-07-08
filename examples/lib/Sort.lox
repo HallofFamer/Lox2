@@ -1,4 +1,5 @@
 namespace examples.lib
+using clox.std.collection.Array
 
 class Sort {
     
@@ -7,8 +8,8 @@ class Sort {
         val length = array.length
         var temp = nil
 
-        for (val i : 0..(length - 1)) { 
-            for (val j : 0..(length - 2)){ 
+        for (val i : 0.until(length)) { 
+            for (val j : 0.until(length - 1)){ 
                 if (newArray[j] > newArray[j + 1]) { 
                     temp = newArray[j]
                     newArray[j] = newArray[j + 1]
@@ -26,7 +27,7 @@ class Sort {
         var minIndex = nil
         var temp = nil
 
-        for (val i : 0..(length - 1)) { 
+        for (val i : 0..(length - 2)) { 
             minIndex = i
             for (val j : (i + 1)..(length - 1)) { 
                 if (newArray[j] < newArray[minIndex]) { 
@@ -91,7 +92,7 @@ class Sort {
             return array
         }
 
-        val mid = array.length / 2
+        val mid = (array.length / 2).toInt()
         val left = this.mergeSort(array.slice(0, mid))
         val right = this.mergeSort(array.slice(mid, array.length))
         return this.merge(left, right)
@@ -102,7 +103,7 @@ class Sort {
             return array
         }
 
-        val pivot = array[array.length / 2]
+        val pivot = array[(array.length / 2).toInt()]
         val left = []
         val right = []
 

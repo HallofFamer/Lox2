@@ -1,4 +1,4 @@
-namespace examples.library
+namespace examples.lib
 
 class Fraction {
 
@@ -13,8 +13,8 @@ class Fraction {
 
         if (Fraction.shouldReduce){
             val gcd = numerator.gcd(denominator)
-            this.numerator = numerator / gcd
-            this.denominator = denominator / gcd
+            this.numerator = (numerator / gcd).toInt()
+            this.denominator = (denominator / gcd).toInt()
         } 
         else{
             this.numerator = numerator

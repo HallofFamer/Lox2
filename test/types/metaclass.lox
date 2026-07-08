@@ -1,5 +1,4 @@
 namespace test.types
-using clox.std.collection.Array
 using clox.std.util.Date
 using clox.std.util.DateTime
 
