@@ -969,6 +969,7 @@ static void typeTableOutputCallable(CallableTypeInfo* function) {
 
     printf("(");
     if (function->paramTypes != NULL && function->paramTypes->count > 0) {
+		if (function->attribute.isVariadic) printf("..");
         printf("%s", (function->paramTypes->elements[0] != NULL) ? function->paramTypes->elements[0]->shortName->chars : "dynamic");
         for (int i = 1; i < function->paramTypes->count; i++) {
             printf(", %s", (function->paramTypes->elements[i] != NULL) ? function->paramTypes->elements[i]->shortName->chars : "dynamic");

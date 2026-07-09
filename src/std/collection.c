@@ -183,6 +183,7 @@ static void linkAddFirst(VM* vm, ObjInstance* linkedList, Value element) {
     ObjNode* new = newNode(vm, element, NULL, first);
     push(vm, OBJ_VAL(new));
     setObjField(vm, linkedList, "first", OBJ_VAL(new));
+
     if (first == NULL) setObjField(vm, linkedList, "last", OBJ_VAL(new));
     else first->prev = new;
     pop(vm);
