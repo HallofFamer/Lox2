@@ -614,12 +614,12 @@ static void astHandleInitializer(Resolver* resolver, Ast* ast) {
     }
 }
 
-static void astInsertTempType(Resolver* resolver, Ast* ast, TypeInfo* type) {
+static void astInsertHigherOrderType(Resolver* resolver, Ast* ast, TypeInfo* type) {
     char* shortName = createTypeName(type, false);
 	char* fullName = createTypeName(type, true);
     ast->type = type;
 	ast->type->shortName = takeStringPerma(resolver->vm, shortName, (int)strlen(shortName));
-	ast->type->fullName =takeStringPerma(resolver->vm, fullName, (int)strlen(fullName));
+	ast->type->fullName = takeStringPerma(resolver->vm, fullName, (int)strlen(fullName));
     TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
 }
 
@@ -673,7 +673,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
             }
         }
 
-		astInsertTempType(resolver, ast, (TypeInfo*)callableType);
+		astInsertHigherOrderType(resolver, ast, (TypeInfo*)callableType);
     }
     return callableType;
 }
@@ -701,7 +701,7 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
             Ast* typeParam = typeParams->children->elements[i];
             insertTypeParameter(resolver, typeParam, i, genericType);
         }
-        astInsertTempType(resolver, ast, (TypeInfo*)genericType);
+        astInsertHigherOrderType(resolver, ast, (TypeInfo*)genericType);
     }
     return genericType;
 }
@@ -740,7 +740,7 @@ static AliasTypeInfo* insertGenericAliasType(Resolver* resolver, Ast* ast) {
         TypeInfoArrayAdd(aliasType->formalTypeParams, type);
     }
 
-    astInsertTempType(resolver, ast, (TypeInfo*)aliasType);
+    astInsertHigherOrderType(resolver, ast, (TypeInfo*)aliasType);
 	return aliasType;
 }
 

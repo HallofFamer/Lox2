@@ -196,6 +196,7 @@ static void linkAddLast(VM* vm, ObjInstance* linkedList, Value element) {
     ObjNode* new = newNode(vm, element, last, NULL);
     push(vm, OBJ_VAL(new));
     setObjField(vm, linkedList, "last", OBJ_VAL(new));
+
     if (last == NULL) setObjField(vm, linkedList, "first", OBJ_VAL(new));
     else last->next = new;
     pop(vm);
