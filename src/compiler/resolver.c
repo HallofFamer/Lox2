@@ -678,6 +678,41 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
     return callableType;
 }
 
+static GenericTypeInfo* findGenericTypeFromAst(Resolver* resolver, Ast* ast) {
+    char* genericName = bufferNewCString(UINT16_MAX);
+    size_t length = 0;
+    TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false, true);
+
+    char* rawTypeName = createTypeName(rawType, true);
+    size_t rawTypeLength = strlen(rawTypeName);
+    memcpy(genericName, rawTypeName, rawTypeLength);
+    length += rawTypeLength;
+
+	Ast* typeParams = astGetChild(ast, 0);
+	for (int i = 0; i < typeParams->children->count; i++) {
+        if (i > 0) {
+            genericName[length++] = ',';
+            genericName[length++] = ' ';
+        }
+
+		Ast* typeParam = typeParams->children->elements[i];
+		if (typeParam->type == NULL) {
+			resolveChild(resolver, typeParams, i);
+		}
+
+		char* typeParamName = createTypeName(typeParam->type, true);
+		size_t typeParamLength = strlen(typeParamName);
+		genericName[length++] = '<';
+		memcpy(genericName + length, typeParamName, typeParamLength);
+		length += typeParamLength;
+		genericName[length++] = '>';
+	}
+
+	genericName[length] = '\0';
+	ObjString* fullGenericName = takeStringPerma(resolver->vm, genericName, length);
+	return AS_GENERIC_TYPE(typeTableGet(resolver->vm->typetab, fullGenericName));
+}
+
 static void insertTypeParameter(Resolver* resolver, Ast* ast, int index, GenericTypeInfo* genericType) {
     if (ast->type == NULL && astNumChild(ast) == 0) {
         ObjString* typeParamName = createStringFromToken(resolver->vm, ast->token);

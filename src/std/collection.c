@@ -169,6 +169,7 @@ static bool linkAddBefore(VM* vm, ObjInstance* linkedList, Value element, ObjNod
         ObjNode* new = newNode(vm, element, pred, succ);
         push(vm, OBJ_VAL(new));
         succ->prev = new;
+
         if (pred == NULL) setObjField(vm, linkedList, "first", OBJ_VAL(new));
         else pred->next = new;
         pop(vm);
