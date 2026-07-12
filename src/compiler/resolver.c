@@ -696,13 +696,10 @@ static GenericTypeInfo* findGenericTypeFromAst(Resolver* resolver, Ast* ast) {
         }
 
 		Ast* typeParam = typeParams->children->elements[i];
-		if (typeParam->type == NULL) {
-			resolveChild(resolver, typeParams, i);
-		}
-
-		char* typeParamName = createTypeName(typeParam->type, true);
+		char* typeParamName = typeParam->type != NULL ? createTypeName(typeParam->type, true) : "dynamic";
 		size_t typeParamLength = strlen(typeParamName);
 		genericName[length++] = '<';
+
 		memcpy(genericName + length, typeParamName, typeParamLength);
 		length += typeParamLength;
 		genericName[length++] = '>';

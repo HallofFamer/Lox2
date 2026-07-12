@@ -208,6 +208,7 @@ static int linkFindIndex(VM* vm, ObjInstance* linkedList, Value element) {
     int index = 0;
     Value f = getObjField(vm, linkedList, "first");
     ObjNode* first = IS_NIL(f) ? NULL : AS_NODE(f);
+
     for (ObjNode* node = first; node != NULL; node = node->next) {
         if (valuesEqual(element, node->element)) return index;
         index++;
@@ -219,6 +220,7 @@ static int linkFindLastIndex(VM* vm, ObjInstance* linkedList, Value element) {
     int index = AS_INT(getObjField(vm, linkedList, "length"));
     Value l = getObjField(vm, linkedList, "last");
     ObjNode* last = IS_NIL(l) ? NULL : AS_NODE(l);
+
     for (ObjNode* node = last; node != NULL; node = node->prev) {
         index--;
         if (valuesEqual(element, node->element)) return index;
@@ -284,6 +286,7 @@ static Value linkRemoveFirst(VM* vm, ObjInstance* linkedList, ObjNode* first) {
     first->element = NIL_VAL;
     first->next = NULL;
     setObjField(vm, linkedList, "first", OBJ_VAL(next));
+
     if (next == NULL) setObjField(vm, linkedList, "last", NIL_VAL);
     else next->prev = NULL;
     collectionLengthDecrement(vm, linkedList);
