@@ -299,6 +299,7 @@ static Value linkRemoveLast(VM* vm, ObjInstance* linkedList, ObjNode* last) {
     last->element = NIL_VAL;
     last->next = NULL;
     setObjField(vm, linkedList, "last", OBJ_VAL(prev));
+
     if (prev == NULL) setObjField(vm, linkedList, "first", NIL_VAL);
     else prev->next = NULL;
     collectionLengthDecrement(vm, linkedList);

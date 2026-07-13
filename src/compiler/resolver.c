@@ -726,6 +726,12 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
         return NULL;
     }
 
+	GenericTypeInfo* existingGenericType = findGenericTypeFromAst(resolver, ast);
+	if (existingGenericType != NULL) {
+		astInsertHigherOrderType(resolver, ast, (TypeInfo*)existingGenericType);
+		return existingGenericType;
+	}
+
     GenericTypeInfo* genericType = newGenericTypeInfo(-1, rawType->shortName, rawType->fullName, rawType);
     if (genericType != NULL) {
         Ast* typeParams = astGetChild(ast, 0);
