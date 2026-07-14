@@ -680,6 +680,7 @@ LOX_METHOD(Array, insertAt) {
     ASSERT_ARG_TYPE("Array::insertAt(index, element)", 0, Int);
     ObjArray* self = AS_ARRAY(receiver);
     int index = AS_INT(args[0]);
+
     ASSERT_INDEX_WITHIN_BOUNDS("Array::insertAt(index, element)", index, 0, self->elements.count, 0);
     valueArrayInsert(vm, &self->elements, index, args[1]);
     RETURN_VAL(args[1]);

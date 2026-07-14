@@ -638,6 +638,37 @@ static TypeInfo* findCallableTypeParams(Resolver* resolver, Ast* ast, Token* tok
     return NULL;
 }
 
+static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
+	char* callableName = bufferNewCString(UINT16_MAX);
+	size_t length = 0;
+	Ast* returnType = astGetChild(ast, 0);
+
+	char* returnTypeName = createTypeName(returnType->type, true);
+	size_t returnTypeLength = strlen(returnTypeName);
+	memcpy(callableName, returnTypeName, returnTypeLength);
+	length += returnTypeLength;
+	callableName[length++] = '(';
+	Ast* params = astGetChild(ast, 1);
+
+	for (int i = 0; i < params->children->count; i++) {
+		if (i > 0) {
+			callableName[length++] = ',';
+			callableName[length++] = ' ';
+		}
+
+		Ast* param = params->children->elements[i];
+		char* paramTypeName = createTypeName(param->type, true);
+		size_t paramTypeLength = strlen(paramTypeName);
+		memcpy(callableName + length, paramTypeName, paramTypeLength);
+		length += paramTypeLength;
+	}
+
+	callableName[length++] = ')';
+	callableName[length] = '\0';
+	ObjString* fullCallableName = takeStringPerma(resolver->vm, callableName, length);
+	return AS_CALLABLE_TYPE(typeTableGet(resolver->vm->typetab, fullCallableName));
+}
+
 static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isGeneric, bool isLambda, bool isVariadic, bool isVoid) {
     Ast* returnType = astGetChild(ast, 0);
     if (isGeneric && returnType->type == NULL) {
