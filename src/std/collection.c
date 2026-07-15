@@ -746,6 +746,7 @@ LOX_METHOD(Array, removeAt) {
     ASSERT_ARG_TYPE("Array::removeAt(index)", 0, Int);
     ObjArray* self = AS_ARRAY(receiver);
     int index = AS_INT(args[0]);
+
     ASSERT_INDEX_WITHIN_BOUNDS("Array::removeAt(index)", AS_INT(args[0]), 0, self->elements.count - 1, 0);
     Value element = valueArrayDelete(vm, &self->elements, index);
     RETURN_VAL(element);

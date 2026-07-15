@@ -714,8 +714,8 @@ static GenericTypeInfo* findGenericTypeFromAst(Resolver* resolver, Ast* ast) {
     size_t length = 0;
     TypeInfo* rawType = getTypeForSymbol(resolver, ast->token, false, true);
 
-    char* rawTypeName = createTypeName(rawType, true);
-    size_t rawTypeLength = strlen(rawTypeName);
+    char* rawTypeName = rawType->fullName->chars;
+    size_t rawTypeLength = rawType->fullName->length;
     memcpy(genericName, rawTypeName, rawTypeLength);
     length += rawTypeLength;
 
