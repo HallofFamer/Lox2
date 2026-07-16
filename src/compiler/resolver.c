@@ -643,7 +643,7 @@ static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
 	size_t length = 0;
 	Ast* returnType = astGetChild(ast, 0);
 
-	char* returnTypeName = createTypeName(returnType->type, true);
+	char* returnTypeName = returnType->type != NULL ? createTypeName(returnType->type, true) : "dynamic";
 	size_t returnTypeLength = strlen(returnTypeName);
 	memcpy(callableName, returnTypeName, returnTypeLength);
 	length += returnTypeLength;

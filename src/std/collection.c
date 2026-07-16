@@ -773,6 +773,7 @@ LOX_METHOD(Array, slice) {
     ASSERT_ARG_TYPE("Array::slice(from, to)", 0, Int);
     ASSERT_ARG_TYPE("Array::slice(from, to)", 1, Int);
     ObjArray* self = AS_ARRAY(receiver);
+
     int fromIndex = AS_INT(args[0]);
     int toIndex = AS_INT(args[1]);
     ASSERT_INDEX_WITHIN_BOUNDS("Array::slice(from, to)", fromIndex, 0, self->elements.count, 0);
