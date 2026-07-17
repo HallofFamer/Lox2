@@ -657,7 +657,7 @@ static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
 		}
 
 		Ast* param = params->children->elements[i];
-		char* paramTypeName = createTypeName(param->type, true);
+		char* paramTypeName = param->type != NULL ? createTypeName(param->type, true) : "dynamic";
 		size_t paramTypeLength = strlen(paramTypeName);
 		memcpy(callableName + length, paramTypeName, paramTypeLength);
 		length += paramTypeLength;

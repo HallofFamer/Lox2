@@ -800,6 +800,7 @@ LOX_METHOD(Array, __setSubscript__) {
     ASSERT_ARG_TYPE("Array::[]=(index, element)", 0, Int);
     ObjArray* self = AS_ARRAY(receiver);
     int index = AS_INT(args[0]);
+
     ASSERT_INDEX_WITHIN_BOUNDS("Array::[]=(index, element)", index, 0, self->elements.count, 0);
     self->elements.values[index] = args[1];
     if (index == self->elements.count) self->elements.count++;
