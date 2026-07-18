@@ -244,7 +244,7 @@ static char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullN
         size_t returnTypeLength = strlen(returnTypeName);
         memcpy(callableName, returnTypeName, returnTypeLength);
         length += returnTypeLength;
-        if (isTempType(callableType->returnType)) free(returnTypeName);
+        if (isHigherOrderType(callableType->returnType)) free(returnTypeName);
     }
     else {
         memcpy(callableName, "dynamic", 7);
@@ -266,7 +266,7 @@ static char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullN
                 size_t formalTypeLength = strlen(formalTypeName);
                 memcpy(callableName + length, formalTypeName, formalTypeLength);
                 length += formalTypeLength;
-                if (isTempType(formalType)) free(formalTypeName);
+                if (isHigherOrderType(formalType)) free(formalTypeName);
             }
             else {
                 memcpy(callableName + length, "dynamic", 7);
@@ -293,7 +293,7 @@ static char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullN
             size_t paramTypeLength = strlen(paramTypeName);
             memcpy(callableName + length, paramTypeName, paramTypeLength);
             length += paramTypeLength;
-            if (isTempType(paramType)) free(paramTypeName);
+            if (isHigherOrderType(paramType)) free(paramTypeName);
         }
         else {
             memcpy(callableName + length, "dynamic", 7);
@@ -315,7 +315,7 @@ static char* createGenericTypeName(GenericTypeInfo* genericType, bool isFullName
         size_t rawTypeLength = strlen(rawTypeName);
         memcpy(genericName, rawTypeName, rawTypeLength);
         length += rawTypeLength;
-        if (isTempType(genericType->rawType)) free(rawTypeName);
+        if (isHigherOrderType(genericType->rawType)) free(rawTypeName);
     }
     else {
         memcpy(genericName, "dynamic", 7);
@@ -334,7 +334,7 @@ static char* createGenericTypeName(GenericTypeInfo* genericType, bool isFullName
             size_t paramTypeLength = strlen(paramTypeName);
             memcpy(genericName + length, paramTypeName, paramTypeLength);
             length += paramTypeLength;
-            if (isTempType(paramType)) free(paramTypeName);
+            if (isHigherOrderType(paramType)) free(paramTypeName);
         }
         else {
             memcpy(genericName + length, "dynamic", 7);
@@ -356,7 +356,7 @@ static char* createAliasTypeName(AliasTypeInfo* aliasType, bool isFullName) {
         size_t targetTypeLength = strlen(targetTypeName);
         memcpy(aliasName, targetTypeName, targetTypeLength);
         length += targetTypeLength;
-        if (isTempType(aliasType->targetType)) free(targetTypeName);
+        if (isHigherOrderType(aliasType->targetType)) free(targetTypeName);
     }
     else {
         memcpy(aliasName, "dynamic", 7);
@@ -375,7 +375,7 @@ static char* createAliasTypeName(AliasTypeInfo* aliasType, bool isFullName) {
             size_t paramTypeLength = strlen(paramTypeName);
             memcpy(aliasName + length, paramTypeName, paramTypeLength);
             length += paramTypeLength;
-            if (isTempType(paramType)) free(paramTypeName);
+            if (isHigherOrderType(paramType)) free(paramTypeName);
         }
         else {
             memcpy(aliasName + length, "dynamic", 7);
@@ -671,7 +671,7 @@ TypeTable* newTypeTable(int id) {
 void freeTypeTable(TypeTable* typetab) {
     for (int i = 0; i < typetab->capacity; i++) {
         TypeEntry* entry = &typetab->entries[i];
-        if (entry != NULL && !isTempType(entry->value)) {
+        if (entry != NULL && !isHigherOrderType(entry->value)) {
             freeTypeInfo(entry->value);
         }
     }

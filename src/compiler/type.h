@@ -176,7 +176,7 @@ void typeTableOutput(TypeTable* typetab);
 bool isEqualType(TypeInfo* type, TypeInfo* type2);
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2);
 
-static inline bool isTempType(TypeInfo* type) {
+static inline bool isHigherOrderType(TypeInfo* type) {
     return (type != NULL) && (IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type));
 }
 

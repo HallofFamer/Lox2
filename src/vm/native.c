@@ -322,7 +322,7 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
         for (int i = 0; i < numParams; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
             TypeInfoArrayAdd(callableType->paramTypes, paramType);
-            if (isTempType(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+            if (isHigherOrderType(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
         }
         va_end(args);
     }
@@ -335,46 +335,53 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
     return (TypeInfo*)callableType;
 }
 
-TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawType, int numParams, ...) {
-	va_list args;
-	va_start(args, numParams);
-	char* genericName = bufferNewCString(UINT16_MAX);
+static GenericTypeInfo* findGenericTypeInfoWithName(VM* vm, TypeInfo* rawType, int numParams, va_list* args) {
+    char* genericName = bufferNewCString(UINT16_MAX);
     size_t length = 0;
-
+    
     char* rawTypeName = rawType->fullName->chars;
     size_t rawTypeLength = rawType->fullName->length;
     memcpy(genericName, rawTypeName, rawTypeLength);
     length += rawTypeLength;
     genericName[length++] = '<';
 
-    for (int i = 0; i < numParams; i++) {
-        if (i > 0) {
-            genericName[length++] = ',';
-            genericName[length++] = ' ';
-        }
-        TypeInfo* paramType = va_arg(*args, TypeInfo*);
-        char* paramTypeName = paramType != NULL ? createTypeName(paramType, true) : "dynamic";
-        size_t paramTypeLength = strlen(paramTypeName);
-        memcpy(genericName + length, paramTypeName, paramTypeLength);
-        length += paramTypeLength;
-    }
+	for (int i = 0; i < numParams; i++) {
+		if (i > 0) {
+			genericName[length++] = ',';
+			genericName[length++] = ' ';
+		}
+		TypeInfo* paramType = va_arg(*args, TypeInfo*);
+		char* paramTypeName = paramType != NULL ? createTypeName(paramType, true) : "dynamic";
+		size_t paramTypeLength = strlen(paramTypeName);
+		memcpy(genericName + length, paramTypeName, paramTypeLength);
+		length += paramTypeLength;
+	}
 
-    genericName[length++] = '>';
-    genericName[length] = '\0';
+	genericName[length++] = '>';
+	genericName[length] = '\0';
     ObjString* fullGenericName = takeStringPerma(vm, genericName, (int)length);
     TypeInfo* existingType = typeTableGet(vm->typetab, fullGenericName);
+
+    if (existingType != NULL && IS_GENERIC_TYPE(existingType)) {
+        return AS_GENERIC_TYPE(existingType);
+    }
+	return NULL;
+}
+
+TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawType, int numParams, ...) {
+	va_list args;
+	va_start(args, numParams);
+	GenericTypeInfo* existingGenericType = findGenericTypeInfoWithName(vm, rawType, numParams, &args);
 	va_end(args);
 
-	if (existingType != NULL && IS_GENERIC_TYPE(existingType)) {
-		return AS_GENERIC_TYPE(existingType);
-	}
+	if (existingGenericType != NULL) return (TypeInfo*)existingGenericType;
     GenericTypeInfo* genericType = newGenericTypeInfo(-1, name, name, rawType);
 	va_start(args, numParams);
 
     for (int i = 0; i < numParams; i++) {
         TypeInfo* paramType = va_arg(args, TypeInfo*);
         TypeInfoArrayAdd(genericType->actualTypeParams, paramType);
-        if (isTempType(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+        if (isHigherOrderType(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
     }
     va_end(args);
 

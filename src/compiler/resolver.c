@@ -620,7 +620,7 @@ static void astInsertHigherOrderType(Resolver* resolver, Ast* ast, TypeInfo* typ
     ast->type = type;
 	ast->type->shortName = takeStringPerma(resolver->vm, shortName, (int)strlen(shortName));
 	ast->type->fullName = takeStringPerma(resolver->vm, fullName, (int)strlen(fullName));
-    TypeInfoArrayAdd(resolver->vm->tempTypes, ast->type);
+    typeTableSet(resolver->vm->typetab, ast->type->fullName, ast->type);
 }
 
 static TypeInfo* findCallableTypeParams(Resolver* resolver, Ast* ast, Token* token) {

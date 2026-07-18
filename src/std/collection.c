@@ -1733,6 +1733,7 @@ LOX_METHOD(Node, toString) {
     Value nodeElement = AS_NODE(receiver)->element;
     char* nodeChars = valueToString(vm, nodeElement);
     size_t nodeLength = strlen(nodeChars);
+
     memcpy(nodeString + 6, nodeChars, nodeLength);
     nodeString[nodeLength + 6] = '\0';
     RETURN_STRING(nodeString, (int)nodeLength + 6);
