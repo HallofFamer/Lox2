@@ -1,0 +1,92 @@
+namespace examples.lib
+
+class Matrix {
+
+	var Int rows
+	var Int cols
+	var Array<Array<Number>> data
+
+	__init__(Int rows, Int cols) {
+		this.rows = rows
+		this.cols = cols
+		this.data = []
+
+		for (val i : 0..(rows - 1)) {
+			var row = []
+			row.fill(cols, 0)
+			this.data.add(row)
+		}
+	}
+
+	Number get(Int row, Int col) {
+		return this.data[row][col]
+	}
+
+	void set(Int row, Int col, Number value) {
+		this.data[row][col] = value
+	}
+
+	Matrix +(Matrix that) {
+		if (this.rows != that.rows || this.cols != that.cols) {
+			throw UnsupportedOperationException("Matrices must have the same dimensions for addition.")
+		}	
+		var result = Matrix(this.rows, this.cols)
+		
+		for (val i : 0..(this.rows - 1)) {
+			for (val j : 0..(this.cols - 1)) {
+				result.set(i, j, this.get(i, j) + that.get(i, j))
+			}
+		}
+		return result
+	}
+
+	Matrix -(Matrix that) {
+		if (this.rows != that.rows || this.cols != that.cols) {
+			throw UnsupportedOperationException("Matrices must have the same dimensions for subtraction.")
+		}	
+		var result = Matrix(this.rows, this.cols)
+		
+		for (val i : 0..(this.rows - 1)) {
+			for (val j : 0..(this.cols - 1)) {
+				result.set(i, j, this.get(i, j) - that.get(i, j))
+			}
+		}
+		return result
+	}
+
+	Matrix *(Matrix that) {
+		if (this.cols != that.rows) {
+			throw UnsupportedOperationException("Number of columns of the first matrix must equal the number of rows of the second matrix for multiplication.")
+		}
+		var result = Matrix(this.rows, that.cols)
+		
+		for (val i : 0..(this.rows - 1)) {
+			for (val j : 0..(that.cols - 1)) {
+				var sum = 0
+				for (val k : 0..(this.cols - 1)) {
+					sum = sum + this.get(i, k) * that.get(k, j)
+				}
+				result.set(i, j, sum)
+			}
+		}
+		return result
+	}
+
+	Matrix transpose() {
+		var result = Matrix(this.cols, this.rows)
+		for (val i : 0..(this.rows - 1)) {
+			for (val j : 0..(this.cols - 1)) {
+				result.set(j, i, this.get(i, j))
+			}
+		}
+		return result
+	}
+
+	String toString() {
+		var result = ""
+		for (val i : 0..(this.rows - 1)) {
+			result = result + this.data[i].join(", ") + "\n"
+		}
+		return result
+	}
+}

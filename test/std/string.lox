@@ -22,3 +22,7 @@ println("'Hello World' to upper case: ${"Hello World".toUppercase()}")
 println("'Hello World' to lower case: ${"Hello World".toLowercase()}")
 val str2 = "Hello My Friend"
 println("Splitting string 'Hello My Friend': ${str2.split(" ")}")
+
+val str3 = "Our big big world"
+println("Current string: ${str3}")
+println("String after replacing 'big' with 'small': ${str3.replaceAll("big", "small")}")

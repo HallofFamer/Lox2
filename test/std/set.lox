@@ -27,3 +27,24 @@ println("Looping through elements in set...")
 for(val element : set){
     println("Element: ${element}")
 }
+
+val set2 = Set()
+set2.add(1)
+set2.add(2)
+set2.add(3)
+set2.add(4)
+println("\nSet 2 elements: ${set2.toString()}")
+
+val set3 = Set()
+set3.add(3)
+set3.add(4)
+set3.add(5)
+set3.add(6)
+println("Set 3 elements: ${set3.toString()}")
+
+val set4 = set2.union(set3)
+println("Union of set 2 and set 3: ${set4.toString()}")
+val set5 = set2.intersection(set3)
+println("Intersection of set 2 and set 3: ${set5.toString()}")
+val set6 = set2.difference(set3)
+println("Difference of set 2 and set 3: ${set6.toString()}")
