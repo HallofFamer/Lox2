@@ -336,9 +336,40 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
 }
 
 TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawType, int numParams, ...) {
+	va_list args;
+	va_start(args, numParams);
+	char* genericName = bufferNewCString(UINT16_MAX);
+    size_t length = 0;
+
+    char* rawTypeName = rawType->fullName->chars;
+    size_t rawTypeLength = rawType->fullName->length;
+    memcpy(genericName, rawTypeName, rawTypeLength);
+    length += rawTypeLength;
+    genericName[length++] = '<';
+
+    for (int i = 0; i < numParams; i++) {
+        if (i > 0) {
+            genericName[length++] = ',';
+            genericName[length++] = ' ';
+        }
+        TypeInfo* paramType = va_arg(*args, TypeInfo*);
+        char* paramTypeName = paramType != NULL ? createTypeName(paramType, true) : "dynamic";
+        size_t paramTypeLength = strlen(paramTypeName);
+        memcpy(genericName + length, paramTypeName, paramTypeLength);
+        length += paramTypeLength;
+    }
+
+    genericName[length++] = '>';
+    genericName[length] = '\0';
+    ObjString* fullGenericName = takeStringPerma(vm, genericName, (int)length);
+    TypeInfo* existingType = typeTableGet(vm->typetab, fullGenericName);
+	va_end(args);
+
+	if (existingType != NULL && IS_GENERIC_TYPE(existingType)) {
+		return AS_GENERIC_TYPE(existingType);
+	}
     GenericTypeInfo* genericType = newGenericTypeInfo(-1, name, name, rawType);
-    va_list args;
-    va_start(args, numParams);
+	va_start(args, numParams);
 
     for (int i = 0; i < numParams; i++) {
         TypeInfo* paramType = va_arg(args, TypeInfo*);
@@ -351,7 +382,7 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawTy
     char* fullName = createTypeName((TypeInfo*)genericType, true);
     genericType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
     genericType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
-	TypeInfoArrayAdd(vm->tempTypes, (TypeInfo*)genericType);
+	typeTableSet(vm->typetab, genericType->baseType.fullName, (TypeInfo*)genericType);
     return (TypeInfo*)genericType;
 }
 

@@ -49,7 +49,7 @@ Value emptyObject(VM* vm, ObjClass* klass) {
         case OBJ_RECORD: obj = (Obj*)newRecord(vm, NULL); break;
         case OBJ_STRING: return OBJ_VAL(ALLOCATE_STRING(0, klass));
         case OBJ_TIMER: obj = (Obj*)newTimer(vm, NULL, 0, 0); break;
-		case OBJ_TYPE: obj = (Obj*)newType(vm, emptyString(vm), NULL); break;
+		case OBJ_TYPE: obj = (Obj*)newType(vm, emptyString(vm)); break;
         case OBJ_VALUE_INSTANCE: return OBJ_VAL(newValueInstance(vm, NIL_VAL, klass));
         default: return NIL_VAL;
     }
@@ -348,12 +348,16 @@ ObjTimer* newTimer(VM* vm, ObjClosure* closure, int delay, int interval) {
 
 static Value createTypeObjFromTypeInfo(VM* vm, TypeInfo* type) {
     if (type == NULL) return NIL_VAL;
-    ObjString* name = type->shortName;
-	TypeInfo* targetType = getAliasTargetType(type);
-    return OBJ_VAL(newType(vm, name, targetType));
+    return OBJ_VAL(newType(vm, type->fullName));
 }
 
-ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
+ObjType* newType(VM* vm, ObjString* name) {
+	TypeInfo* typeInfo = typeTableGet(vm->typetab, name);
+	if (typeInfo == NULL) {
+        runtimeError(vm, "Type '%s' not found.", name->chars);
+        exit(70);
+	}
+
 	TypeInfo* targetType = getAliasTargetType(typeInfo);
     ObjType* type = ALLOCATE_OBJ_GEN(ObjType, OBJ_TYPE, vm->typeClass, GC_GENERATION_TYPE_PERMANENT);
     type->category = targetType->category;

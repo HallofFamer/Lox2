@@ -1269,7 +1269,7 @@ InterpretResult run(VM* vm) {
                     RUNTIME_ERROR("The specified type alias %s is invalid.", typeName->chars);
                 }
 
-                push(vm, OBJ_VAL(newType(vm, typeName, typeInfo)));
+                push(vm, OBJ_VAL(newType(vm, typeName)));
                 tableSet(vm, &vm->currentNamespace->values, typeName, peek(vm, 0));
                 break;
             }

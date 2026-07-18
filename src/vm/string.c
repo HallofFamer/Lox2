@@ -224,20 +224,23 @@ ObjString* replaceAllString(VM* vm, ObjString* original, ObjString* target, ObjS
     char* heapChars = ALLOCATE(char, (size_t)newLength + 1, GC_GENERATION_TYPE_EDEN);
     pop(vm);
 
-	int offset = 0, occurrence = 0;
-	while (offset < original->length) {
-		if (occurrence < numOccurrence && offset == searchString(vm, original, target, offset)) {
-			for (int i = 0; i < replace->length; i++) {
-				heapChars[offset + i] = replace->chars[i];
-			}
-            offset += replace->length;
-			occurrence++;
-		}
-		else {
-			heapChars[offset] = original->chars[offset];
-			offset++;
-		}
-	}
+    int rIndex = 0;
+    int wIndex = 0;
+    while (rIndex < original->length) {
+        int offset = searchString(vm, original, target, rIndex);
+
+        if (offset == rIndex) {
+            for (int i = 0; i < replace->length; i++) {
+                heapChars[wIndex + i] = replace->chars[i];
+            }
+            rIndex += target->length;
+            wIndex += replace->length;
+        }
+        else {
+            heapChars[wIndex++] = original->chars[rIndex++];
+        }
+    }
+
 	heapChars[newLength] = '\0';
 	return takeString(vm, heapChars, (int)newLength);
 }
