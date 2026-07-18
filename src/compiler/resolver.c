@@ -665,11 +665,17 @@ static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
 
 	callableName[length++] = ')';
 	callableName[length] = '\0';
-	ObjString* fullCallableName = takeStringPerma(resolver->vm, callableName, length);
+	ObjString* fullCallableName = takeStringPerma(resolver->vm, callableName, (int)length);
 	return AS_CALLABLE_TYPE(typeTableGet(resolver->vm->typetab, fullCallableName));
 }
 
 static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isGeneric, bool isLambda, bool isVariadic, bool isVoid) {
+    CallableTypeInfo* existingCallableType = findCallableTypeFromAst(resolver, ast);
+    if (existingCallableType != NULL) {
+        astInsertHigherOrderType(resolver, ast, (TypeInfo*)existingCallableType);
+        return existingCallableType;
+    }
+    
     Ast* returnType = astGetChild(ast, 0);
     if (isGeneric && returnType->type == NULL) {
         returnType->type = findCallableTypeParams(resolver, ast, &returnType->token);
@@ -718,6 +724,7 @@ static GenericTypeInfo* findGenericTypeFromAst(Resolver* resolver, Ast* ast) {
     size_t rawTypeLength = rawType->fullName->length;
     memcpy(genericName, rawTypeName, rawTypeLength);
     length += rawTypeLength;
+	genericName[length++] = '<';
 
 	Ast* typeParams = astGetChild(ast, 0);
 	for (int i = 0; i < typeParams->children->count; i++) {
@@ -729,15 +736,13 @@ static GenericTypeInfo* findGenericTypeFromAst(Resolver* resolver, Ast* ast) {
 		Ast* typeParam = typeParams->children->elements[i];
 		char* typeParamName = typeParam->type != NULL ? createTypeName(typeParam->type, true) : "dynamic";
 		size_t typeParamLength = strlen(typeParamName);
-		genericName[length++] = '<';
-
 		memcpy(genericName + length, typeParamName, typeParamLength);
 		length += typeParamLength;
-		genericName[length++] = '>';
 	}
 
+    genericName[length++] = '>';
 	genericName[length] = '\0';
-	ObjString* fullGenericName = takeStringPerma(resolver->vm, genericName, length);
+	ObjString* fullGenericName = takeStringPerma(resolver->vm, genericName, (int)length);
 	return AS_GENERIC_TYPE(typeTableGet(resolver->vm->typetab, fullGenericName));
 }
 

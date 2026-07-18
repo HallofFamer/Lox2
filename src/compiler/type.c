@@ -235,7 +235,7 @@ AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjS
     return aliasType;
 }
 
-char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullName) {
+static char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullName) {
     char* callableName = bufferNewCString(UINT16_MAX);
     size_t length = 0;
 
@@ -306,7 +306,7 @@ char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullName) {
     return callableName;
 }
 
-char* createGenericTypeName(GenericTypeInfo* genericType, bool isFullName) {
+static char* createGenericTypeName(GenericTypeInfo* genericType, bool isFullName) {
     char* genericName = bufferNewCString(UINT16_MAX);
     size_t length = 0;
 
@@ -347,7 +347,7 @@ char* createGenericTypeName(GenericTypeInfo* genericType, bool isFullName) {
     return genericName;
 }
 
-char* createAliasTypeName(AliasTypeInfo* aliasType, bool isFullName) {
+static char* createAliasTypeName(AliasTypeInfo* aliasType, bool isFullName) {
     char* aliasName = bufferNewCString(UINT16_MAX);
     size_t length = 0;
 
@@ -671,7 +671,9 @@ TypeTable* newTypeTable(int id) {
 void freeTypeTable(TypeTable* typetab) {
     for (int i = 0; i < typetab->capacity; i++) {
         TypeEntry* entry = &typetab->entries[i];
-        if (entry != NULL) freeTypeInfo(entry->value);
+        if (entry != NULL && !isTempType(entry->value)) {
+            freeTypeInfo(entry->value);
+        }
     }
 
     if (typetab->entries != NULL) free(typetab->entries);

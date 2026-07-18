@@ -127,10 +127,10 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
-static void insertTempType(TypeChecker* typeChecker, TypeInfo* type) {
+static void insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type) {
 	if (type == NULL) return;
 	if (IS_GENERIC_TYPE(type) || IS_CALLABLE_TYPE(type)) {
-		char* shortName = createTypeName(type, false);
+        char* shortName = createTypeName(type, false);
 		char* fullName = createTypeName(type, true);
         type->shortName = takeStringPerma(typeChecker->vm, shortName, (int)strlen(shortName));
 		type->fullName = takeStringPerma(typeChecker->vm, fullName, (int)strlen(fullName));
@@ -142,7 +142,7 @@ static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, Type
 	TypeInfo* instantiatedType = instantiateTypeParameter(type, formalParams, actualParams);
 	if (instantiatedType == NULL) return NULL;
     else if (IS_CALLABLE_TYPE(instantiatedType) || IS_GENERIC_TYPE(instantiatedType)) {
-		insertTempType(typeChecker, instantiatedType);
+		insertHigherOrderType(typeChecker, instantiatedType);
     }
 	return instantiatedType;
 }
@@ -168,7 +168,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
         TypeInfoArrayAdd(instantiatedFunctionType->paramTypes, paramType);
     }
     
-	insertTempType(typeChecker, (TypeInfo*)instantiatedFunctionType);
+	insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedFunctionType);
     return instantiatedFunctionType;
 }
 
@@ -212,7 +212,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
         TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
     }
     
-	insertTempType(typeChecker, (TypeInfo*)instantiatedMethodType);
+	insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedMethodType);
     return instantiatedMethodType;
 }
 
@@ -224,7 +224,7 @@ static TypeInfo* getAstGenericDynamicType(TypeChecker* typeChecker, Ast* ast, Ty
         TypeInfoArrayAdd(genericType->actualTypeParams, NULL);
     }
 
-	insertTempType(typeChecker, (TypeInfo*)genericType);
+	insertHigherOrderType(typeChecker, (TypeInfo*)genericType);
     return (TypeInfo*)genericType;
 }
 
@@ -581,7 +581,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
                 TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
             }
 
-			insertTempType(typeChecker, (TypeInfo*)calleeType);
+			insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
             ast->type = (TypeInfo*)calleeType;
         }
     }
@@ -608,7 +608,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         deriveCalleeType(typeChecker, ast, calleeType);   
 
         callee->type = (TypeInfo*)calleeType;
-		insertTempType(typeChecker, (TypeInfo*)calleeType);
+		insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
         function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false, calleeType->attribute.isLambda);
     }
     else if (IS_CALLABLE_TYPE(rawType)) {

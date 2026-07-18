@@ -697,7 +697,9 @@ static Ast* question(Parser* parser, Token token, Ast* left, bool canAssign) {
         expr = nil(parser, previousToken(parser), left, canAssign);
     }
 
-    if (expr != NULL) expr->attribute.isOptional = true;
+    if (expr != NULL) {
+        expr->attribute.isOptional = true;
+    }
     return expr;
 }
 
