@@ -1461,6 +1461,7 @@ LOX_METHOD(LinkedList, addAt) {
     ObjInstance* self = AS_INSTANCE(receiver);
     int index = AS_INT(args[0]);
     int length = AS_INT(getObjField(vm, self, "length"));
+
     if (index == length) linkAddLast(vm, self, args[1]);
     else {
         if (!linkIndexIsValid(vm, self, index)) {

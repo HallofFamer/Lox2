@@ -315,6 +315,43 @@ ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass) 
 }
 
 TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...) {
+    char* callableName = bufferNewCString(UINT16_MAX);
+    size_t length = 0;
+    char* returnTypeName = returnType->fullName->chars;
+    size_t returnTypeLength = returnType->fullName->length;
+
+    memcpy(callableName, returnTypeName, returnTypeLength);
+    length += returnTypeLength;
+    memcpy(callableName + length, " fun(", 5);
+	length += 5;
+
+	if (numParams > 0) {
+		va_list args;
+		va_start(args, numParams);
+		for (int i = 0; i < numParams; i++) {
+			if (i > 0) {
+				callableName[length++] = ',';
+				callableName[length++] = ' ';
+			}
+
+			TypeInfo* paramType = va_arg(args, TypeInfo*);
+			char* paramTypeName = paramType != NULL ? createTypeName(paramType, true) : "dynamic";
+			size_t paramTypeLength = strlen(paramTypeName);
+			memcpy(callableName + length, paramTypeName, paramTypeLength);
+			length += paramTypeLength;
+		}
+		va_end(args);
+	}
+
+	callableName[length++] = ')';
+    callableName[length] = '\0';
+    ObjString* fullCallableName = takeStringPerma(vm, callableName, (int)length);
+    TypeInfo* existingType = typeTableGet(vm->typetab, fullCallableName);
+
+    if (existingType != NULL && IS_CALLABLE_TYPE(existingType)) {
+        return existingType;
+    }
+
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, category, name, returnType);
     if (numParams > 0) {
         va_list args;
@@ -331,16 +368,16 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
 	char* fullName = createTypeName((TypeInfo*)callableType, true);
     callableType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
 	callableType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
-    TypeInfoArrayAdd(vm->tempTypes, (TypeInfo*)callableType);
+    typeTableSet(vm->typetab, callableType->baseType.fullName, (TypeInfo*)callableType);
     return (TypeInfo*)callableType;
 }
 
 static GenericTypeInfo* findGenericTypeInfoWithName(VM* vm, TypeInfo* rawType, int numParams, va_list* args) {
     char* genericName = bufferNewCString(UINT16_MAX);
     size_t length = 0;
-    
     char* rawTypeName = rawType->fullName->chars;
     size_t rawTypeLength = rawType->fullName->length;
+
     memcpy(genericName, rawTypeName, rawTypeLength);
     length += rawTypeLength;
     genericName[length++] = '<';
