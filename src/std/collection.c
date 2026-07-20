@@ -1768,6 +1768,7 @@ LOX_METHOD(Queue, dequeue) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjNode* first = AS_NODE(getObjField(vm, self, "first"));
     int length = AS_INT(getObjField(vm, AS_INSTANCE(receiver), "length"));
+
     if (length == 0) RETURN_NIL;
     else if (length == 1) {
         ObjNode* new = newNode(vm, args[0], NULL, NULL);
@@ -1779,6 +1780,7 @@ LOX_METHOD(Queue, dequeue) {
     else {
         setObjField(vm, self, "first", OBJ_VAL(first->next));
     }
+
     collectionLengthDecrement(vm, self);
     RETURN_VAL(first->element);
 }

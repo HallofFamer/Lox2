@@ -9,6 +9,8 @@
 #include "string.h"
 #include "../common/os.h"
 
+#pragma warning(disable : 6305)
+
 LOX_FUNCTION(assert) {
     ASSERT_ARG_COUNT("assert(expression, message)", 2);
     ASSERT_ARG_TYPE("assert(expression, message)", 1, String);
@@ -314,47 +316,55 @@ ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass) 
     return exceptionClass;
 }
 
-TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...) {
-    char* callableName = bufferNewCString(UINT16_MAX);
-    size_t length = 0;
-    char* returnTypeName = returnType->fullName->chars;
-    size_t returnTypeLength = returnType->fullName->length;
+static CallableTypeInfo* findCallableTypeInfoWithName(VM* vm, TypeInfo* returnType, int numParams, va_list* args) {
+	char* callableName = bufferNewCString(UINT16_MAX);
+	size_t length = 0;
+	char* returnTypeName = returnType->fullName->chars;
+	size_t returnTypeLength = returnType->fullName->length;
 
-    memcpy(callableName, returnTypeName, returnTypeLength);
-    length += returnTypeLength;
-    memcpy(callableName + length, " fun(", 5);
+	memcpy(callableName, returnTypeName, returnTypeLength);
+	length += returnTypeLength;
+	memcpy(callableName + length, " fun(", 5);
 	length += 5;
-
-	if (numParams > 0) {
-		va_list args;
-		va_start(args, numParams);
+	
+    if (numParams > 0) {
 		for (int i = 0; i < numParams; i++) {
 			if (i > 0) {
 				callableName[length++] = ',';
 				callableName[length++] = ' ';
 			}
 
-			TypeInfo* paramType = va_arg(args, TypeInfo*);
+			TypeInfo* paramType = va_arg(*args, TypeInfo*);
 			char* paramTypeName = paramType != NULL ? createTypeName(paramType, true) : "dynamic";
 			size_t paramTypeLength = strlen(paramTypeName);
 			memcpy(callableName + length, paramTypeName, paramTypeLength);
 			length += paramTypeLength;
 		}
-		va_end(args);
 	}
 
 	callableName[length++] = ')';
-    callableName[length] = '\0';
-    ObjString* fullCallableName = takeStringPerma(vm, callableName, (int)length);
-    TypeInfo* existingType = typeTableGet(vm->typetab, fullCallableName);
-
+	callableName[length] = '\0';
+	ObjString* fullCallableName = takeStringPerma(vm, callableName, (int)length);
+	TypeInfo* existingType = typeTableGet(vm->typetab, fullCallableName);
+	
     if (existingType != NULL && IS_CALLABLE_TYPE(existingType)) {
-        return existingType;
-    }
+		return AS_CALLABLE_TYPE(existingType);
+	}
+	return NULL;
+}
 
+TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...) {
+    va_list args;
+    if (numParams > 0) va_start(args, numParams);
+    CallableTypeInfo* existingCallableType = findCallableTypeInfoWithName(vm, returnType, numParams, &args);
+    if (numParams > 0) va_end(args);
+
+    if (existingCallableType != NULL) {
+        return (TypeInfo*)existingCallableType;
+    }
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, category, name, returnType);
+
     if (numParams > 0) {
-        va_list args;
         va_start(args, numParams);
         for (int i = 0; i < numParams; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
@@ -411,7 +421,9 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawTy
 	GenericTypeInfo* existingGenericType = findGenericTypeInfoWithName(vm, rawType, numParams, &args);
 	va_end(args);
 
-	if (existingGenericType != NULL) return (TypeInfo*)existingGenericType;
+    if (existingGenericType != NULL) {
+        return (TypeInfo*)existingGenericType;
+    }
     GenericTypeInfo* genericType = newGenericTypeInfo(-1, name, name, rawType);
 	va_start(args, numParams);
 
