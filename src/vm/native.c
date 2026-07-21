@@ -192,7 +192,7 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     va_start(args, method);
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     TypeInfo* returnType = va_arg(args, TypeInfo*);
-    if (IS_CALLABLE_TYPE(returnType)) TypeInfoArrayAdd(vm->tempTypes, returnType);
+    if (isHigherOrderType(returnType)) TypeInfoArrayAdd(vm->tempTypes, returnType);
     
     bool isClass = (klass->behaviorType == BEHAVIOR_METACLASS);
     bool isInitializer = (strcmp(name, "__init__") == 0);
@@ -204,13 +204,13 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
         methodType->declaredType->attribute.isVariadic = true;
         TypeInfo* paramType = va_arg(args, TypeInfo*);
         TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
-        if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+        if (isHigherOrderType(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
     }
     else {
         for (int i = 0; i < arity; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
             TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
-            if (IS_CALLABLE_TYPE(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
+            if (isHigherOrderType(paramType)) TypeInfoArrayAdd(vm->tempTypes, paramType);
         }
     }
 
