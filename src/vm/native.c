@@ -152,7 +152,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Typ
     item->type = (TypeInfo*)functionType;
     item->type->shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
 	item->type->fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
-    TypeInfoArrayAdd(vm->tempTypes, item->type);
+    typeTableSet(vm->typetab, item->type->fullName, item->type);
     va_end(args);
 }
 
@@ -160,9 +160,6 @@ void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type
     ObjString* fieldName = newStringPerma(vm, name);
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     FieldTypeInfo* fieldType = typeTableInsertField(behaviorType->fields, fieldName, type, isMutable, !IS_NIL(defaultValue));
-    if (fieldType->declaredType != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
-        TypeInfoArrayAdd(vm->tempTypes, fieldType->declaredType);
-    }
 
     if (klass->classType == OBJ_INSTANCE || klass->classType == OBJ_CLASS) {
         klass->defaultShapeID = createShapeFromParent(vm, klass->defaultShapeID, fieldName);

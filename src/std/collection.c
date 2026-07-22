@@ -2163,10 +2163,12 @@ LOX_METHOD(Set, toArray) {
     ObjDictionary* dict = AS_DICTIONARY(getObjField(vm, self, "dict"));
     ObjArray* array = newArray(vm);
     push(vm, OBJ_VAL(array));
+
     for (int i = 0; i < dict->count; i++) {
         ObjEntry* entry = &dict->entries[i];
         if (!IS_UNDEFINED(entry->key)) valueArrayWrite(vm, &array->elements, entry->key);
     }
+
     pop(vm);
     RETURN_OBJ(array);
 }
