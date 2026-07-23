@@ -2275,6 +2275,7 @@ LOX_METHOD(Stack, pop) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjNode* first = AS_NODE(getObjField(vm, self, "first"));
     int length = AS_INT(getObjField(vm, AS_INSTANCE(receiver), "length"));
+
     if (length == 0) RETURN_NIL;
     else {
         Value element = first->element;
