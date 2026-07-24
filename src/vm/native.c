@@ -278,11 +278,18 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
         }
     }
 
-    typeTableSet(behaviorType->methods, methodName, (TypeInfo*)methodType);
-    if (methodType->declaredType != NULL) {
-        TypeInfoArrayAdd(vm->tempTypes, (TypeInfo*)methodType->declaredType);
-    }
     va_end(args);
+    typeTableSet(behaviorType->methods, methodName, (TypeInfo*)methodType);
+    char* shortName = createTypeName((TypeInfo*)methodType->declaredType, false);
+    char* fullName = createTypeName((TypeInfo*)methodType->declaredType, true);
+    methodType->declaredType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
+    methodType->declaredType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
+
+	TypeInfo* existingType = typeTableGet(vm->typetab, methodType->declaredType->baseType.fullName);
+	if (existingType != NULL && IS_CALLABLE_TYPE(existingType)) {
+		freeTypeInfo(vm, (TypeInfo*)methodType->declaredType);
+		methodType->declaredType = AS_CALLABLE_TYPE(existingType);
+	}
 
     if (isInitializer && behaviorType->isReified) {
         nativeMethod->arity += behaviorType->formalTypeParams->count;

@@ -2315,11 +2315,13 @@ LOX_METHOD(Stack, toArray) {
     int length = AS_INT(getObjField(vm, self, "length"));
     ObjArray* array = newArray(vm);
     push(vm, OBJ_VAL(array));
+
     if (length > 0) {
         for (ObjNode* node = AS_NODE(getObjField(vm, self, "first")); node != NULL; node = node->next) {
             valueArrayWrite(vm, &array->elements, node->element);
         }
     }
+
     pop(vm);
     RETURN_OBJ(array);
 }
