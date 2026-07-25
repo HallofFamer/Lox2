@@ -263,31 +263,32 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     bool isClass = (klass->behaviorType == BEHAVIOR_METACLASS);
     bool isInitializer = (strcmp(name, "__init__") == 0);
     MethodTypeInfo* methodType = newMethodTypeInfo(behaviorType->methods->count + 1, methodName, returnType, isClass, isInitializer);
-    methodType->declaredType->attribute.isAsync = isAsync;
-    methodType->declaredType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
+	CallableTypeInfo* declaredType = methodType->declaredType;
+    declaredType->attribute.isAsync = isAsync;
+    declaredType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
     if (arity < 0) {
-        methodType->declaredType->attribute.isVariadic = true;
+        declaredType->attribute.isVariadic = true;
         TypeInfo* paramType = va_arg(args, TypeInfo*);
-        TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
+        TypeInfoArrayAdd(declaredType->paramTypes, paramType);
     }
     else {
         for (int i = 0; i < arity; i++) {
             TypeInfo* paramType = va_arg(args, TypeInfo*);
-            TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
+            TypeInfoArrayAdd(declaredType->paramTypes, paramType);
         }
     }
 
     va_end(args);
     typeTableSet(behaviorType->methods, methodName, (TypeInfo*)methodType);
-    char* shortName = createTypeName((TypeInfo*)methodType->declaredType, false);
-    char* fullName = createTypeName((TypeInfo*)methodType->declaredType, true);
-    methodType->declaredType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
-    methodType->declaredType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
+    char* shortName = createTypeName((TypeInfo*)declaredType, false);
+    char* fullName = createTypeName((TypeInfo*)declaredType, true);
+    declaredType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
+    declaredType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
 
-	TypeInfo* existingType = typeTableGet(vm->typetab, methodType->declaredType->baseType.fullName);
+	TypeInfo* existingType = typeTableGet(vm->typetab, declaredType->baseType.fullName);
 	if (existingType != NULL && IS_CALLABLE_TYPE(existingType)) {
-		freeTypeInfo(vm, (TypeInfo*)methodType->declaredType);
+		freeTypeInfo((TypeInfo*)declaredType);
 		methodType->declaredType = AS_CALLABLE_TYPE(existingType);
 	}
 

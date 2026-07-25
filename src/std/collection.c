@@ -1968,6 +1968,7 @@ LOX_METHOD(Range, step) {
     ASSERT_ARG_TYPE("Range::step(by, closure)", 0, Number);
     ASSERT_ARG_TCALLABLE("Range::step(by, closure)", 1);
     ObjRange* self = AS_RANGE(receiver);
+
     double from = self->from;
     double to = self->to;
     double by = AS_NUMBER(args[0]);
@@ -2035,6 +2036,7 @@ LOX_METHOD(RangeIterator, moveNext) {
     ASSERT_ARG_COUNT("RangeIterator::moveNext()", 0);
     ObjIterator* self = AS_ITERATOR(receiver);
     ObjRange* range = AS_RANGE(self->iterable);
+
     if (self->position >= abs(range->to - range->from)) RETURN_FALSE;
     self->position++;
     self->value = INT_VAL(range->from + ((range->from < range->to) ? self->position : -self->position));
