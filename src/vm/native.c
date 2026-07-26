@@ -126,6 +126,16 @@ static CallableTypeInfo* findCallableTypeInfoWithName(VM* vm, TypeInfo* returnTy
             length += paramTypeLength;
         }
     }
+	else if (numParams < 0) {
+        memcpy(callableName + length, "...", 3);
+        length += 3;
+		TypeInfo* paramType = va_arg(*args, TypeInfo*);
+
+		char* paramTypeName = paramType != NULL ? createTypeName(paramType, true) : "dynamic";
+		size_t paramTypeLength = strlen(paramTypeName);
+		memcpy(callableName + length, paramTypeName, paramTypeLength);
+		length += paramTypeLength;
+	}
 
     callableName[length++] = ')';
     callableName[length] = '\0';
@@ -259,7 +269,7 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     va_start(args, method);
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
     TypeInfo* returnType = va_arg(args, TypeInfo*);
-    
+
     bool isClass = (klass->behaviorType == BEHAVIOR_METACLASS);
     bool isInitializer = (strcmp(name, "__init__") == 0);
     MethodTypeInfo* methodType = newMethodTypeInfo(behaviorType->methods->count + 1, methodName, returnType, isClass, isInitializer);

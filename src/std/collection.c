@@ -2062,6 +2062,7 @@ LOX_METHOD(Set, clear) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjDictionary* dict = AS_DICTIONARY(getObjField(vm, self, "dict"));
     FREE_ARRAY(ObjEntry, dict->entries, dict->capacity, dict->entries->obj.generation);
+
     dict->count = 0;
     dict->capacity = 0;
     dict->entries = NULL;
@@ -2208,10 +2209,11 @@ LOX_METHOD(SetIterator, moveNext) {
     ASSERT_ARG_COUNT("SetIterator::moveNext()", 0);
     ObjIterator* self = AS_ITERATOR(receiver);
     ObjInstance* set = AS_INSTANCE(self->iterable);
+
     ObjDictionary* dict = AS_DICTIONARY(getObjField(vm, set, "dict"));
     if (dict->count == 0 || self->position >= dict->capacity - 1) RETURN_FALSE;
-
     ObjEntry* entry = &dict->entries[++self->position];
+    
     while (entry == NULL || IS_UNDEFINED(entry->key)) {
         self->position++;
         if (self->position >= dict->capacity) {
@@ -2219,6 +2221,7 @@ LOX_METHOD(SetIterator, moveNext) {
         }
         entry = &dict->entries[self->position];
     }
+
     self->value = entry->key;
     RETURN_TRUE;
 }
