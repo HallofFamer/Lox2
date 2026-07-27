@@ -1790,10 +1790,11 @@ LOX_METHOD(Queue, enqueue) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjNode* first = AS_NODE(getObjField(vm, self, "first"));
     ObjNode* last = AS_NODE(getObjField(vm, self, "last"));
-    int length = AS_INT(getObjField(vm, AS_INSTANCE(receiver), "length"));
 
+    int length = AS_INT(getObjField(vm, AS_INSTANCE(receiver), "length"));
     ObjNode* new = newNode(vm, args[0], NULL, NULL);
     push(vm, OBJ_VAL(new));
+    
     if (length == 0) {
         setObjField(vm, self, "first", OBJ_VAL(new));
         setObjField(vm, self, "last", OBJ_VAL(new));
@@ -1802,6 +1803,7 @@ LOX_METHOD(Queue, enqueue) {
         last->next = new;
         setObjField(vm, self, "last", OBJ_VAL(new));
     }
+
     pop(vm);
     collectionLengthIncrement(vm, self);
     RETURN_VAL(args[0]);
