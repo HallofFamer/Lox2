@@ -166,7 +166,7 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
     return methodType;
 }
 
-MethodTypeInfo* newMethodTypeInfoWithDeclaredType(int id, ObjString* name, CallableTypeInfo* declaredType, bool isClass, bool isInitializer) {
+MethodTypeInfo* newMethodTypeWithDeclaredType(int id, ObjString* name, CallableTypeInfo* declaredType, bool isClass, bool isInitializer) {
 	MethodTypeInfo* methodType = (MethodTypeInfo*)newTypeInfo(id, sizeof(MethodTypeInfo), TYPE_CATEGORY_METHOD, name, name);
 	if (methodType != NULL) {
 		methodType->declaredType = declaredType;
@@ -831,9 +831,9 @@ FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInf
     return fieldType;
 }
 
-MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer) {
+MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, CallableTypeInfo* declaredType, bool isClass, bool isInitializer) {
     int id = typetab->count + 1;
-    MethodTypeInfo* methodType = newMethodTypeInfo(id, name, returnType, isClass, isInitializer);
+    MethodTypeInfo* methodType = newMethodTypeWithDeclaredType(id, name, declaredType, isClass, isInitializer);
     typeTableSet(typetab, name, (TypeInfo*)methodType);
     return methodType;
 }

@@ -100,8 +100,6 @@ void initVM(VM* vm) {
     vm->numSymtabs = 0;
     vm->symtab = newSymbolTable(vm->numSymtabs++, NULL, SYMBOL_SCOPE_GLOBAL, -1);
     vm->typetab = newTypeTable(0);
-    vm->tempTypes = ALLOCATE_STRUCT(TypeInfoArray);
-    TypeInfoArrayInit(vm->tempTypes);
 
     vm->initString = NULL;
     vm->voidString = NULL;
@@ -148,7 +146,6 @@ void freeVM(VM* vm) {
     vm->runningGenerator = NULL;
 
     freeSymbolTable(vm->symtab);
-    freeTempTypes(vm->tempTypes);
     freeTypeTable(vm->typetab);
     freeMarshaller(vm->marshaller);
     freeObjects(vm);

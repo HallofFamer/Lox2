@@ -84,7 +84,6 @@ struct VM {
     int numSymtabs;
     SymbolTable* symtab;
     TypeTable* typetab;
-    TypeInfoArray* tempTypes;
     Compiler* compiler;
 	Marshaller* marshaller;
     GC* gc;

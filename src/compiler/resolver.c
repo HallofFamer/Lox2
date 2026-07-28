@@ -1715,10 +1715,8 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
             _class = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, _class->baseType.fullName)));
         }
 
-        MethodTypeInfo* methodType = typeTableInsertMethod(_class->methods, name, NULL, ast->attribute.isClass, ast->attribute.isInitializer);
+        MethodTypeInfo* methodType = typeTableInsertMethod(_class->methods, name, AS_CALLABLE_TYPE(ast->type), ast->attribute.isClass, ast->attribute.isInitializer);
         setCallableTypeModifier(ast, methodType->declaredType);
-        free(methodType->declaredType);
-        methodType->declaredType = AS_CALLABLE_TYPE(ast->type);
 	    item->type = (TypeInfo*)methodType;
     }
 }

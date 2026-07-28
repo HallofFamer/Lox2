@@ -1744,8 +1744,8 @@ static Ast* funDeclaration(Parser* parser, bool isAsync, bool hasReturnType) {
     Ast* returnType = hasReturnType ? type_(parser, false, false) : emptyAst(AST_EXPR_TYPE, emptyToken());
     consume(parser, TOKEN_KIND_IDENTIFIER, "Expect function name.");
     Token name = previousToken(parser);
-
     Ast* typeParams = check(parser, TOKEN_KIND_LESS) ? typeParameters(parser, name) : NULL;
+
     Ast* body = function(parser, returnType, isAsync, false, isVoid);
 	body->token = name; 
     Ast* ast = newAst(AST_DECL_FUN, name, 1, body);
