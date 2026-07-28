@@ -2349,33 +2349,28 @@ LOX_METHOD(StackIterator, __init__) {
 }
 
 void registerCollectionPackage(VM* vm) {
-    ObjNamespace* collectionNamespace = defineNativeNamespace(vm, "collection", vm->stdNamespace);
+	ObjNamespace* collectionNamespace = getNativeNamespace(vm, "clox.std.collection");
     vm->currentNamespace = collectionNamespace;
 
     TypeInfo* elementType = declareNativeTypeParameter(vm, "E");
     ObjClass* iterableTrait = getNativeClass(vm, "clox.std.lang.TIterable");
-    ObjClass* collectionClass = defineNativeGenericClass(vm, "Collection", 1, elementType);
-    ObjClass* listClass = defineNativeGenericClass(vm, "List", 1, elementType);
-    vm->arrayClass = defineNativeGenericClass(vm, "Array", 1, elementType);
-    ObjClass* arrayIteratorClass = defineNativeGenericClass(vm, "ArrayIterator", 1, elementType);
-    ObjClass* linkedListClass = defineNativeGenericClass(vm, "LinkedList", 1, elementType);
-    ObjClass* linkedListIteratorClass = defineNativeGenericClass(vm, "LinkedListIterator", 1, elementType);
-    vm->nodeClass = defineNativeGenericClass(vm, "Node", 1, elementType);
+    ObjClass* collectionClass = getNativeClass(vm, "clox.std.collection.Collection");
+	ObjClass* listClass = getNativeClass(vm, "clox.std.collection.List");
+    ObjClass* arrayIteratorClass = getNativeClass(vm, "clox.std.collection.ArrayIterator");
+    ObjClass* linkedListClass = getNativeClass(vm, "clox.std.collection.LinkedList");
+    ObjClass* linkedListIteratorClass = getNativeClass(vm, "clox.std.collection.LinkedListIterator");
 
     TypeInfo* keyType = declareNativeTypeParameter(vm, "K");
     TypeInfo* valueType = declareNativeTypeParameter(vm, "V");
-    vm->dictionaryClass = defineNativeGenericClass(vm, "Dictionary", 2, keyType, valueType);
-    ObjClass* dictionaryIteratorClass = defineNativeGenericClass(vm, "DictionaryIterator", 1, valueType);
-    vm->entryClass = defineNativeGenericClass(vm, "Entry", 2, keyType, valueType);
+    ObjClass* dictionaryIteratorClass = getNativeClass(vm, "clox.std.collection.DictionaryIterator");
 
-    ObjClass* setClass = defineNativeGenericClass(vm, "Set", 1, elementType);
-    ObjClass* setIteratorClass = defineNativeGenericClass(vm, "SetIterator", 1, elementType);
-    vm->rangeClass = defineNativeClass(vm, "Range");
-    ObjClass* rangeIteratorClass = defineNativeClass(vm, "RangeIterator");
-    ObjClass* stackClass = defineNativeGenericClass(vm, "Stack", 1, elementType);
-    ObjClass* stackIteratorClass = defineNativeGenericClass(vm, "StackIterator", 1, elementType);
-    ObjClass* queueClass = defineNativeGenericClass(vm, "Queue", 1, elementType);
-    ObjClass* queueIteratorClass = defineNativeGenericClass(vm, "QueueIterator", 1, elementType);
+    ObjClass* setClass = getNativeClass(vm, "clox.std.collection.Set");
+    ObjClass* setIteratorClass = getNativeClass(vm, "clox.std.collection.SetIterator");
+    ObjClass* rangeIteratorClass = getNativeClass(vm, "clox.std.collection.RangeIterator");
+    ObjClass* stackClass = getNativeClass(vm, "clox.std.collection.Stack");
+    ObjClass* stackIteratorClass = getNativeClass(vm, "clox.std.collection.StackIterator");
+    ObjClass* queueClass = getNativeClass(vm, "clox.std.collection.Queue");
+    ObjClass* queueIteratorClass = getNativeClass(vm, "clox.std.collection.QueueIterator");
 
     bindSuperclass(vm, collectionClass, vm->objectClass);
     bindTrait(vm, collectionClass, iterableTrait);

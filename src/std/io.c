@@ -710,18 +710,17 @@ LOX_METHOD(WriteStream, write) {
 }
 
 void registerIOPackage(VM* vm) {
-    ObjNamespace* ioNamespace = defineNativeNamespace(vm, "io", vm->stdNamespace);
+    ObjNamespace* ioNamespace = getNativeNamespace(vm, "clox.std.io");
     vm->currentNamespace = ioNamespace;
 
-    vm->fileClass = defineNativeClass(vm, "File");
-    ObjClass* closableTrait = defineNativeTrait(vm, "TClosable");
-    ObjClass* ioStreamClass = defineNativeClass(vm, "IOStream");
-    ObjClass* readStreamClass = defineNativeClass(vm, "ReadStream");
-    ObjClass* writeStreamClass = defineNativeClass(vm, "WriteStream");
-    ObjClass* binaryReadStreamClass = defineNativeClass(vm, "BinaryReadStream");
-    ObjClass* binaryWriteStreamClass = defineNativeClass(vm, "BinaryWriteStream");
-    ObjClass* fileReadStreamClass = defineNativeClass(vm, "FileReadStream");
-    ObjClass* fileWriteStreamClass = defineNativeClass(vm, "FileWriteStream");
+    ObjClass* closableTrait = getNativeClass(vm, "clox.std.io.TClosable");
+    ObjClass* ioStreamClass = getNativeClass(vm, "clox.std.io.IOStream");
+    ObjClass* readStreamClass = getNativeClass(vm, "clox.std.io.ReadStream");
+    ObjClass* writeStreamClass = getNativeClass(vm, "clox.std.io.WriteStream");
+    ObjClass* binaryReadStreamClass = getNativeClass(vm, "clox.std.io.BinaryReadStream");
+    ObjClass* binaryWriteStreamClass = getNativeClass(vm, "clox.std.io.BinaryWriteStream");
+    ObjClass* fileReadStreamClass = getNativeClass(vm, "clox.std.io.FileReadStream");
+    ObjClass* fileWriteStreamClass = getNativeClass(vm, "clox.std.io.FileWriteStream");
 
     bindSuperclass(vm, vm->fileClass, vm->objectClass);
     vm->fileClass->classType = OBJ_FILE;

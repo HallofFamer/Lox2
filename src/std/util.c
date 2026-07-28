@@ -875,19 +875,17 @@ LOX_METHOD(UUIDClass, parse) {
 }
 
 void registerUtilPackage(VM* vm) {
-    ObjNamespace* utilNamespace = defineNativeNamespace(vm, "util", vm->stdNamespace);
+    ObjNamespace* utilNamespace = getNativeNamespace(vm, "clox.std.util");
     vm->currentNamespace = utilNamespace;
 
     TypeInfo* placeholderType = declareNativeTypeParameter(vm, "T");
     ObjClass* comparableTrait = getNativeClass(vm, "clox.std.lang.TComparable");
-    ObjClass* dateClass = defineNativeClass(vm, "Date");
-    ObjClass* dateTimeClass = defineNativeClass(vm, "DateTime");
-    ObjClass* durationClass = defineNativeClass(vm, "Duration");
-    vm->promiseClass = defineNativeGenericClass(vm, "Promise", 1, placeholderType);
-    ObjClass* randomClass = defineNativeClass(vm, "Random");
-    ObjClass* regexClass = defineNativeClass(vm, "Regex");
-    vm->timerClass = defineNativeClass(vm, "Timer");
-    ObjClass* uuidClass = defineNativeClass(vm, "UUID");
+    ObjClass* dateClass = getNativeClass(vm, "clox.std.util.Date");
+    ObjClass* dateTimeClass = getNativeClass(vm, "clox.std.util.DateTime");
+    ObjClass* durationClass = getNativeClass(vm, "clox.std.util.Duration");
+    ObjClass* randomClass = getNativeClass(vm, "clox.std.util.Random");
+    ObjClass* regexClass = getNativeClass(vm, "clox.std.util.Regex");
+    ObjClass* uuidClass = getNativeClass(vm, "clox.std.util.UUID");
 
     bindSuperclass(vm, dateClass, vm->objectClass);
     bindTrait(vm, dateClass, comparableTrait);

@@ -17,11 +17,7 @@
 #include "variable.h"
 #include "vm.h"
 #include "../common/os.h"
-#include "../std/collection.h"
-#include "../std/io.h"
-#include "../std/lang.h"
-#include "../std/net.h"
-#include "../std/util.h"
+#include "../std/std.h"
 
 static void resetCallFrame(VM* vm, int index) {
     CallFrame* frame = &vm->frames[index];
@@ -124,13 +120,7 @@ void initVM(VM* vm) {
     vm->voidString = copyStringPerma(vm, "void", 4);
     TypeInfo* voidType = newTypeInfo(0, sizeof(TypeInfo), TYPE_CATEGORY_VOID, vm->voidString, vm->voidString);
     typeTableSet(vm->typetab, vm->voidString, voidType);
-
-    registerLangPackage(vm);
-    registerCollectionPackage(vm);
-    registerUtilPackage(vm);
-    registerIOPackage(vm);
-    registerNetPackage(vm);
-    registerNativeFunctions(vm);
+	registerStdPackages(vm);
 }
 
 void freeVM(VM* vm) {

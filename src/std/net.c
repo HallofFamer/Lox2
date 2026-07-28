@@ -808,19 +808,19 @@ LOX_METHOD(URLClass, parse) {
 }
 
 void registerNetPackage(VM* vm) {
-    ObjNamespace* netNamespace = defineNativeNamespace(vm, "net", vm->stdNamespace);
+    ObjNamespace* netNamespace = getNativeNamespace(vm, "clox.std.net");
     vm->currentNamespace = netNamespace;
 
-    ObjClass* urlClass = defineNativeClass(vm, "URL");
-    ObjClass* domainClass = defineNativeClass(vm, "Domain");
-    ObjClass* ipAddressClass = defineNativeClass(vm, "IPAddress");
-    ObjClass* socketAddressClass = defineNativeClass(vm, "SocketAddress");
-    ObjClass* socketClass = defineNativeClass(vm, "Socket");
-    ObjClass* socketClientClass = defineNativeClass(vm, "SocketClient");
-    ObjClass* socketServerClass = defineNativeClass(vm, "SocketServer");
-    ObjClass* httpRequestClass = defineNativeClass(vm, "HTTPRequest");
-    ObjClass* httpResponseClass = defineNativeClass(vm, "HTTPResponse");
-    ObjClass* httpClientClass = defineNativeClass(vm, "HTTPClient");
+    ObjClass* urlClass = getNativeClass(vm, "clox.std.net.URL");
+    ObjClass* domainClass = getNativeClass(vm, "clox.std.net.Domain");
+    ObjClass* ipAddressClass = getNativeClass(vm, "clox.std.net.IPAddress");
+    ObjClass* socketAddressClass = getNativeClass(vm, "clox.std.net.SocketAddress");
+    ObjClass* socketClass = getNativeClass(vm, "clox.std.net.Socket");
+    ObjClass* socketClientClass = getNativeClass(vm, "clox.std.net.SocketClient");
+    ObjClass* socketServerClass = getNativeClass(vm, "clox.std.net.SocketServer");
+    ObjClass* httpRequestClass = getNativeClass(vm, "clox.std.net.HTTPRequest");
+    ObjClass* httpResponseClass = getNativeClass(vm, "clox.std.net.HTTPResponse");
+    ObjClass* httpClientClass = getNativeClass(vm, "clox.std.net.HTTPClient");
 
     bindSuperclass(vm, urlClass, vm->objectClass);
     DEF_FIELD(urlClass, scheme, String, false, OBJ_VAL(emptyString(vm)));

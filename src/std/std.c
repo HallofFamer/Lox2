@@ -109,6 +109,16 @@ static void defineLangTypes(VM* vm) {
     vm->traitClass = defineNativeClass(vm, "Trait");
     vm->typeClass = defineNativeClass(vm, "Type");
 
+    insertGlobalSymbolTable(vm, "clox", "Namespace");
+    insertGlobalSymbolTable(vm, "Object", "Object class");
+    insertGlobalSymbolTable(vm, "Behavior", "Behavior class");
+    insertGlobalSymbolTable(vm, "Class", "Class class");
+    insertGlobalSymbolTable(vm, "Metaclass", "Metaclass class");
+    insertGlobalSymbolTable(vm, "Method", "Method class");
+    insertGlobalSymbolTable(vm, "Namespace", "Namespace class");
+    insertGlobalSymbolTable(vm, "Trait", "Trait class");
+    insertGlobalSymbolTable(vm, "Type", "Type class");
+
     vm->nilClass = defineNativeClass(vm, "Nil");
     vm->boolClass = defineNativeClass(vm, "Bool");
     ObjClass* comparableTrait = defineNativeTrait(vm, "TComparable");
@@ -128,6 +138,23 @@ static void defineLangTypes(VM* vm) {
     vm->boundMethodClass = defineNativeClass(vm, "BoundMethod");
     vm->generatorClass = defineNativeClass(vm, "Generator");
     vm->exceptionClass = defineNativeClass(vm, "Exception");
+
+    insertGlobalSymbolTable(vm, "Nil", "Nil class");
+	insertGlobalSymbolTable(vm, "Bool", "Bool class");
+    insertGlobalSymbolTable(vm, "TComparable", "Trait");
+    insertGlobalSymbolTable(vm, "Number", "Number class");
+	insertGlobalSymbolTable(vm, "Int", "Int class");
+    insertGlobalSymbolTable(vm, "Float", "Float class");
+	insertGlobalSymbolTable(vm, "TIterable", "Trait");
+	insertGlobalSymbolTable(vm, "TIterator", "Trait");
+	insertGlobalSymbolTable(vm, "Iterator", "Iterator class");
+    insertGlobalSymbolTable(vm, "String", "String class");
+	insertGlobalSymbolTable(vm, "StringIterator", "StringIterator class");
+	insertGlobalSymbolTable(vm, "TCallable", "Trait");
+    insertGlobalSymbolTable(vm, "Function", "Function class");
+    insertGlobalSymbolTable(vm, "BoundMethod", "BoundMethod class");
+	insertGlobalSymbolTable(vm, "Generator", "Generator class");
+    insertGlobalSymbolTable(vm, "Exception", "Exception class");
     vm->currentNamespace = vm->rootNamespace;
 }
 
