@@ -5,6 +5,7 @@ val square = fun(a){
 }
 println("Using anonymous function for square(2): ${square(2)}")
 println("Invoke anonymous function pow(2, 3) directly: ")
+
 fun(a, b){ println(a.pow(b)) }(2, 3)
 println("Class of anonymous function: ${square.getClassName()}")
 println("Arity of anonymous function: ${square.arity()}")

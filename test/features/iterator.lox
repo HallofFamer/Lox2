@@ -1,7 +1,7 @@
 namespace test.features
 using clox.std.collection.Dictionary
 
-class IterableObject with TIterable { 
+class IterableObject with TIterable<Object> { 
     
     val Dictionary fields = Dictionary()
     var Int position = -1
@@ -11,7 +11,7 @@ class IterableObject with TIterable {
         this.fields[name] = value
     }
 
-    TIterator iterator() {
+    TIterator<Object> iterator() {
         return this.fields.iterator()
     }
 
