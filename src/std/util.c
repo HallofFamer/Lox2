@@ -5,10 +5,10 @@
 #include <time.h>
 
 #include "util.h"
+#include "../common/os.h"
 #include "../inc/pcg.h"
 #include "../inc/regex.h"
 #include "../inc/uuid4.h"
-#include "../common/os.h"
 #include "../vm/assert.h"
 #include "../vm/date.h"
 #include "../vm/native.h"

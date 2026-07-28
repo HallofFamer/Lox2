@@ -166,6 +166,16 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
     return methodType;
 }
 
+MethodTypeInfo* newMethodTypeInfoWithDeclaredType(int id, ObjString* name, CallableTypeInfo* declaredType, bool isClass, bool isInitializer) {
+	MethodTypeInfo* methodType = (MethodTypeInfo*)newTypeInfo(id, sizeof(MethodTypeInfo), TYPE_CATEGORY_METHOD, name, name);
+	if (methodType != NULL) {
+		methodType->declaredType = declaredType;
+		methodType->isClass = isClass;
+		methodType->isInitializer = isInitializer;
+	}
+	return methodType;
+}
+
 TypeInfo* newPlaceholderTypeInfo(int id, ObjString* name) {
     return newTypeInfo(id, sizeof(TypeInfo), TYPE_CATEGORY_PLACEHOLDER, name, name);
 }

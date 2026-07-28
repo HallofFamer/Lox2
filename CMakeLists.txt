@@ -162,6 +162,8 @@ set(Source_Files__std
     "src/std/lang.h"
     "src/std/net.c"
     "src/std/net.h"
+    "src/std/std.c"
+    "src/std/std.h"
     "src/std/util.c"
     "src/std/util.h"
 )
