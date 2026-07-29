@@ -215,25 +215,32 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Typ
     tableSet(vm, &vm->rootNamespace->values, functionName, OBJ_VAL(nativeFunction));
     pop(vm);
 
-    SymbolItem* item = insertGlobalSymbolTable(vm, name, NULL);
-    CallableTypeInfo* functionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, functionName, returnType);
-    functionType->attribute.isAsync = isAsync;
-    functionType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
-
     va_list args;
-    va_start(args, function);
-    for (int i = 0; i < arity; i++) {
-        TypeInfo* paramType = va_arg(args, TypeInfo*);
-        TypeInfoArrayAdd(functionType->paramTypes, paramType);
+    if (arity > 0) va_start(args, function);
+    CallableTypeInfo* functionType = findCallableTypeInfoWithName(vm, returnType, arity, &args);
+	if (arity > 0) va_end(args);
+
+    SymbolItem* item = insertGlobalSymbolTable(vm, name, NULL);
+    if (functionType == NULL) {
+        functionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, functionName, returnType);
+        functionType->attribute.isAsync = isAsync;
+        functionType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
+
+        va_start(args, function);
+        for (int i = 0; i < arity; i++) {
+            TypeInfo* paramType = va_arg(args, TypeInfo*);
+            TypeInfoArrayAdd(functionType->paramTypes, paramType);
+        }
+        va_end(args);
+
+        char* shortName = createTypeName((TypeInfo*)functionType, false);
+        char* fullName = createTypeName((TypeInfo*)functionType, true);
+        functionType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
+        functionType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
     }
-    
-    char* shortName = createTypeName((TypeInfo*)functionType, false);
-	char* fullName = createTypeName((TypeInfo*)functionType, true);
+
     item->type = (TypeInfo*)functionType;
-    item->type->shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
-	item->type->fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
-    typeTableSet(vm->typetab, item->type->fullName, item->type);
-    va_end(args);
+    typeTableSet(vm->typetab, functionType->baseType.fullName, (TypeInfo*)functionType);
 }
 
 void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type, bool isMutable, Value defaultValue) {

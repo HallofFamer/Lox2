@@ -2101,21 +2101,6 @@ static void bindNamespaceClass(VM* vm) {
     }
 }
 
-static ObjClass* defineSpecialClass(VM* vm, const char* name, BehaviorType behavior) {
-    ObjString* className = newStringPerma(vm, name);
-    push(vm, OBJ_VAL(className));
-    ObjClass* nativeClass = createClass(vm, className, NULL, behavior);
-    nativeClass->isNative = true;
-    push(vm, OBJ_VAL(nativeClass));
-
-    tableSet(vm, &vm->classes, nativeClass->fullName, OBJ_VAL(nativeClass));
-    tableSet(vm, &vm->rootNamespace->values, AS_STRING(vm->stack[0]), vm->stack[1]);
-    pop(vm);
-    pop(vm);
-    typeTableInsertBehavior(vm->typetab, TYPE_CATEGORY_CLASS, className, nativeClass->fullName, NULL);
-    return nativeClass;
-}
-
 static ObjNamespace* defineRootNamespace(VM* vm) {
     ObjString* name = newStringPerma(vm, "");
     ObjNamespace* rootNamespace = newNamespace(vm, name, NULL);
