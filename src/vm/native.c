@@ -275,40 +275,46 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     va_list args;
     va_start(args, method);
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeTableGet(vm->typetab, klass->fullName));
+	MethodTypeInfo* methodType = NULL;
     TypeInfo* returnType = va_arg(args, TypeInfo*);
 
     bool isClass = (klass->behaviorType == BEHAVIOR_METACLASS);
     bool isInitializer = (strcmp(name, "__init__") == 0);
-    MethodTypeInfo* methodType = newMethodTypeInfo(behaviorType->methods->count + 1, methodName, returnType, isClass, isInitializer);
-	CallableTypeInfo* callableType = methodType->declaredType;
-    callableType->attribute.isAsync = isAsync;
-    callableType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
+    CallableTypeInfo* declaredType = findCallableTypeInfoWithName(vm, returnType, arity, &args);
+    va_end(args);
 
-    if (arity < 0) {
-        callableType->attribute.isVariadic = true;
-        TypeInfo* paramType = va_arg(args, TypeInfo*);
-        TypeInfoArrayAdd(callableType->paramTypes, paramType);
+    if (declaredType == NULL) {
+        va_start(args, method);
+        returnType = va_arg(args, TypeInfo*);
+        methodType = newMethodTypeInfo(behaviorType->methods->count + 1, methodName, returnType, isClass, isInitializer);
+        
+        declaredType = methodType->declaredType;
+        declaredType->attribute.isAsync = isAsync;
+        declaredType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
+
+        if (arity < 0) {
+            declaredType->attribute.isVariadic = true;
+            TypeInfo* paramType = va_arg(args, TypeInfo*);
+            TypeInfoArrayAdd(declaredType->paramTypes, paramType);
+        }
+        else {
+            for (int i = 0; i < arity; i++) {
+                TypeInfo* paramType = va_arg(args, TypeInfo*);
+                TypeInfoArrayAdd(declaredType->paramTypes, paramType);
+            }
+        }
+
+        va_end(args);
+        char* shortName = createTypeName((TypeInfo*)declaredType, false);
+        char* fullName = createTypeName((TypeInfo*)declaredType, true);
+        declaredType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
+        declaredType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
     }
     else {
-        for (int i = 0; i < arity; i++) {
-            TypeInfo* paramType = va_arg(args, TypeInfo*);
-            TypeInfoArrayAdd(callableType->paramTypes, paramType);
-        }
+		methodType = newMethodTypeInfoWithDeclaredType(behaviorType->methods->count + 1, methodName, declaredType, isClass, isInitializer);
     }
 
-    va_end(args);
     typeTableSet(behaviorType->methods, methodName, (TypeInfo*)methodType);
-    char* shortName = createTypeName((TypeInfo*)callableType, false);
-    char* fullName = createTypeName((TypeInfo*)callableType, true);
-    callableType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
-    callableType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
-
-	TypeInfo* existingType = typeTableGet(vm->typetab, callableType->baseType.fullName);
-	if (existingType != NULL && IS_CALLABLE_TYPE(existingType)) {
-		freeTypeInfo((TypeInfo*)callableType);
-		methodType->declaredType = AS_CALLABLE_TYPE(existingType);
-	}
-
     if (isInitializer && behaviorType->isReified) {
         nativeMethod->arity += behaviorType->formalTypeParams->count;
     }

@@ -2101,17 +2101,6 @@ static void bindNamespaceClass(VM* vm) {
     }
 }
 
-static ObjNamespace* defineRootNamespace(VM* vm) {
-    ObjString* name = newStringPerma(vm, "");
-    ObjNamespace* rootNamespace = newNamespace(vm, name, NULL);
-    rootNamespace->isRoot = true;
-
-    push(vm, OBJ_VAL(rootNamespace));
-    tableSet(vm, &vm->namespaces, name, OBJ_VAL(rootNamespace));
-    pop(vm);
-    return rootNamespace;
-}
-
 void registerLangPackage(VM* vm) {
     vm->currentNamespace = vm->langNamespace;
 
