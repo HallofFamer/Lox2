@@ -2144,9 +2144,9 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(behaviorClass, Behavior, isNative, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, isTrait, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, isType, 0, NATIVE_TYPE(Bool));
-    DEF_METHOD(behaviorClass, Behavior, methods, 0, NATIVE_TYPE(Object));
+    DEF_METHOD(behaviorClass, Behavior, methods, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Method)));
     DEF_METHOD(behaviorClass, Behavior, name, 0, NATIVE_TYPE(String));
-    DEF_METHOD(behaviorClass, Behavior, traits, 0, NATIVE_TYPE(Object));
+    DEF_METHOD(behaviorClass, Behavior, traits, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Trait)));
     DEF_OPERATOR(behaviorClass, Behavior, (), __invoke__, -1, NATIVE_TYPE(Object));
 
     inheritSuperclass(vm, vm->classClass, behaviorClass);
