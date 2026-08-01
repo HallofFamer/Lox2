@@ -2235,7 +2235,7 @@ void registerLangPackage(VM* vm) {
     bindSuperclass(vm, vm->typeClass, behaviorClass);
     DEF_INTERCEPTOR(vm->typeClass, Type, INTERCEPTOR_INIT, __init__, 2, NATIVE_TYPE(Type), NATIVE_TYPE(String), NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, getMethod, 1, NATIVE_TYPE(Method), NATIVE_TYPE(String));
-	DEF_METHOD(vm->typeClass, Type, getTypeParameters, 0, NATIVE_TYPE(Object));
+	DEF_METHOD(vm->typeClass, Type, getTypeParameters, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Type)));
     DEF_METHOD(vm->typeClass, Type, hasMethod, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(String));
 	DEF_METHOD(vm->typeClass, Type, hasTypeParameters, 0, NATIVE_TYPE(Bool));
 	DEF_METHOD(vm->typeClass, Type, isAlias, 0, NATIVE_TYPE(Bool));
@@ -2247,11 +2247,11 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, isNative, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isPlaceholder, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isTrait, 0, NATIVE_TYPE(Bool));
-    DEF_METHOD(vm->typeClass, Type, methods, 0, NATIVE_TYPE(Object));
+    DEF_METHOD(vm->typeClass, Type, methods, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Method)));
     DEF_METHOD(vm->typeClass, Type, name, 0, NATIVE_TYPE(String));
 	DEF_METHOD(vm->typeClass, Type, toBehavior, 0, NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, toString, 0, NATIVE_TYPE(String));
-    DEF_METHOD(vm->typeClass, Type, traits, 0, NATIVE_TYPE(Object));
+    DEF_METHOD(vm->typeClass, Type, traits, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Trait)));
     DEF_OPERATOR(vm->typeClass, Type, (), __invoke__, -1, NATIVE_TYPE(Object));
 
     bindSuperclass(vm, vm->nilClass, vm->objectClass);

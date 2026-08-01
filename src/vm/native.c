@@ -369,10 +369,11 @@ ObjClass* defineNativeTrait(VM* vm, const char* name) {
     ObjString* traitName = newStringPerma(vm, name);
     ObjClass* nativeTrait = createTrait(vm, traitName);
     nativeTrait->isNative = true;
-    push(vm, OBJ_VAL(nativeTrait));
 
+    push(vm, OBJ_VAL(nativeTrait));
     tableSet(vm, &vm->classes, nativeTrait->fullName, OBJ_VAL(nativeTrait));
     tableSet(vm, &vm->currentNamespace->values, traitName, OBJ_VAL(nativeTrait));
+    
     pop(vm);
     typeTableInsertBehavior(vm->typetab, TYPE_CATEGORY_TRAIT, traitName, nativeTrait->fullName, NULL);
     return nativeTrait;
