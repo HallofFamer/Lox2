@@ -89,6 +89,7 @@ typedef struct {
 typedef struct {
     TypeInfo baseType;
     CallableTypeInfo* declaredType;
+    bool isAsync;
     bool isClass;
     bool isInitializer;
 } MethodTypeInfo;

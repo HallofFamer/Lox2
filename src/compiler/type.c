@@ -160,6 +160,7 @@ MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType,
     MethodTypeInfo* methodType = (MethodTypeInfo*)newTypeInfo(id, sizeof(MethodTypeInfo), TYPE_CATEGORY_METHOD, name, name);
     if (methodType != NULL) {
         methodType->declaredType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, name, returnType);
+        methodType->isAsync = false;
         methodType->isClass = isClass;
         methodType->isInitializer = isInitializer;
     }
@@ -170,6 +171,7 @@ MethodTypeInfo* newMethodTypeInfoWithDeclaredType(int id, ObjString* name, Calla
 	MethodTypeInfo* methodType = (MethodTypeInfo*)newTypeInfo(id, sizeof(MethodTypeInfo), TYPE_CATEGORY_METHOD, name, name);
 	if (methodType != NULL) {
 		methodType->declaredType = declaredType;
+        methodType->isAsync = declaredType->attribute.isAsync;
 		methodType->isClass = isClass;
 		methodType->isInitializer = isInitializer;
 	}
