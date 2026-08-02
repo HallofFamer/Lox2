@@ -2334,13 +2334,13 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->intClass, Int, toHexadecimal, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toOctal, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toString, 0, NATIVE_TYPE(String));
-    DEF_METHOD(vm->intClass, Int, until, 1, NATIVE_TYPE(Object), NATIVE_TYPE(Int));
+    DEF_METHOD(vm->intClass, Int, until, 1, NATIVE_TYPE(clox.std.collection.Range), NATIVE_TYPE(Int));
     DEF_METHOD(vm->intClass, Int, upTo, 2, NATIVE_TYPE(void), NATIVE_TYPE(Int), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(void), 1, NATIVE_TYPE(Int)));
     DEF_OPERATOR(vm->intClass, Int, +, __add__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->intClass, Int, -, __subtract__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->intClass, Int, *, __multiply__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->intClass, Int, %, __modulo__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
-    DEF_OPERATOR(vm->intClass, Int, .., __range__, 1, NATIVE_TYPE(Object), NATIVE_TYPE(Int));
+    DEF_OPERATOR(vm->intClass, Int, .., __range__, 1, NATIVE_TYPE(clox.std.collection.Range), NATIVE_TYPE(Int));
 
     ObjClass* intMetaclass = vm->intClass->obj.klass;
     DEF_FIELD(intMetaclass, max, Int, false, INT_VAL(INT32_MAX));

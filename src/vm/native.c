@@ -309,6 +309,7 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
         char* fullName = createTypeName((TypeInfo*)declaredType, true);
         declaredType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
         declaredType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
+		typeTableSet(vm->typetab, declaredType->baseType.fullName, (TypeInfo*)declaredType);
     }
     else {
 		methodType = newMethodTypeInfoWithDeclaredType(behaviorType->methods->count + 1, methodName, declaredType, isClass, isInitializer);
