@@ -2394,11 +2394,11 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->stringClass, String, replace, 2, NATIVE_TYPE(String), NATIVE_TYPE(String), NATIVE_TYPE(String));
 	DEF_METHOD(vm->stringClass, String, replaceAll, 2, NATIVE_TYPE(String), NATIVE_TYPE(String), NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, reverse, 0, NATIVE_TYPE(String));
-    DEF_METHOD(vm->stringClass, String, split, 1, NATIVE_TYPE(Object), NATIVE_TYPE(String));
+    DEF_METHOD(vm->stringClass, String, split, 1, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(String)), NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, startsWith, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, subString, 2, NATIVE_TYPE(String), NATIVE_TYPE(Int), NATIVE_TYPE(Int));
-    DEF_METHOD(vm->stringClass, String, toBytes, 0, NATIVE_TYPE(Object));
-    DEF_METHOD(vm->stringClass, String, toCodePoints, 0, NATIVE_TYPE(Object));
+    DEF_METHOD(vm->stringClass, String, toBytes, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Int)));
+    DEF_METHOD(vm->stringClass, String, toCodePoints, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(String)));
     DEF_METHOD(vm->stringClass, String, toLowercase, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, toString, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, toUppercase, 0, NATIVE_TYPE(String));

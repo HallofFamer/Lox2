@@ -365,7 +365,7 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
         if (entry != NULL && entry->key != NULL) {
 			if ((entry->key == typeChecker->vm->initString) || typeTableGet(subtype->methods, entry->key) != NULL) continue;
             MethodTypeInfo* superMethodType = AS_METHOD_TYPE(entry->value);
-            MethodTypeInfo* subMethodType = newMethodTypeInfo(i, superMethodType->baseType.shortName, superMethodType->declaredType->returnType, superMethodType->isClass, superMethodType->isInitializer);
+            MethodTypeInfo* subMethodType = newMethodTypeInfo(i, superMethodType->baseType.shortName, superMethodType->declaredType->returnType, superMethodType->isAsync, superMethodType->isClass, superMethodType->isInitializer);
             subMethodType->declaredType->attribute = superMethodType->declaredType->attribute;
             
             TypeInfo* returnType = superMethodType->declaredType->returnType;
