@@ -88,12 +88,14 @@ LOX_METHOD(Date, toDateTime) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjInstance* dateTime = newInstance(vm, getNativeClass(vm, "clox.std.util.DateTime"));
     push(vm, OBJ_VAL(dateTime));
+
     copyObjField(vm, self, dateTime, "year");
     copyObjField(vm, self, dateTime, "month");
     copyObjField(vm, self, dateTime, "day");
     setObjField(vm, dateTime, "hour", INT_VAL(0));
     setObjField(vm, dateTime, "minute", INT_VAL(0));
     setObjField(vm, dateTime, "second", INT_VAL(0)); 
+    
     pop(vm);
     RETURN_OBJ(dateTime);
 }

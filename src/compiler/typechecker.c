@@ -380,6 +380,11 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
                 }
                 TypeInfoArrayAdd(subMethodType->declaredType->paramTypes, paramType);
             }
+
+            char* shortName = createTypeName((TypeInfo*)subMethodType->declaredType, false);
+            char* fullName = createTypeName((TypeInfo*)subMethodType->declaredType, true);
+            subMethodType->declaredType->baseType.shortName = takeStringPerma(typeChecker->vm, shortName, (int)strlen(shortName));
+            subMethodType->declaredType->baseType.fullName = takeStringPerma(typeChecker->vm, fullName, (int)strlen(fullName));
             typeTableSet(subtype->methods, superMethodType->baseType.shortName, (TypeInfo*)subMethodType);
         }
     }
