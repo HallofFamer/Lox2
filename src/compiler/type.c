@@ -156,22 +156,22 @@ FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType,
     return fieldType;
 }
 
-MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isClass, bool isInitializer) {
+MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isAsync, bool isClass, bool isInitializer) {
     MethodTypeInfo* methodType = (MethodTypeInfo*)newTypeInfo(id, sizeof(MethodTypeInfo), TYPE_CATEGORY_METHOD, name, name);
     if (methodType != NULL) {
         methodType->declaredType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, name, returnType);
-        methodType->isAsync = false;
+        methodType->isAsync = isAsync;
         methodType->isClass = isClass;
         methodType->isInitializer = isInitializer;
     }
     return methodType;
 }
 
-MethodTypeInfo* newMethodTypeInfoWithDeclaredType(int id, ObjString* name, CallableTypeInfo* declaredType, bool isClass, bool isInitializer) {
+MethodTypeInfo* newMethodTypeInfoWithDeclaredType(int id, ObjString* name, CallableTypeInfo* declaredType, bool isAsync, bool isClass, bool isInitializer) {
 	MethodTypeInfo* methodType = (MethodTypeInfo*)newTypeInfo(id, sizeof(MethodTypeInfo), TYPE_CATEGORY_METHOD, name, name);
 	if (methodType != NULL) {
 		methodType->declaredType = declaredType;
-        methodType->isAsync = declaredType->attribute.isAsync;
+        methodType->isAsync = isAsync;
 		methodType->isClass = isClass;
 		methodType->isInitializer = isInitializer;
 	}
@@ -835,7 +835,7 @@ FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInf
 
 MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, CallableTypeInfo* declaredType, bool isClass, bool isInitializer) {
     int id = typetab->count + 1;
-    MethodTypeInfo* methodType = newMethodTypeInfoWithDeclaredType(id, name, declaredType, isClass, isInitializer);
+    MethodTypeInfo* methodType = newMethodTypeInfoWithDeclaredType(id, name, declaredType, false, isClass, isInitializer);
     typeTableSet(typetab, name, (TypeInfo*)methodType);
     return methodType;
 }
