@@ -286,8 +286,8 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
     if (declaredType == NULL) {
         va_start(args, method);
         returnType = va_arg(args, TypeInfo*);
-        methodType = newMethodTypeInfo(behaviorType->methods->count + 1, methodName, returnType, isClass, isInitializer);
-        
+        methodType = newMethodTypeInfo(behaviorType->methods->count + 1, methodName, returnType, isAsync, isClass, isInitializer);
+
         declaredType = methodType->declaredType;
         declaredType->attribute.isAsync = isAsync;
         declaredType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
@@ -312,7 +312,7 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
 		typeTableSet(vm->typetab, declaredType->baseType.fullName, (TypeInfo*)declaredType);
     }
     else {
-		methodType = newMethodTypeInfoWithDeclaredType(behaviorType->methods->count + 1, methodName, declaredType, isClass, isInitializer);
+		methodType = newMethodTypeInfoWithDeclaredType(behaviorType->methods->count + 1, methodName, declaredType, isAsync, isClass, isInitializer);
     }
 
     typeTableSet(behaviorType->methods, methodName, (TypeInfo*)methodType);

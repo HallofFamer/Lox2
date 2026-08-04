@@ -977,9 +977,9 @@ void registerUtilPackage(VM* vm) {
     DEF_FIELD(promiseMetaclass, statePending, Int, false, INT_VAL(PROMISE_PENDING));
     DEF_FIELD(promiseMetaclass, stateFulfilled, Int, false, INT_VAL(PROMISE_FULFILLED));
     DEF_FIELD(promiseMetaclass, stateRejected, Int, false, INT_VAL(PROMISE_REJECTED));
-    DEF_METHOD(promiseMetaclass, PromiseClass, all, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE(clox.std.collection.Array));
+    DEF_METHOD(promiseMetaclass, PromiseClass, all, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(clox.std.util.Promise)));
     DEF_METHOD(promiseMetaclass, PromiseClass, fulfill, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE(Object));
-    DEF_METHOD(promiseMetaclass, PromiseClass, race, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE(clox.std.collection.Array));
+    DEF_METHOD(promiseMetaclass, PromiseClass, race, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(clox.std.util.Promise)));
     DEF_METHOD(promiseMetaclass, PromiseClass, reject, 1, NATIVE_TYPE(clox.std.util.Promise), NATIVE_TYPE(Exception));
 
     bindSuperclass(vm, randomClass, vm->objectClass);
