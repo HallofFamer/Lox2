@@ -833,9 +833,9 @@ FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInf
     return fieldType;
 }
 
-MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, CallableTypeInfo* declaredType, bool isClass, bool isInitializer) {
+MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, CallableTypeInfo* declaredType, bool isAsync, bool isClass, bool isInitializer) {
     int id = typetab->count + 1;
-    MethodTypeInfo* methodType = newMethodTypeInfoWithDeclaredType(id, name, declaredType, false, isClass, isInitializer);
+    MethodTypeInfo* methodType = newMethodTypeInfoWithDeclaredType(id, name, declaredType, isAsync, isClass, isInitializer);
     typeTableSet(typetab, name, (TypeInfo*)methodType);
     return methodType;
 }
