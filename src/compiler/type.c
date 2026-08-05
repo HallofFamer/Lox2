@@ -909,7 +909,7 @@ static void typeTableOutputMethods(TypeTable* methods) {
         TypeEntry* entry = &methods->entries[i];
         if (entry != NULL && entry->key != NULL) {
             MethodTypeInfo* method = AS_METHOD_TYPE(entry->value);
-            printf("      %s", method->declaredType->attribute.isAsync ? "async " : "");
+            printf("      %s", method->isAsync ? "async " : "");
 
             if (method->declaredType->returnType == NULL) printf("dynamic ");
             else if (method->declaredType->attribute.isVoid) printf("void ");
