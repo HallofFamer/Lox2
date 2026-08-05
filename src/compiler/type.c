@@ -591,6 +591,16 @@ bool hasGenericParameters(TypeInfo* type) {
     else return false;
 }
 
+TypeInfoArray* getTypeParameters(TypeInfo* type) {
+    if (type == NULL) return NULL;
+    else if (IS_BEHAVIOR_TYPE(type)) return AS_BEHAVIOR_TYPE(type)->formalTypeParams;
+    else if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type)->formalTypeParams;
+    else if (IS_GENERIC_TYPE(type)) return AS_GENERIC_TYPE(type)->actualTypeParams;
+    else if (IS_METHOD_TYPE(type)) return AS_METHOD_TYPE(type)->declaredType->formalTypeParams;
+    else if (IS_ALIAS_TYPE(type)) return AS_ALIAS_TYPE(type)->formalTypeParams;
+    else return NULL;
+}
+
 static TypeInfo* instantiateFormalTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
     for (int i = 0; i < formalParams->count; i++) {
         TypeInfo* formalTypeParam = formalParams->elements[i];

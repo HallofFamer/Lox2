@@ -159,6 +159,7 @@ TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name);
 TypeInfo* getAliasTargetType(TypeInfo* type);
 TypeInfo* getInnerBaseType(TypeInfo* type);
 bool hasGenericParameters(TypeInfo* type);
+TypeInfoArray* getTypeParameters(TypeInfo* type);
 TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
 
 TypeTable* newTypeTable(int id);
@@ -180,16 +181,6 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2);
 
 static inline bool isHigherOrderType(TypeInfo* type) {
     return (type != NULL) && (IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type));
-}
-
-static inline TypeInfoArray* getTypeParameters(TypeInfo* type) {
-    if (type == NULL) return NULL;
-    else if (IS_BEHAVIOR_TYPE(type)) return AS_BEHAVIOR_TYPE(type)->formalTypeParams;
-    else if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type)->formalTypeParams;
-    else if (IS_GENERIC_TYPE(type)) return AS_GENERIC_TYPE(type)->actualTypeParams;
-    else if (IS_METHOD_TYPE(type)) return AS_METHOD_TYPE(type)->declaredType->formalTypeParams;
-    else if (IS_ALIAS_TYPE(type)) return AS_ALIAS_TYPE(type)->formalTypeParams;
-    else return NULL;
 }
 
 #endif // !clox_type_h
