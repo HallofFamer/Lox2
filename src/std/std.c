@@ -6,14 +6,14 @@
 #include "io.h"
 #include "lang.h"
 #include "net.h"
-#include "util.h"
 #include "std.h"
+#include "util.h"
 #include "../vm/namespace.h"
 #include "../vm/native.h"
 #include "../vm/vm.h"
 
 static ObjNamespace* defineRootNamespace(VM* vm) {
-    ObjString* name = newStringPerma(vm, "");
+    ObjString* name = emptyString(vm);
     ObjNamespace* rootNamespace = newNamespace(vm, name, NULL);
     rootNamespace->isRoot = true;
 

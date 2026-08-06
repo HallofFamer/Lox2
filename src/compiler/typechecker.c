@@ -381,12 +381,8 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
                 TypeInfoArrayAdd(subMethodType->declaredType->paramTypes, paramType);
             }
 
-            char* shortName = createTypeName((TypeInfo*)subMethodType->declaredType, false);
-            char* fullName = createTypeName((TypeInfo*)subMethodType->declaredType, true);
-            subMethodType->declaredType->baseType.shortName = takeStringPerma(typeChecker->vm, shortName, (int)strlen(shortName));
-            subMethodType->declaredType->baseType.fullName = takeStringPerma(typeChecker->vm, fullName, (int)strlen(fullName));
             typeTableSet(subtype->methods, superMethodType->baseType.shortName, (TypeInfo*)subMethodType);
-			typeTableSet(typeChecker->vm->typetab, subMethodType->declaredType->baseType.fullName, (TypeInfo*)subMethodType->declaredType);
+            insertHigherOrderType(typeChecker, (TypeInfo*)subMethodType->declaredType);
         }
     }
 }
@@ -610,9 +606,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         }
 
         CallableTypeInfo* calleeType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(typeChecker->vm), NULL);
-        calleeType->attribute.isAsync = callee->attribute.isAsync;
-        deriveCalleeType(typeChecker, ast, calleeType);   
-
+        deriveCalleeType(typeChecker, ast, calleeType); 
         callee->type = (TypeInfo*)calleeType;
 		insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
         function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false, calleeType->attribute.isLambda);
