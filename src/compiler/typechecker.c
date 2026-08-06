@@ -386,6 +386,7 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
             subMethodType->declaredType->baseType.shortName = takeStringPerma(typeChecker->vm, shortName, (int)strlen(shortName));
             subMethodType->declaredType->baseType.fullName = takeStringPerma(typeChecker->vm, fullName, (int)strlen(fullName));
             typeTableSet(subtype->methods, superMethodType->baseType.shortName, (TypeInfo*)subMethodType);
+			typeTableSet(typeChecker->vm->typetab, subMethodType->declaredType->baseType.fullName, (TypeInfo*)subMethodType->declaredType);
         }
     }
 }
