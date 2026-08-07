@@ -683,7 +683,6 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
     CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
     
     if (callableType != NULL) {
-        callableType->attribute.isAsync = isAsync;
         callableType->attribute.isGeneric = isGeneric;
         callableType->attribute.isLambda = isLambda;
         callableType->attribute.isVariadic = isVariadic;
@@ -1694,10 +1693,11 @@ static void resolveFunDeclaration(Resolver* resolver, Ast* ast) {
     SymbolItem* item = declareVariable(resolver, ast, false);
     item->type = getNativeType(resolver->vm, "Function");
     item->state = SYMBOL_STATE_ACCESSED;
+
     ObjString* name = createStringFromToken(resolver->vm, item->token);
     resolveChild(resolver, ast, 0);
-
     Ast* function = astGetChild(ast, 0);
+    
     if (function->type != NULL && IS_CALLABLE_TYPE(function->type)) {
         item->type = function->type;
     }

@@ -180,7 +180,7 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2);
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2);
 
 static inline bool isHigherOrderType(TypeInfo* type) {
-    return (type != NULL) && (IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type));
+    return (type != NULL) && (IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type) || IS_ALIAS_TYPE(type));
 }
 
 #endif // !clox_type_h
