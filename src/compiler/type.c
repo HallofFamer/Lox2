@@ -746,7 +746,9 @@ TypeInfo* typeTableGet(TypeTable* typetab, ObjString* key) {
 }
 
 bool typeTableSet(TypeTable* typetab, ObjString* key, TypeInfo* value) {
-	if (value->hash == 0) value->hash = hashTypeInfo(value);
+    if (value->hash == 0) {
+        value->hash = hashTypeInfo(value);
+    }
 
     if (typetab->count + 1 > typetab->capacity * TYPE_TABLE_MAX_LOAD) {
         int capacity = bufferGrowCapacity(typetab->capacity);
