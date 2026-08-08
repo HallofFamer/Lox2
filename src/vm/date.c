@@ -52,6 +52,7 @@ ObjInstance* dateObjNow(VM* vm, ObjClass* klass) {
     struct tm now;
     localtime_s(&now, &nowTime);
     ObjInstance* date = newInstance(vm, klass);
+
     push(vm, OBJ_VAL(date));
     setObjField(vm, date, "year", INT_VAL(1900 + now.tm_year));
     setObjField(vm, date, "month", INT_VAL(1 + now.tm_mon));
@@ -75,6 +76,7 @@ ObjInstance* dateObjFromTimestamp(VM* vm, ObjClass* dateClass, double timeValue)
     struct tm time;
     localtime_s(&time, &timestamp);
     ObjInstance* date = newInstance(vm, dateClass);
+
     push(vm, OBJ_VAL(date));
     setObjField(vm, date, "year", INT_VAL(1900 + time.tm_year));
     setObjField(vm, date, "month", INT_VAL(1 + time.tm_mon));
@@ -89,12 +91,14 @@ ObjInstance* dateTimeObjFromTimestamp(VM* vm, ObjClass* dateTimeClass, double ti
     localtime_s(&time, &timestamp);
     ObjInstance* dateTime = newInstance(vm, dateTimeClass);
     push(vm, OBJ_VAL(dateTime));
+
     setObjField(vm, dateTime, "year", INT_VAL(1900 + time.tm_year));
     setObjField(vm, dateTime, "month", INT_VAL(1 + time.tm_mon));
     setObjField(vm, dateTime, "day", INT_VAL(time.tm_mday));
     setObjField(vm, dateTime, "hour", INT_VAL(time.tm_hour));
     setObjField(vm, dateTime, "minute", INT_VAL(time.tm_min));
     setObjField(vm, dateTime, "second", INT_VAL(time.tm_sec));
+    
     pop(vm);
     return dateTime;
 }
@@ -105,6 +109,7 @@ ObjInstance* dateTimeObjNow(VM* vm, ObjClass* klass) {
     struct tm now;
     localtime_s(&now, &nowTime);
     ObjInstance* dateTime = newInstance(vm, getNativeClass(vm, "clox.std.util.DateTime"));
+
     push(vm, OBJ_VAL(dateTime));
     setObjField(vm, dateTime, "year", INT_VAL(1900 + now.tm_year));
     setObjField(vm, dateTime, "month", INT_VAL(1 + now.tm_mon));

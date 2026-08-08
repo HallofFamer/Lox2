@@ -260,6 +260,7 @@ void bindTraits(VM* vm, int numTraits, ObjClass* klass, ...) {
         Value trait = va_arg(args, Value);
         bindTrait(vm, klass, AS_CLASS(trait));
     }
+	va_end(args);
     flattenTraits(vm, klass, &klass->traits);
 }
 

@@ -580,6 +580,7 @@ static void freeObject(VM* vm, Obj* object) {
         }
         case OBJ_MODULE: {
             ObjModule* module = (ObjModule*)object;
+            freeTypeTable(module->typeTab);
             freeIDMap(vm, &module->valIndexes);
             freeValueArray(vm, &module->valFields);
             freeIDMap(vm, &module->varIndexes);

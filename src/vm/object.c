@@ -227,6 +227,7 @@ ObjModule* newModule(VM* vm, ObjString* path) {
     module->path = path;
     module->namespace = NULL;
     module->closure = NULL;
+    module->typeTab = newTypeTable(-1);
     module->isNative = false;
 
     initIDMap(&module->valIndexes, module->obj.generation);

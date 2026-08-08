@@ -237,10 +237,10 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Typ
         char* fullName = createTypeName((TypeInfo*)functionType, true);
         functionType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
         functionType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
+        typeTableSet(vm->typetab, functionType->baseType.fullName, (TypeInfo*)functionType);
     }
 
-    item->type = (TypeInfo*)functionType;
-    typeTableSet(vm->typetab, functionType->baseType.fullName, (TypeInfo*)functionType);
+    item->type = (TypeInfo*)functionType;   
 }
 
 void defineNativeField(VM* vm, ObjClass* klass, const char* name, TypeInfo* type, bool isMutable, Value defaultValue) {

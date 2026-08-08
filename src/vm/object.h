@@ -315,6 +315,7 @@ struct ObjModule {
     ObjString* path;
 	ObjNamespace* namespace;
     ObjClosure* closure;
+    TypeTable* typeTab;
     bool isNative;
     IDMap valIndexes;
     ValueArray valFields;
