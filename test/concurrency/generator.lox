@@ -21,6 +21,8 @@ while(i <= 10) {
 
 class MultiGenerator { 
     
+    var totalYields
+
     __init__(){ 
         this.totalYields = 0
     }

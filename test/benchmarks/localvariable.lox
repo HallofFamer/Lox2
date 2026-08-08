@@ -1,6 +1,14 @@
 namespace test.benchmarks
 
 class Zoo {
+
+    val Int aardvark
+    val Int baboon
+    val Int cat
+    val Int donkey
+    val Int elephant
+    val Int fox
+
     __init__() {
         this.aardvark = 1
         this.baboon   = 1
@@ -9,6 +17,7 @@ class Zoo {
         this.elephant = 1
         this.fox      = 1
     }
+
     ant()    { return this.aardvark }
     banana() { return this.baboon }
     tuna()   { return this.cat }
