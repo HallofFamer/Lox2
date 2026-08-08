@@ -1587,9 +1587,7 @@ static Ast* statement(Parser* parser) {
         advance(parser);
         return block(parser);
     }
-    else {
-        return expressionStatement(parser);
-    }
+    else return expressionStatement(parser);
 }
 
 static bool matchClassDeclaration(Parser* parser) {
@@ -1611,8 +1609,8 @@ static Ast* classDeclaration(Parser* parser) {
     Ast* fieldList = fields(parser, &name);
     Ast* methodList = methods(parser, &name);
     consume(parser, TOKEN_KIND_RIGHT_BRACE, "Expect '}' after class body.");
-    Ast* _class = newAst(AST_EXPR_CLASS, name, 4, superClass, traitList, fieldList, methodList);
 
+    Ast* _class = newAst(AST_EXPR_CLASS, name, 4, superClass, traitList, fieldList, methodList);
     Ast* ast = newAst(AST_DECL_CLASS, name, 1, _class);
     if (typeParams != NULL) {
         ast->attribute.isGeneric = true;
@@ -1882,9 +1880,7 @@ static Ast* declaration(Parser* parser) {
     else if (matchVarDeclaration(parser, &isMutable)) {
         return varDeclaration(parser, isMutable);
     }
-    else {
-        return statement(parser);
-    }
+    else return statement(parser);
 }
 
 void initParser(Parser* parser, TokenStream* tokens, bool debugAst) {

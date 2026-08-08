@@ -254,8 +254,10 @@ static void initCompiler(VM* vm, Compiler* compiler, Compiler* enclosing, Compil
     compiler->isAsync = isAsync;
     compiler->debugCode = debugCode;
     compiler->hadError = false;
-    compiler->function = newFunction(vm, (type == COMPILE_TYPE_SCRIPT) ? NULL : copyStringPerma(vm, name->start, name->length), isAsync);
+
     initIDMap(&compiler->indexes, GC_GENERATION_TYPE_PERMANENT);
+	ObjString* functionName = (name != NULL) ? copyStringPerma(vm, name->start, name->length) : NULL;
+    compiler->function = newFunction(vm, functionName, isAsync);
     vm->compiler = compiler;
 
     if (enclosing != NULL) {
