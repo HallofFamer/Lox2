@@ -414,8 +414,8 @@ void freeTypeInfo(TypeInfo* type) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
         if (behaviorType->formalTypeParams != NULL) TypeInfoArrayFree(behaviorType->formalTypeParams);
-        freeTypeTable(behaviorType->fields);
-        freeTypeTable(behaviorType->methods);
+        freeTypeTable(behaviorType->fields, true);
+        freeTypeTable(behaviorType->methods, true);
         free(behaviorType);
     }
     else if (IS_CALLABLE_TYPE(type)) {
@@ -690,10 +690,12 @@ TypeTable* newTypeTable(int id) {
     return typetab;
 }
 
-void freeTypeTable(TypeTable* typetab) {
-    for (int i = 0; i < typetab->capacity; i++) {
-        TypeEntry* entry = &typetab->entries[i];
-        if (entry != NULL) freeTypeInfo(entry->value);
+void freeTypeTable(TypeTable* typetab, bool freeTypes) {
+    if (freeTypes) {
+        for (int i = 0; i < typetab->capacity; i++) {
+            TypeEntry* entry = &typetab->entries[i];
+            if (entry != NULL) freeTypeInfo(entry->value);
+        }
     }
 
     if (typetab->entries != NULL) free(typetab->entries);

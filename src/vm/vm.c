@@ -137,7 +137,7 @@ void freeVM(VM* vm) {
 
     freeObjects(vm);
     freeSymbolTable(vm->symtab);
-    freeTypeTable(vm->typetab);
+    freeTypeTable(vm->typetab, true);
     freeMarshaller(vm->marshaller);
     freeGC(vm);
     freeLoop(vm);

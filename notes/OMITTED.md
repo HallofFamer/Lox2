@@ -23,11 +23,20 @@ Abstract classes and methods are usually supported in statically typed object-or
 ## Visibility Modifiers
 Lox2 does not include visibility modifiers (like `public`, `private`, `protected`), as seen in languages like Java and C#. This omission is intentional to keep the language simple and focused on core functionality. Instead, Lox2 relies on conventions and module boundaries to manage access control, promoting a more straightforward approach to encapsulation.
 
+## Function/Method Overloading
+Lox2 does not support function or method overloading, which allows multiple functions/methods to have the same name but different parameter lists. This decision was made to avoid ambiguity and complexity in function resolution. Instead, Lox2 encourages using descriptive function names or leveraging default parameters and variadic functions to achieve similar functionality without the need for overloading.
+
+## Multiple Inheritance
+Lox2 does not support multiple inheritance, which allows a class to inherit from more than one superclass. This decision was made to avoid the complexities and potential issues associated with multiple inheritance, such as the "diamond problem". Instead, Lox2 promotes the use of traits, which provide a more flexible and composable way to share behavior across classes without the pitfalls of multiple inheritance.
+
 ## Structural Typing
 Lox2 employs nominal typing rather than structural typing. Structural typing may be more flexible, but it can lead to undesirable behaviors when two irrelevant types share same structure. Nominal typing also aligns better with Lox2's object model, while structural typing can make type checking complex and slow at the presence of higher order types.
 
 ## Local variable type annotations
 It is not possible to declare local variable types in Lox2. This decision was made to encourages using immutable local variables with type inference. The Java community still struggle to move past explicit local variable type annotations, as many refuse to embrase the new `var` keyword in favor of redundant explicit type annotations which become noises/distractions. Lox2 aims to promote cleaner and more maintainable code by avoiding unnecessary verbosity.
+
+## Data annotations/attributes
+Lox2 does not support data annotations or attributes, which are used in some languages to provide metadata about classes, methods, or fields. The presence of data annotations/attributes is a sign that the language is not powerful enough to express certain concepts directly, and relies on annotations/attributes as a workaround. As everything in Lox2 is a first class object, the language has rich features to express any concepts directly without the need for annotations/attributes.
 
 ## Type declaration for lambda expressions
 Even though type annotations are available for anonymous functions, the lambda expressions cannot be explicitly typed. This decision was made to keep lambda expressions concise and focused on their functionality rather than type details. On the other hand, Lox2's lambda parameters are enclosed in pipe symbols (`|`), which will conflict with union type syntax to be introduced in Lox 2.3.

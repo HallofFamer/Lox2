@@ -163,7 +163,7 @@ TypeInfoArray* getTypeParameters(TypeInfo* type);
 TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
 
 TypeTable* newTypeTable(int id);
-void freeTypeTable(TypeTable* typeTable);
+void freeTypeTable(TypeTable* typeTable, bool freeTypes);
 TypeInfo* typeTableGet(TypeTable* typetab, ObjString* key);
 bool typeTableSet(TypeTable* typetab, ObjString* key, TypeInfo* value);
 void typeTableFieldsInherit(BehaviorTypeInfo* subclassType, TypeInfo* superclassType);
