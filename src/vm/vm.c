@@ -135,10 +135,10 @@ void freeVM(VM* vm) {
     vm->voidString = NULL;
     vm->runningGenerator = NULL;
 
+    freeObjects(vm);
     freeSymbolTable(vm->symtab);
     freeTypeTable(vm->typetab);
     freeMarshaller(vm->marshaller);
-    freeObjects(vm);
     freeGC(vm);
     freeLoop(vm);
 	freeConfiguration(&vm->config);
@@ -402,7 +402,10 @@ Value callGenerator(VM* vm, ObjGenerator* generator) {
         ObjPromise* promise = AS_PROMISE(value);
         if (promise->state == PROMISE_REJECTED) promiseReject(vm, promise, OBJ_VAL(promise->exception));
     }
-    if(vm->runningGenerator->frame->closure->function->name != NULL) vm->runningGenerator = outer;
+
+    if (vm->runningGenerator->frame->closure->function->name != NULL) {
+        vm->runningGenerator = outer;
+    }
     return pop(vm);
 }
 

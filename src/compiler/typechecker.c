@@ -129,7 +129,7 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
 
 static void insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type) {
 	if (type == NULL) return;
-	if (IS_GENERIC_TYPE(type) || IS_CALLABLE_TYPE(type)) {
+	if (IS_GENERIC_TYPE(type) || IS_CALLABLE_TYPE(type) || IS_ALIAS_TYPE(type)) {
         char* shortName = createTypeName(type, false);
 		char* fullName = createTypeName(type, true);
         type->shortName = takeStringPerma(typeChecker->vm, shortName, (int)strlen(shortName));

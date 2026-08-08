@@ -322,6 +322,7 @@ static void synchronize(Parser* parser) {
             case TOKEN_KIND_SWITCH:
             case TOKEN_KIND_TRAIT:
             case TOKEN_KIND_THROW:
+            case TOKEN_KIND_TRY:
             case TOKEN_KIND_TYPE:
             case TOKEN_KIND_USING:
             case TOKEN_KIND_VAL:

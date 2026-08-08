@@ -693,9 +693,7 @@ TypeTable* newTypeTable(int id) {
 void freeTypeTable(TypeTable* typetab) {
     for (int i = 0; i < typetab->capacity; i++) {
         TypeEntry* entry = &typetab->entries[i];
-        if (entry != NULL && !isHigherOrderType(entry->value)) {
-            freeTypeInfo(entry->value);
-        }
+        if (entry != NULL) freeTypeInfo(entry->value);
     }
 
     if (typetab->entries != NULL) free(typetab->entries);

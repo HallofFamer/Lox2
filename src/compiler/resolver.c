@@ -650,18 +650,29 @@ static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
 	callableName[length++] = '(';
 	Ast* params = astGetChild(ast, 1);
 
-	for (int i = 0; i < params->children->count; i++) {
-		if (i > 0) {
-			callableName[length++] = ',';
-			callableName[length++] = ' ';
-		}
+    if (!params->attribute.isVariadic) {
+        for (int i = 0; i < params->children->count; i++) {
+            if (i > 0) {
+                callableName[length++] = ',';
+                callableName[length++] = ' ';
+            }
 
-		Ast* param = params->children->elements[i];
+            Ast* param = params->children->elements[i];
+            char* paramTypeName = param->type != NULL ? createTypeName(param->type, true) : "dynamic";
+            size_t paramTypeLength = strlen(paramTypeName);
+            memcpy(callableName + length, paramTypeName, paramTypeLength);
+            length += paramTypeLength;
+        }
+    }
+    else {
+        memcpy(callableName + length, "...", 3);
+        length += 3;
+		Ast* param = astGetChild(params, 0);
 		char* paramTypeName = param->type != NULL ? createTypeName(param->type, true) : "dynamic";
 		size_t paramTypeLength = strlen(paramTypeName);
 		memcpy(callableName + length, paramTypeName, paramTypeLength);
 		length += paramTypeLength;
-	}
+    }
 
 	callableName[length++] = ')';
 	callableName[length] = '\0';
