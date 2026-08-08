@@ -2,8 +2,8 @@
 #include <string.h> 
 
 #include "net.h"
-#include "../inc/yuarel.h"
 #include "../common/os.h"
+#include "../inc/yuarel.h"
 #include "../vm/assert.h"
 #include "../vm/dict.h"
 #include "../vm/http.h"

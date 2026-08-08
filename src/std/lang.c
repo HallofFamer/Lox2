@@ -17,14 +17,6 @@
 #include "../vm/variable.h"
 #include "../vm/vm.h"
 
-static void bindStringClass(VM* vm) {
-    for (int i = 0; i < vm->strings.capacity; i++) {
-        Entry* entry = &vm->strings.entries[i];
-        if (entry->key == NULL) continue;
-        entry->key->obj.klass = vm->stringClass;
-    }
-}
-
 static void bindMethodClass(VM* vm, ObjClass* klass) {
     for (int i = 0; i < klass->methods.capacity; i++) {
         Entry* entry = &klass->methods.entries[i];
@@ -33,6 +25,23 @@ static void bindMethodClass(VM* vm, ObjClass* klass) {
             ObjNativeMethod* method = AS_NATIVE_METHOD(entry->value);
             method->obj.klass = vm->methodClass;
         }
+    }
+}
+
+static void bindNamespaceClass(VM* vm) {
+    for (int i = 0; i < vm->namespaces.capacity; i++) {
+        Entry* entry = &vm->namespaces.entries[i];
+        if (entry->key == NULL) continue;
+        ObjNamespace* namespace = AS_NAMESPACE(entry->value);
+        namespace->obj.klass = vm->namespaceClass;
+    }
+}
+
+static void bindStringClass(VM* vm) {
+    for (int i = 0; i < vm->strings.capacity; i++) {
+        Entry* entry = &vm->strings.entries[i];
+        if (entry->key == NULL) continue;
+        entry->key->obj.klass = vm->stringClass;
     }
 }
 
@@ -2090,15 +2099,6 @@ LOX_METHOD(Type, __invoke__) {
     }
     pop(vm);
     RETURN_VAL(value);
-}
-
-static void bindNamespaceClass(VM* vm) {
-    for (int i = 0; i < vm->namespaces.capacity; i++) {
-        Entry* entry = &vm->namespaces.entries[i];
-        if (entry->key == NULL) continue;
-        ObjNamespace* namespace = AS_NAMESPACE(entry->value);
-        namespace->obj.klass = vm->namespaceClass;
-    }
 }
 
 void registerLangPackage(VM* vm) {

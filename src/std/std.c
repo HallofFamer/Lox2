@@ -185,6 +185,7 @@ static void defineUtilTypes(VM* vm) {
     ObjClass* dateClass = defineNativeClass(vm, "Date");
     ObjClass* dateTimeClass = defineNativeClass(vm, "DateTime");
     ObjClass* durationClass = defineNativeClass(vm, "Duration");
+    
     vm->promiseClass = defineNativeGenericClass(vm, "Promise", 1, placeholderType);
     ObjClass* randomClass = defineNativeClass(vm, "Random");
     ObjClass* regexClass = defineNativeClass(vm, "Regex");

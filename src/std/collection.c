@@ -1560,6 +1560,7 @@ LOX_METHOD(LinkedList, putAt) {
     ASSERT_ARG_COUNT("LinkedList::putAt(index, element)", 2);
     ASSERT_ARG_TYPE("LinkedList::putAt(index, element)", 0, Int);
     ObjInstance* self = AS_INSTANCE(receiver);
+
     int index = AS_INT(args[0]);
     if (!linkIndexIsValid(vm, self, index)) {
         THROW_EXCEPTION(clox.std.lang.IndexOutOfBoundsException, "Index out of bound for LinkedList.");

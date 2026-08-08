@@ -429,6 +429,7 @@ LOX_METHOD(DurationClass, ofHours) {
     ObjClass* self = AS_CLASS(receiver);
     ObjInstance* instance = newInstance(vm, self);
     push(vm, OBJ_VAL(instance));
+    
     int duration[4] = { 0, hours, 0, 0 };
     durationObjInit(vm, duration, instance);
     pop(vm);
