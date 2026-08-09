@@ -710,6 +710,7 @@ LOX_METHOD(Random, setSeed) {
     if (seed < 0) {
         THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Random::setSeed(seed) expects argument 1 to be a non negative integer but got %d.", seed);
     }
+
     pcg32_seed((uint64_t)AS_INT(args[0]));
     setObjField(vm, AS_INSTANCE(receiver), "seed", args[0]);
     RETURN_NIL;
