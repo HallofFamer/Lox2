@@ -65,6 +65,7 @@ LOX_METHOD(Date, compareTo) {
     ASSERT_ARG_INSTANCE_OF("Date::compareTo(date)", 0, clox.std.util.Date);
     double timestamp = dateObjGetTimestamp(vm, AS_INSTANCE(receiver));
     double timestamp2 = dateObjGetTimestamp(vm, AS_INSTANCE(args[0]));
+    
     if (timestamp > timestamp2) RETURN_INT(1);
     else if (timestamp < timestamp2) RETURN_INT(-1);
     else RETURN_INT(0);

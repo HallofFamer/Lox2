@@ -312,6 +312,7 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
     ObjString* shortName = createStringFromToken(resolver->vm, ast->token);
     ObjString* fullName = getSymbolFullName(resolver, ast->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
+	typeTableSet(resolver->vm->currentModule->typeTab, fullName, (TypeInfo*)behaviorType);
 
     if (ast->attribute.isGeneric) {
         Ast* typeParams = astLastChild(ast);
