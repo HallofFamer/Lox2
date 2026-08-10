@@ -389,6 +389,7 @@ LOX_METHOD(Duration, __add__) {
     ASSERT_ARG_INSTANCE_OF("Duration::+(duration)", 0, clox.std.util.Duration);
     ObjInstance* self = AS_INSTANCE(receiver);
     int duration[4];
+
     durationFromSeconds(duration, durationTotalSeconds(vm, self) + durationTotalSeconds(vm, AS_INSTANCE(args[0])));
     ObjInstance* object = newInstance(vm, self->obj.klass);
     durationObjInit(vm, duration, object);
@@ -400,6 +401,7 @@ LOX_METHOD(Duration, __subtract__) {
     ASSERT_ARG_INSTANCE_OF("Duration::-(duration)", 0, clox.std.util.Duration);
     ObjInstance* self = AS_INSTANCE(receiver);
     int duration[4];
+
     durationFromSeconds(duration, durationTotalSeconds(vm, self) - durationTotalSeconds(vm, AS_INSTANCE(args[0])));
     ObjInstance* object = newInstance(vm, self->obj.klass);
     durationObjInit(vm, duration, object);
