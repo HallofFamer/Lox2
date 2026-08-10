@@ -831,13 +831,6 @@ BehaviorTypeInfo* typeTableInsertBehavior(TypeTable* typetab, TypeCategory categ
     return behaviorType;
 }
 
-CallableTypeInfo* typeTableInsertCallable(TypeTable* typetab, TypeCategory category, ObjString* name, TypeInfo* returnType) {
-    int id = typetab->count + 1;
-    CallableTypeInfo* callableType = newCallableTypeInfo(id, category, name, returnType);
-    typeTableSet(typetab, name, (TypeInfo*)callableType);
-    return callableType;
-}
-
 FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer) {
     int id = typetab->count + 1;
     FieldTypeInfo* fieldType = newFieldTypeInfo(id, name, declaredType, isMutable, hasInitializer);
@@ -850,13 +843,6 @@ MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, Calla
     MethodTypeInfo* methodType = newMethodTypeInfoWithDeclaredType(id, name, declaredType, isAsync, isClass, isInitializer);
     typeTableSet(typetab, name, (TypeInfo*)methodType);
     return methodType;
-}
-
-GenericTypeInfo* typeTableInsertGeneric(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* rawType) {
-    int id = typetab->count + 1;
-    GenericTypeInfo* genericType = newGenericTypeInfo(id, shortName, fullName, rawType);
-    typeTableSet(typetab, fullName, (TypeInfo*)genericType);
-    return genericType;
 }
 
 AliasTypeInfo* typeTableInsertAlias(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* targetType) {
