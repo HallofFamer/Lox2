@@ -346,6 +346,7 @@ LOX_METHOD(Duration, compareTo) {
     ASSERT_ARG_INSTANCE_OF("Duration::compareTo(duration)", 0, clox.std.util.Duration);
     double totalSeconds = durationTotalSeconds(vm, AS_INSTANCE(receiver));
     double totalSeconds2 = durationTotalSeconds(vm, AS_INSTANCE(args[0]));
+
     if (totalSeconds > totalSeconds2) RETURN_INT(1);
     else if (totalSeconds < totalSeconds2) RETURN_INT(-1);
     else RETURN_INT(0);
@@ -417,6 +418,7 @@ LOX_METHOD(DurationClass, ofDays) {
     ObjClass* self = AS_CLASS(receiver);
     ObjInstance* instance = newInstance(vm, self);
     push(vm, OBJ_VAL(instance));
+
     int duration[4] = { days, 0, 0, 0 };
     durationObjInit(vm, duration, instance);
     pop(vm);

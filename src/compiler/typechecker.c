@@ -128,7 +128,6 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
 }
 
 static void insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type) {
-	if (type == NULL) return;
 	if (isHigherOrderType(type)) {
         char* shortName = createTypeName(type, false);
 		char* fullName = createTypeName(type, true);
@@ -145,7 +144,7 @@ static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, Type
     else if (isHigherOrderType(instantiatedType)) {
         insertHigherOrderType(typeChecker, instantiatedType);
     }
-	return instantiatedType;
+    return instantiatedType;
 }
 
 static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker, TypeInfo* type) {
