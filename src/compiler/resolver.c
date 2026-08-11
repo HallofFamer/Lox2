@@ -271,7 +271,6 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
 }
 
 static void setCallableTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
-    callableType->attribute.isAsync = ast->attribute.isAsync;
     callableType->attribute.isClassMethod = ast->attribute.isClass;
     callableType->attribute.isGeneric = ast->attribute.isGeneric;
     callableType->attribute.isInitializer = ast->attribute.isInitializer;

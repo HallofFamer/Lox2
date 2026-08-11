@@ -387,6 +387,7 @@ LOX_METHOD(FileReadStream, __init__) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjFile* file = getFileArgument(vm, args[0]);
     if (file == NULL) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "Method FileReadStream::__init__(file) expects argument 1 to be a string or file.");
+    
     if (!setFileField(vm, AS_INSTANCE(receiver), file, "r")) {
         THROW_EXCEPTION(clox.std.io.IOException, "Cannot create FileReadStream, file either does not exist or require additional permission to access.");
     }
@@ -398,6 +399,7 @@ LOX_METHOD(FileReadStream, peek) {
     ASSERT_ARG_COUNT("FileReadStream::peek()", 0);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot peek the next char because file is already closed.");
+    
     if (file->fsOpen == NULL) RETURN_NIL;
     else {
         ObjString* ch = fileRead(vm, file, true);
@@ -410,6 +412,7 @@ LOX_METHOD(FileReadStream, read) {
     ASSERT_ARG_COUNT("FileReadStream::read()", 0);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot read the next char because file is already closed.");
+    
     if (file->fsOpen == NULL) RETURN_NIL;
     else {
         ObjString* ch = fileRead(vm, file, false);
