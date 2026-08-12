@@ -270,7 +270,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
     return type;
 }
 
-static void setCallableTypeModifier(Ast* ast, CallableTypeInfo* callableType) {
+static void setCallableTypeAttributes(Ast* ast, CallableTypeInfo* callableType) {
     callableType->attribute.isClassMethod = ast->attribute.isClass;
     callableType->attribute.isGeneric = ast->attribute.isGeneric;
     callableType->attribute.isInitializer = ast->attribute.isInitializer;
@@ -1728,7 +1728,7 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
         }
 
         MethodTypeInfo* methodType = typeTableInsertMethod(_class->methods, name, AS_CALLABLE_TYPE(ast->type), ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
-        setCallableTypeModifier(ast, methodType->declaredType);
+        setCallableTypeAttributes(ast, methodType->declaredType);
 	    item->type = (TypeInfo*)methodType;
     }
 }

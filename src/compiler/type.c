@@ -993,9 +993,11 @@ static void typeTableOutputCallable(CallableTypeInfo* function) {
 static void typeTableOutputGeneric(GenericTypeInfo* generic) {
     printf("    generic type: %s\n", generic->rawType->shortName->chars);
     if (generic->actualTypeParams != NULL && generic->actualTypeParams->count > 0) {
-        printf("    actual type parameters: %s", generic->actualTypeParams->elements[0]->shortName->chars);
-        for (int i = 1; i < generic->actualTypeParams->count; i++) {
-            printf(", %s", generic->actualTypeParams->elements[i]->shortName->chars);
+		TypeInfo* actualTypeParam = generic->actualTypeParams->elements[0];
+        printf("    actual type parameters: %s", actualTypeParam != NULL ? actualTypeParam->shortName->chars : "dynamic");
+        for (int i = 0; i < generic->actualTypeParams->count; i++) {
+			actualTypeParam = generic->actualTypeParams->elements[i];
+            printf(", %s", (actualTypeParam != NULL) ? actualTypeParam->shortName->chars : "dynamic");
         }
         printf("\n");
     }
