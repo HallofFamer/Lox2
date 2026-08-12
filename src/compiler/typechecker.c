@@ -140,8 +140,7 @@ static void insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type) {
 
 static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
 	TypeInfo* instantiatedType = instantiateTypeParameter(type, formalParams, actualParams);
-	if (instantiatedType == NULL) return NULL;
-    else if (isHigherOrderType(instantiatedType)) {
+	if (isHigherOrderType(instantiatedType)) {
         insertHigherOrderType(typeChecker, instantiatedType);
     }
     return instantiatedType;

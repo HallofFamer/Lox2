@@ -515,6 +515,7 @@ LOX_METHOD(FileWriteStream, __init__) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjFile* file = getFileArgument(vm, args[0]);
     if (file == NULL) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "Method FileWriteStream::__init__(file) expects argument 1 to be a string or file.");
+    
     if (!setFileField(vm, AS_INSTANCE(receiver), file, "w")) {
         THROW_EXCEPTION(clox.std.io.IOException, "Cannot create FileWriteStream, file either does not exist or require additional permission to access.");
     }
@@ -527,6 +528,7 @@ LOX_METHOD(FileWriteStream, write) {
     ASSERT_ARG_TYPE("FileWriteStream::write(char)", 0, String);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot write character to stream because file is already closed.");
+    
     if (file->fsOpen != NULL && file->fsWrite != NULL) {
         ObjString* character = AS_STRING(args[0]);
         if (character->length != 1) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "Method FileWriteStream::put(char) expects argument 1 to be a character(string of length 1)");
@@ -562,6 +564,7 @@ LOX_METHOD(FileWriteStream, writeLineAsync) {
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write line to stream because file is already closed.");
     loadFileWrite(vm, file);
+    
     ObjPromise* promise = fileWriteAsync(vm, file, copyStringPerma(vm, "\n", 1), fileOnWrite);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.io.IOException, "Failed to write to IO stream.");
     RETURN_OBJ(promise);
@@ -591,6 +594,7 @@ LOX_METHOD(FileWriteStream, writeString) {
     ASSERT_ARG_TYPE("FileWriteStream::writeString(string)", 0, String);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot write string to stream because file is already closed.");
+    
     if (file->fsOpen != NULL && file->fsWrite != NULL) {
         ObjString* string = AS_STRING(args[0]);
         uv_buf_t uvBuf = uv_buf_init(string->chars, string->length);
