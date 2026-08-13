@@ -40,6 +40,7 @@ LOX_METHOD(BinaryReadStream, readAsync) {
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot read the next byte because file is already closed.");
     loadFileRead(vm, file);
+
     ObjPromise* promise = fileReadAsync(vm, file, fileOnReadByte);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.io.IOException, "Failed to read byte from IO stream.");
     RETURN_OBJ(promise);
@@ -49,10 +50,11 @@ LOX_METHOD(BinaryReadStream, readBytes) {
     ASSERT_ARG_COUNT("BinaryReadStream::readBytes(length)", 1);
     ASSERT_ARG_TYPE("BinaryReadStream::readBytes(length)", 0, Int);
     int length = AS_INT(args[0]);
-    if (length < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "Method BinaryReadStream::readBytes(length) expects argument 1 to be a positive integer but got %g.", length);
 
+    if (length < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "Method BinaryReadStream::readBytes(length) expects argument 1 to be a positive integer but got %g.", length);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot read the next bytes because file is already closed.");
+    
     if (file->fsOpen != NULL && file->fsRead != NULL) {
         ObjArray* bytes = fileReadBytes(vm, file, length);
         if (bytes == NULL) THROW_EXCEPTION_FMT(clox.std.lang.OutOfMemoryException, "Not enough memory to read the next %d bytes.", length);
@@ -81,6 +83,7 @@ LOX_METHOD(BinaryWriteStream, __init__) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjFile* file = getFileArgument(vm, args[0]);
     if (file == NULL) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "Method BinaryWriteStream::__init__(file) expects argument 1 to be a string or file.");
+    
     if (!setFileField(vm, AS_INSTANCE(receiver), file, "wb")) {
         THROW_EXCEPTION(clox.std.io.IOException, "Cannot create BinaryWriteStream, file either does not exist or require additional permission to access.");
     }

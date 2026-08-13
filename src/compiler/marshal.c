@@ -184,7 +184,8 @@ static void marshalSerializeFields(Marshaller* marshaller, ByteArray* bytes, Typ
 			FieldTypeInfo* fieldType = AS_FIELD_TYPE(entry->value);
 			marshalSerializeString(bytes, entry->key);
 			marshalSerializeByte(bytes, fieldType->isMutable ? 1 : 0);
-			marshalSerializeByte(marshaller, bytes, fieldType->index);
+			marshalSerializeByte(bytes, fieldType->hasInitializer ? 1 : 0);
+			marshalSerializeByte(bytes, (uint8_t)fieldType->index);
 			marshalSerializeString(bytes, fieldType->declaredType != NULL ? fieldType->declaredType->fullName : newStringPerma(marshaller->vm, "dynamic"));
 		}
 	}
@@ -218,7 +219,6 @@ static void marshalSerializeMethods(Marshaller* marshaller, ByteArray* bytes, Ty
 }
 
 static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, TypeInfo* type) {
-	marshalSerializeInt(bytes, (uint32_t)type->id);
 	marshalSerializeByte(bytes, (uint8_t)type->category);
 	marshalSerializeInt(bytes, type->hash);
 	marshalSerializeString(bytes, type->shortName);
@@ -229,9 +229,9 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 		marshalSerializeString(bytes, behaviorType->superclassType->fullName);
 		marshalSerializeTraits(bytes, behaviorType->traitTypes);
 		marshalSerializeFormalTypeParams(bytes, behaviorType->formalTypeParams);
-		marshalSerializeFields(marshaller, bytes, &behaviorType->fields);
-		marshalSerializeMethods(marshaller, bytes, &behaviorType->methods);
-		marshalSerializeByte(bytes, behaviorType->isReified ? 1 : 0);
+		marshalSerializeFields(marshaller, bytes, behaviorType->fields);
+		marshalSerializeMethods(marshaller, bytes, behaviorType->methods);
+		marshalSerializeByte(bytes, (behaviorType->isReified ? 1 : 0));
 	}
 }
 
@@ -398,6 +398,99 @@ Value marshalDeserializeValue(Marshaller* marshaller) {
 	    default:
 		    fprintf(stderr, "Unsupported value type for deserialization.\n");
 	     	exit(1);
+	}
+}
+
+static TypeInfo* marshalDeserializeType(Marshaller* marshaller) {
+	ObjString* typeName = marshalDeserializeString(marshaller);
+	if (strcmp(typeName->chars, "dynamic") == 0) return NULL;
+	TypeInfo* typeInfo = typeTableGet(marshaller->vm->typetab, typeName);
+
+	if (typeInfo == NULL) {
+		fprintf(stderr, "Failed to find type \"%s\" during marshal deserialization.\n", typeName->chars);
+		exit(1);
+	}
+	return typeInfo;
+}
+
+static void marshalDeserializeTraits(Marshaller* marshaller, BehaviorTypeInfo* behaviorType) {
+	int traitCount = marshalDeserializeInt(marshaller);
+	for (int i = 0; i < traitCount; i++) {
+		TypeInfo* traitType = marshalDeserializeType(marshaller);
+		TypeInfoArrayAdd(behaviorType->traitTypes, traitType);
+	}
+}
+
+static void marshalDeserializeFormalTypeParams(Marshaller* marshaller, BehaviorTypeInfo* behaviorType) {
+	int formalTypeParamCount = marshalDeserializeInt(marshaller);
+	for (int i = 0; i < formalTypeParamCount; i++) {
+		TypeInfo* placeholderType = marshalDeserializeType(marshaller);
+		TypeInfoArrayAdd(behaviorType->formalTypeParams, placeholderType);
+	}
+}
+
+static void marshalDeserializeFields(Marshaller* marshaller, BehaviorTypeInfo* behaviorType) {
+	int fieldCount = marshalDeserializeInt(marshaller);
+	for (int i = 0; i < fieldCount; i++) {
+		ObjString* fieldName = marshalDeserializeString(marshaller);
+		bool isMutable = marshalDeserializeByte(marshaller) == 1;
+		bool hasInitializer = marshalDeserializeByte(marshaller) == 1;
+		uint8_t index = marshalDeserializeByte(marshaller);
+		TypeInfo* declaredType = marshalDeserializeType(marshaller);
+		typeTableInsertField(behaviorType->fields, fieldName, declaredType, isMutable, hasInitializer);
+	}
+}
+
+static void marshalDeserializeMethod(Marshaller* marshaller, TypeTable* methods) {
+	ObjString* shortName = marshalDeserializeString(marshaller);
+	bool isAsync = marshalDeserializeByte(marshaller) == 1;
+	bool isClass = marshalDeserializeByte(marshaller) == 1;
+	bool isInitializer = marshalDeserializeByte(marshaller) == 1;
+	TypeInfo* returnType = marshalDeserializeType(marshaller);
+	MethodTypeInfo* methodType = typeTableInsertMethod(methods, shortName, (CallableTypeInfo*)returnType, isAsync, isClass, isInitializer);
+	
+	uint8_t paramCount = marshalDeserializeByte(marshaller);
+	for (uint8_t i = 0; i < paramCount; i++) {
+		TypeInfo* paramType = marshalDeserializeType(marshaller);
+		TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
+	}
+}
+
+static void marshalDeserializeMethods(Marshaller* marshaller, BehaviorTypeInfo* behaviorType) {
+	int methodCount = marshalDeserializeInt(marshaller);
+	for (int i = 0; i < methodCount; i++) {
+		marshalDeserializeMethod(marshaller, behaviorType->methods);
+	}
+}
+
+static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
+	uint32_t id = marshaller->vm->typetab->count + 1;
+	TypeCategory category = (TypeCategory)marshalDeserializeByte(marshaller);
+	uint32_t hash = marshalDeserializeInt(marshaller);
+	ObjString* shortName = marshalDeserializeString(marshaller);
+	ObjString* fullName = marshalDeserializeString(marshaller);
+
+	if (category == TYPE_CATEGORY_CLASS || category == TYPE_CATEGORY_METACLASS || category == TYPE_CATEGORY_TRAIT) {
+		TypeInfo* superclassType = marshalDeserializeType(marshaller);
+		BehaviorTypeInfo* behaviorType = newBehaviorTypeInfo(id, category, shortName, fullName, superclassType);
+		marshalDeserializeTraits(marshaller, behaviorType);
+		marshalDeserializeFormalTypeParams(marshaller, behaviorType);
+		marshalDeserializeFields(marshaller, behaviorType);
+		marshalDeserializeMethods(marshaller, behaviorType);
+
+		bool isReified = marshalDeserializeByte(marshaller) == 1;
+		behaviorType->isReified = isReified;
+		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)behaviorType);
+		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)behaviorType);
+		return (TypeInfo*)behaviorType;
+	}
+}
+
+static void marshalDeserializeTypeTable(Marshaller* marshaller) {
+	int typeCount = marshalDeserializeInt(marshaller);
+	for (int i = 0; i < typeCount; i++) {
+		ObjString* typeName = marshalDeserializeString(marshaller);
+		TypeInfo* typeInfo = marshalDeserializeTypeInfo(marshaller);
 	}
 }
 
