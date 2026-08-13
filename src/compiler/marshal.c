@@ -160,6 +160,92 @@ void marshalSerializeValue(Marshaller* marshaller, ByteArray* bytes, Value value
 	}
 }
 
+static void marshalSerializeTraits(ByteArray* bytes, TypeInfoArray* traits) {
+	marshalSerializeInt(bytes, (uint32_t)traits->count);
+	for (int i = 0; i < traits->count; i++) {
+		TypeInfo* traitType = traits->elements[i];
+		marshalSerializeString(bytes, traitType->fullName);
+	}
+}
+
+static void marshalSerializeFormalTypeParams(ByteArray* bytes, TypeInfoArray* formalTypeParams) {
+	marshalSerializeInt(bytes, (uint32_t)formalTypeParams->count);
+	for (int i = 0; i < formalTypeParams->count; i++) {
+		TypeInfo* typeParam = formalTypeParams->elements[i];
+		marshalSerializeString(bytes, typeParam->fullName);
+	}
+}
+
+static void marshalSerializeFields(Marshaller* marshaller, ByteArray* bytes, TypeTable* fields) {
+	marshalSerializeInt(bytes, (uint32_t)fields->count);
+	for (int i = 0; i < fields->capacity; i++) {
+		TypeEntry* entry = &fields->entries[i];
+		if (entry != NULL && entry->key != NULL) {
+			FieldTypeInfo* fieldType = AS_FIELD_TYPE(entry->value);
+			marshalSerializeString(bytes, entry->key);
+			marshalSerializeByte(bytes, fieldType->isMutable ? 1 : 0);
+			marshalSerializeByte(marshaller, bytes, fieldType->index);
+			marshalSerializeString(bytes, fieldType->declaredType != NULL ? fieldType->declaredType->fullName : newStringPerma(marshaller->vm, "dynamic"));
+		}
+	}
+}
+
+static void marshalSerializeMethod(Marshaller* marshaller, ByteArray* bytes, MethodTypeInfo* method) {
+	marshalSerializeString(bytes, method->baseType.shortName);
+	marshalSerializeByte(bytes, method->isAsync ? 1 : 0);
+	marshalSerializeByte(bytes, method->isClass ? 1 : 0);
+	marshalSerializeByte(bytes, method->isInitializer ? 1 : 0);
+
+	CallableTypeInfo* callableType = method->declaredType;
+	marshalSerializeString(bytes, callableType->returnType != NULL ? callableType->returnType->fullName : newStringPerma(marshaller->vm, "dynamic"));
+	marshalSerializeByte(bytes, (uint8_t)callableType->paramTypes->count);
+	
+	for (int i = 0; i < callableType->paramTypes->count; i++) {
+		TypeInfo* paramType = callableType->paramTypes->elements[i];
+		marshalSerializeString(bytes, paramType != NULL ? paramType->fullName : newStringPerma(marshaller->vm, "dynamic"));
+	}
+}
+
+static void marshalSerializeMethods(Marshaller* marshaller, ByteArray* bytes, TypeTable* methods) {
+	marshalSerializeInt(bytes, (uint32_t)methods->count);
+	for (int i = 0; i < methods->capacity; i++) {
+		TypeEntry* entry = &methods->entries[i];
+		if (entry != NULL && entry->key != NULL) {
+			MethodTypeInfo* methodType = AS_METHOD_TYPE(entry->value);
+			marshalSerializeMethod(marshaller, bytes, methodType);
+		}
+	}
+}
+
+static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, TypeInfo* type) {
+	marshalSerializeInt(bytes, (uint32_t)type->id);
+	marshalSerializeByte(bytes, (uint8_t)type->category);
+	marshalSerializeInt(bytes, type->hash);
+	marshalSerializeString(bytes, type->shortName);
+	marshalSerializeString(bytes, type->fullName);
+
+	if (IS_BEHAVIOR_TYPE(type)) {
+		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+		marshalSerializeString(bytes, behaviorType->superclassType->fullName);
+		marshalSerializeTraits(bytes, behaviorType->traitTypes);
+		marshalSerializeFormalTypeParams(bytes, behaviorType->formalTypeParams);
+		marshalSerializeFields(marshaller, bytes, &behaviorType->fields);
+		marshalSerializeMethods(marshaller, bytes, &behaviorType->methods);
+		marshalSerializeByte(bytes, behaviorType->isReified ? 1 : 0);
+	}
+}
+
+static void marshalSerializeTypeTable(Marshaller* marshaller, ByteArray* bytes, TypeTable* typeTab) {
+	marshalSerializeInt(bytes, (uint32_t)typeTab->count);
+	for (int i = 0; i < typeTab->capacity; i++) {
+		TypeEntry* entry = &typeTab->entries[i];
+		if (entry != NULL && entry->key != NULL) {
+			marshalSerializeString(bytes, entry->key);
+			marshalSerializeTypeInfo(marshaller, bytes, entry->value);
+		}
+	}
+}
+
 static void marshalSerializeModule(Marshaller* marshaller, ByteArray* bytes, ObjModule* module) {
 	ObjFunction* function = module->closure->function;
 	marshalSerializeString(bytes, newString(marshaller->vm, marshaller->vm->config.version));
@@ -189,6 +275,7 @@ static void marshalSerializeModule(Marshaller* marshaller, ByteArray* bytes, Obj
 		Value entry = module->dependencies.values[i];
 		marshalSerializeString(bytes, AS_STRING(entry));		
 	}
+
 	marshalSerializeFunction(marshaller, bytes, function);
 }
 

@@ -436,6 +436,7 @@ LOX_METHOD(FileReadStream, readLine) {
     ASSERT_ARG_COUNT("FileReadStream::readLine()", 0);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot read the next line because file is already closed.");
+    
     if (file->fsOpen == NULL) RETURN_NIL;
     else {
         ObjString* line = fileReadLine(vm, file);
@@ -683,6 +684,7 @@ LOX_METHOD(ReadStream, skip) {
     ASSERT_ARG_TYPE("ReadStream::skip(offset)", 0, Int);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot skip stream by offset because file is already closed.");
+    
     if (file->fsOpen == NULL) RETURN_FALSE;
     file->offset += AS_INT(args[0]);
     RETURN_TRUE;
