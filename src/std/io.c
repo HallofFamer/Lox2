@@ -484,6 +484,7 @@ LOX_METHOD(FileReadStream, readStringAsync) {
     ASSERT_ARG_COUNT_ASYNC("FileReadStream::readStringAsync(length)", 1);
     ASSERT_ARG_TYPE_ASYNC("FileReadStream::readString(length)", 0, Int);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
+    
     int length = AS_INT(args[0]);
     if (length < 0) RETURN_PROMISE_EX_FMT(clox.std.lang.IllegalArgumentException, "Method FileReadStream::readStringAsync(length) expects argument 1 to be a positive integer but got %g.", length);
     loadFileRead(vm, file);
@@ -551,10 +552,11 @@ LOX_METHOD(FileWriteStream, writeAsync) {
     ASSERT_ARG_TYPE_ASYNC("FileWriteStream::writeAsync(char)", 0, String);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) RETURN_PROMISE_EX(clox.std.io.IOException, "Cannot write character to stream because file is already closed.");
+    
     loadFileWrite(vm, file);
-
     ObjString* character = AS_STRING(args[0]);
     if (character->length != 1) RETURN_PROMISE_EX(clox.std.lang.IllegalArgumentException, "Method FileWriteStream::putAsync(char) expects argument 1 to be a character(string of length 1)");
+    
     ObjPromise* promise = fileWriteAsync(vm, file, character, fileOnWrite);
     if (promise == NULL) RETURN_PROMISE_EX(clox.std.io.IOException, "Failed to write to IO stream.");
     RETURN_OBJ(promise);
@@ -718,6 +720,7 @@ LOX_METHOD(WriteStream, flushAsync) {
     ASSERT_ARG_COUNT_ASYNC("WriteStream::flushAsync()", 0);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot flush write stream because file is already closed.");
+    
     loadFileWrite(vm, file);
     ObjPromise* promise = fileFlushAsync(vm, file, fileOnFlush);
     if (promise == NULL) THROW_EXCEPTION(clox.std.io.IOException, "Failed to flush write stream.");

@@ -250,6 +250,21 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 		}
 		marshalSerializeFormalTypeParams(bytes, callableType->formalTypeParams);
 	}
+	else if (IS_GENERIC_TYPE(type)) {
+		GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
+		marshalSerializeByte(bytes, (uint8_t)genericType->isFullyInstantiated);
+		marshalSerializeString(bytes, genericType->rawType->fullName);
+		marshalSerializeByte(bytes, (uint8_t)genericType->actualTypeParams->count);
+		
+		for (int i = 0; i < genericType->actualTypeParams->count; i++) {
+			TypeInfo* actualType = genericType->actualTypeParams->elements[i];
+			marshalSerializeString(bytes, actualType != NULL ? actualType->fullName : newStringPerma(marshaller->vm, "dynamic"));
+		}
+	}
+	else {
+		fprintf(stderr, "Unsupported type category for serialization: %d\n", type->category);
+		exit(1);
+	}
 }
 
 static void marshalSerializeTypeTable(Marshaller* marshaller, ByteArray* bytes, TypeTable* typeTab) {
@@ -528,6 +543,22 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)callableType);
 		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)callableType);
 		return (TypeInfo*)callableType;
+	}
+	else if (category == TYPE_CATEGORY_GENERIC) {
+		bool isFullyInstantiated = marshalDeserializeByte(marshaller) == 1;
+		TypeInfo* rawType = marshalDeserializeType(marshaller);
+		GenericTypeInfo* genericType = newGenericTypeInfo(id, shortName, fullName, rawType);
+		genericType->isFullyInstantiated = isFullyInstantiated;
+
+		uint8_t actualTypeParamCount = marshalDeserializeByte(marshaller);
+		for (int i = 0; i < actualTypeParamCount; i++) {
+			TypeInfo* actualType = marshalDeserializeType(marshaller);
+			TypeInfoArrayAdd(genericType->actualTypeParams, actualType);
+		}
+
+		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)genericType);
+		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)genericType);
+		return (TypeInfo*)genericType;
 	}
 	else {
 		fprintf(stderr, "Unsupported type category for deserialization.\n");
