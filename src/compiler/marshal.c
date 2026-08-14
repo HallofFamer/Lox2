@@ -233,6 +233,23 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 		marshalSerializeMethods(marshaller, bytes, behaviorType->methods);
 		marshalSerializeByte(bytes, (behaviorType->isReified ? 1 : 0));
 	}
+	else if (IS_CALLABLE_TYPE(type)) {
+		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
+		marshalSerializeByte(bytes, (uint8_t)callableType->attribute.isGeneric);
+		marshalSerializeByte(bytes, (uint8_t)callableType->attribute.isInitializer);
+		marshalSerializeByte(bytes, (uint8_t)callableType->attribute.isLambda);
+		marshalSerializeByte(bytes, (uint8_t)callableType->attribute.isReified);
+		marshalSerializeByte(bytes, (uint8_t)callableType->attribute.isVariadic);
+		marshalSerializeByte(bytes, (uint8_t)callableType->attribute.isVoid);
+		marshalSerializeString(bytes, callableType->returnType != NULL ? callableType->returnType->fullName : newStringPerma(marshaller->vm, "dynamic"));
+		
+		marshalSerializeByte(bytes, (uint8_t)callableType->paramTypes->count);	
+		for (int i = 0; i < callableType->paramTypes->count; i++) {
+			TypeInfo* paramType = callableType->paramTypes->elements[i];
+			marshalSerializeString(bytes, paramType != NULL ? paramType->fullName : newStringPerma(marshaller->vm, "dynamic"));
+		}
+		marshalSerializeFormalTypeParams(bytes, callableType->formalTypeParams);
+	}
 }
 
 static void marshalSerializeTypeTable(Marshaller* marshaller, ByteArray* bytes, TypeTable* typeTab) {
@@ -421,11 +438,11 @@ static void marshalDeserializeTraits(Marshaller* marshaller, BehaviorTypeInfo* b
 	}
 }
 
-static void marshalDeserializeFormalTypeParams(Marshaller* marshaller, BehaviorTypeInfo* behaviorType) {
+static void marshalDeserializeFormalTypeParams(Marshaller* marshaller, TypeInfoArray* formalTypeParams) {
 	int formalTypeParamCount = marshalDeserializeInt(marshaller);
 	for (int i = 0; i < formalTypeParamCount; i++) {
 		TypeInfo* placeholderType = marshalDeserializeType(marshaller);
-		TypeInfoArrayAdd(behaviorType->formalTypeParams, placeholderType);
+		TypeInfoArrayAdd(formalTypeParams, placeholderType);
 	}
 }
 
@@ -483,6 +500,38 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)behaviorType);
 		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)behaviorType);
 		return (TypeInfo*)behaviorType;
+	}
+	else if (category == TYPE_CATEGORY_FUNCTION) {
+		bool isGeneric = marshalDeserializeByte(marshaller) == 1;
+		bool isInitializer = marshalDeserializeByte(marshaller) == 1;
+		bool isLambda = marshalDeserializeByte(marshaller) == 1;
+		bool isReified = marshalDeserializeByte(marshaller) == 1;
+		bool isVariadic = marshalDeserializeByte(marshaller) == 1;
+		bool isVoid = marshalDeserializeByte(marshaller) == 1;
+
+		TypeInfo* returnType = marshalDeserializeType(marshaller);
+		CallableTypeInfo* callableType = newCallableTypeInfo(id, category, shortName, returnType);
+		callableType->baseType.fullName = fullName;
+		callableType->attribute.isInitializer = isInitializer;
+		callableType->attribute.isLambda = isLambda;
+		callableType->attribute.isReified = isReified;
+		callableType->attribute.isVariadic = isVariadic;
+		callableType->attribute.isVoid = isVoid;
+
+		uint8_t paramCount = marshalDeserializeByte(marshaller);
+		for (int i = 0; i < paramCount; i++) {
+			TypeInfo* paramType = marshalDeserializeType(marshaller);
+			TypeInfoArrayAdd(callableType->paramTypes, paramType);
+		}
+
+		marshalDeserializeFormalTypeParams(marshaller, callableType->formalTypeParams);
+		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)callableType);
+		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)callableType);
+		return (TypeInfo*)callableType;
+	}
+	else {
+		fprintf(stderr, "Unsupported type category for deserialization.\n");
+		exit(1);
 	}
 }
 
