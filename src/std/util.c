@@ -764,8 +764,8 @@ LOX_METHOD(Timer, __init__) {
     ASSERT_ARG_TYPE("Timer::__init__(closure, delay, interval)", 1, Int);
     ASSERT_ARG_TYPE("Timer::__init__(closure, delay, interval)", 2, Int);
     ObjTimer* self = AS_TIMER(receiver);
-    TimerData* data = (TimerData*)self->timer->data;
 
+    TimerData* data = (TimerData*)self->timer->data;
     data->receiver = receiver;
     data->closure = AS_CLOSURE(args[0]);
     data->delay = AS_INT(args[1]);
@@ -802,6 +802,7 @@ LOX_METHOD(Timer, toString) {
     ASSERT_ARG_COUNT("Timer::run()", 0);
     ObjTimer* self = AS_TIMER(receiver);
     TimerData* data = (TimerData*)self->timer->data;
+    
     if (data->delay != 0 && data->interval == 0) RETURN_STRING_FMT("Timer: delay after %dms", data->delay);
     if (data->delay == 0 && data->interval != 0) RETURN_STRING_FMT("Timer: interval at %dms", data->interval);
     RETURN_STRING_FMT("Timer: delay after %dms, interval at %dms", data->delay, data->interval);

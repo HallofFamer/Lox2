@@ -261,6 +261,11 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 			marshalSerializeString(bytes, actualType != NULL ? actualType->fullName : newStringPerma(marshaller->vm, "dynamic"));
 		}
 	}
+	else if (IS_ALIAS_TYPE(type)) {
+		AliasTypeInfo* aliasType = AS_ALIAS_TYPE(type);
+		marshalSerializeString(bytes, aliasType->targetType->fullName);
+		marshalSerializeFormalTypeParams(bytes, aliasType->formalTypeParams);
+	}
 	else {
 		fprintf(stderr, "Unsupported type category for serialization: %d\n", type->category);
 		exit(1);
@@ -559,6 +564,14 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)genericType);
 		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)genericType);
 		return (TypeInfo*)genericType;
+	}
+	else if (category == TYPE_CATEGORY_ALIAS) {
+		TypeInfo* targetType = marshalDeserializeType(marshaller);
+		AliasTypeInfo* aliasType = newAliasTypeInfo(id, shortName, fullName, targetType);
+		marshalDeserializeFormalTypeParams(marshaller, aliasType->formalTypeParams);
+		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)aliasType);
+		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)aliasType);
+		return (TypeInfo*)aliasType;
 	}
 	else {
 		fprintf(stderr, "Unsupported type category for deserialization.\n");
