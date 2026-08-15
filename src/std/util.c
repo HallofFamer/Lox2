@@ -228,6 +228,7 @@ LOX_METHOD(DateTime, toDate) {
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjInstance* date = newInstance(vm, getNativeClass(vm, "clox.std.util.Date"));
     push(vm, OBJ_VAL(date));
+    
     copyObjField(vm, self, date, "year");
     copyObjField(vm, self, date, "month");
     copyObjField(vm, self, date, "day");
@@ -465,6 +466,7 @@ LOX_METHOD(DurationClass, ofSeconds) {
     ObjClass* self = AS_CLASS(receiver);
     ObjInstance* instance = newInstance(vm, self);
     push(vm, OBJ_VAL(instance));
+    
     int duration[4] = { 0, 0, 0, seconds };
     durationObjInit(vm, duration, instance);
     pop(vm);

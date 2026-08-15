@@ -266,10 +266,6 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 		marshalSerializeString(bytes, aliasType->targetType->fullName);
 		marshalSerializeFormalTypeParams(bytes, aliasType->formalTypeParams);
 	}
-	else {
-		fprintf(stderr, "Unsupported type category for serialization: %d\n", type->category);
-		exit(1);
-	}
 }
 
 static void marshalSerializeTypeTable(Marshaller* marshaller, ByteArray* bytes, TypeTable* typeTab) {
@@ -511,7 +507,7 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		TypeInfo* superclassType = marshalDeserializeType(marshaller);
 		BehaviorTypeInfo* behaviorType = newBehaviorTypeInfo(id, category, shortName, fullName, superclassType);
 		marshalDeserializeTraits(marshaller, behaviorType);
-		marshalDeserializeFormalTypeParams(marshaller, behaviorType);
+		marshalDeserializeFormalTypeParams(marshaller, behaviorType->formalTypeParams);
 		marshalDeserializeFields(marshaller, behaviorType);
 		marshalDeserializeMethods(marshaller, behaviorType);
 
@@ -572,6 +568,12 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)aliasType);
 		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)aliasType);
 		return (TypeInfo*)aliasType;
+	}
+	else if (category == TYPE_CATEGORY_PLACEHOLDER) {
+		TypeInfo* placeholderType = newPlaceholderTypeInfo(id, shortName);
+		typeTableSet(marshaller->vm->typetab, fullName, placeholderType);
+		typeTableSet(marshaller->module->typeTab, fullName, placeholderType);
+		return placeholderType;
 	}
 	else {
 		fprintf(stderr, "Unsupported type category for deserialization.\n");
