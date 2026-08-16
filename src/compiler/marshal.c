@@ -507,14 +507,12 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		bool isReified = marshalDeserializeByte(marshaller) == 1;
 		TypeInfo* superclassType = marshalDeserializeBaseType(marshaller);
 		BehaviorTypeInfo* behaviorType = newBehaviorTypeInfo(id, category, shortName, fullName, superclassType);
+		behaviorType->isReified = isReified;
+
 		marshalDeserializeTraits(marshaller, behaviorType);
 		marshalDeserializeFormalTypeParams(marshaller, behaviorType->formalTypeParams);
 		marshalDeserializeFields(marshaller, behaviorType);
 		marshalDeserializeMethods(marshaller, behaviorType);
-
-		behaviorType->isReified = isReified;
-		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)behaviorType);
-		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)behaviorType);
 		return (TypeInfo*)behaviorType;
 	}
 	else if (category == TYPE_CATEGORY_FUNCTION) {
@@ -541,8 +539,6 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		}
 
 		marshalDeserializeFormalTypeParams(marshaller, callableType->formalTypeParams);
-		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)callableType);
-		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)callableType);
 		return (TypeInfo*)callableType;
 	}
 	else if (category == TYPE_CATEGORY_GENERIC) {
@@ -556,24 +552,16 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 			TypeInfo* actualType = marshalDeserializeBaseType(marshaller);
 			TypeInfoArrayAdd(genericType->actualTypeParams, actualType);
 		}
-
-		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)genericType);
-		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)genericType);
 		return (TypeInfo*)genericType;
 	}
 	else if (category == TYPE_CATEGORY_ALIAS) {
 		TypeInfo* targetType = marshalDeserializeBaseType(marshaller);
 		AliasTypeInfo* aliasType = newAliasTypeInfo(id, shortName, fullName, targetType);
 		marshalDeserializeFormalTypeParams(marshaller, aliasType->formalTypeParams);
-		typeTableSet(marshaller->vm->typetab, fullName, (TypeInfo*)aliasType);
-		typeTableSet(marshaller->module->typeTab, fullName, (TypeInfo*)aliasType);
 		return (TypeInfo*)aliasType;
 	}
 	else if (category == TYPE_CATEGORY_PLACEHOLDER) {
-		TypeInfo* placeholderType = newPlaceholderTypeInfo(id, shortName);
-		typeTableSet(marshaller->vm->typetab, fullName, placeholderType);
-		typeTableSet(marshaller->module->typeTab, fullName, placeholderType);
-		return placeholderType;
+		return newPlaceholderTypeInfo(id, shortName);
 	}
 	else {
 		fprintf(stderr, "Unsupported type category for deserialization.\n");
@@ -586,6 +574,8 @@ static void marshalDeserializeTypeTable(Marshaller* marshaller) {
 	for (int i = 0; i < typeCount; i++) {
 		ObjString* typeName = marshalDeserializeString(marshaller);
 		TypeInfo* typeInfo = marshalDeserializeTypeInfo(marshaller);
+		typeTableSet(marshaller->vm->typetab, typeName->chars, typeInfo);
+		typeTableSet(marshaller->module->typeTab, typeName->chars, typeInfo);
 	}
 }
 

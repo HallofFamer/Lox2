@@ -394,12 +394,15 @@ LOX_METHOD(FileReadStream, __init__) {
     ASSERT_ARG_COUNT("FileReadStream::__init__(file)", 1);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjFile* file = getFileArgument(vm, args[0]);
-    if (file == NULL) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "Method FileReadStream::__init__(file) expects argument 1 to be a string or file.");
     
+    if (file == NULL) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "Method FileReadStream::__init__(file) expects argument 1 to be a string or file.");    
     if (!setFileField(vm, AS_INSTANCE(receiver), file, "r")) {
         THROW_EXCEPTION(clox.std.io.IOException, "Cannot create FileReadStream, file either does not exist or require additional permission to access.");
     }
-    if (!loadFileRead(vm, file)) THROW_EXCEPTION(clox.std.io.IOException, "Unable to read from file stream.");
+
+    if (!loadFileRead(vm, file)) {
+        THROW_EXCEPTION(clox.std.io.IOException, "Unable to read from file stream.");
+    }
     RETURN_OBJ(self);
 }
 
