@@ -477,6 +477,7 @@ LOX_METHOD(Promise, __init__) {
     ASSERT_ARG_COUNT("Promise::__init__(executor)", 1);
     ASSERT_ARG_TCALLABLE("Promise::__init__(executor)", 0);
     ObjPromise* self = AS_PROMISE(receiver);
+    
     self->executor = args[0];
     promiseExecute(vm, self);
     RETURN_OBJ(self);
@@ -486,6 +487,7 @@ LOX_METHOD(Promise, catch) {
     ASSERT_ARG_COUNT("Promise::catch(closure)", 1);
     ASSERT_ARG_TCALLABLE("Promise::catch(closure)", 0);
     ObjPromise* self = AS_PROMISE(receiver);
+    
     if (self->state == PROMISE_REJECTED) callReentrantMethod(vm, OBJ_VAL(self), args[0], OBJ_VAL(self->exception));
     else self->onCatch = args[0];
     RETURN_OBJ(self);
@@ -495,6 +497,7 @@ LOX_METHOD(Promise, catchAll) {
     ASSERT_ARG_COUNT("Promise::catchAll(exception)", 1);
     ASSERT_ARG_TYPE("Promise::catchAll(exception)", 0, Exception);
     ObjPromise* self = AS_PROMISE(receiver);
+  
     if (self->captures->count == 0) {
         THROW_EXCEPTION(clox.std.lang.UnsupportedOperationException, "Method Promise::catchAll(exception) can only be called internally by Promise class::all(promises).");
     }
@@ -508,6 +511,7 @@ LOX_METHOD(Promise, finally) {
     ASSERT_ARG_COUNT("Promise::finally(closure)", 1);
     ASSERT_ARG_TCALLABLE("Promise::finally(closure)", 0);
     ObjPromise* self = AS_PROMISE(receiver);
+    
     if (self->state == PROMISE_FULFILLED || self->state == PROMISE_REJECTED) callReentrantMethod(vm, OBJ_VAL(self), args[0], self->value);
     else self->onFinally = args[0];
     RETURN_OBJ(self);
