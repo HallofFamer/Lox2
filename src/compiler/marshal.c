@@ -301,6 +301,7 @@ static void marshalSerializeModule(Marshaller* marshaller, ByteArray* bytes, Obj
 		marshalSerializeString(bytes, AS_STRING(entry));		
 	}
 
+	marshalSerializeTypeTable(marshaller, bytes, module->typeTab);
 	marshalSerializeFunction(marshaller, bytes, function);
 }
 
@@ -607,6 +608,7 @@ static void marshalDeserializeModule(Marshaller* marshaller) {
 		valueArrayWrite(marshaller->vm, &marshaller->module->dependencies, OBJ_VAL(dependency));
 	}
 
+	marshalDeserializeTypeTable(marshaller);
 	ObjFunction* function = marshalDeserializeFunction(marshaller);
 	ABORT_IFNULL(function, "Failed to deserialize program for file \"%s\".\n", marshaller->module->path->chars);
 	push(marshaller->vm, OBJ_VAL(function));

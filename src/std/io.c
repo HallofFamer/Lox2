@@ -150,6 +150,7 @@ LOX_METHOD(File, __init__) {
     ASSERT_ARG_COUNT("File::__init__(pathname)", 1);
     ASSERT_ARG_TYPE("File::__init__(pathname)", 0, String);
     ObjFile* self = AS_FILE(receiver);
+    
     self->name = AS_STRING(args[0]);
     self->mode = emptyString(vm);
     self->isOpen = false;
