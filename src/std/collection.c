@@ -594,6 +594,7 @@ LOX_METHOD(Array, collect) {
         Value result = callReentrantMethod(vm, receiver, closure, self->elements.values[i]);
         valueArrayWrite(vm, &collected->elements, result);
     }
+
     pop(vm);
     RETURN_OBJ(collected);
 }
@@ -728,6 +729,7 @@ LOX_METHOD(Array, reject) {
         Value result = callReentrantMethod(vm, receiver, closure, self->elements.values[i]);
         if (isFalsey(result)) valueArrayWrite(vm, &rejected->elements, self->elements.values[i]);
     }
+
     pop(vm);
     RETURN_OBJ(rejected);
 }

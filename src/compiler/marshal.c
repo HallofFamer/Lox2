@@ -196,15 +196,7 @@ static void marshalSerializeMethod(Marshaller* marshaller, ByteArray* bytes, Met
 	marshalSerializeByte(bytes, method->isAsync ? 1 : 0);
 	marshalSerializeByte(bytes, method->isClass ? 1 : 0);
 	marshalSerializeByte(bytes, method->isInitializer ? 1 : 0);
-
-	CallableTypeInfo* callableType = method->declaredType;
-	marshalSerializeString(bytes, callableType->returnType != NULL ? callableType->returnType->fullName : newStringPerma(marshaller->vm, "dynamic"));
-	marshalSerializeByte(bytes, (uint8_t)callableType->paramTypes->count);
-	
-	for (int i = 0; i < callableType->paramTypes->count; i++) {
-		TypeInfo* paramType = callableType->paramTypes->elements[i];
-		marshalSerializeString(bytes, paramType != NULL ? paramType->fullName : newStringPerma(marshaller->vm, "dynamic"));
-	}
+	marshalSerializeString(bytes, method->declaredType->baseType.fullName);
 }
 
 static void marshalSerializeMethods(Marshaller* marshaller, ByteArray* bytes, TypeTable* methods) {
@@ -479,14 +471,8 @@ static void marshalDeserializeMethod(Marshaller* marshaller, TypeTable* methods)
 	bool isAsync = marshalDeserializeByte(marshaller) == 1;
 	bool isClass = marshalDeserializeByte(marshaller) == 1;
 	bool isInitializer = marshalDeserializeByte(marshaller) == 1;
-	TypeInfo* returnType = marshalDeserializeBaseType(marshaller);
-	MethodTypeInfo* methodType = typeTableInsertMethod(methods, methodName, (CallableTypeInfo*)returnType, isAsync, isClass, isInitializer);
-	
-	uint8_t paramCount = marshalDeserializeByte(marshaller);
-	for (uint8_t i = 0; i < paramCount; i++) {
-		TypeInfo* paramType = marshalDeserializeBaseType(marshaller);
-		TypeInfoArrayAdd(methodType->declaredType->paramTypes, paramType);
-	}
+	TypeInfo* declaredType = marshalDeserializeBaseType(marshaller);
+	MethodTypeInfo* methodType = typeTableInsertMethod(methods, methodName, (CallableTypeInfo*)declaredType, isAsync, isClass, isInitializer);
 }
 
 static void marshalDeserializeMethods(Marshaller* marshaller, BehaviorTypeInfo* behaviorType) {
@@ -574,8 +560,8 @@ static void marshalDeserializeTypeTable(Marshaller* marshaller) {
 	for (int i = 0; i < typeCount; i++) {
 		ObjString* typeName = marshalDeserializeString(marshaller);
 		TypeInfo* typeInfo = marshalDeserializeTypeInfo(marshaller);
-		typeTableSet(marshaller->vm->typetab, typeName->chars, typeInfo);
-		typeTableSet(marshaller->module->typeTab, typeName->chars, typeInfo);
+		typeTableSet(marshaller->vm->typetab, typeName, typeInfo);
+		typeTableSet(marshaller->module->typeTab, typeName, typeInfo);
 	}
 }
 
