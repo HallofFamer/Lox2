@@ -13,7 +13,7 @@ static void repl(VM* vm) {
     printf("REPL for Lox2 version %s\n", vm->config.version);
     if (vm->currentModule == NULL) {
         vm->currentModule = newModule(vm, emptyString(vm));
-		vm->rootModule = vm->currentModule;
+        vm->currentModule->isRoot = true;
     }
 
     char code[1024];
@@ -49,7 +49,7 @@ static void repl(VM* vm) {
 static void runFile(VM* vm, const char* filePath) {
     ObjString* path = newString(vm, filePath);
     vm->currentModule = newModule(vm, path);
-	vm->rootModule = vm->currentModule;
+    vm->currentModule->isRoot = true;
 
     char* source = readFile(filePath);
     InterpretResult result = interpret(vm, source);

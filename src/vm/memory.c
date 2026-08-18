@@ -254,7 +254,8 @@ static size_t sizeOfObject(Obj* object) {
         case OBJ_MODULE: {
             ObjModule* module = (ObjModule*)object;
             return sizeof(ObjModule) + sizeof(Value) * module->valFields.capacity + sizeof(IDEntry) * module->valIndexes.capacity
-                + sizeof(Value) * module->varFields.capacity + sizeof(IDEntry) * module->varIndexes.capacity + sizeof(Value) * module->dependencies.capacity;
+                + sizeof(Value) * module->varFields.capacity + sizeof(IDEntry) * module->varIndexes.capacity 
+                + sizeof(Value) * module->typeNames.capacity + sizeof(Value) * module->dependencies.capacity;
         }
         case OBJ_NAMESPACE: {
             ObjNamespace* _namespace = (ObjNamespace*)object;
@@ -409,6 +410,7 @@ static void blackenObject(VM* vm, Obj* object, GCGenerationType generation) {
             markArray(vm, &module->valFields, generation);
             markIDMap(vm, &module->varIndexes, generation);
             markArray(vm, &module->varFields, generation);
+            markArray(vm, &module->typeNames, generation);
 			markArray(vm, &module->dependencies, generation);
             break;
         }
@@ -585,6 +587,7 @@ static void freeObject(VM* vm, Obj* object) {
             freeValueArray(vm, &module->valFields);
             freeIDMap(vm, &module->varIndexes);
             freeValueArray(vm, &module->varFields);
+			freeValueArray(vm, &module->typeNames);
 			freeValueArray(vm, &module->dependencies);
             FREE(ObjModule, object, object->generation);
             break;
@@ -689,6 +692,7 @@ static void promoteObject(VM* vm, Obj* object, GCGenerationType generation) {
             module->valFields.generation++;
             module->varIndexes.generation++;
             module->varFields.generation++;
+			module->typeNames.generation++;
 			module->dependencies.generation++;
             break;
         }

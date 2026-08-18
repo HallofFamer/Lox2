@@ -322,6 +322,7 @@ struct ObjModule {
     ValueArray valFields;
     IDMap varIndexes;
     ValueArray varFields;
+    ValueArray typeNames;
     ValueArray dependencies;
 };
 

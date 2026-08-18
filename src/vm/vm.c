@@ -92,7 +92,6 @@ void initVM(VM* vm) {
     resetStack(vm);
     initConfiguration(vm);
     vm->currentModule = NULL;
-    vm->rootModule = NULL;
     vm->runningGenerator = NULL;
     vm->numSymtabs = 0;
     vm->symtab = newSymbolTable(vm->numSymtabs++, NULL, SYMBOL_SCOPE_GLOBAL, -1);

@@ -1565,6 +1565,7 @@ void typeCheck(TypeChecker* typeChecker, Ast* ast) {
     endFunctionTypeChecker(typeChecker);
 
     if (typeChecker->debugTypetab) {
-        typeTableOutput(typeChecker->vm->typetab);
+        //typeTableOutput(typeChecker->vm->typetab);
+		typeTableOutput(typeChecker->vm->currentModule->typeTab);
     }
 }
