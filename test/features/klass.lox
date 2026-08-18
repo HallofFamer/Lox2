@@ -10,6 +10,9 @@ println("Class of Metaclass class is: ${s.getClass().getClass().getClass().getCl
 
 class Point { 
 
+    val Int x
+    val Int y
+
     __init__(Int x, Int y){      
         this.x = x
         this.y = y

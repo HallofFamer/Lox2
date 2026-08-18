@@ -21,11 +21,7 @@ while(i <= 10) {
 
 class MultiGenerator { 
     
-    var totalYields
-
-    __init__(){ 
-        this.totalYields = 0
-    }
+    var Int totalYields = 0
 
     inner(arg, arg2){ 
         println("Inner Generator starts...")

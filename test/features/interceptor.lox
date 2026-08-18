@@ -2,9 +2,7 @@ namespace test.features
 
 class InterceptObject {   
 
-    __init__() { 
-        this.definedProperty = "property"
-    }
+    var definedProperty = "property"
 
     definedMethod(arg, arg2){ 
         println("Invoking method: definedMethod with arguments: ${arg}, ${arg2}.")

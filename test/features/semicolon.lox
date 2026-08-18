@@ -6,7 +6,7 @@ if (x >= 0) {
 }
 else { println("x is not natural number.") }
 
-fun printNumber(num) { 
+void printNumber(num) { 
     if (!num.instanceOf(Number))
         return
     else 
@@ -14,7 +14,7 @@ fun printNumber(num) {
 }
 printNumber(5)
 
-fun sumNumbers(Number a, Number b) { 
+void sumNumbers(Number a, Number b) { 
     return a 
         + b
 }
