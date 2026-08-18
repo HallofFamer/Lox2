@@ -317,6 +317,7 @@ struct ObjModule {
     ObjClosure* closure;
     TypeTable* typeTab;
     bool isNative;
+    bool isRoot;
     IDMap valIndexes;
     ValueArray valFields;
     IDMap varIndexes;

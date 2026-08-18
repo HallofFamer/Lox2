@@ -104,6 +104,7 @@ struct VM {
     ObjString* initString;
     ObjString* voidString;
     ObjModule* currentModule;
+    ObjModule* rootModule;
     ObjUpvalue* openUpvalues;
     uint64_t objectIndex;
 };
