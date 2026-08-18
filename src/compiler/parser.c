@@ -70,7 +70,9 @@ static void parseError(Parser* parser, Token token, const char* message) {
     parser->panicMode = true;
     fprintf(stderr, "[line %d] Parse Error", token.line);
 
-    if (token.kind == TOKEN_KIND_EOF) fprintf(stderr, " at end");
+    if (token.kind == TOKEN_KIND_EOF) {
+        fprintf(stderr, " at end");
+    }
     else fprintf(stderr, " at '%.*s'", token.length, token.start);
 
     fprintf(stderr, ": %s\n", message);

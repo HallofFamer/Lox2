@@ -69,7 +69,7 @@ static void semanticError(Resolver* resolver, const char* format, ...) {
     resolver->hadError = true;
 }
 
-static ResolverAttribute resolverInitModifier() {
+static ResolverAttribute resolverInitAttribute() {
     return (ResolverAttribute) {
         .isAsync = false,
         .isClassMethod = false,
@@ -118,7 +118,7 @@ static void initFunctionResolver(Resolver* resolver, FunctionResolver* function,
     function->hasRequired = false;
     function->isReified = false;
     function->scopeDepth = scopeDepth; 
-    function->attribute = resolverInitModifier();
+    function->attribute = resolverInitAttribute();
     resolver->currentFunction = function;
     if (resolver->currentFunction->enclosing != NULL) resolver->isTopLevel = false;
 }

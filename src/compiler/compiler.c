@@ -787,10 +787,12 @@ static void behavior(Compiler* compiler, BehaviorType type, Ast* ast) {
     if (astHasTypeParameters(ast)) {
         behaviorTypeParametersAtDeclaration(compiler, ast);
     }
-
-    childIndex++; 
+    childIndex++;    
     compileChild(compiler, ast, childIndex);
-    if (type != BEHAVIOR_TRAIT) compileChild(compiler, ast, childIndex + 1);
+    
+    if (type != BEHAVIOR_TRAIT) {
+        compileChild(compiler, ast, childIndex + 1);
+    }
     endScope(compiler);
     endClassCompiler(compiler);
 }

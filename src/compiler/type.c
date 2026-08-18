@@ -524,35 +524,6 @@ uint32_t mixHashTypeInfo(TypeInfo* type, uint32_t initialHash) {
     else return mixHashTypeName(initialHash, type->fullName->chars, type->fullName->length);
 }
 
-TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name) {
-    if (type == NULL) return NULL;
-    else if (IS_BEHAVIOR_TYPE(type)) {
-        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
-        for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
-            TypeInfo* formalType = behaviorType->formalTypeParams->elements[i];
-            if (formalType != NULL && formalType->shortName == name) return formalType;
-        }
-    }
-    else if (IS_CALLABLE_TYPE(type)) {
-        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
-        for (int i = 0; i < callableType->formalTypeParams->count; i++) {
-            TypeInfo* formalType = callableType->formalTypeParams->elements[i];
-            if (formalType != NULL && formalType->shortName == name) return formalType;
-        }
-    }
-	else if (IS_GENERIC_TYPE(type)) {
-        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
-        if (genericType->isFullyInstantiated) {
-            for (int i = 0; i < genericType->actualTypeParams->count; i++) {
-                TypeInfo* formalType = genericType->actualTypeParams->elements[i];
-				if (formalType == NULL || !IS_PLACEHOLDER_TYPE(formalType)) continue;
-                if (formalType->shortName == name) return formalType;
-            }
-        }
-    }
-    return NULL;
-}
-
 TypeInfo* getAliasTargetType(TypeInfo* type) {
 	return IS_ALIAS_TYPE(type) ? AS_ALIAS_TYPE(type)->targetType : type;
 }

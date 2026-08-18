@@ -155,7 +155,6 @@ void freeTempTypes(TypeInfoArray* typeArray);
 uint32_t hashTypeInfo(TypeInfo* type);
 uint32_t mixHashTypeInfo(TypeInfo* type, uint32_t initialHash);
 
-TypeInfo* getPlaceholderTypeByName(TypeInfo* type, ObjString* name);
 TypeInfo* getAliasTargetType(TypeInfo* type);
 TypeInfo* getInnerBaseType(TypeInfo* type);
 bool hasGenericParameters(TypeInfo* type);
