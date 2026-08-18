@@ -528,11 +528,12 @@ LOX_METHOD(FileWriteStream, __init__) {
     ASSERT_ARG_COUNT("FileWriteStream::__init__(file)", 1);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjFile* file = getFileArgument(vm, args[0]);
-    if (file == NULL) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "Method FileWriteStream::__init__(file) expects argument 1 to be a string or file.");
     
+    if (file == NULL) THROW_EXCEPTION(clox.std.lang.IllegalArgumentException, "Method FileWriteStream::__init__(file) expects argument 1 to be a string or file.");   
     if (!setFileField(vm, AS_INSTANCE(receiver), file, "w")) {
         THROW_EXCEPTION(clox.std.io.IOException, "Cannot create FileWriteStream, file either does not exist or require additional permission to access.");
     }
+
     if (!loadFileWrite(vm, file)) THROW_EXCEPTION(clox.std.io.IOException, "Unable to write to file stream.");
     RETURN_OBJ(self);
 }

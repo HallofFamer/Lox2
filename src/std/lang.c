@@ -2003,6 +2003,12 @@ LOX_METHOD(Type, isGeneric) {
     RETURN_BOOL(self->category == TYPE_CATEGORY_GENERIC);
 }
 
+LOX_METHOD(Type, isHigherOrder) {
+	ASSERT_ARG_COUNT("Type::isHigherOrder()", 0);
+	ObjType* self = AS_TYPE(receiver);
+	RETURN_BOOL(self->category == TYPE_CATEGORY_FUNCTION || self->category == TYPE_CATEGORY_GENERIC || self->category == TYPE_CATEGORY_ALIAS);
+}
+
 LOX_METHOD(Type, isMetaclass) {
     ASSERT_ARG_COUNT("Type::isMetaclass()", 0);
     ObjType* self = AS_TYPE(receiver);
@@ -2243,6 +2249,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, isCallable, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isClass, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isGeneric, 0, NATIVE_TYPE(Bool));
+	DEF_METHOD(vm->typeClass, Type, isHigherOrder, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isMetaclass, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isNative, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isPlaceholder, 0, NATIVE_TYPE(Bool));

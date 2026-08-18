@@ -127,6 +127,7 @@ LOX_METHOD(HTTPClient, download) {
         curl_easy_cleanup(curl);
         THROW_EXCEPTION(clox.std.net.HTTPException, "Failed to download file from URL.");
     }
+
     curl_easy_cleanup(curl);
     RETURN_NIL;
 }
@@ -498,8 +499,8 @@ LOX_METHOD(IPAddress, toArray) {
     ASSERT_ARG_COUNT("IPAddress::toArray()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* address = AS_STRING(getObjField(vm, self, "address"));
-
     int version = AS_INT(getObjField(vm, self, "version"));
+    
     ObjArray* array = newArray(vm);
     ipWriteByteArray(vm, array, address, version == 6 ? 16 : 10);
     RETURN_OBJ(array);
@@ -755,6 +756,7 @@ LOX_METHOD(URL, relativize) {
     ASSERT_ARG_INSTANCE_OF("URL::relativize(url)", 0, clox.std.net.URL);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjInstance* url = AS_INSTANCE(args[0]);
+    
     if (urlIsAbsolute(vm, self) || urlIsAbsolute(vm, url)) RETURN_OBJ(url);
     ObjString* urlString = AS_STRING(getObjField(vm, self, "raw"));
     ObjString* urlString2 = urlToString(vm, url);

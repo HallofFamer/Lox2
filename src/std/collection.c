@@ -2299,16 +2299,17 @@ LOX_METHOD(Stack, push) {
     ASSERT_ARG_COUNT("Stack::push(element)", 1);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjNode* first = AS_NODE(getObjField(vm, self, "first"));
+    
     int length = AS_INT(getObjField(vm, AS_INSTANCE(receiver), "length"));
     ObjNode* new = newNode(vm, args[0], NULL, NULL);
-
     push(vm, OBJ_VAL(new));
+    
     if (length > 0) {
         new->next = first;
     }
     setObjField(vm, self, "first", OBJ_VAL(new));
-    pop(vm);
     
+    pop(vm);    
     collectionLengthIncrement(vm, self);
     RETURN_VAL(args[0]);
 }
