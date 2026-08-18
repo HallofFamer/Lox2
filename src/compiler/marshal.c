@@ -260,13 +260,14 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 	}
 }
 
-static void marshalSerializeTypeTable(Marshaller* marshaller, ByteArray* bytes, TypeTable* typeTab) {
-	marshalSerializeInt(bytes, (uint32_t)typeTab->count);
-	for (int i = 0; i < typeTab->capacity; i++) {
-		TypeEntry* entry = &typeTab->entries[i];
-		if (entry != NULL && entry->key != NULL) {
-			marshalSerializeString(bytes, entry->key);
-			marshalSerializeTypeInfo(marshaller, bytes, entry->value);
+static void marshalSerializeTypeTable(Marshaller* marshaller, ByteArray* bytes, ObjModule* module) {
+	marshalSerializeInt(bytes, (uint32_t)module->typeNames.count);
+	for (int i = 0; i < module->typeNames.capacity; i++) {
+		ObjString* typeName = AS_STRING(module->typeNames.values[i]);
+		TypeInfo* typeInfo = typeTableGet(module->typeTab, typeName);
+		if (typeInfo != NULL) {
+			marshalSerializeString(bytes, typeName);
+			marshalSerializeTypeInfo(marshaller, bytes, typeInfo);
 		}
 	}
 }
@@ -301,7 +302,7 @@ static void marshalSerializeModule(Marshaller* marshaller, ByteArray* bytes, Obj
 		marshalSerializeString(bytes, AS_STRING(entry));		
 	}
 
-	marshalSerializeTypeTable(marshaller, bytes, module->typeTab);
+	marshalSerializeTypeTable(marshaller, bytes, module);
 	marshalSerializeFunction(marshaller, bytes, function);
 }
 
@@ -561,8 +562,9 @@ static void marshalDeserializeTypeTable(Marshaller* marshaller) {
 	for (int i = 0; i < typeCount; i++) {
 		ObjString* typeName = marshalDeserializeString(marshaller);
 		TypeInfo* typeInfo = marshalDeserializeTypeInfo(marshaller);
-		typeTableSet(marshaller->vm->typetab, typeName, typeInfo);
+		valueArrayWrite(marshaller->vm, &marshaller->module->typeNames, OBJ_VAL(typeName));
 		typeTableSet(marshaller->module->typeTab, typeName, typeInfo);
+		typeTableSet(marshaller->vm->typetab, typeName, typeInfo);
 	}
 }
 

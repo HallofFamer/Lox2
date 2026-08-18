@@ -133,8 +133,7 @@ static void insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type) {
 		char* fullName = createTypeName(type, true);
         type->shortName = takeStringPerma(typeChecker->vm, shortName, (int)strlen(shortName));
 		type->fullName = takeStringPerma(typeChecker->vm, fullName, (int)strlen(fullName));
-        typeTableSet(typeChecker->vm->typetab, type->fullName, type);
-		typeTableSet(typeChecker->vm->currentModule->typeTab, type->fullName, type);
+		insertUserDefinedTypeIntoModule(typeChecker->vm, typeChecker->vm->currentModule, type, true);
 	}
 }
 
@@ -1565,7 +1564,6 @@ void typeCheck(TypeChecker* typeChecker, Ast* ast) {
     endFunctionTypeChecker(typeChecker);
 
     if (typeChecker->debugTypetab) {
-        //typeTableOutput(typeChecker->vm->typetab);
 		typeTableOutput(typeChecker->vm->currentModule->typeTab);
     }
 }

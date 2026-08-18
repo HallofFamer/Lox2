@@ -3,9 +3,11 @@
 #define clox_namespace_h
 
 #include "value.h"
+#include "../compiler/type.h"
 
 ObjNamespace* declareNamespace(VM* vm, uint8_t namespaceDepth);
 Value usingNamespace(VM* vm, uint8_t namespaceDepth);
+bool insertUserDefinedTypeIntoModule(VM* vm, ObjModule* module, TypeInfo* type, bool insertGlobal);
 bool isNativeNamespace(ObjString* fullName);
 bool sourceFileExists(ObjString* filePath);
 ObjString* locateSourceFile(VM* vm, ObjString* shortName, ObjNamespace* enclosingNamespace);

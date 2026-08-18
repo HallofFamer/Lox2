@@ -311,7 +311,7 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
     ObjString* shortName = createStringFromToken(resolver->vm, ast->token);
     ObjString* fullName = getSymbolFullName(resolver, ast->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
-	typeTableSet(resolver->vm->currentModule->typeTab, fullName, (TypeInfo*)behaviorType);
+	insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, (TypeInfo*)behaviorType, false);
 
     if (ast->attribute.isGeneric) {
         Ast* typeParams = astLastChild(ast);
@@ -620,8 +620,7 @@ static void astInsertHigherOrderType(Resolver* resolver, Ast* ast, TypeInfo* typ
     ast->type = type;
 	ast->type->shortName = takeStringPerma(resolver->vm, shortName, (int)strlen(shortName));
 	ast->type->fullName = takeStringPerma(resolver->vm, fullName, (int)strlen(fullName));
-    typeTableSet(resolver->vm->typetab, ast->type->fullName, ast->type);
-    typeTableSet(resolver->vm->currentModule->typeTab, ast->type->fullName, ast->type);
+    insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, ast->type, true);
 }
 
 static TypeInfo* findCallableTypeParams(Resolver* resolver, Ast* ast, Token* token) {

@@ -51,6 +51,15 @@ Value usingNamespace(VM* vm, uint8_t namespaceDepth) {
     return valueExists ? value : NIL_VAL;
 }
 
+bool insertUserDefinedTypeIntoModule(VM* vm, ObjModule* module, TypeInfo* type, bool insertGlobal) {
+	valueArrayWrite(vm, &module->typeNames, OBJ_VAL(type->fullName));
+	bool result = typeTableSet(module->typeTab, type->fullName, type);
+    if (insertGlobal) {
+        typeTableSet(vm->typetab, type->fullName, type);
+    }
+    return result;
+}
+
 bool isNativeNamespace(ObjString* fullName) {
     return fullName->length < 5 ? false : memcmp("clox.", fullName->chars, 5) == 0;
 }
