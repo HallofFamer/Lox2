@@ -717,6 +717,7 @@ LOX_METHOD(Random, setSeed) {
     ASSERT_ARG_COUNT("Random::setSeed(seed)", 1);
     ASSERT_ARG_TYPE("Random::setSeed(seed)", 0, Int);
     int seed = AS_INT(args[0]);
+    
     if (seed < 0) {
         THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Random::setSeed(seed) expects argument 1 to be a non negative integer but got %d.", seed);
     }

@@ -161,6 +161,10 @@ void marshalSerializeValue(Marshaller* marshaller, ByteArray* bytes, Value value
 	}
 }
 
+static void marshalSerializeTypeName(Marshaller* marshaller, ByteArray* bytes, TypeInfo* type) {
+	marshalSerializeString(bytes, (type != NULL) ? type->fullName : newStringPerma(marshaller->vm, "dynamic"));
+}
+
 static void marshalSerializeTraits(ByteArray* bytes, TypeInfoArray* traits) {
 	marshalSerializeInt(bytes, (uint32_t)traits->count);
 	for (int i = 0; i < traits->count; i++) {
@@ -187,7 +191,7 @@ static void marshalSerializeFields(Marshaller* marshaller, ByteArray* bytes, Typ
 			marshalSerializeByte(bytes, fieldType->isMutable ? 1 : 0);
 			marshalSerializeByte(bytes, fieldType->hasInitializer ? 1 : 0);
 			marshalSerializeByte(bytes, (uint8_t)fieldType->index);
-			marshalSerializeString(bytes, fieldType->declaredType != NULL ? fieldType->declaredType->fullName : newStringPerma(marshaller->vm, "dynamic"));
+			marshalSerializeTypeName(marshaller, bytes, fieldType->declaredType);
 		}
 	}
 }
@@ -234,12 +238,12 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 		marshalSerializeByte(bytes, (uint8_t)callableType->attribute.isReified);
 		marshalSerializeByte(bytes, (uint8_t)callableType->attribute.isVariadic);
 		marshalSerializeByte(bytes, (uint8_t)callableType->attribute.isVoid);
-		marshalSerializeString(bytes, callableType->returnType != NULL ? callableType->returnType->fullName : newStringPerma(marshaller->vm, "dynamic"));
-		
+		marshalSerializeTypeName(marshaller, bytes, callableType->returnType);
+
 		marshalSerializeByte(bytes, (uint8_t)callableType->paramTypes->count);	
 		for (int i = 0; i < callableType->paramTypes->count; i++) {
 			TypeInfo* paramType = callableType->paramTypes->elements[i];
-			marshalSerializeString(bytes, paramType != NULL ? paramType->fullName : newStringPerma(marshaller->vm, "dynamic"));
+			marshalSerializeTypeName(marshaller, bytes, paramType);
 		}
 		marshalSerializeFormalTypeParams(bytes, callableType->formalTypeParams);
 	}
@@ -251,7 +255,7 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 		
 		for (int i = 0; i < genericType->actualTypeParams->count; i++) {
 			TypeInfo* actualType = genericType->actualTypeParams->elements[i];
-			marshalSerializeString(bytes, actualType != NULL ? actualType->fullName : newStringPerma(marshaller->vm, "dynamic"));
+			marshalSerializeTypeName(marshaller, bytes, actualType);
 		}
 	}
 	else if (IS_ALIAS_TYPE(type)) {
