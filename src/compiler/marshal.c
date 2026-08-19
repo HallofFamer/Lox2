@@ -8,6 +8,7 @@
 #include "marshal.h"
 #include "../common/os.h"
 #include "../vm/debug.h"
+#include "../vm/namespace.h"
 
 static void initMarshaller(Marshaller* marshaller, VM* vm) {
 	marshaller->vm = vm;	
@@ -562,9 +563,7 @@ static void marshalDeserializeTypeTable(Marshaller* marshaller) {
 	for (int i = 0; i < typeCount; i++) {
 		ObjString* typeName = marshalDeserializeString(marshaller);
 		TypeInfo* typeInfo = marshalDeserializeTypeInfo(marshaller);
-		valueArrayWrite(marshaller->vm, &marshaller->module->typeNames, OBJ_VAL(typeName));
-		typeTableSet(marshaller->module->typeTab, typeName, typeInfo);
-		typeTableSet(marshaller->vm->typetab, typeName, typeInfo);
+		insertUserDefinedTypeIntoModule(marshaller->vm, marshaller->module, typeInfo, true);
 	}
 }
 

@@ -242,8 +242,12 @@ LOX_METHOD(File, isWritable) {
 LOX_METHOD(File, lastAccessed) {
     ASSERT_ARG_COUNT("File::lastAccessed()", 0);
     ObjFile* self = AS_FILE(receiver);
-    if (!loadFileStat(vm, self)) THROW_EXCEPTION(clox.std.io.FileNotFoundException, "Cannot get file last accessed date because it does not exist.");
-    ObjInstance* lastAccessed = dateTimeObjFromTimestamp(vm, getNativeClass(vm, "clox.std.util.DateTime"), (double)self->fsStat->statbuf.st_atim.tv_sec);
+    if (!loadFileStat(vm, self)) {
+        THROW_EXCEPTION(clox.std.io.FileNotFoundException, "Cannot get file last accessed date because it does not exist.");
+    }
+    
+	ObjClass* dateTimeClass = getNativeClass(vm, "clox.std.util.DateTime");
+    ObjInstance* lastAccessed = dateTimeObjFromTimestamp(vm, dateTimeClass, (double)self->fsStat->statbuf.st_atim.tv_sec);
     RETURN_OBJ(lastAccessed);
 }
 
