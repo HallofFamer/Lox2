@@ -216,7 +216,7 @@ LOX_METHOD(DateTime, diff) {
     ObjInstance* dateTime = AS_INSTANCE(args[0]);
 
     double timestamp = dateTimeObjGetTimestamp(vm, AS_INSTANCE(receiver));
-    double timestamp2 = isClassExtendingSuperclass(dateTime->obj.klass, dateTimeClass) ? dateTimeObjGetTimestamp(vm, dateTime) : dateObjGetTimestamp(vm, dateTime);
+    double timestamp2 = isObjInstanceOf(vm, args[0], dateTimeClass) ? dateTimeObjGetTimestamp(vm, dateTime) : dateObjGetTimestamp(vm, dateTime);
     RETURN_NUMBER(timestamp - timestamp2);
 }
 

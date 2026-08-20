@@ -227,8 +227,6 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 		marshalSerializeString(bytes, behaviorType->superclassType->fullName);
 		marshalSerializeTraits(bytes, behaviorType->traitTypes);
 		marshalSerializeFormalTypeParams(bytes, behaviorType->formalTypeParams);
-		marshalSerializeFields(marshaller, bytes, behaviorType->fields);
-		marshalSerializeMethods(marshaller, bytes, behaviorType->methods);
 	}
 	else if (IS_CALLABLE_TYPE(type)) {
 		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
@@ -273,6 +271,22 @@ static void marshalSerializeTypeTable(Marshaller* marshaller, ByteArray* bytes, 
 		if (typeInfo != NULL) {
 			marshalSerializeString(bytes, typeName);
 			marshalSerializeTypeInfo(marshaller, bytes, typeInfo);
+		}
+	}
+
+	// Serialize the fields and methods of each behavior type in the type table
+	for (int i = 0; i < module->typeTab->capacity; i++) {
+		TypeEntry* entry = &module->typeTab->entries[i];
+		if (entry != NULL && entry->key != NULL) {
+			ObjString* typeName = entry->key;
+			TypeInfo* type = typeTableGet(module->typeTab, typeName);
+			marshalSerializeString(bytes, typeName);
+
+			if (IS_BEHAVIOR_TYPE(type)) {
+				BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+				marshalSerializeFields(marshaller, bytes, behaviorType->fields);
+				marshalSerializeMethods(marshaller, bytes, behaviorType->methods);
+			}
 		}
 	}
 }
@@ -504,8 +518,6 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 
 		marshalDeserializeTraits(marshaller, behaviorType);
 		marshalDeserializeFormalTypeParams(marshaller, behaviorType->formalTypeParams);
-		marshalDeserializeFields(marshaller, behaviorType);
-		marshalDeserializeMethods(marshaller, behaviorType);
 		return (TypeInfo*)behaviorType;
 	}
 	else if (category == TYPE_CATEGORY_FUNCTION) {
@@ -568,6 +580,16 @@ static void marshalDeserializeTypeTable(Marshaller* marshaller) {
 		ObjString* typeName = marshalDeserializeString(marshaller);
 		TypeInfo* typeInfo = marshalDeserializeTypeInfo(marshaller);
 		insertUserDefinedTypeIntoModule(marshaller->vm, marshaller->module, typeInfo, true);
+	}
+
+	for (int i = 0; i < typeCount; i++) {
+		ObjString* typeName = marshalDeserializeString(marshaller);
+		TypeInfo* typeInfo = typeTableGet(marshaller->module->typeTab, typeName);
+		if (IS_BEHAVIOR_TYPE(typeInfo)) {
+			BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(typeInfo);
+			marshalDeserializeFields(marshaller, behaviorType);
+			marshalDeserializeMethods(marshaller, behaviorType);
+		}
 	}
 }
 
