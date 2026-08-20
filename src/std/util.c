@@ -112,7 +112,7 @@ LOX_METHOD(Date, toString) {
 
 LOX_METHOD(Date, __equal__) { 
     ASSERT_ARG_COUNT("Date::==(date)", 1);
-    ASSERT_ARG_INSTANCE_OF("Date::==(date)", 0, clox.std.util.Date);
+    if (!isObjInstanceOf(vm, args[0], getNativeClass(vm, "clox.std.util.Date"))) RETURN_FALSE;
     double timestamp = dateObjGetTimestamp(vm, AS_INSTANCE(receiver));
     double timestamp2 = dateObjGetTimestamp(vm, AS_INSTANCE(args[0]));
     RETURN_BOOL(timestamp == timestamp2);
@@ -138,6 +138,7 @@ LOX_METHOD(Date, __add__) {
     ASSERT_ARG_COUNT("Date::+(duration)", 1);
     ASSERT_ARG_INSTANCE_OF("Date::+(duration)", 0, clox.std.util.Duration);
     ObjInstance* self = AS_INSTANCE(receiver);
+    
     double timestamp = dateObjGetTimestamp(vm, self) + durationTotalSeconds(vm, AS_INSTANCE(args[0]));
     ObjInstance* date = dateObjFromTimestamp(vm, self->obj.klass, timestamp);
     RETURN_OBJ(date);
@@ -147,6 +148,7 @@ LOX_METHOD(Date, __subtract__) {
     ASSERT_ARG_COUNT("Date::-(duration)", 1);
     ASSERT_ARG_INSTANCE_OF("Date::-(duration)", 0, clox.std.util.Duration);
     ObjInstance* self = AS_INSTANCE(receiver);
+    
     double timestamp = dateObjGetTimestamp(vm, self) - durationTotalSeconds(vm, AS_INSTANCE(args[0]));
     ObjInstance* date = dateObjFromTimestamp(vm, self->obj.klass, timestamp);
     RETURN_OBJ(date);
@@ -250,7 +252,7 @@ LOX_METHOD(DateTime, toString) {
 
 LOX_METHOD(DateTime, __equal__) {
     ASSERT_ARG_COUNT("DateTime::==(dateTime)", 1);
-    ASSERT_ARG_INSTANCE_OF("DateTime::==(dateTime)", 0, clox.std.util.DateTime);
+	if (!isObjInstanceOf(vm, args[0], getNativeClass(vm, "clox.std.util.DateTime"))) RETURN_FALSE;
     double timestamp = dateTimeObjGetTimestamp(vm, AS_INSTANCE(receiver));
     double timestamp2 = dateTimeObjGetTimestamp(vm, AS_INSTANCE(args[0]));
     RETURN_BOOL(timestamp == timestamp2);

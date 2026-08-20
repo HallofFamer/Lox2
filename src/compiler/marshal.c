@@ -267,7 +267,7 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 
 static void marshalSerializeTypeTable(Marshaller* marshaller, ByteArray* bytes, ObjModule* module) {
 	marshalSerializeInt(bytes, (uint32_t)module->typeNames.count);
-	for (int i = 0; i < module->typeNames.capacity; i++) {
+	for (int i = 0; i < module->typeNames.count; i++) {
 		ObjString* typeName = AS_STRING(module->typeNames.values[i]);
 		TypeInfo* typeInfo = typeTableGet(module->typeTab, typeName);
 		if (typeInfo != NULL) {
