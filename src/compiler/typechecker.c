@@ -127,20 +127,30 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
-static void insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type) {
+static TypeInfo* insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type) {
 	if (isHigherOrderType(type)) {
         char* shortName = createTypeName(type, false);
 		char* fullName = createTypeName(type, true);
         type->shortName = takeStringPerma(typeChecker->vm, shortName, (int)strlen(shortName));
 		type->fullName = takeStringPerma(typeChecker->vm, fullName, (int)strlen(fullName));
-		insertUserDefinedTypeIntoModule(typeChecker->vm, typeChecker->vm->currentModule, type, true);
+
+        TypeInfo* existingType = typeTableGet(typeChecker->vm->typetab, type->fullName);
+        if (existingType == NULL) {
+            insertUserDefinedTypeIntoModule(typeChecker->vm, typeChecker->vm->currentModule, type, true);
+            return type;
+        }
+        else {
+			free(type);
+            return existingType;
+        }
 	}
+    return type;
 }
 
 static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
 	TypeInfo* instantiatedType = instantiateTypeParameter(type, formalParams, actualParams);
 	if (isHigherOrderType(instantiatedType)) {
-        insertHigherOrderType(typeChecker, instantiatedType);
+        return insertHigherOrderType(typeChecker, instantiatedType);
     }
     return instantiatedType;
 }
@@ -166,8 +176,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
         TypeInfoArrayAdd(instantiatedFunctionType->paramTypes, paramType);
     }
     
-	insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedFunctionType);
-    return instantiatedFunctionType;
+	return AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedFunctionType));
 }
 
 static CallableTypeInfo* instantiateGenericMethodTypeFromAst(TypeChecker* typeChecker, CallableTypeInfo* declaredType, Ast* typeParams) {
@@ -185,8 +194,7 @@ static CallableTypeInfo* instantiateGenericMethodTypeFromAst(TypeChecker* typeCh
         TypeInfoArrayAdd(instantiatedCallableType->paramTypes, paramType);
     }
 
-	insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedCallableType);
-    return instantiatedCallableType;
+	return AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedCallableType));
 }
 
 static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, TypeInfo* behaviorType, TypeInfo* methodType) {
@@ -210,8 +218,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
         TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
     }
     
-	insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedMethodType);
-    return instantiatedMethodType;
+	return AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedMethodType));
 }
 
 static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer, bool isLambda);
@@ -221,9 +228,7 @@ static TypeInfo* getAstGenericDynamicType(TypeChecker* typeChecker, Ast* ast, Ty
     for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
         TypeInfoArrayAdd(genericType->actualTypeParams, NULL);
     }
-
-	insertHigherOrderType(typeChecker, (TypeInfo*)genericType);
-    return (TypeInfo*)genericType;
+	return insertHigherOrderType(typeChecker, (TypeInfo*)genericType);
 }
 
 static void defineAstType(TypeChecker* typeChecker, Ast* ast, const char* name, SymbolItem* item) {
@@ -379,8 +384,8 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
                 TypeInfoArrayAdd(subMethodType->declaredType->paramTypes, paramType);
             }
 
+            subMethodType->declaredType = AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)subMethodType->declaredType));
             typeTableSet(subtype->methods, superMethodType->baseType.shortName, (TypeInfo*)subMethodType);
-            insertHigherOrderType(typeChecker, (TypeInfo*)subMethodType->declaredType);
         }
     }
 }
@@ -581,7 +586,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
                 TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
             }
 
-			insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
+			calleeType = AS_GENERIC_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)calleeType));
             ast->type = (TypeInfo*)calleeType;
         }
     }
@@ -605,8 +610,8 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
 
         CallableTypeInfo* calleeType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(typeChecker->vm), NULL);
         deriveCalleeType(typeChecker, ast, calleeType); 
+		calleeType = AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)calleeType));
         callee->type = (TypeInfo*)calleeType;
-		insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
         function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false, calleeType->attribute.isLambda);
     }
     else if (IS_CALLABLE_TYPE(rawType)) {
@@ -1565,5 +1570,8 @@ void typeCheck(TypeChecker* typeChecker, Ast* ast) {
 
     if (typeChecker->debugTypetab) {
 		typeTableOutput(typeChecker->vm->currentModule->typeTab);
+        if (typeChecker->vm->currentModule->isRoot) {
+			typeTableOutput(typeChecker->vm->typetab);
+        }
     }
 }
