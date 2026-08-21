@@ -940,8 +940,8 @@ static void typeTableOutputCallable(CallableTypeInfo* function) {
     if (function->returnType == NULL) printf("dynamic ");
     else if (function->attribute.isVoid) printf("void ");
     else printf("%s ", function->returnType->shortName->chars);
+    printf("fun");
 
-    printf("%s", function->baseType.shortName->chars);
 	if (function->formalTypeParams != NULL && function->formalTypeParams->count > 0) {
         printf("<%s", function->formalTypeParams->elements[0]->shortName->chars);
         for (int i = 1; i < function->formalTypeParams->count; i++) {

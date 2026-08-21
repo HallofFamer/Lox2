@@ -800,6 +800,7 @@ static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
 
 	TypeInfo* targetType = getAliasTargetType(typeDef->type);
     AliasTypeInfo* aliasType = typeTableInsertAlias(resolver->vm->typetab, alias, alias, targetType);
+	insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, (TypeInfo*)aliasType, false);
     if (ast->attribute.isGeneric) {
         Ast* typeParams = astLastChild(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
