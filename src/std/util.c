@@ -272,8 +272,11 @@ LOX_METHOD(DateTime, __greater__) {
 LOX_METHOD(DateTime, __less__) {
     ASSERT_ARG_COUNT("DateTime::<(dateTime)", 1);
     ASSERT_ARG_INSTANCE_OF("DateTime::<(dateTime)", 0, clox.std.util.DateTime);
+    ObjClass* dateTimeClass = getNativeClass(vm, "clox.std.util.DateTime");
+    ObjInstance* dateTime = AS_INSTANCE(args[0]);
+
     double timestamp = dateTimeObjGetTimestamp(vm, AS_INSTANCE(receiver));
-    double timestamp2 = dateTimeObjGetTimestamp(vm, AS_INSTANCE(args[0]));
+    double timestamp2 = isObjInstanceOf(vm, args[0], dateTimeClass) ? dateTimeObjGetTimestamp(vm, dateTime) : dateObjGetTimestamp(vm, dateTime);
     RETURN_BOOL(timestamp < timestamp2);
 }
 

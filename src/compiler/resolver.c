@@ -614,13 +614,22 @@ static void astHandleInitializer(Resolver* resolver, Ast* ast) {
     }
 }
 
-static void astInsertHigherOrderType(Resolver* resolver, Ast* ast, TypeInfo* type) {
+static TypeInfo* astInsertHigherOrderType(Resolver* resolver, Ast* ast, TypeInfo* type) {
     char* shortName = createTypeName(type, false);
 	char* fullName = createTypeName(type, true);
     ast->type = type;
 	ast->type->shortName = takeStringPerma(resolver->vm, shortName, (int)strlen(shortName));
 	ast->type->fullName = takeStringPerma(resolver->vm, fullName, (int)strlen(fullName));
-    insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, ast->type, true);
+	
+    TypeInfo* existingType = typeTableGet(resolver->vm->typetab, ast->type->fullName);
+    if (existingType == NULL) {
+        insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, ast->type, true);
+    }
+    else {
+        ast->type = existingType;
+		freeTypeInfo(type);
+    }
+    return ast->type;
 }
 
 static TypeInfo* findCallableTypeParams(Resolver* resolver, Ast* ast, Token* token) {
@@ -683,7 +692,8 @@ static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
 static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isGeneric, bool isLambda, bool isVariadic, bool isVoid) {
     CallableTypeInfo* existingCallableType = findCallableTypeFromAst(resolver, ast);
     if (existingCallableType != NULL) {
-        astInsertHigherOrderType(resolver, ast, (TypeInfo*)existingCallableType);
+		ast->type = (TypeInfo*)existingCallableType;
+        insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, ast->type, false);
         return existingCallableType;
     }
     
@@ -720,7 +730,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
             }
         }
 
-		astInsertHigherOrderType(resolver, ast, (TypeInfo*)callableType);
+		callableType = AS_CALLABLE_TYPE(astInsertHigherOrderType(resolver, ast, (TypeInfo*)callableType));
     }
     return callableType;
 }
@@ -774,7 +784,8 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
 
 	GenericTypeInfo* existingGenericType = findGenericTypeFromAst(resolver, ast);
 	if (existingGenericType != NULL) {
-		astInsertHigherOrderType(resolver, ast, (TypeInfo*)existingGenericType);
+        ast->type = (TypeInfo*)existingGenericType;
+        insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, ast->type, false);
 		return existingGenericType;
 	}
 
@@ -785,7 +796,8 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
             Ast* typeParam = typeParams->children->elements[i];
             insertTypeParameter(resolver, typeParam, i, genericType);
         }
-        astInsertHigherOrderType(resolver, ast, (TypeInfo*)genericType);
+
+        genericType = AS_GENERIC_TYPE(astInsertHigherOrderType(resolver, ast, (TypeInfo*)genericType));
     }
     return genericType;
 }
@@ -801,6 +813,7 @@ static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
 	TypeInfo* targetType = getAliasTargetType(typeDef->type);
     AliasTypeInfo* aliasType = typeTableInsertAlias(resolver->vm->typetab, alias, alias, targetType);
 	insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, (TypeInfo*)aliasType, false);
+    
     if (ast->attribute.isGeneric) {
         Ast* typeParams = astLastChild(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
@@ -825,8 +838,7 @@ static AliasTypeInfo* insertGenericAliasType(Resolver* resolver, Ast* ast) {
         TypeInfoArrayAdd(aliasType->formalTypeParams, type);
     }
 
-    astInsertHigherOrderType(resolver, ast, (TypeInfo*)aliasType);
-	return aliasType;
+    return AS_ALIAS_TYPE(astInsertHigherOrderType(resolver, ast, (TypeInfo*)aliasType));
 }
 
 static SymbolItem* getVariable(Resolver* resolver, Ast* ast) {
