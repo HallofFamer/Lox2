@@ -224,7 +224,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
 static void function(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* calleeType, bool isAsync, bool isClass, bool isInitializer, bool isLambda);
 
 static TypeInfo* getAstGenericDynamicType(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
-    GenericTypeInfo* genericType = newGenericTypeInfo(-1, type->shortName, type->fullName, type);
+    GenericTypeInfo* genericType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, type->shortName, type->fullName, type);
     for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
         TypeInfoArrayAdd(genericType->actualTypeParams, NULL);
     }
@@ -581,7 +581,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
             ast->type = callee->type;
         }
         else {
-            GenericTypeInfo* calleeType = newGenericTypeInfo(-1, type->shortName, type->fullName, type);
+            GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, type->shortName, type->fullName, type);
             for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
                 TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
             }
@@ -1571,7 +1571,7 @@ void typeCheck(TypeChecker* typeChecker, Ast* ast) {
     if (typeChecker->debugTypetab) {
 		typeTableOutput(typeChecker->vm->currentModule->typeTab);
         if (typeChecker->vm->currentModule->isRoot) {
-			typeTableOutput(typeChecker->vm->typetab);
+			//typeTableOutput(typeChecker->vm->typetab);
         }
     }
 }

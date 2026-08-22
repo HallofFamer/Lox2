@@ -262,10 +262,11 @@ static char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullN
         memcpy(callableName, "dynamic", 7);
         length += 7;
     }
-
+    
     memcpy(callableName + length, " fun", 4);
     length += 4;
-    if (callableType->attribute.isGeneric) {
+    
+    if (callableType->formalTypeParams->count > 0) {
         callableName[length++] = '<';
         for (int i = 0; i < callableType->formalTypeParams->count; i++) {
             TypeInfo* formalType = callableType->formalTypeParams->elements[i];
@@ -374,28 +375,32 @@ static char* createAliasTypeName(AliasTypeInfo* aliasType, bool isFullName) {
         memcpy(aliasName, "dynamic", 7);
         length += 7;
     }
-    aliasName[length++] = '<';
 
-    for (int i = 0; i < aliasType->formalTypeParams->count; i++) {
-        TypeInfo* paramType = aliasType->formalTypeParams->elements[i];
-        if (i > 0) {
-            aliasName[length++] = ',';
-            aliasName[length++] = ' ';
+    if (aliasType->formalTypeParams->count > 0) {
+        aliasName[length++] = '<';
+
+        for (int i = 0; i < aliasType->formalTypeParams->count; i++) {
+            TypeInfo* paramType = aliasType->formalTypeParams->elements[i];
+            if (i > 0) {
+                aliasName[length++] = ',';
+                aliasName[length++] = ' ';
+            }
+            if (paramType != NULL) {
+                char* paramTypeName = createTypeName(paramType, isFullName);
+                size_t paramTypeLength = strlen(paramTypeName);
+                memcpy(aliasName + length, paramTypeName, paramTypeLength);
+                length += paramTypeLength;
+                if (isHigherOrderType(paramType)) free(paramTypeName);
+            }
+            else {
+                memcpy(aliasName + length, "dynamic", 7);
+                length += 7;
+            }
         }
-        if (paramType != NULL) {
-            char* paramTypeName = createTypeName(paramType, isFullName);
-            size_t paramTypeLength = strlen(paramTypeName);
-            memcpy(aliasName + length, paramTypeName, paramTypeLength);
-            length += paramTypeLength;
-            if (isHigherOrderType(paramType)) free(paramTypeName);
-        }
-        else {
-            memcpy(aliasName + length, "dynamic", 7);
-            length += 7;
-        }
+
+        aliasName[length++] = '>';
     }
-
-    aliasName[length++] = '>';
+    
     aliasName[length] = '\0';
     return aliasName;
 }
