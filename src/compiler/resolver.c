@@ -196,6 +196,16 @@ static void insertTypeParams(Resolver* resolver, ObjString* className) {
     }
 }
 
+static TypeInfo* insertPlaceholderType(Resolver* resolver, Token token) {
+    ObjString* typeParamName = createStringFromToken(resolver->vm, token);
+    TypeInfo* placeholderType = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
+    TypeInfo* existingType = typeTableGet(resolver->vm->currentModule->typeTab, typeParamName);
+    if (existingType == NULL) {
+        insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, placeholderType, false);
+    }
+    return placeholderType;
+}
+
 static void importSymbols(Resolver* resolver, Ast* ast, ObjString* fullName, TypeInfo* type) {
     SymbolItem* item = insertSymbol(resolver, ast->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_DEFINED, type, false);
     item->isImported = true;
@@ -253,7 +263,7 @@ static TypeInfo* getTypeForSymbol(Resolver* resolver, Token token, bool isMetacl
                         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, originalName);
                         if (item != NULL) {
                             if (checkFormalParam && item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
-                                type = declareNativeTypeParameter(resolver->vm, originalName->chars);
+                                type = insertPlaceholderType(resolver, item->token);
                             }
                             else type = item->type;
                         }
@@ -311,15 +321,13 @@ static TypeInfo* insertBehaviorType(Resolver* resolver, Ast* ast, TypeCategory c
     ObjString* shortName = createStringFromToken(resolver->vm, ast->token);
     ObjString* fullName = getSymbolFullName(resolver, ast->token);
     BehaviorTypeInfo* behaviorType = typeTableInsertBehavior(resolver->vm->typetab, category, shortName, fullName, NULL);
-	insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, (TypeInfo*)behaviorType, false);
 
     if (ast->attribute.isGeneric) {
         Ast* typeParams = astLastChild(ast);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
-            ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
-            TypeInfo* formalType = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
-            TypeInfoArrayAdd(behaviorType->formalTypeParams, formalType);
+			TypeInfo* placeholderType = insertPlaceholderType(resolver, typeParam->token);
+            TypeInfoArrayAdd(behaviorType->formalTypeParams, placeholderType);
         }
     }
 
@@ -639,9 +647,7 @@ static TypeInfo* findCallableTypeParams(Resolver* resolver, Ast* ast, Token* tok
     for (int i = 0; i < numChild; i++) {
         Ast* typeParam = astGetChild(typeParams, i);
         if (tokensEqual(token, &typeParam->token)) {
-            ObjString* formalTypeName = createStringFromToken(resolver->vm, typeParam->token);
-			TypeInfo* formalType = declareNativeTypeParameter(resolver->vm, formalTypeName->chars);
-            return formalType;
+			return insertPlaceholderType(resolver, typeParam->token);
         }
     }
     return NULL;
@@ -724,9 +730,8 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
             for (int i = 0; i < typeParams->children->count; i++) {
                 Ast* typeParam = astGetChild(typeParams, i);
                 resolveChild(resolver, typeParams, i);
-                ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
-                TypeInfo* formalType = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
-                TypeInfoArrayAdd(callableType->formalTypeParams, formalType);
+				TypeInfo* placeholderType = insertPlaceholderType(resolver, typeParam->token);
+                TypeInfoArrayAdd(callableType->formalTypeParams, placeholderType);
             }
         }
 
@@ -768,8 +773,7 @@ static GenericTypeInfo* findGenericTypeFromAst(Resolver* resolver, Ast* ast) {
 
 static void insertTypeParameter(Resolver* resolver, Ast* ast, int index, GenericTypeInfo* genericType) {
     if (ast->type == NULL && astNumChild(ast) == 0) {
-        ObjString* typeParamName = createStringFromToken(resolver->vm, ast->token);
-		ast->type = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
+        ast->type = insertPlaceholderType(resolver, ast->token);
     }
     TypeInfoArrayAdd(genericType->actualTypeParams, ast->type);
 }
@@ -819,9 +823,8 @@ static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = astGetChild(typeParams, i);
             resolveChild(resolver, typeParams, i);
-            ObjString* typeParamName = createStringFromToken(resolver->vm, typeParam->token);
-			TypeInfo* formalType = declareNativeTypeParameter(resolver->vm, typeParamName->chars);
-            TypeInfoArrayAdd(aliasType->formalTypeParams, formalType);
+			TypeInfo* placeholderType = insertPlaceholderType(resolver, typeParam->token);
+            TypeInfoArrayAdd(aliasType->formalTypeParams, placeholderType);
         }
     }
     return aliasType;
@@ -960,7 +963,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     initClassResolver(resolver, &classResolver, name, resolver->currentFunction->scopeDepth + 1, type);
     int childIndex = 0;
     beginScope(resolver, ast, (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS);
-
+    
     if (astHasTypeParameters(ast)) {
         classResolver.isGeneric = true;
         typeParameters(resolver, ast, true, false);
@@ -1000,6 +1003,11 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
         resolveChild(resolver, ast, childIndex);
         if (!classResolver.isAnonymous) bindTraitTypes(resolver, resolver->currentClass->name, traitList);
     }
+
+	ObjString* shortName = createStringFromToken(resolver->vm, name);
+    ObjString* fullName = concatenateString(resolver->vm, resolver->currentNamespace, shortName, ".");
+	TypeInfo* typeInfo = typeTableGet(resolver->vm->typetab, fullName);
+	insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, typeInfo, false);
 
     childIndex++;
     resolveChild(resolver, ast, childIndex);

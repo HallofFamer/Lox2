@@ -714,9 +714,11 @@ LOX_METHOD(Random, nextIntBounded) {
     ASSERT_ARG_COUNT("Random::nextIntBounded(bound)", 1);
     ASSERT_ARG_TYPE("Random::nextIntBounded(bound)", 0, Int);
     int bound = AS_INT(args[0]);
+
     if (bound < 0) {
         THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "method Random::nextIntBounded(bound) expects argument 1 to be a non negative integer but got %d.", bound);
     }
+    
     uint32_t value = pcg32_random_int_bounded((uint32_t)AS_INT(args[0]));
     RETURN_INT((int)value);
 }
