@@ -159,7 +159,7 @@ TypeInfo* getAliasTargetType(TypeInfo* type);
 TypeInfo* getInnerBaseType(TypeInfo* type);
 bool hasGenericParameters(TypeInfo* type);
 TypeInfoArray* getTypeParameters(TypeInfo* type);
-TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
+TypeInfo* instantiateTypeParameter(int id, TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams);
 
 TypeTable* newTypeTable(int id);
 void freeTypeTable(TypeTable* typeTable, bool freeTypes);

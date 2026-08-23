@@ -587,14 +587,14 @@ static TypeInfo* instantiateFormalTypeParameter(TypeInfo* type, TypeInfoArray* f
     return type;
 }
 
-TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
+TypeInfo* instantiateTypeParameter(int id, TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
 	if (type == NULL) return NULL;
 	else if (IS_PLACEHOLDER_TYPE(type)) {
         return instantiateFormalTypeParameter(type, formalParams, actualParams);
     }
     else if (IS_BEHAVIOR_TYPE(type)){
 		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
-		GenericTypeInfo* genericType = newGenericTypeInfo(-1, behaviorType->baseType.shortName, behaviorType->baseType.fullName, type);
+		GenericTypeInfo* genericType = newGenericTypeInfo(id, behaviorType->baseType.shortName, behaviorType->baseType.fullName, type);
 		
         for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
             TypeInfo* formalTypeParam = behaviorType->formalTypeParams->elements[i];
@@ -612,7 +612,7 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
     else if (IS_CALLABLE_TYPE(type)) {
 		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
         if (callableType->formalTypeParams->count > 0) {
-            GenericTypeInfo* genericType = newGenericTypeInfo(-1, callableType->baseType.shortName, callableType->baseType.fullName, type);            
+            GenericTypeInfo* genericType = newGenericTypeInfo(id, callableType->baseType.shortName, callableType->baseType.fullName, type);            
             for (int i = 0; i < callableType->formalTypeParams->count; i++) {
                 TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];
                 if (formalTypeParam != NULL && IS_PLACEHOLDER_TYPE(formalTypeParam)) {
@@ -627,19 +627,19 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
             return (TypeInfo*)genericType;
         }
         else {
-			CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, callableType->baseType.category, callableType->baseType.shortName, NULL);
+			CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(id, callableType->baseType.category, callableType->baseType.shortName, NULL);
             instantiatedCallableType->attribute = callableType->attribute;
             TypeInfo* instantiatedReturnType = callableType->returnType;
             
             if (hasGenericParameters(instantiatedReturnType)) {
-                instantiatedReturnType = instantiateTypeParameter(instantiatedReturnType, formalParams, actualParams);
+                instantiatedReturnType = instantiateTypeParameter(id + 1, instantiatedReturnType, formalParams, actualParams);
             }
             instantiatedCallableType->returnType = instantiatedReturnType;
             
             for (int i = 0; i < callableType->paramTypes->count; i++) {
                 TypeInfo* paramType = callableType->paramTypes->elements[i];
                 if (hasGenericParameters(paramType)) {
-                    paramType = instantiateTypeParameter(paramType, formalParams, actualParams);
+                    paramType = instantiateTypeParameter(id + i + 1, paramType, formalParams, actualParams);
                 }
                 TypeInfoArrayAdd(instantiatedCallableType->paramTypes, paramType);
             }
@@ -650,7 +650,7 @@ TypeInfo* instantiateTypeParameter(TypeInfo* type, TypeInfoArray* formalParams, 
     else if (IS_ALIAS_TYPE(type)) {
 		TypeInfo* targetType = getInnerBaseType(type);
 		formalParams = IS_CALLABLE_TYPE(targetType) ? AS_CALLABLE_TYPE(targetType)->formalTypeParams : AS_BEHAVIOR_TYPE(targetType)->formalTypeParams;
-		return instantiateTypeParameter(targetType, formalParams, actualParams);
+		return instantiateTypeParameter(id + 1, targetType, formalParams, actualParams);
     }
 	return type;
 }
@@ -758,7 +758,7 @@ static void typeTableFieldsInheritGeneric(TypeTable* from, TypeTable* to, TypeIn
         if (entry != NULL && entry->key != NULL) {
             FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);
             if (fromFieldType->declaredType != NULL && (hasGenericParameters(fromFieldType->declaredType) || hasCallableTypeParameters(fromFieldType->declaredType))) {
-                TypeInfo* instantiatedType = instantiateTypeParameter(fromFieldType->declaredType, formalParams, actualParams);
+                TypeInfo* instantiatedType = instantiateTypeParameter(to->count + 1, fromFieldType->declaredType, formalParams, actualParams);
                 FieldTypeInfo* toFieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, instantiatedType, fromFieldType->isMutable, fromFieldType->hasInitializer);
             }
 
