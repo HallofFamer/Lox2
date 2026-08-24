@@ -140,7 +140,7 @@ static TypeInfo* insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type)
             return type;
         }
         else {
-			free(type);
+			if (type->id != existingType->id) freeTypeInfo(type);
             return existingType;
         }
 	}
@@ -148,7 +148,7 @@ static TypeInfo* insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type)
 }
 
 static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, TypeInfo* type, TypeInfoArray* formalParams, TypeInfoArray* actualParams) {
-	TypeInfo* instantiatedType = instantiateTypeParameter(type, formalParams, actualParams);
+	TypeInfo* instantiatedType = instantiateTypeParameter(typeChecker->vm->typetab->count + 1, type, formalParams, actualParams);
 	if (isHigherOrderType(instantiatedType)) {
         return insertHigherOrderType(typeChecker, instantiatedType);
     }
@@ -1571,7 +1571,7 @@ void typeCheck(TypeChecker* typeChecker, Ast* ast) {
     if (typeChecker->debugTypetab) {
 		typeTableOutput(typeChecker->vm->currentModule->typeTab);
         if (typeChecker->vm->currentModule->isRoot) {
-			//typeTableOutput(typeChecker->vm->typetab);
+			typeTableOutput(typeChecker->vm->typetab);
         }
     }
 }

@@ -707,7 +707,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
     if (isGeneric && returnType->type == NULL) {
         returnType->type = findCallableTypeParams(resolver, ast, &returnType->token);
     }
-    CallableTypeInfo* callableType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
+    CallableTypeInfo* callableType = newCallableTypeInfo(resolver->vm->typetab->count + 1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
     
     if (callableType != NULL) {
         callableType->attribute.isGeneric = isGeneric;
@@ -793,7 +793,7 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
 		return existingGenericType;
 	}
 
-    GenericTypeInfo* genericType = newGenericTypeInfo(-1, rawType->shortName, rawType->fullName, rawType);
+    GenericTypeInfo* genericType = newGenericTypeInfo(resolver->vm->typetab->count + 1, rawType->shortName, rawType->fullName, rawType);
     if (genericType != NULL) {
         Ast* typeParams = astGetChild(ast, 0);
         for (int i = 0; i < typeParams->children->count; i++) {
@@ -833,7 +833,7 @@ static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
 static AliasTypeInfo* insertGenericAliasType(Resolver* resolver, Ast* ast) {
     Ast* typeParams = astGetChild(ast, 0);
     TypeInfo* targetType = getTypeForSymbol(resolver, ast->token, false, false);
-    AliasTypeInfo* aliasType = newAliasTypeInfo(-1, targetType->shortName, targetType->fullName, targetType);
+    AliasTypeInfo* aliasType = newAliasTypeInfo(resolver->vm->typetab->count + 1, targetType->shortName, targetType->fullName, targetType);
 
     for (int i = 0; i < typeParams->children->count; i++) {
         Ast* typeParam = astGetChild(typeParams, i);
