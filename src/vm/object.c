@@ -49,7 +49,7 @@ Value emptyObject(VM* vm, ObjClass* klass) {
         case OBJ_RECORD: obj = (Obj*)newRecord(vm, NULL); break;
         case OBJ_STRING: return OBJ_VAL(ALLOCATE_STRING(0, klass));
         case OBJ_TIMER: obj = (Obj*)newTimer(vm, NULL, 0, 0); break;
-		case OBJ_TYPE: obj = (Obj*)newType(vm, emptyString(vm)); break;
+		case OBJ_TYPE: obj = (Obj*)newType(vm, emptyString(vm), NULL); break;
         case OBJ_VALUE_INSTANCE: return OBJ_VAL(newValueInstance(vm, NIL_VAL, klass));
         default: return NIL_VAL;
     }
@@ -349,42 +349,11 @@ ObjTimer* newTimer(VM* vm, ObjClosure* closure, int delay, int interval) {
     return NULL;
 }
 
-static Value createTypeObjFromTypeInfo(VM* vm, TypeInfo* type) {
-    if (type == NULL) return NIL_VAL;
-    return OBJ_VAL(newType(vm, type->fullName));
-}
-
-ObjType* newType(VM* vm, ObjString* name) {
-	TypeInfo* typeInfo = typeTableGet(vm->typetab, name);
-	if (typeInfo == NULL) {
-        runtimeError(vm, "Type '%s' not found.", name->chars);
-        exit(70);
-	}
-
-	TypeInfo* targetType = getAliasTargetType(typeInfo);
+ObjType* newType(VM* vm, ObjString* name, TypeInfo* typeInfo) {
     ObjType* type = ALLOCATE_OBJ_GEN(ObjType, OBJ_TYPE, vm->typeClass, GC_GENERATION_TYPE_PERMANENT);
-    type->category = targetType->category;
     type->name = name;
-    type->isAlias = IS_ALIAS_TYPE(typeInfo);
-    type->behavior = getClassFromTypeInfo(vm, targetType);
-    initValueArray(&type->typeParameters, GC_GENERATION_TYPE_PERMANENT);
-
-    if (targetType != NULL && IS_CALLABLE_TYPE(targetType)) {
-        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(targetType);
-        valueArrayWrite(vm, &type->typeParameters, createTypeObjFromTypeInfo(vm, callableType->returnType));
-        for (int i = 0; i < callableType->paramTypes->count; i++) {
-            TypeInfo* paramType = callableType->paramTypes->elements[i];
-            valueArrayWrite(vm, &type->typeParameters, createTypeObjFromTypeInfo(vm, paramType));
-        }
-    }
-    else if (targetType != NULL && IS_GENERIC_TYPE(targetType)) {
-        GenericTypeInfo* genericType = AS_GENERIC_TYPE(targetType);
-        for (int i = 0; i < genericType->actualTypeParams->count; i++) {
-            TypeInfo* paramType = genericType->actualTypeParams->elements[i];
-            valueArrayWrite(vm, &type->typeParameters, createTypeObjFromTypeInfo(vm, paramType));
-        }
-    }
-
+    type->typeInfo = typeInfo;
+    type->behavior = getClassFromTypeInfo(vm, typeInfo);
     tableSet(vm, &vm->types, name, OBJ_VAL(type));
     return type;
 }
@@ -520,36 +489,6 @@ static void printFunction(ObjFunction* function) {
     else printf("<function %s>", function->name->chars);
 }
 
-static void printType(ObjType* type) {
-    printf("<type %s: ", type->name->chars);
-    if (IS_BEHAVIOR_TYPE(type)) printf("%s", type->behavior->name->chars);
-    else if (IS_CALLABLE_TYPE(type)) {
-        printf("%s fun(", AS_TYPE(type->typeParameters.values[0])->name->chars);
-        for (int i = 1; i < type->typeParameters.count; i++) {
-            if (i > 1) printf(", ");
-            printf("%s", AS_TYPE(type->typeParameters.values[i])->name->chars);
-        }
-        printf(")");
-    }
-    else if (IS_PLACEHOLDER_TYPE(type)) printf("%s", type->name->chars);
-    else if (IS_GENERIC_TYPE(type)) {
-        printf("%s<", type->name->chars);
-        for (int i = 0; i < type->typeParameters.count; i++) {
-            if (i > 0) printf(", ");
-            printf("%s", AS_TYPE(type->typeParameters.values[i])->name->chars);
-        }
-        printf(">");
-        return;
-    }
-    else if (IS_ALIAS_TYPE(type)) {
-        printf("type alias %s", AS_ALIAS_TYPE(type)->baseType.shortName->chars);
-        return;
-    }
-    else if (IS_VOID_TYPE(type)) printf("void");
-    else printf("dynamic");
-    printf(">");
-}
-
 void printObject(Value value) {
     switch (OBJ_CATEGORY(value)) {
         case OBJ_ARRAY:
@@ -645,9 +584,11 @@ void printObject(Value value) {
         case OBJ_TIMER: 
             printf("<timer: %d>", AS_TIMER(value)->id);
             break;
-        case OBJ_TYPE: 
-            printType(AS_TYPE(value));
+        case OBJ_TYPE: {
+			ObjType* type = AS_TYPE(value);
+            printf("<type %s: %s>", type->name->chars, (type->typeInfo != NULL) ? type->typeInfo->shortName->chars : "dynamic");
             break;
+        }
         case OBJ_UPVALUE:
             printf("<upvalue>");
             break;
