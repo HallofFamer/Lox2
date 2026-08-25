@@ -94,7 +94,8 @@ ObjClass* getObjClass(VM* vm, Value value) {
 ObjType* getTypeFromClass(VM* vm, ObjClass* klass) {
     Value value;
     if (tableGet(&vm->types, klass->fullName, &value)) return AS_TYPE(value);
-    return newType(vm, klass->fullName);
+	TypeInfo* typeInfo = typeTableGet(vm->typetab, klass->fullName);
+    return newType(vm, klass->fullName, typeInfo);
 }
 
 ObjString* getClassNameFromMetaclass(VM* vm, ObjString* metaclassName) {
@@ -268,7 +269,11 @@ ObjClass* getClassFromTypeInfo(VM* vm, TypeInfo* type) {
     if (IS_BEHAVIOR_TYPE(type)) {
         Value value;
         bool result = tableGet(&vm->classes, type->fullName, &value);
-		return result ? AS_CLASS(value) : NULL;
+		if (!result) {
+			runtimeError(vm, "Class for type '%s' not found", type->fullName->chars);
+			return NULL;
+		}
+		return AS_CLASS(value);
     }
     else if (IS_CALLABLE_TYPE(type)) {
         return vm->functionClass;

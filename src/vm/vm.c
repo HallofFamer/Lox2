@@ -409,6 +409,34 @@ Value callGenerator(VM* vm, ObjGenerator* generator) {
     return pop(vm);
 }
 
+static bool callType(VM* vm, ObjType* type, int argCount) {
+	if (type->typeInfo == NULL) {
+		throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate type '%s' because it has no associated type information.", type->name->chars);
+		return false;
+	}
+	else if (IS_ALIAS_TYPE(type->typeInfo)) {
+		TypeInfo* targetType = AS_ALIAS_TYPE(type->typeInfo)->targetType;
+		ObjClass* targetClass = getClassFromTypeInfo(vm, targetType);
+		if (targetClass == NULL) {
+			throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate type '%s' because its target type '%s' has no associated class.", type->name->chars, targetType->shortName->chars);
+			return false;
+		}
+		return callClass(vm, targetClass, argCount);
+	}
+	else if (IS_PLACEHOLDER_TYPE(type->typeInfo)) {
+		throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate placeholder type '%s'.", type->name->chars);
+		return false;
+	}
+    else if (type->typeInfo->category == TYPE_CATEGORY_TRAIT) {
+		throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate trait type '%s'.", type->name->chars);
+		return false;
+    }
+    else {
+		ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
+		return callClass(vm, klass, argCount);
+    }
+}
+
 static bool callValue(VM* vm, Value callee, int argCount) {
     if (IS_OBJ(callee)) {
         switch (OBJ_CATEGORY(callee)) {
@@ -417,6 +445,7 @@ static bool callValue(VM* vm, Value callee, int argCount) {
             case OBJ_CLOSURE: return callClosure(vm, AS_CLOSURE(callee), argCount);
             case OBJ_NATIVE_FUNCTION: return callNativeFunction(vm, AS_NATIVE_FUNCTION(callee)->function, argCount);
             case OBJ_NATIVE_METHOD: return callNativeMethod(vm, AS_NATIVE_METHOD(callee)->method, argCount);
+            case OBJ_TYPE: return callType(vm, AS_TYPE(callee), argCount);
             default: break;
         }
     }
@@ -1252,14 +1281,10 @@ InterpretResult run(VM* vm) {
                 ObjString* typeName = READ_STRING();
                 TypeInfo* typeInfo = typeTableGet(vm->typetab, typeName);
 				if (typeInfo == NULL) {
-					RUNTIME_ERROR("The specified type %s is undefined.", typeName->chars);
+                    RUNTIME_ERROR("The specified type %s is undefined.", typeName->chars);
 				}
 
-                if (!IS_ALIAS_TYPE(typeInfo)) {
-                    RUNTIME_ERROR("The specified type alias %s is invalid.", typeName->chars);
-                }
-
-                push(vm, OBJ_VAL(newType(vm, typeName)));
+                push(vm, OBJ_VAL(newType(vm, typeName, typeInfo)));
                 tableSet(vm, &vm->currentNamespace->values, typeName, peek(vm, 0));
                 break;
             }
