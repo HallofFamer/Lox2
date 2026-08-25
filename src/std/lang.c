@@ -1950,11 +1950,26 @@ LOX_METHOD(Type, getTypeParameters) {
 	ASSERT_ARG_COUNT("Type::getTypeParameters()", 0);
 	ObjType* self = AS_TYPE(receiver);
 	ObjArray* parameters = newArray(vm);
+
+    if (!hasGenericParameters(self->typeInfo)) {
+        RETURN_OBJ(parameters);
+    }
 	push(vm, OBJ_VAL(parameters));
 
-	for (int i = 0; i < self->typeParameters.count; i++) {
-		valueArrayWrite(vm, &parameters->elements, self->typeParameters.values[i]);
+	TypeInfoArray* typeParams = getTypeParameters(self->typeInfo);
+	for (int i = 0; i < typeParams->count; i++) {
+		TypeInfo* typeParam = typeParams->elements[i];
+		if (typeParam == NULL) valueArrayWrite(vm, &parameters->elements, NIL_VAL);
+        else {
+            Value type;
+            if (!tableGet(&vm->types, typeParam->fullName, &type)) {
+				type = OBJ_VAL(newType(vm, typeParam->fullName, typeParam));
+				tableSet(vm, &vm->types, typeParam->fullName, type);
+            }
+			valueArrayWrite(vm, &parameters->elements, type);
+        }
 	}
+
 	pop(vm);
 	RETURN_OBJ(parameters);
 }
@@ -1970,49 +1985,49 @@ LOX_METHOD(Type, hasMethod) {
 LOX_METHOD(Type, hasTypeParameters) {
 	ASSERT_ARG_COUNT("Type::hasTypeParameters()", 0);
 	ObjType* self = AS_TYPE(receiver);
-	RETURN_BOOL(self->typeParameters.count > 0);
+	RETURN_BOOL(hasGenericParameters(self->typeInfo));
 }
 
 LOX_METHOD(Type, isAlias) {
     ASSERT_ARG_COUNT("Type::isAlias()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->isAlias);
+    RETURN_BOOL(IS_ALIAS_TYPE(self->typeInfo));
 }
 
 LOX_METHOD(Type, isBehavior) {
     ASSERT_ARG_COUNT("Type::isBehavior()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_CLASS || self->category == TYPE_CATEGORY_METACLASS || self->category == TYPE_CATEGORY_TRAIT);
+    RETURN_BOOL(IS_BEHAVIOR_TYPE(self->typeInfo));
 }
 
 LOX_METHOD(Type, isCallable) {
     ASSERT_ARG_COUNT("Type::isCallable()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_FUNCTION);
+    RETURN_BOOL(IS_CALLABLE_TYPE(self->typeInfo));
 }
 
 LOX_METHOD(Type, isClass) {
     ASSERT_ARG_COUNT("Type::isClass()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_CLASS);
+    RETURN_BOOL(self->typeInfo->category == TYPE_CATEGORY_CLASS);
 }
 
 LOX_METHOD(Type, isGeneric) {
     ASSERT_ARG_COUNT("Type::isGeneric()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_GENERIC);
+    RETURN_BOOL(IS_GENERIC_TYPE(self->typeInfo));
 }
 
 LOX_METHOD(Type, isHigherOrder) {
 	ASSERT_ARG_COUNT("Type::isHigherOrder()", 0);
 	ObjType* self = AS_TYPE(receiver);
-	RETURN_BOOL(self->category == TYPE_CATEGORY_FUNCTION || self->category == TYPE_CATEGORY_GENERIC || self->category == TYPE_CATEGORY_ALIAS);
+	RETURN_BOOL(isHigherOrderType(self->typeInfo));
 }
 
 LOX_METHOD(Type, isMetaclass) {
     ASSERT_ARG_COUNT("Type::isMetaclass()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_METACLASS);
+    RETURN_BOOL(self->typeInfo->category == TYPE_CATEGORY_METACLASS);
 }
 
 LOX_METHOD(Type, isNative) {
@@ -2024,13 +2039,13 @@ LOX_METHOD(Type, isNative) {
 LOX_METHOD(Type, isPlaceholder) {
     ASSERT_ARG_COUNT("Type::isPlaceholder()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_PLACEHOLDER);
+    RETURN_BOOL(IS_PLACEHOLDER_TYPE(self->typeInfo));
 }
 
 LOX_METHOD(Type, isTrait) {
     ASSERT_ARG_COUNT("Type::isTrait()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_BOOL(self->category == TYPE_CATEGORY_TRAIT);
+    RETURN_BOOL(self->typeInfo->category == TYPE_CATEGORY_TRAIT);
 }
 
 LOX_METHOD(Type, methods) {
