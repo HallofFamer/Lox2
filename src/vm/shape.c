@@ -88,8 +88,7 @@ static void createDefaultShapes(VM* vm) {
     defaultShapeIDs[OBJ_TIMER] = shapeIDIsRunning;
     
     int shapeIDBehavior = createShapeFromParent(vm, 0, newStringPerma(vm, "behavior"));
-    int shapeIDIsAlias = createShapeFromParent(vm, shapeIDBehavior, newStringPerma(vm, "isAlias"));
-    defaultShapeIDs[OBJ_TYPE] = shapeIDIsAlias;
+    defaultShapeIDs[OBJ_TYPE] = shapeIDBehavior;
     defaultShapeIDs[OBJ_UPVALUE] = -1;
     defaultShapeIDs[OBJ_VALUE_INSTANCE] = 0;
 }

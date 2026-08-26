@@ -211,7 +211,6 @@ static bool getGenericInstanceVariableByIndex(VM* vm, Obj* object, int index) {
             ObjType* type = (ObjType*)object;
             if (index == 0) push(vm, OBJ_VAL(type->name));
             else if (index == 1) push(vm, OBJ_VAL(type->behavior));
-            else if (index == 2) push(vm, BOOL_VAL(type->isAlias));
             else getAndPushGenericInstanceVariableByIndex(vm, object, index);
             return true;
         }
@@ -363,7 +362,6 @@ bool getGenericInstanceVariableByName(VM* vm, Obj* object, ObjString* name) {
             ObjType* type = (ObjType*)object;
             if (matchVariableName(name, "name", 4)) push(vm, OBJ_VAL(type->name));
             else if (matchVariableName(name, "behavior", 8)) push(vm, OBJ_VAL(type->behavior));
-            else if (matchVariableName(name, "isAlias", 7)) push(vm, INT_VAL(type->isAlias));
             else return getAndPushGenericInstanceVariableByName(vm, object, name);
             return true;
         }

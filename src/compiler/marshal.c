@@ -224,7 +224,7 @@ static void marshalSerializeTypeInfo(Marshaller* marshaller, ByteArray* bytes, T
 	if (IS_BEHAVIOR_TYPE(type)) {
 		BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
 		marshalSerializeByte(bytes, (behaviorType->isReified ? 1 : 0));
-		marshalSerializeString(bytes, behaviorType->superclassType->fullName);
+		if(type->category != TYPE_CATEGORY_TRAIT) marshalSerializeString(bytes, behaviorType->superclassType->fullName);
 		marshalSerializeTraits(bytes, behaviorType->traitTypes);
 		marshalSerializeFormalTypeParams(bytes, behaviorType->formalTypeParams);
 	}
@@ -512,7 +512,7 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 
 	if (category == TYPE_CATEGORY_CLASS || category == TYPE_CATEGORY_METACLASS || category == TYPE_CATEGORY_TRAIT) {
 		bool isReified = marshalDeserializeByte(marshaller) == 1;
-		TypeInfo* superclassType = marshalDeserializeBaseType(marshaller);
+		TypeInfo* superclassType = (category != TYPE_CATEGORY_TRAIT) ? marshalDeserializeBaseType(marshaller) : NULL;
 		BehaviorTypeInfo* behaviorType = newBehaviorTypeInfo(id, category, shortName, fullName, superclassType);
 		behaviorType->isReified = isReified;
 
