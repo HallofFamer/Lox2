@@ -174,6 +174,8 @@ int disassembleInstruction(Chunk* chunk, int offset) {
             return simpleInstruction("OP_GET_SUBSCRIPT_OPTIONAL", offset);
         case OP_GET_SUPER:
             return identifierInstruction("OP_GET_SUPER", chunk, offset);
+        case OP_GET_TYPE:
+			return simpleInstruction("OP_GET_TYPE", offset);
         case OP_EQUAL:
             return simpleInstruction("OP_EQUAL", offset);
         case OP_GREATER:

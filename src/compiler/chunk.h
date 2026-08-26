@@ -25,6 +25,7 @@ typedef enum {
     OP_SET_SUBSCRIPT,
     OP_GET_SUBSCRIPT_OPTIONAL,
     OP_GET_SUPER,
+    OP_GET_TYPE,
     OP_EQUAL,
     OP_GREATER,
     OP_LESS,
