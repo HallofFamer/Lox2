@@ -1109,14 +1109,18 @@ InterpretResult run(VM* vm) {
                 break;
             case OP_CLASS: {
                 ObjString* className = READ_STRING();
-                push(vm, OBJ_VAL(newClass(vm, className, OBJ_INSTANCE)));
+                ObjClass* klass = newClass(vm, className, OBJ_INSTANCE);
+                push(vm, OBJ_VAL(klass));
                 tableSet(vm, &vm->currentNamespace->values, className, peek(vm, 0));
+				tableSet(vm, &vm->classes, klass->fullName, peek(vm, 0));
                 break;
             }
             case OP_TRAIT: {
                 ObjString* traitName = READ_STRING();
-                push(vm, OBJ_VAL(createTrait(vm, traitName)));
+				ObjClass* trait = createTrait(vm, traitName);
+                push(vm, OBJ_VAL(trait));
                 tableSet(vm, &vm->currentNamespace->values, traitName, peek(vm, 0));
+				tableSet(vm, &vm->classes, trait->fullName, peek(vm, 0));
                 break;
             }
             case OP_ANONYMOUS: {
@@ -1485,6 +1489,7 @@ InterpretResult interpret(VM* vm, const char* source) {
         pop(vm);
         marshalDump(vm->marshaller, vm->currentModule);
     }
+
     loadNamespaceIntoModule(vm, vm->langNamespace, vm->currentModule);
     return runModule(vm, vm->currentModule, true);
 }

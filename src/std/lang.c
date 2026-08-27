@@ -2074,7 +2074,7 @@ LOX_METHOD(Type, methods) {
 LOX_METHOD(Type, name) {
     ASSERT_ARG_COUNT("Type::name()", 0);
     ObjType* self = AS_TYPE(receiver);
-    RETURN_OBJ(self->name);
+    RETURN_OBJ(self->typeInfo->shortName);
 }
 
 LOX_METHOD(Type, toBehavior) {
@@ -2168,7 +2168,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(behaviorClass, Behavior, methods, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Method)));
     DEF_METHOD(behaviorClass, Behavior, name, 0, NATIVE_TYPE(String));
     DEF_METHOD(behaviorClass, Behavior, traits, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Trait)));
-    DEF_OPERATOR(behaviorClass, Behavior, (), __invoke__, -1, NATIVE_TYPE(Object));
+    DEF_OPERATOR(behaviorClass, Behavior, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 
     inheritSuperclass(vm, vm->classClass, behaviorClass);
     DEF_INTERCEPTOR(vm->classClass, Class, INTERCEPTOR_INIT, __init__, 3, NATIVE_TYPE(Class), NATIVE_TYPE(Object), NATIVE_TYPE(Class), NATIVE_TYPE(Object));
@@ -2179,7 +2179,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->classClass, Class, memberOf, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->classClass, Class, superclass, 0, NATIVE_TYPE(Class));
     DEF_METHOD(vm->classClass, Class, toString, 0, NATIVE_TYPE(String));
-    DEF_OPERATOR(vm->classClass, Class, (), __invoke__, -1, NATIVE_TYPE(Object));
+    DEF_OPERATOR(vm->classClass, Class, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 
     inheritSuperclass(vm, vm->metaclassClass, behaviorClass);
     DEF_METHOD(vm->metaclassClass, Metaclass, getClass, 0, NATIVE_TYPE(Class));
@@ -2274,7 +2274,7 @@ void registerLangPackage(VM* vm) {
 	DEF_METHOD(vm->typeClass, Type, toBehavior, 0, NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, toString, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, traits, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Trait)));
-    DEF_OPERATOR(vm->typeClass, Type, (), __invoke__, -1, NATIVE_TYPE(Object));
+    DEF_OPERATOR(vm->typeClass, Type, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 
     bindSuperclass(vm, vm->nilClass, vm->objectClass);
     DEF_INTERCEPTOR(vm->nilClass, Nil, INTERCEPTOR_INIT, __init__, 0, NATIVE_TYPE(Nil));
@@ -2442,7 +2442,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(callableTrait, TCallable, isNative, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(callableTrait, TCallable, isVariadic, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(callableTrait, TCallable, name, 0, NATIVE_TYPE(String));
-    DEF_OPERATOR(callableTrait, TCallable, (), __invoke__, -1, NATIVE_TYPE(Object));
+    DEF_OPERATOR(callableTrait, TCallable, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 
     bindSuperclass(vm, vm->functionClass, vm->objectClass);
     bindTrait(vm, vm->functionClass, callableTrait);
@@ -2451,7 +2451,7 @@ void registerLangPackage(VM* vm) {
     DEF_FIELD(vm->functionClass, name, String, true, OBJ_VAL(emptyString(vm)));
     DEF_FIELD(vm->functionClass, arity, Int, true, INT_VAL(0));
     DEF_METHOD(vm->functionClass, Function, arity, 0, NATIVE_TYPE(Int));
-    DEF_METHOD(vm->functionClass, Function, call, -1, NATIVE_TYPE(Object));
+    DEF_METHOD(vm->functionClass, Function, call, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
     DEF_METHOD(vm->functionClass, Function, call0, 0, NATIVE_TYPE(Object));
     DEF_METHOD(vm->functionClass, Function, call1, 1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
     DEF_METHOD(vm->functionClass, Function, call2, 2, NATIVE_TYPE(Object), NATIVE_TYPE(Object), NATIVE_TYPE(Object));
@@ -2464,7 +2464,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->functionClass, Function, toString, 0, NATIVE_TYPE(String));
 	DEF_METHOD(vm->functionClass, Function, typeParamCount, 0, NATIVE_TYPE(Int));
     DEF_METHOD(vm->functionClass, Function, upvalueCount, 0, NATIVE_TYPE(Int));
-    DEF_OPERATOR(vm->functionClass, Function, (), __invoke__, -1, NATIVE_TYPE(Object));
+    DEF_OPERATOR(vm->functionClass, Function, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 
     bindSuperclass(vm, vm->boundMethodClass, vm->objectClass);
     bindTrait(vm, vm->boundMethodClass, callableTrait);
@@ -2481,7 +2481,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->boundMethodClass, BoundMethod, receiver, 0, NATIVE_TYPE(Object));
     DEF_METHOD(vm->boundMethodClass, BoundMethod, toString, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->boundMethodClass, BoundMethod, upvalueCount, 0, NATIVE_TYPE(Int));
-    DEF_OPERATOR(vm->boundMethodClass, BoundMethod, (), __invoke__, -1, NATIVE_TYPE(Object));
+    DEF_OPERATOR(vm->boundMethodClass, BoundMethod, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 
     bindSuperclass(vm, vm->generatorClass, vm->objectClass);
     vm->generatorClass->classType = OBJ_GENERATOR;
@@ -2501,7 +2501,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->generatorClass, Generator, step, 1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
     DEF_METHOD(vm->generatorClass, Generator, throws, 1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
     DEF_METHOD(vm->generatorClass, Generator, toString, 0, NATIVE_TYPE(String));
-    DEF_OPERATOR(vm->generatorClass, Generator, (), __invoke__, -1, NATIVE_TYPE(Object));
+    DEF_OPERATOR(vm->generatorClass, Generator, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 
     ObjClass* generatorMetaclass = vm->generatorClass->obj.klass;
     DEF_FIELD(generatorMetaclass, stateStart, Int, false, INT_VAL(GENERATOR_START));
