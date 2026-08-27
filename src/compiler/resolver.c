@@ -1004,10 +1004,12 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
         if (!classResolver.isAnonymous) bindTraitTypes(resolver, resolver->currentClass->name, traitList);
     }
 
-	ObjString* shortName = createStringFromToken(resolver->vm, name);
-    ObjString* fullName = concatenateString(resolver->vm, resolver->currentNamespace, shortName, ".");
-	TypeInfo* typeInfo = typeTableGet(resolver->vm->typetab, fullName);
-	insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, typeInfo, false);
+    if (!classResolver.isAnonymous) {
+        ObjString* shortName = createStringFromToken(resolver->vm, name);
+        ObjString* fullName = concatenateString(resolver->vm, resolver->currentNamespace, shortName, ".");
+        TypeInfo* typeInfo = typeTableGet(resolver->vm->typetab, fullName);
+        insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, typeInfo, false);
+    }
 
     childIndex++;
     resolveChild(resolver, ast, childIndex);

@@ -52,8 +52,11 @@ Value usingNamespace(VM* vm, uint8_t namespaceDepth) {
 }
 
 bool insertUserDefinedTypeIntoModule(VM* vm, ObjModule* module, TypeInfo* type, bool insertGlobal) {
-	valueArrayWrite(vm, &module->typeNames, OBJ_VAL(type->fullName));
-	bool result = typeTableSet(module->typeTab, type->fullName, type);
+    bool result = typeTableSet(module->typeTab, type->fullName, type);
+    if (result) {
+        valueArrayWrite(vm, &module->typeNames, OBJ_VAL(type->fullName));
+    }
+
     if (insertGlobal) {
         typeTableSet(vm->typetab, type->fullName, type);
     }
