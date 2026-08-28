@@ -172,9 +172,6 @@ static void loadModuleDependencies(VM* vm, ObjModule* module) {
 }
 
 InterpretResult runModule(VM* vm, ObjModule* module, bool isRootModule) {
-    if (module->dependencies.count > 0) {
-        loadModuleDependencies(vm, module);
-    }
     push(vm, OBJ_VAL(module->closure));
 
     if (module->closure->function->isAsync) {

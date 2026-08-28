@@ -917,6 +917,23 @@ InterpretResult run(VM* vm) {
                 }
                 break;
             }
+            case OP_GET_TYPE: {
+				ObjString* name = AS_STRING(pop(vm));
+                Value value;
+                if (!tableGet(&vm->types, name, &value)) {
+					TypeInfo* typeInfo = typeTableGet(vm->typetab, name);
+					if (typeInfo == NULL) {
+						throwNativeException(vm, "clox.std.lang.IllegalArgumentException", "Undefined type '%s'.", name->chars);
+					}
+					else {
+						ObjType* type = newType(vm, name, typeInfo);
+						tableSet(vm, &vm->types, name, OBJ_VAL(type));
+						push(vm, OBJ_VAL(type));
+					}
+                }
+				else push(vm, value);
+                break;
+            }
             case OP_EQUAL: {
                 if (IS_NUMBER(peek(vm, 0)) && IS_NUMBER(peek(vm, 1))) BINARY_NUMBER_OP(BOOL_VAL, ==);
                 else {

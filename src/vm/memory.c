@@ -630,7 +630,6 @@ static void freeObject(VM* vm, Obj* object) {
         } 
         case OBJ_TIMER: { 
             ObjTimer* timer = (ObjTimer*)object;
-            free(timer->timer);
             FREE(ObjTimer, object, object->generation);
             break;
         }

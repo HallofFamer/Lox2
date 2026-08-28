@@ -222,7 +222,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Typ
 
     SymbolItem* item = insertGlobalSymbolTable(vm, name, NULL);
     if (functionType == NULL) {
-        functionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, functionName, returnType);
+        functionType = newCallableTypeInfo(vm->typetab->count + 1, TYPE_CATEGORY_FUNCTION, functionName, returnType);
         functionType->attribute.isAsync = isAsync;
         functionType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
@@ -422,7 +422,7 @@ TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjStrin
     if (existingCallableType != NULL) {
         return (TypeInfo*)existingCallableType;
     }
-    CallableTypeInfo* callableType = newCallableTypeInfo(-1, category, name, returnType);
+    CallableTypeInfo* callableType = newCallableTypeInfo(vm->typetab->count + 1, category, name, returnType);
 
     if (numParams > 0) {
         va_start(args, numParams);
@@ -450,7 +450,7 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawTy
     if (existingGenericType != NULL) {
         return (TypeInfo*)existingGenericType;
     }
-    GenericTypeInfo* genericType = newGenericTypeInfo(-1, name, name, rawType);
+    GenericTypeInfo* genericType = newGenericTypeInfo(vm->typetab->count + 1, name, name, rawType);
 	va_start(args, numParams);
 
     for (int i = 0; i < numParams; i++) {
