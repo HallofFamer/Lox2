@@ -30,6 +30,7 @@ typedef struct {
     bool marshalEnabled;
     bool marshalFileWatch;
     bool marshalLineInfo;
+    bool marshalTryRecompile;
     const char* marshalOutputPath;
 } Configuration;
 

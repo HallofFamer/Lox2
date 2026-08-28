@@ -206,7 +206,7 @@ static void symbolTableOutputEntry(SymbolEntry* entry) {
     symbolTableOutputCategory(entry->value->category);
     printf(", state: ");
     symbolTableOutputState(entry->value->state);
-    printf(", isMutable: %s\n", entry->value->isMutable ? "true" : "false");
+    printf(", isMutable: %s, isImported: %s\n", entry->value->isMutable ? "true" : "false", entry->value->isImported ? "true" : "false");
 }
 
 void symbolTableOutput(SymbolTable* symtab) {

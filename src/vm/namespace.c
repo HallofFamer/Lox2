@@ -157,20 +157,6 @@ ObjString* locateSourceDirectoryFromFullName(VM* vm, ObjString* fullName) {
     return takeString(vm, heapChars, fullName->length);
 }
 
-static void loadModuleDependencies(VM* vm, ObjModule* module) {
-	for (int i = 0; i < module->dependencies.count; i++) {
-		ObjString* dependencyPath = AS_STRING(module->dependencies.values[i]);
-		Value value;
-
-		if (!tableGet(&vm->modules, dependencyPath, &value)) {
-			if (!loadModule(vm, dependencyPath)) {
-				fprintf(stderr, "Failed to load module dependency '%s' for module '%s'.\n", dependencyPath->chars, module->path->chars);
-				exit(70);
-			}
-		}
-	}
-}
-
 InterpretResult runModule(VM* vm, ObjModule* module, bool isRootModule) {
     push(vm, OBJ_VAL(module->closure));
 

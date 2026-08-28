@@ -122,6 +122,9 @@ static int parseMarshalSection(void* data, const char* name, const char* value) 
     else if (HAS_CONFIG_NAME("marshalLineInfo")) {
         config->marshalLineInfo = (bool)atoi(value);
     }
+    else if (HAS_CONFIG_NAME("marshalTryRecompile")) {
+        config->marshalTryRecompile = (bool)atoi(value);
+    }
     else if (HAS_CONFIG_NAME("marshalOutputPath")) {
         config->marshalOutputPath = _strdup(value);
     }
