@@ -633,6 +633,15 @@ static void marshalDeserializeModule(Marshaller* marshaller) {
 	for (int i = 0; i < numDependencies; i++) {
 		ObjString* dependency = marshalDeserializeString(marshaller);
 		valueArrayWrite(marshaller->vm, &marshaller->module->dependencies, OBJ_VAL(dependency));
+
+		ObjModule* module = marshaller->module;
+		ByteArray* bytes = marshaller->bytes;
+		int offset = marshaller->offset;
+		loadModule(marshaller->vm, dependency);
+
+		marshaller->module = module;
+		marshaller->bytes = bytes;
+		marshaller->offset = offset;
 	}
 
 	marshalDeserializeTypeTable(marshaller);
@@ -664,6 +673,7 @@ bool marshalLoad(Marshaller* marshaller, ObjModule* module) {
 	if (file == NULL) return false;
 	marshaller->module = module;
 	marshaller->bytes = (ByteArray*)malloc(sizeof(ByteArray));
+	marshaller->offset = 0;
 	ABORT_IFNULL(marshaller->bytes, "Failed to allocate memory for byte streams to perform marshal deserialization.\n");
 
 	size_t fileSize = marshalFileSize(file);

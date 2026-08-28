@@ -545,6 +545,7 @@ static SymbolItem* findGlobal(Resolver* resolver, Ast* ast) {
         }
 
         if (item != NULL) {
+            if (item->state == SYMBOL_STATE_DEFINED) item->state = SYMBOL_STATE_ACCESSED;
             return insertSymbol(resolver, ast->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, item->type, item->isMutable);
         }
     }
@@ -1307,7 +1308,7 @@ static void resolveVariable(Resolver* resolver, Ast* ast) {
             semanticError(resolver, "Cannot use variable '%s' before it is defined.", name->chars);
         }
         else if (item->category == SYMBOL_CATEGORY_PLACEHOLDER) {
-			reifyTypeParameters(resolver, item->token);
+            reifyTypeParameters(resolver, item->token);
         }
     }
     else {
@@ -1442,10 +1443,13 @@ static void resolveCaseStatement(Resolver* resolver, Ast* ast) {
 
 static void resolveCatchStatement(Resolver* resolver, Ast* ast) {
     beginScope(resolver, ast, SYMBOL_SCOPE_BLOCK);
+    SymbolItem* exceptionTypeItem = symbolTableLookup(ast->symtab, createStringFromToken(resolver->vm, ast->token));
+    if (exceptionTypeItem->state == SYMBOL_STATE_DEFINED) exceptionTypeItem->state = SYMBOL_STATE_ACCESSED;
+
     Ast* exceptionVar = astGetChild(ast, 0);
     exceptionVar->symtab = ast->symtab;
-    SymbolItem* exceptionItem = declareVariable(resolver, exceptionVar, false);
-    exceptionItem->state = SYMBOL_STATE_DEFINED;
+    SymbolItem* exceptionVarItem = declareVariable(resolver, exceptionVar, false);
+    exceptionVarItem->state = SYMBOL_STATE_DEFINED;
 
     Ast* blk = astGetChild(ast, 1);
     blk->symtab = ast->symtab;

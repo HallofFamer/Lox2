@@ -549,6 +549,20 @@ static void getVariable(Compiler* compiler, SymbolTable* symtab, Token token) {
     }
 }
 
+static bool isGenericTypeExpr(Compiler* compiler, Ast* ast) {
+    if (ast->parent != NULL && ast->parent->kind != AST_EXPR_CALL && ast->parent->kind != AST_EXPR_CLASS && 
+        ast->parent->kind != AST_EXPR_FUNCTION && ast->parent->kind != AST_EXPR_TRAIT && ast->parent->kind != AST_LIST_VAR) {
+		Ast* firstChild = astGetChild(ast->parent, 0);
+        return (ast->type != NULL && IS_GENERIC_TYPE(ast->type) && ast == firstChild);
+    }
+    return false;
+}
+
+static void getTypeArgument(Compiler* compiler, SymbolTable* symtab, Ast* typeArg) {
+    emitConstant(compiler, OBJ_VAL(typeArg->type->fullName));
+	emitByte(compiler, OP_GET_TYPE);
+}
+
 static void parameters(Compiler* compiler, Ast* ast) {
     if (!astHasChild(ast)) return;
     for (int i = 0; i < ast->children->count; i++) {
@@ -655,7 +669,8 @@ static int typeArgumentsAtCall(Compiler* compiler, Ast* ast) {
     Ast* typeArgs = astGetChild(ast, 0);
     for (int i = 0; i < typeArgs->children->count; i++) {
         Ast* typeArg = astGetChild(typeArgs, i);
-        getVariable(compiler, typeArg->symtab, typeArg->token);
+		if (isHigherOrderType(typeArg->type)) getTypeArgument(compiler, typeArg->symtab, typeArg);
+        else getVariable(compiler, typeArg->symtab, typeArg->token);
     }
     return typeArgs->children->count;
 }
@@ -1087,8 +1102,13 @@ static void compileTrait(Compiler* compiler, Ast* ast) {
 }
 
 static void compileType(Compiler* compiler, Ast* ast) {
-	Token name = ast->attribute.isFunction ? syntheticToken("Function") : ast->token;
-	emitBytes(compiler, OP_GET_GLOBAL, (uint8_t)identifierConstant(compiler, &name));
+    if (isGenericTypeExpr(compiler, ast)) {
+		getTypeArgument(compiler, ast->symtab, ast);
+    }
+    else {
+        Token name = ast->attribute.isFunction ? syntheticToken("Function") : ast->token;
+        emitBytes(compiler, OP_GET_GLOBAL, (uint8_t)identifierConstant(compiler, &name));
+    }
 }
 
 static void compileUnary(Compiler* compiler, Ast* ast) {

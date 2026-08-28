@@ -1929,6 +1929,12 @@ LOX_METHOD(Type, __init__) {
     RETURN_OBJ(self);
 }
 
+LOX_METHOD(Type, fullName) {
+    ASSERT_ARG_COUNT("Type::fullName()", 0);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_OBJ(self->typeInfo->fullName);
+}
+
 LOX_METHOD(Type, getMethod) {
     ASSERT_ARG_COUNT("Type::getMethod(name)", 1);
     ASSERT_ARG_TYPE("Type::getMethod(name)", 0, String);
@@ -2075,6 +2081,12 @@ LOX_METHOD(Type, name) {
     ASSERT_ARG_COUNT("Type::name()", 0);
     ObjType* self = AS_TYPE(receiver);
     RETURN_OBJ(self->typeInfo->shortName);
+}
+
+LOX_METHOD(Type, shortName) {
+	ASSERT_ARG_COUNT("Type::shortName()", 0);
+	ObjType* self = AS_TYPE(receiver);
+	RETURN_OBJ(self->typeInfo->shortName);
 }
 
 LOX_METHOD(Type, toBehavior) {
@@ -2255,6 +2267,7 @@ void registerLangPackage(VM* vm) {
 
     bindSuperclass(vm, vm->typeClass, behaviorClass);
     DEF_INTERCEPTOR(vm->typeClass, Type, INTERCEPTOR_INIT, __init__, 2, NATIVE_TYPE(Type), NATIVE_TYPE(String), NATIVE_TYPE(Behavior));
+    DEF_METHOD(vm->typeClass, Type, fullName, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, getMethod, 1, NATIVE_TYPE(Method), NATIVE_TYPE(String));
 	DEF_METHOD(vm->typeClass, Type, getTypeParameters, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Type)));
     DEF_METHOD(vm->typeClass, Type, hasMethod, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(String));
@@ -2271,6 +2284,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, isTrait, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, methods, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Method)));
     DEF_METHOD(vm->typeClass, Type, name, 0, NATIVE_TYPE(String));
+    DEF_METHOD(vm->typeClass, Type, shortName, 0, NATIVE_TYPE(String));
 	DEF_METHOD(vm->typeClass, Type, toBehavior, 0, NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, toString, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, traits, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Trait)));
