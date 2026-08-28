@@ -1298,7 +1298,7 @@ InterpretResult run(VM* vm) {
                 else RUNTIME_ERROR("Only classes, traits and namespaces may be imported.");
                 break;
             }
-            case OP_TYPE: {
+            case OP_TYPE_ALIAS: {
                 ObjString* typeName = READ_STRING();
                 TypeInfo* typeInfo = typeTableGet(vm->typetab, typeName);
 				if (typeInfo == NULL) {

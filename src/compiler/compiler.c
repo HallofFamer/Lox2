@@ -1592,7 +1592,7 @@ static void compileTypeDeclaration(Compiler* compiler, Ast* ast) {
     Token* name = &ast->token;
     uint8_t index = identifierConstant(compiler, name);
     declareVariable(compiler, name);
-    emitBytes(compiler, OP_TYPE, index);
+    emitBytes(compiler, OP_TYPE_ALIAS, index);
     compileChild(compiler, ast, 0);
 }
 
