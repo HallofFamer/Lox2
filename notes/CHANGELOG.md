@@ -1,11 +1,16 @@
 # Change Log
 
-### Lox2 v2.2.1(current version)
+### Lox2 v2.2.2(current version)
+- Introduce fully reified generics with new object type `ObjType` which captures full type information instead of just class/trait.
+- Extend Marshaller to serialize type information for each serialized source code, so it can be used by its dependents during compilation.
+- Fix parser glitch which causes incorrect parsing of nested callable or generic type annotations.
+
+### Lox2 v2.2.1(last version)
 - Smart reified generics that only passes type objects as instance fields or function arguments if they are actually being used/inspected. 
 - Implement configuration options `flagUnusedImport` and `flagUndefinedType` in lox2.ini which decide whether to throw warnings/errors when encountering unused imports or undefined type annotations.
 - Fix a glitch that the resolver cannot find and load types from the same namespace without using statement, which causes typechecking errors in some cases.
 
-### Lox2 v2.2.0(last version)
+### Lox2 v2.2.0
 - Enhanced type system with basic support for generics/parametric polymorphism.
 - `type` keyword used as declaration of type alias, useful for complex callable or generic types.
 - Capability of serializing compiled bytecodes into disk as .loxo files, skipping compilation for faster startup time.
