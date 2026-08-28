@@ -15,7 +15,8 @@ finally {
 
 println("Testing handling native exception: ")
 try { 
-    var str = "abc"
+    var str = 5
+    str = "abc"
     val range = 3..str
 }
 catch(IllegalArgumentException e){ 

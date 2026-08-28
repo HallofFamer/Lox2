@@ -1,6 +1,5 @@
 namespace examples.scripts
 using clox.std.net.HTTPClient
-using clox.std.net.URL
 
 println("Create HTTP Client.")
 val client = HTTPClient()

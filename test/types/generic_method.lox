@@ -60,10 +60,18 @@ class GenericRepository<TEntity> {
 	}
 }
 
+class ProductRepository extends GenericRepository<Product> { 
+    
+	Product getByName(String name) {
+		return this.get({|m| m.name == name })
+	}
+}
+
 val products = Array<Product>()
 products.add(Product(1, "Laptop", 999.99))
 products.add(Product(2, "Smartphone", 499.49))
 products.add(Product(3, "Tablet", 299.29))
+
 for (val product : products) {
 	println(product.toString())
 }
@@ -73,13 +81,6 @@ productRepo.addAll(products)
 productRepo.add(Product(4, "Monitor", 199.99))
 val product = productRepo.getById<Int>(4)
 println(product.toString())
-
-class ProductRepository extends GenericRepository<Product> { 
-    
-	Product getByName(String name) {
-		return this.get({|m| m.name == name })
-	}
-}
 
 val productRepo2 = ProductRepository()
 productRepo2.addAll(products)

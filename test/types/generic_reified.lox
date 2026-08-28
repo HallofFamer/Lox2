@@ -1,4 +1,5 @@
 namespace test.types
+using clox.std.collection.Array
 using clox.std.util.UUID
 
 T identity<T>(T arg) {
@@ -26,6 +27,7 @@ class Box<T> {
     }
 
     String toString() {
+        println(T)
         return "Box<${T.name()}>(${this.item})"
     }
 }
@@ -44,12 +46,19 @@ class WeightedBox<T> extends Box<T> {
     }
 
     String toString() {
+        println(T)
         return "WeightedBox<${T.name()}>(${this.item}, ${this.weight}kg)"
     }
 }
 
+val intBoxType = Box<Int>
+println(intBoxType)
+
 val box = Box<Int>(32)
 println(box.toString())
+
+val box2 = Box<Array<Int>>([1, 2, 3])
+println(box2.toString())
 
 val weightedBox = WeightedBox<String>("Hello World", 2.5)
 println(weightedBox.toString())

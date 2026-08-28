@@ -46,6 +46,7 @@ class Car extends Vehicle {
 }
 
 val car = Car("Mercedes", "GLC", 2024)
+car.acceptPassenger(2)
 car.drive(80)
 println(car.toString())
 println(Vehicle.serialID)
