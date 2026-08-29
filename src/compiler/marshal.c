@@ -593,6 +593,17 @@ static void marshalDeserializeTypeTable(Marshaller* marshaller) {
 	}
 }
 
+static void marshalDeserializeDependency(Marshaller* marshaller, ObjString* dependency) {
+	ObjModule* module = marshaller->module;
+	ByteArray* bytes = marshaller->bytes;
+	int offset = marshaller->offset;
+	loadModule(marshaller->vm, dependency);
+
+	marshaller->module = module;
+	marshaller->bytes = bytes;
+	marshaller->offset = offset;
+}
+
 static void marshalDeserializeModule(Marshaller* marshaller) {
 	ObjString* version = marshalDeserializeString(marshaller);
 	if (strcmp(version->chars, marshaller->vm->config.version) != 0) {

@@ -75,6 +75,7 @@ LOX_METHOD(HTTPClient, close) {
     ASSERT_ARG_COUNT("HTTPClient::close()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjRecord* metadata = AS_RECORD(getObjField(vm, self, "metadata"));
+
     CURLMData* curlMData = (CURLMData*)metadata->data;
     if (curlMData != NULL) curl_multi_cleanup(curlMData->curlM);
     RETURN_NIL;
