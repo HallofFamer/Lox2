@@ -168,6 +168,19 @@ LOX_METHOD(Behavior, name) {
     RETURN_OBJ(AS_CLASS(receiver)->name);
 }
 
+LOX_METHOD(Behavior, toType) {
+    ASSERT_ARG_COUNT("Behavior::toType()", 0);
+    ObjClass* self = AS_CLASS(receiver);
+    Value value;
+    if (tableGet(&vm->types, self->fullName, &value)) RETURN_VAL(value);
+    else {
+        TypeInfo* typeInfo = typeTableGet(vm->typetab, self->fullName);
+        ObjType* type = newType(vm, self->fullName, typeInfo);
+        tableSet(vm, &vm->types, self->fullName, OBJ_VAL(type));
+        RETURN_OBJ(type);
+    }  
+}
+
 LOX_METHOD(Behavior, traits) {
     ASSERT_ARG_COUNT("Behavior::traits()", 0);
     ObjClass* self = AS_CLASS(receiver);
@@ -2179,6 +2192,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(behaviorClass, Behavior, isType, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(behaviorClass, Behavior, methods, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Method)));
     DEF_METHOD(behaviorClass, Behavior, name, 0, NATIVE_TYPE(String));
+    DEF_METHOD(behaviorClass, Behavior, toType, 0, NATIVE_TYPE(Type));
     DEF_METHOD(behaviorClass, Behavior, traits, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Trait)));
     DEF_OPERATOR(behaviorClass, Behavior, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 

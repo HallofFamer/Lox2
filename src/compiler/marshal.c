@@ -671,6 +671,7 @@ bool marshalLoad(Marshaller* marshaller, ObjModule* module) {
 	FILE* file;
     fopen_s(&file, fileName, "rb");
 	if (file == NULL) return false;
+
 	marshaller->module = module;
 	marshaller->bytes = (ByteArray*)malloc(sizeof(ByteArray));
 	marshaller->offset = 0;
