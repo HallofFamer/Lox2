@@ -370,6 +370,7 @@ LOX_METHOD(HTTPClient, send) {
     CURLResponse curlResponse;
     CURLcode curlCode = httpSendRequest(vm, url, method, data, curl, &curlResponse);
     curl_slist_free_all(curlHeaders);
+    
     if (curlCode != CURLE_OK) {
         curl_easy_cleanup(curl);
         THROW_EXCEPTION(clox.std.net.HTTPException, "Failed to complete an HTTP request from URL.");
