@@ -1518,9 +1518,7 @@ static void resolveReturnStatement(Resolver* resolver, Ast* ast) {
         semanticError(resolver, "Cannot use 'return' from an initializer.");
     }
     else if (astHasChild(ast)) {
-        if (resolver->currentFunction->attribute.isVoid) {
-            semanticError(resolver, "Cannot use 'return' from a void function/method.");
-        }
+        if (resolver->currentFunction->attribute.isVoid) semanticError(resolver, "Cannot use 'return' from a void function/method.");
         resolveChild(resolver, ast, 0);
     }
 }

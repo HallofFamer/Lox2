@@ -2114,6 +2114,11 @@ LOX_METHOD(Type, toString) {
     RETURN_STRING_FMT("<type %s: %s>", self->name->chars, self->behavior->fullName->chars);
 }
 
+LOX_METHOD(Type, toType) {
+    ASSERT_ARG_COUNT("Type::toString()", 0);
+    RETURN_VAL(receiver);
+}
+
 LOX_METHOD(Type, traits) {
     ASSERT_ARG_COUNT("Type::traits()", 0);
     ObjType* self = AS_TYPE(receiver);
@@ -2301,6 +2306,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, shortName, 0, NATIVE_TYPE(String));
 	DEF_METHOD(vm->typeClass, Type, toBehavior, 0, NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, toString, 0, NATIVE_TYPE(String));
+    DEF_METHOD(vm->typeClass, Type, toType, 0, NATIVE_TYPE(Type));
     DEF_METHOD(vm->typeClass, Type, traits, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Trait)));
     DEF_OPERATOR(vm->typeClass, Type, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 
