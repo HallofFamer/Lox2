@@ -604,7 +604,7 @@ static void marshalDeserializeDependency(Marshaller* marshaller, ObjString* depe
 	marshaller->offset = offset;
 }
 
-static void marshalDeserializeModule(Marshaller* marshaller) {
+static bool marshalDeserializeModule(Marshaller* marshaller) {
 	ObjString* version = marshalDeserializeString(marshaller);
 	if (strcmp(version->chars, marshaller->vm->config.version) != 0) {
 		fprintf(stderr, "Version mismatch during marshal deserialization. Expected: v%s, but got: v%s.\n", marshaller->vm->config.version, version->chars);
@@ -653,6 +653,7 @@ static void marshalDeserializeModule(Marshaller* marshaller) {
 	push(marshaller->vm, OBJ_VAL(function));
 	marshaller->module->closure = newClosure(marshaller->vm, function);
 	pop(marshaller->vm);
+	return true;
 }
 
 static bool marshalSourceFileModified(const char* sourceFilePath, const char* compiledFilePath) {
@@ -686,9 +687,9 @@ bool marshalLoad(Marshaller* marshaller, ObjModule* module) {
 
 	size_t bytesRead = fread(marshaller->bytes->elements, sizeof(uint8_t), fileSize, file);
 	ABORT_IFTRUE(bytesRead < fileSize, "Failed to read file \"%s\" for marshal deserialization.\n", fileName);
-	marshalDeserializeModule(marshaller);	
+	bool result = marshalDeserializeModule(marshaller);
 	
 	fclose(file);
 	marshalCleanup(marshaller);
-	return true;
+	return result;
 }

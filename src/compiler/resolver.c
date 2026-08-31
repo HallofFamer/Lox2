@@ -1748,7 +1748,8 @@ static void resolveMethodDeclaration(Resolver* resolver, Ast* ast) {
     if (!resolver->currentClass->isAnonymous) {
         BehaviorTypeInfo* _class = AS_BEHAVIOR_TYPE(getTypeForSymbol(resolver, resolver->currentClass->name, false, false));
         if (ast->attribute.isClass) {
-            _class = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, getMetaclassNameFromClass(resolver->vm, _class->baseType.fullName)));
+            ObjString* metaclassName = getMetaclassNameFromClass(resolver->vm, _class->baseType.fullName);
+            _class = AS_BEHAVIOR_TYPE(typeTableGet(resolver->vm->typetab, metaclassName));
         }
 
         MethodTypeInfo* methodType = typeTableInsertMethod(_class->methods, name, AS_CALLABLE_TYPE(ast->type), ast->attribute.isAsync, ast->attribute.isClass, ast->attribute.isInitializer);
