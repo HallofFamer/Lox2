@@ -2067,6 +2067,12 @@ LOX_METHOD(Type, isTrait) {
     RETURN_BOOL(self->typeInfo->category == TYPE_CATEGORY_TRAIT);
 }
 
+LOX_METHOD(Type, isVoid) {
+    ASSERT_ARG_COUNT("Type::isVoid()", 0);
+    ObjType* self = AS_TYPE(receiver);
+    RETURN_BOOL(IS_VOID_TYPE(self->typeInfo));
+}
+
 LOX_METHOD(Type, methods) {
     ASSERT_ARG_COUNT("Type::methods()", 0);
     ObjType* self = AS_TYPE(receiver);
@@ -2301,6 +2307,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, isNative, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isPlaceholder, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isTrait, 0, NATIVE_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isVoid, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, methods, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Method)));
     DEF_METHOD(vm->typeClass, Type, name, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, shortName, 0, NATIVE_TYPE(String));

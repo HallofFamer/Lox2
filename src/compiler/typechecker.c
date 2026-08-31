@@ -1307,9 +1307,7 @@ static void typeCheckThrowStatement(TypeChecker* typeChecker, Ast* ast) {
 static void typeCheckTryStatement(TypeChecker* typeChecker, Ast* ast) {
     typeCheckChild(typeChecker, ast, 0);
     typeCheckChild(typeChecker, ast, 1);
-    if (astNumChild(ast) > 2) {
-        typeCheckChild(typeChecker, ast, 2);
-    }
+    if (astNumChild(ast) > 2) typeCheckChild(typeChecker, ast, 2);
 }
 
 static void typeCheckUsingStatement(TypeChecker* typeChecker, Ast* ast) {
