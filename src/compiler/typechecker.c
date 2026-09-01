@@ -1203,6 +1203,15 @@ static void typeCheckCaseStatement(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckCatchStatement(TypeChecker* typeChecker, Ast* ast) {
+    SymbolItem* exceptionTypeItem = symbolTableLookup(ast->symtab, createStringFromToken(typeChecker->vm, ast->token));
+    if (exceptionTypeItem->type != NULL) {
+        ObjString* className = getClassNameFromMetaclass(typeChecker->vm, exceptionTypeItem->type->fullName);
+        TypeInfo* classType = typeTableGet(typeChecker->vm->typetab, className);
+        if (!isSubtypeOfType(classType, getNativeType(typeChecker->vm, "clox.std.lang.Exception"))) {
+            typeError(typeChecker, "catch statement expects instance of Exception but gets %s.", classType->shortName->chars);
+        }
+    }
+
     typeCheckChild(typeChecker, ast, 0);
     Ast* exceptionVar = astGetChild(ast, 0);
     ObjString* exceptionClassName = copyStringPerma(typeChecker->vm, ast->token.start, ast->token.length);

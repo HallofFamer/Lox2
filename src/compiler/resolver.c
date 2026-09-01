@@ -992,7 +992,8 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
 
         if (!classResolver.isAnonymous) bindSuperclassType(resolver, resolver->currentClass->name, superclass);
         else {
-			SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createStringFromToken(resolver->vm, superclass->token));
+            ObjString* superclassName = createStringFromToken(resolver->vm, superclass->token);
+			SymbolItem* item = symbolTableLookup(resolver->currentSymtab, superclassName);
             ast->type = item->type;
         }
     }
