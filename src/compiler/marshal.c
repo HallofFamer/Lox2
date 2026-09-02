@@ -607,18 +607,21 @@ static void marshalDeserializeDependency(Marshaller* marshaller, ObjString* depe
 static bool marshalDeserializeModule(Marshaller* marshaller) {
 	ObjString* version = marshalDeserializeString(marshaller);
 	if (strcmp(version->chars, marshaller->vm->config.version) != 0) {
+		if (marshaller->vm->config.marshalTryRecompile) return false;
 		fprintf(stderr, "Version mismatch during marshal deserialization. Expected: v%s, but got: v%s.\n", marshaller->vm->config.version, version->chars);
 		exit(1);
 	}
 
 	ObjString* path = marshalDeserializeString(marshaller);
 	if (path != marshaller->module->path) {
+		if (marshaller->vm->config.marshalTryRecompile) return false;
 		fprintf(stderr, "Module path mismatch during marshal deserialization. Expected: %s, but got: %s.\n", marshaller->module->path->chars, path->chars);
 		exit(1);
 	}
 
 	int hasLineInfo = marshalDeserializeByte(marshaller);
 	if (hasLineInfo != marshaller->vm->config.marshalLineInfo) {
+		if (marshaller->vm->config.marshalTryRecompile) return false;
 		fprintf(stderr, "Marshal line info configuration mismatch during deserialization. Expected: %s, but got: %s.\n", 
 			marshaller->vm->config.marshalLineInfo ? "1(enabled)" : "0(disabled)", hasLineInfo ? "1(enabled)" : "0(disabled)");
 		exit(1);

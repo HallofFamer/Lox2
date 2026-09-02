@@ -1208,7 +1208,7 @@ static void typeCheckCatchStatement(TypeChecker* typeChecker, Ast* ast) {
         ObjString* className = getClassNameFromMetaclass(typeChecker->vm, exceptionTypeItem->type->fullName);
         TypeInfo* classType = typeTableGet(typeChecker->vm->typetab, className);
         if (!isSubtypeOfType(classType, getNativeType(typeChecker->vm, "clox.std.lang.Exception"))) {
-            typeError(typeChecker, "catch statement expects instance of Exception but gets %s.", classType->shortName->chars);
+            typeError(typeChecker, "catch statement expects type to be a subclass of Exception but gets %s.", classType->shortName->chars);
         }
     }
 
