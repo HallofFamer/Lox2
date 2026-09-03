@@ -593,7 +593,10 @@ static void marshalDeserializeTypeTable(Marshaller* marshaller) {
 	}
 }
 
-static void marshalDeserializeDependency(Marshaller* marshaller, ObjString* dependency) {
+static bool marshalDeserializeDependency(Marshaller* marshaller) {
+	ObjString* dependency = marshalDeserializeString(marshaller);
+	valueArrayWrite(marshaller->vm, &marshaller->module->dependencies, OBJ_VAL(dependency));
+
 	ObjModule* module = marshaller->module;
 	ByteArray* bytes = marshaller->bytes;
 	int offset = marshaller->offset;
@@ -602,6 +605,7 @@ static void marshalDeserializeDependency(Marshaller* marshaller, ObjString* depe
 	marshaller->module = module;
 	marshaller->bytes = bytes;
 	marshaller->offset = offset;
+	return true;
 }
 
 static bool marshalDeserializeModule(Marshaller* marshaller) {
@@ -644,11 +648,12 @@ static bool marshalDeserializeModule(Marshaller* marshaller) {
 	}
 
 	int numDependencies = marshalDeserializeInt(marshaller);
+	bool dependenciesModified = false;
 	for (int i = 0; i < numDependencies; i++) {
-		ObjString* dependency = marshalDeserializeString(marshaller);
-		valueArrayWrite(marshaller->vm, &marshaller->module->dependencies, OBJ_VAL(dependency));
-		marshalDeserializeDependency(marshaller, dependency);
+		bool result = marshalDeserializeDependency(marshaller);
+		if (!result) dependenciesModified = true;
 	}
+	if (dependenciesModified && marshaller->vm->config.marshalTryRecompile) return false;
 
 	marshalDeserializeTypeTable(marshaller);
 	ObjFunction* function = marshalDeserializeFunction(marshaller);

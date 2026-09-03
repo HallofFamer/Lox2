@@ -1584,9 +1584,7 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
         }
         else {
             ObjString* directoryPath = locateSourceDirectoryFromFullName(resolver->vm, fullName);
-            if (sourceDirectoryExists(directoryPath)) {
-                type = getNativeType(resolver->vm, "Namespace");
-            }
+            if (sourceDirectoryExists(directoryPath)) type = getNativeType(resolver->vm, "Namespace");
         }
     }
 
