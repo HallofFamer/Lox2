@@ -596,12 +596,17 @@ static void marshalDeserializeTypeTable(Marshaller* marshaller) {
 static bool marshalDeserializeDependency(Marshaller* marshaller) {
 	ObjString* dependency = marshalDeserializeString(marshaller);
 	valueArrayWrite(marshaller->vm, &marshaller->module->dependencies, OBJ_VAL(dependency));
-
 	ObjModule* module = marshaller->module;
 	ByteArray* bytes = marshaller->bytes;
 	int offset = marshaller->offset;
-	loadModule(marshaller->vm, dependency);
 
+	char fileName[UINT8_COUNT];
+	sprintf_s(fileName, UINT8_COUNT, "%s%s%s", marshaller->vm->config.marshalOutputPath, module->path->chars, "o");
+	if (marshaller->vm->config.marshalTryRecompile && marshalSourceFileModified(dependency, fileName)) {
+		return false;
+	}
+
+	loadModule(marshaller->vm, dependency);
 	marshaller->module = module;
 	marshaller->bytes = bytes;
 	marshaller->offset = offset;

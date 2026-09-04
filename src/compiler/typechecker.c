@@ -743,10 +743,11 @@ static void inferAstTypeFromSubscriptGet(TypeChecker* typeChecker, Ast* ast) {
         TypeInfo* baseType = typeTableMethodLookup(receiver->type, newStringPerma(typeChecker->vm, "[]"));
         if (baseType == NULL) return;
         MethodTypeInfo* methodType = AS_METHOD_TYPE(baseType);
-        CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, (TypeInfo*)methodType->declaredType);
-        
+
+        CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, (TypeInfo*)methodType->declaredType);        
         if (callableType->paramTypes->count == 0) return;
         TypeInfo* paramType = callableType->paramTypes->elements[0];
+
         if (!isSubtypeOfType(index->type, paramType)) {
             typeError(typeChecker, "Method %s::[] expects argument 0 to be an instance of %s but gets %s.",
                 receiver->type->shortName->chars, paramType->shortName->chars, index->type->shortName->chars);
