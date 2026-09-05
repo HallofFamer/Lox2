@@ -345,6 +345,14 @@ void marshalDump(Marshaller* marshaller, ObjModule* module) {
 	marshalCleanup(marshaller);
 }
 
+static bool marshalSourceFileModified(const char* sourceFilePath, const char* compiledFilePath) {
+	struct stat sourceFileStat, compiledFileStat;
+	if (stat(sourceFilePath, &sourceFileStat) == -1 || stat(compiledFilePath, &compiledFileStat) == -1) {
+		return false;
+	}
+	return difftime(sourceFileStat.st_mtime, compiledFileStat.st_mtime) > 0;
+}
+
 static uint8_t marshalDeserializeByte(Marshaller* marshaller) {
 	return marshaller->bytes->elements[marshaller->offset++];
 }
@@ -602,7 +610,7 @@ static bool marshalDeserializeDependency(Marshaller* marshaller) {
 
 	char fileName[UINT8_COUNT];
 	sprintf_s(fileName, UINT8_COUNT, "%s%s%s", marshaller->vm->config.marshalOutputPath, module->path->chars, "o");
-	if (marshaller->vm->config.marshalTryRecompile && marshalSourceFileModified(dependency, fileName)) {
+	if (marshaller->vm->config.marshalTryRecompile && marshalSourceFileModified(dependency->chars, fileName)) {
 		return false;
 	}
 
@@ -669,13 +677,6 @@ static bool marshalDeserializeModule(Marshaller* marshaller) {
 	return true;
 }
 
-static bool marshalSourceFileModified(const char* sourceFilePath, const char* compiledFilePath) {
-	struct stat sourceFileStat, compiledFileStat;
-	if (stat(sourceFilePath, &sourceFileStat) == -1 || stat(compiledFilePath, &compiledFileStat) == -1) {	
-		return false;
-	}
-	return difftime(sourceFileStat.st_mtime, compiledFileStat.st_mtime) > 0;
-}
 
 bool marshalLoad(Marshaller* marshaller, ObjModule* module) {
 	if (!marshaller->vm->config.marshalEnabled || module->path->length == 0) return false;

@@ -658,9 +658,9 @@ static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
 	char* callableName = bufferNewCString(UINT16_MAX);
 	size_t length = 0;
 	Ast* returnType = astGetChild(ast, 0);
-
 	char* returnTypeName = returnType->type != NULL ? createTypeName(returnType->type, true) : "dynamic";
 	size_t returnTypeLength = strlen(returnTypeName);
+
 	memcpy(callableName, returnTypeName, returnTypeLength);
 	length += returnTypeLength;
 	callableName[length++] = '(';
@@ -684,7 +684,8 @@ static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
         memcpy(callableName + length, "...", 3);
         length += 3;
 		Ast* param = astGetChild(params, 0);
-		char* paramTypeName = param->type != NULL ? createTypeName(param->type, true) : "dynamic";
+		
+        char* paramTypeName = param->type != NULL ? createTypeName(param->type, true) : "dynamic";
 		size_t paramTypeLength = strlen(paramTypeName);
 		memcpy(callableName + length, paramTypeName, paramTypeLength);
 		length += paramTypeLength;
