@@ -166,7 +166,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
         returnType = instantiateTypeParameterWithName(typeChecker, returnType, functionType->formalTypeParams, genericFunctionType->actualTypeParams);
     }
 
-    CallableTypeInfo* instantiatedFunctionType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, genericFunctionType->baseType.shortName, returnType);
+    CallableTypeInfo* instantiatedFunctionType = newCallableTypeInfo(typeChecker->vm->typetab->count + 1, TYPE_CATEGORY_FUNCTION, genericFunctionType->baseType.shortName, returnType);
     instantiatedFunctionType->formalTypeParams = functionType->formalTypeParams;
     for (int i = 0; i < functionType->paramTypes->count; i++) {
         TypeInfo* paramType = functionType->paramTypes->elements[i];
@@ -180,7 +180,7 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
 }
 
 static CallableTypeInfo* instantiateGenericMethodTypeFromAst(TypeChecker* typeChecker, CallableTypeInfo* declaredType, Ast* typeParams) {
-    CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(-1, declaredType->baseType.category, declaredType->baseType.shortName, declaredType->returnType);
+    CallableTypeInfo* instantiatedCallableType = newCallableTypeInfo(typeChecker->vm->typetab->count + 1, declaredType->baseType.category, declaredType->baseType.shortName, declaredType->returnType);
     for (int i = 0; i < typeParams->children->count; i++) {
         TypeInfo* actualType = typeParams->children->elements[i]->type;
         TypeInfoArrayAdd(instantiatedCallableType->formalTypeParams, actualType);
@@ -207,7 +207,7 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     if (hasGenericParameters(returnType)) {
         returnType = instantiateTypeParameterWithName(typeChecker, returnType, rawBehaviorType->formalTypeParams, genericBehaviorType->actualTypeParams);
 	}
-    CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(-1, TYPE_CATEGORY_METHOD, rawMethodType->baseType.shortName, returnType);
+    CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(typeChecker->vm->typetab->count + 1, TYPE_CATEGORY_METHOD, rawMethodType->baseType.shortName, returnType);
     instantiatedMethodType->formalTypeParams = rawMethodType->formalTypeParams;    
 
     for (int i = 0; i < rawMethodType->paramTypes->count; i++) {
@@ -608,7 +608,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
             return;
         }
 
-        CallableTypeInfo* calleeType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, emptyString(typeChecker->vm), NULL);
+        CallableTypeInfo* calleeType = newCallableTypeInfo(typeChecker->vm->typetab->count + 1, TYPE_CATEGORY_FUNCTION, emptyString(typeChecker->vm), NULL);
         deriveCalleeType(typeChecker, ast, calleeType); 
 		calleeType = AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)calleeType));
         callee->type = (TypeInfo*)calleeType;

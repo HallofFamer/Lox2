@@ -621,6 +621,16 @@ static bool marshalDeserializeDependency(Marshaller* marshaller) {
 	return true;
 }
 
+static bool marshalDeserializeDependencies(Marshaller* marshaller) {
+	int numDependencies = marshalDeserializeInt(marshaller);
+	bool dependenciesModified = false;
+	for (int i = 0; i < numDependencies; i++) {
+		bool result = marshalDeserializeDependency(marshaller);
+		if (!result) dependenciesModified = true;
+	}
+	return dependenciesModified;
+}
+
 static bool marshalDeserializeModule(Marshaller* marshaller) {
 	ObjString* version = marshalDeserializeString(marshaller);
 	if (strcmp(version->chars, marshaller->vm->config.version) != 0) {
