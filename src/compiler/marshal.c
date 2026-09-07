@@ -670,12 +670,7 @@ static bool marshalDeserializeModule(Marshaller* marshaller) {
 		valueArrayWrite(marshaller->vm, &marshaller->module->varFields, NIL_VAL);
 	}
 
-	int numDependencies = marshalDeserializeInt(marshaller);
-	bool dependenciesModified = false;
-	for (int i = 0; i < numDependencies; i++) {
-		bool result = marshalDeserializeDependency(marshaller);
-		if (!result) dependenciesModified = true;
-	}
+	bool dependenciesModified = marshalDeserializeDependencies(marshaller);
 	if (dependenciesModified && marshaller->vm->config.marshalTryRecompile) return false;
 
 	marshalDeserializeTypeTable(marshaller);
