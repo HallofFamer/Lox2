@@ -554,6 +554,9 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		marshalDeserializeFormalTypeParams(marshaller, callableType->formalTypeParams);
 		return (TypeInfo*)callableType;
 	}
+	else if (category == TYPE_CATEGORY_PLACEHOLDER) {
+		return newPlaceholderTypeInfo(id, shortName);
+	}
 	else if (category == TYPE_CATEGORY_GENERIC) {
 		bool isFullyInstantiated = marshalDeserializeByte(marshaller) == 1;
 		TypeInfo* rawType = marshalDeserializeBaseType(marshaller);
@@ -572,9 +575,6 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		AliasTypeInfo* aliasType = newAliasTypeInfo(id, shortName, fullName, targetType);
 		marshalDeserializeFormalTypeParams(marshaller, aliasType->formalTypeParams);
 		return (TypeInfo*)aliasType;
-	}
-	else if (category == TYPE_CATEGORY_PLACEHOLDER) {
-		return newPlaceholderTypeInfo(id, shortName);
 	}
 	else {
 		fprintf(stderr, "Unsupported type category for deserialization.\n");
@@ -676,6 +676,7 @@ static bool marshalDeserializeModule(Marshaller* marshaller) {
 	marshalDeserializeTypeTable(marshaller);
 	ObjFunction* function = marshalDeserializeFunction(marshaller);
 	ABORT_IFNULL(function, "Failed to deserialize program for file \"%s\".\n", marshaller->module->path->chars);
+	
 	push(marshaller->vm, OBJ_VAL(function));
 	marshaller->module->closure = newClosure(marshaller->vm, function);
 	pop(marshaller->vm);

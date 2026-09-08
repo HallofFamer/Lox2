@@ -335,6 +335,34 @@ static bool callClass(VM* vm, ObjClass* klass, int argCount) {
     return true;
 }
 
+static bool callType(VM* vm, ObjType* type, int argCount) {
+    if (type->typeInfo == NULL) {
+        throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate type '%s' because it has no associated type information.", type->name->chars);
+        return false;
+    }
+    else if (IS_ALIAS_TYPE(type->typeInfo)) {
+        TypeInfo* targetType = AS_ALIAS_TYPE(type->typeInfo)->targetType;
+        ObjClass* targetClass = getClassFromTypeInfo(vm, targetType);
+        if (targetClass == NULL) {
+            throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate type '%s' because its target type '%s' has no associated class.", type->name->chars, targetType->shortName->chars);
+            return false;
+        }
+        return callClass(vm, targetClass, argCount);
+    }
+    else if (IS_PLACEHOLDER_TYPE(type->typeInfo)) {
+        throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate placeholder type '%s'.", type->name->chars);
+        return false;
+    }
+    else if (type->typeInfo->category == TYPE_CATEGORY_TRAIT) {
+        throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate trait type '%s'.", type->name->chars);
+        return false;
+    }
+    else {
+        ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
+        return callClass(vm, klass, argCount);
+    }
+}
+
 static int getCalleeArity(Value callee) {
     if (IS_CLOSURE(callee)) return AS_CLOSURE(callee)->function->arity;
     else if (IS_NATIVE_METHOD(callee)) return AS_NATIVE_METHOD(callee)->arity;
@@ -407,34 +435,6 @@ Value callGenerator(VM* vm, ObjGenerator* generator) {
         vm->runningGenerator = outer;
     }
     return pop(vm);
-}
-
-static bool callType(VM* vm, ObjType* type, int argCount) {
-	if (type->typeInfo == NULL) {
-		throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate type '%s' because it has no associated type information.", type->name->chars);
-		return false;
-	}
-	else if (IS_ALIAS_TYPE(type->typeInfo)) {
-		TypeInfo* targetType = AS_ALIAS_TYPE(type->typeInfo)->targetType;
-		ObjClass* targetClass = getClassFromTypeInfo(vm, targetType);
-		if (targetClass == NULL) {
-			throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate type '%s' because its target type '%s' has no associated class.", type->name->chars, targetType->shortName->chars);
-			return false;
-		}
-		return callClass(vm, targetClass, argCount);
-	}
-	else if (IS_PLACEHOLDER_TYPE(type->typeInfo)) {
-		throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate placeholder type '%s'.", type->name->chars);
-		return false;
-	}
-    else if (type->typeInfo->category == TYPE_CATEGORY_TRAIT) {
-		throwNativeException(vm, "clox.std.lang.TypeError", "Cannot instantiate trait type '%s'.", type->name->chars);
-		return false;
-    }
-    else {
-		ObjClass* klass = getClassFromTypeInfo(vm, type->typeInfo);
-		return callClass(vm, klass, argCount);
-    }
 }
 
 static bool callValue(VM* vm, Value callee, int argCount) {

@@ -990,15 +990,11 @@ static void compileInterpolation(Compiler* compiler, Ast* ast) {
 
 static void compileInvoke(Compiler* compiler, Ast* ast) {
     compileChild(compiler, ast, 0);
-	int typeArgCount = 0;
-    if (astNumChild(ast) > 2) {
-        typeArgCount = typeArgumentsAtInvoke(compiler, ast);
-    }
-
+	int typeArgCount = (astNumChild(ast) > 2) ? typeArgumentsAtInvoke(compiler, ast) : 0;
     Ast* args = astGetChild(ast, 1);
     uint8_t methodIndex = identifierConstant(compiler, &ast->token);
-    uint8_t argCount = argumentList(compiler, args);
 
+    uint8_t argCount = argumentList(compiler, args);
     OpCode opCode = ast->attribute.isOptional ? OP_OPTIONAL_INVOKE : OP_INVOKE;
     emitBytes(compiler, opCode, methodIndex);
     emitByte(compiler, argCount + typeArgCount);

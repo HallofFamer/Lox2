@@ -199,7 +199,7 @@ char* valueToString(VM* vm, Value value) {
         if (IS_STRING(value)) return AS_CSTRING(value);
         else {
             size_t nameLen = (size_t)object->klass->name->length;
-            size_t bufSize = 9 + nameLen + 1;
+            size_t bufSize = nameLen + 10;
 			char* chars = (char*)malloc(sizeof(char) * bufSize);
 			ABORT_IFNULL(chars, "Failed to allocate memory for object string conversion.");
             sprintf_s(chars, bufSize, "<object %s>", object->klass->name->chars);

@@ -17,6 +17,7 @@ static ObjString* allocateString(VM* vm, char* chars, int length, uint32_t hash,
     push(vm, OBJ_VAL(string));
     memcpy(string->chars, chars, length);
     string->chars[length] = '\0';
+
     tableSet(vm, &vm->strings, string, NIL_VAL);
     pop(vm);
     return string;
