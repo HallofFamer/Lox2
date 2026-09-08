@@ -11,7 +11,7 @@ typedef struct TypeTable TypeTable;
 DECLARE_BUFFER(TypeInfoArray, TypeInfo*)
 
 #define IS_BEHAVIOR_TYPE(type) (type->category == TYPE_CATEGORY_CLASS || type->category == TYPE_CATEGORY_METACLASS || type->category == TYPE_CATEGORY_TRAIT)
-#define IS_CALLABLE_TYPE(type) (type->category == TYPE_CATEGORY_FUNCTION)
+#define IS_CALLABLE_TYPE(type) (type->category == TYPE_CATEGORY_CALLABLE)
 #define IS_FIELD_TYPE(type) (type->category == TYPE_CATEGORY_FIELD)
 #define IS_METHOD_TYPE(type) (type->category == TYPE_CATEGORY_METHOD)
 #define IS_PLACEHOLDER_TYPE(type) (type->category == TYPE_CATEGORY_PLACEHOLDER)
@@ -31,7 +31,7 @@ typedef enum {
     TYPE_CATEGORY_CLASS,
     TYPE_CATEGORY_METACLASS,
     TYPE_CATEGORY_TRAIT,
-    TYPE_CATEGORY_FUNCTION,
+    TYPE_CATEGORY_CALLABLE,
     TYPE_CATEGORY_FIELD,
     TYPE_CATEGORY_METHOD,
     TYPE_CATEGORY_PLACEHOLDER,

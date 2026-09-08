@@ -222,7 +222,7 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Typ
 
     SymbolItem* item = insertGlobalSymbolTable(vm, name, NULL);
     if (functionType == NULL) {
-        functionType = newCallableTypeInfo(vm->typetab->count + 1, TYPE_CATEGORY_FUNCTION, functionName, returnType);
+        functionType = newCallableTypeInfo(vm->typetab->count + 1, TYPE_CATEGORY_CALLABLE, functionName, returnType);
         functionType->attribute.isAsync = isAsync;
         functionType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 

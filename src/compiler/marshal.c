@@ -528,7 +528,7 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 		marshalDeserializeFormalTypeParams(marshaller, behaviorType->formalTypeParams);
 		return (TypeInfo*)behaviorType;
 	}
-	else if (category == TYPE_CATEGORY_FUNCTION) {
+	else if (category == TYPE_CATEGORY_CALLABLE) {
 		bool isGeneric = marshalDeserializeByte(marshaller) == 1;
 		bool isInitializer = marshalDeserializeByte(marshaller) == 1;
 		bool isLambda = marshalDeserializeByte(marshaller) == 1;

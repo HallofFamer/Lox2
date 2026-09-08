@@ -709,7 +709,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
     if (isGeneric && returnType->type == NULL) {
         returnType->type = findCallableTypeParams(resolver, ast, &returnType->token);
     }
-    CallableTypeInfo* callableType = newCallableTypeInfo(resolver->vm->typetab->count + 1, TYPE_CATEGORY_FUNCTION, emptyString(resolver->vm), returnType->type);
+    CallableTypeInfo* callableType = newCallableTypeInfo(resolver->vm->typetab->count + 1, TYPE_CATEGORY_CALLABLE, emptyString(resolver->vm), returnType->type);
     
     if (callableType != NULL) {
         callableType->attribute.isGeneric = isGeneric;

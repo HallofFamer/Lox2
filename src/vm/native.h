@@ -40,8 +40,8 @@
 #define THROW_EXCEPTION_FMT(klass, message, ...) return OBJ_VAL(throwException(vm, getNativeClass(vm, #klass), message, __VA_ARGS__))
 
 #define NATIVE_TYPE(type) getNativeType(vm, #type)
-#define NATIVE_TYPE_CALLABLE_0(type) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), type, 0)
-#define NATIVE_TYPE_CALLABLE(type, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_FUNCTION, emptyString(vm), type, numParams, __VA_ARGS__)
+#define NATIVE_TYPE_CALLABLE_0(type) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_CALLABLE, emptyString(vm), type, 0)
+#define NATIVE_TYPE_CALLABLE(type, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_CALLABLE, emptyString(vm), type, numParams, __VA_ARGS__)
 #define NATIVE_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), getNativeType(vm, #rawType), numParams, __VA_ARGS__)
 
 ObjClass* defineNativeClass(VM* vm, const char* name);

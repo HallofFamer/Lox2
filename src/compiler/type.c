@@ -159,7 +159,7 @@ FieldTypeInfo* newFieldTypeInfo(int id, ObjString* name, TypeInfo* declaredType,
 MethodTypeInfo* newMethodTypeInfo(int id, ObjString* name, TypeInfo* returnType, bool isAsync, bool isClass, bool isInitializer) {
     MethodTypeInfo* methodType = (MethodTypeInfo*)newTypeInfo(id, sizeof(MethodTypeInfo), TYPE_CATEGORY_METHOD, name, name);
     if (methodType != NULL) {
-        methodType->declaredType = newCallableTypeInfo(-1, TYPE_CATEGORY_FUNCTION, name, returnType);
+        methodType->declaredType = newCallableTypeInfo(-1, TYPE_CATEGORY_CALLABLE, name, returnType);
         methodType->isAsync = isAsync;
         methodType->isClass = isClass;
         methodType->isInitializer = isInitializer;
@@ -840,7 +840,7 @@ static void typeTableOutputCategory(TypeCategory category) {
         case TYPE_CATEGORY_TRAIT:
             printf("trait");
             break;
-        case TYPE_CATEGORY_FUNCTION:
+        case TYPE_CATEGORY_CALLABLE:
             printf("function");
             break;
         case TYPE_CATEGORY_METHOD:
