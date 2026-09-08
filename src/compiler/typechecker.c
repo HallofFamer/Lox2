@@ -430,9 +430,9 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
             TypeEntry* methodEntry = &traitType->methods->entries[j];
             if (methodEntry == NULL || methodEntry->key == NULL) continue;
             MethodTypeInfo* methodType = AS_METHOD_TYPE(methodEntry->value);
-
             TypeInfo* subclassMethodType = typeTableGet(typeChecker->currentClass->type->methods, methodEntry->key);
             CallableTypeInfo* declaredTraitMethodType = methodType->declaredType;
+            
             if (subclassMethodType != NULL && subclassMethodType->shortName != typeChecker->vm->initString) {
                 if (IS_GENERIC_TYPE(supertype)) {
                     declaredTraitMethodType = instantiateGenericMethodType(typeChecker, supertype, (TypeInfo*)declaredTraitMethodType);

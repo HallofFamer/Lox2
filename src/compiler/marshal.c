@@ -489,6 +489,7 @@ static void marshalDeserializeFields(Marshaller* marshaller, BehaviorTypeInfo* b
 		ObjString* fieldName = marshalDeserializeString(marshaller);
 		bool isMutable = marshalDeserializeByte(marshaller) == 1;
 		bool hasInitializer = marshalDeserializeByte(marshaller) == 1;
+		
 		uint8_t index = marshalDeserializeByte(marshaller);
 		TypeInfo* declaredType = marshalDeserializeBaseType(marshaller);
 		typeTableInsertField(behaviorType->fields, fieldName, declaredType, isMutable, hasInitializer);
@@ -550,7 +551,6 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 			TypeInfo* paramType = marshalDeserializeBaseType(marshaller);
 			TypeInfoArrayAdd(callableType->paramTypes, paramType);
 		}
-
 		marshalDeserializeFormalTypeParams(marshaller, callableType->formalTypeParams);
 		return (TypeInfo*)callableType;
 	}

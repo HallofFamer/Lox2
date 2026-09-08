@@ -821,14 +821,6 @@ MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, Calla
     return methodType;
 }
 
-AliasTypeInfo* typeTableInsertAlias(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* targetType) {
-    int id = typetab->count + 1;
-    AliasTypeInfo* aliasType = newAliasTypeInfo(id, shortName, fullName, targetType);
-	aliasType->baseType.hash = hashTypeInfo((TypeInfo*)aliasType);
-    typeTableSet(typetab, fullName, (TypeInfo*)aliasType);
-    return aliasType;
-}
-
 static void typeTableOutputCategory(TypeCategory category) {
     switch (category) {
         case TYPE_CATEGORY_CLASS:

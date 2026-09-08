@@ -170,7 +170,6 @@ TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key);
 BehaviorTypeInfo* typeTableInsertBehavior(TypeTable* typetab, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType);
 FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInfo* declaredType, bool isMutable, bool hasInitializer);
 MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, CallableTypeInfo* declaredType, bool isAsync, bool isClass, bool isInitializer);
-AliasTypeInfo* typeTableInsertAlias(TypeTable* typetab, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
 void typeTableOutput(TypeTable* typetab);
 
 bool isEqualType(TypeInfo* type, TypeInfo* type2);
