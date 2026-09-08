@@ -14,7 +14,7 @@ void printNumber(num) {
 }
 printNumber(5)
 
-void sumNumbers(Number a, Number b) { 
+Number sumNumbers(Number a, Number b) { 
     return a 
         + b
 }

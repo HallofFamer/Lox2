@@ -2,8 +2,8 @@ namespace test.features
 
 class Complex { 
 
-    val Number real
-    val Number imaginary
+    var Number real
+    var Number imaginary
 
     __init__(Number real, Number imaginary){ 
         this.real = real

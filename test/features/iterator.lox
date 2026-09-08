@@ -11,7 +11,7 @@ class IterableObject with TIterable<Object> {
         this.fields[name] = value
     }
 
-    TIterator<Object> iterator() {
+    TIterator iterator() {
         return this.fields.iterator()
     }
 
