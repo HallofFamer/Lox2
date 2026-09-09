@@ -817,7 +817,7 @@ static AliasTypeInfo* insertAliasType(Resolver* resolver, Ast* ast) {
     }
 
 	TypeInfo* targetType = getAliasTargetType(typeDef->type);
-    AliasTypeInfo* aliasType = newAliasTypeInfo(resolver->vm->typetab->count + 1, alias, alias, targetType);
+    AliasTypeInfo* aliasType = newAliasTypeInfo(-1, alias, alias, targetType);
     aliasType->baseType.hash = hashTypeInfo((TypeInfo*)aliasType);
     typeTableSet(resolver->vm->typetab, alias, (TypeInfo*)aliasType);
 	insertUserDefinedTypeIntoModule(resolver->vm, resolver->vm->currentModule, (TypeInfo*)aliasType, false);

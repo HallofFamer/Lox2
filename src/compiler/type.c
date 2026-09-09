@@ -735,6 +735,7 @@ bool typeTableSet(TypeTable* typetab, ObjString* key, TypeInfo* value) {
     if (entry->key != NULL) return false;
     typetab->count++;
 
+	value->id = typetab->count;
     entry->key = key;
     entry->value = value;
     return true;
