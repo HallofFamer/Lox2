@@ -593,6 +593,28 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     else ast->type = type;
 }
 
+static void deriveCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
+	Ast* callee = astGetChild(ast, 0);
+	Ast* args = astGetChild(ast, 1);
+	if (callee->type == NULL || !IS_CALLABLE_TYPE(callee->type)) return;
+    GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, functionType->baseType.shortName, functionType->baseType.fullName, (TypeInfo*)functionType);
+	Ast* typeParams = NULL;
+
+    for (int i = 0; i < functionType->formalTypeParams->count; i++) {
+		TypeInfo* formalParamType = functionType->formalTypeParams->elements[i];
+		for (int j = 0; j < functionType->paramTypes->count; j++) {
+			TypeInfo* paramType = functionType->paramTypes->elements[j];
+			if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
+				Ast* arg = astGetChild(args, j);
+                TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
+                break;
+			}
+		}
+	}
+    
+    callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
+}
+
 static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
     Ast* callee = astGetChild(ast, 0);
     if (callee->type == NULL) return;
