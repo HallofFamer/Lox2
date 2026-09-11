@@ -795,7 +795,7 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
 		return existingGenericType;
 	}
 
-    GenericTypeInfo* genericType = newGenericTypeInfo(resolver->vm->typetab->count + 1, rawType->shortName, rawType->fullName, rawType);
+    GenericTypeInfo* genericType = newGenericTypeInfo(-1, rawType->shortName, rawType->fullName, rawType);
     if (genericType != NULL) {
         Ast* typeParams = astGetChild(ast, 0);
         for (int i = 0; i < typeParams->children->count; i++) {

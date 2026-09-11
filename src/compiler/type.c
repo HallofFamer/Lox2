@@ -268,6 +268,11 @@ static char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullN
     
     if (callableType->formalTypeParams->count > 0) {
         callableName[length++] = '<';
+		if (callableType->attribute.isReified) {
+			memcpy(callableName + length, "reified ", 8);
+			length += 8;
+		}
+
         for (int i = 0; i < callableType->formalTypeParams->count; i++) {
             TypeInfo* formalType = callableType->formalTypeParams->elements[i];
             if (i > 0) {
