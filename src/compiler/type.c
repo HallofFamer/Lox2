@@ -806,7 +806,7 @@ TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
 }
 
 BehaviorTypeInfo* typeTableInsertBehavior(TypeTable* typetab, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType) {
-    int id = typetab->count + 1;
+	int id = typetab->count + 1;
     BehaviorTypeInfo* behaviorType = newBehaviorTypeInfo(id, category, shortName, fullName, superclassType);
 	behaviorType->baseType.hash = hashTypeInfo((TypeInfo*)behaviorType);
     typeTableSet(typetab, fullName, (TypeInfo*)behaviorType);
@@ -821,7 +821,8 @@ FieldTypeInfo* typeTableInsertField(TypeTable* typetab, ObjString* name, TypeInf
 }
 
 MethodTypeInfo* typeTableInsertMethod(TypeTable* typetab, ObjString* name, CallableTypeInfo* declaredType, bool isAsync, bool isClass, bool isInitializer) {
-    MethodTypeInfo* methodType = newMethodTypeInfoWithDeclaredType(-1, name, declaredType, isAsync, isClass, isInitializer);
+	int id = typetab->count + 1;
+    MethodTypeInfo* methodType = newMethodTypeInfoWithDeclaredType(id, name, declaredType, isAsync, isClass, isInitializer);
     typeTableSet(typetab, name, (TypeInfo*)methodType);
     return methodType;
 }

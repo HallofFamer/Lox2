@@ -661,6 +661,8 @@ static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
 	char* returnTypeName = returnType->type != NULL ? createTypeName(returnType->type, true) : "dynamic";
 	size_t returnTypeLength = strlen(returnTypeName);
 
+    memcpy(callableName + length, " fun", 4);
+    length += 4;
 	memcpy(callableName, returnTypeName, returnTypeLength);
 	length += returnTypeLength;
 	callableName[length++] = '(';
@@ -697,7 +699,7 @@ static CallableTypeInfo* findCallableTypeFromAst(Resolver* resolver, Ast* ast) {
 	return AS_CALLABLE_TYPE(typeTableGet(resolver->vm->typetab, fullCallableName));
 }
 
-static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isGeneric, bool isLambda, bool isVariadic, bool isVoid) {
+static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool isAsync, bool isGeneric, bool isLambda, bool isReified, bool isVariadic, bool isVoid) {
     CallableTypeInfo* existingCallableType = findCallableTypeFromAst(resolver, ast);
     if (existingCallableType != NULL) {
 		ast->type = (TypeInfo*)existingCallableType;
@@ -714,6 +716,7 @@ static CallableTypeInfo* insertCallableType(Resolver* resolver, Ast* ast, bool i
     if (callableType != NULL) {
         callableType->attribute.isGeneric = isGeneric;
         callableType->attribute.isLambda = isLambda;
+		callableType->attribute.isReified = isReified;
         callableType->attribute.isVariadic = isVariadic;
         callableType->attribute.isVoid = isVoid;
 
@@ -946,7 +949,6 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     Ast* params = astGetChild(ast, 1);
     params->symtab = ast->symtab;
     resolveChild(resolver, ast, 1);
-    CallableTypeInfo* callableType = insertCallableType(resolver, ast, functionResolver.attribute.isAsync, functionResolver.attribute.isGeneric, functionResolver.attribute.isLambda, functionResolver.attribute.isVariadic, functionResolver.attribute.isVoid);
 
     Ast* blk = astGetChild(ast, 2);
     blk->symtab = ast->symtab;
@@ -956,8 +958,8 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
 
     if (functionResolver.isReified) {
         ast->attribute.isReified = true;
-		callableType->attribute.isReified = true;
     }
+    insertCallableType(resolver, ast, functionResolver.attribute.isAsync, functionResolver.attribute.isGeneric, functionResolver.attribute.isLambda, ast->attribute.isReified, functionResolver.attribute.isVariadic, functionResolver.attribute.isVoid);
     endFunctionResolver(resolver);
 }
 
@@ -1254,7 +1256,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
     if (ast->attribute.isFunction) {
         resolveChild(resolver, ast, 0);
         resolveChild(resolver, ast, 1);
-        insertCallableType(resolver, ast, false, ast->attribute.isGeneric, false, ast->attribute.isVariadic, ast->attribute.isVoid);
+        insertCallableType(resolver, ast, ast->attribute.isAsync, ast->attribute.isGeneric, ast->attribute.isLambda, ast->attribute.isReified, ast->attribute.isVariadic, ast->attribute.isVoid);
     }
     else if (ast->attribute.isGeneric) {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createStringFromToken(resolver->vm, ast->token));
