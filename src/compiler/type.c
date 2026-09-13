@@ -806,8 +806,7 @@ TypeInfo* typeTableMethodLookup(TypeInfo* type, ObjString* key) {
 }
 
 BehaviorTypeInfo* typeTableInsertBehavior(TypeTable* typetab, TypeCategory category, ObjString* shortName, ObjString* fullName, TypeInfo* superclassType) {
-	int id = typetab->count + 1;
-    BehaviorTypeInfo* behaviorType = newBehaviorTypeInfo(id, category, shortName, fullName, superclassType);
+    BehaviorTypeInfo* behaviorType = newBehaviorTypeInfo(-1, category, shortName, fullName, superclassType);
 	behaviorType->baseType.hash = hashTypeInfo((TypeInfo*)behaviorType);
     typeTableSet(typetab, fullName, (TypeInfo*)behaviorType);
     return behaviorType;
