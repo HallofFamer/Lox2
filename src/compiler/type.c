@@ -838,7 +838,7 @@ static void typeTableOutputCategory(TypeCategory category) {
             printf("trait");
             break;
         case TYPE_CATEGORY_CALLABLE:
-            printf("function");
+            printf("callable");
             break;
         case TYPE_CATEGORY_METHOD:
             printf("method");
@@ -937,27 +937,27 @@ static void typeTableOutputBehavior(BehaviorTypeInfo* behavior) {
     }
 }
 
-static void typeTableOutputCallable(CallableTypeInfo* function) {
+static void typeTableOutputCallable(CallableTypeInfo* callable) {
     printf("    signature: ");
-    if (function->returnType == NULL) printf("dynamic ");
-    else if (function->attribute.isVoid) printf("void ");
-    else printf("%s ", function->returnType->shortName->chars);
+    if (callable->returnType == NULL) printf("dynamic ");
+    else if (callable->attribute.isVoid) printf("void ");
+    else printf("%s ", callable->returnType->shortName->chars);
     printf("fun");
 
-	if (function->formalTypeParams != NULL && function->formalTypeParams->count > 0) {
-        printf("<%s", function->formalTypeParams->elements[0]->shortName->chars);
-        for (int i = 1; i < function->formalTypeParams->count; i++) {
-            printf(", %s", function->formalTypeParams->elements[i]->shortName->chars);
+	if (callable->formalTypeParams != NULL && callable->formalTypeParams->count > 0) {
+        printf("<%s", callable->formalTypeParams->elements[0]->shortName->chars);
+        for (int i = 1; i < callable->formalTypeParams->count; i++) {
+            printf(", %s", callable->formalTypeParams->elements[i]->shortName->chars);
         }
         printf(">");
     }
 
     printf("(");
-    if (function->paramTypes != NULL && function->paramTypes->count > 0) {
-		if (function->attribute.isVariadic) printf("..");
-        printf("%s", (function->paramTypes->elements[0] != NULL) ? function->paramTypes->elements[0]->shortName->chars : "dynamic");
-        for (int i = 1; i < function->paramTypes->count; i++) {
-            printf(", %s", (function->paramTypes->elements[i] != NULL) ? function->paramTypes->elements[i]->shortName->chars : "dynamic");
+    if (callable->paramTypes != NULL && callable->paramTypes->count > 0) {
+		if (callable->attribute.isVariadic) printf("..");
+        printf("%s", (callable->paramTypes->elements[0] != NULL) ? callable->paramTypes->elements[0]->shortName->chars : "dynamic");
+        for (int i = 1; i < callable->paramTypes->count; i++) {
+            printf(", %s", (callable->paramTypes->elements[i] != NULL) ? callable->paramTypes->elements[i]->shortName->chars : "dynamic");
         }
     } 
     printf(")\n");

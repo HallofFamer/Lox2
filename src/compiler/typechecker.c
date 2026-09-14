@@ -596,6 +596,15 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     else ast->type = type;
 }
 
+static Ast* initCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast) {
+    ast->attribute.isGeneric = true;
+    ast->kind = AST_EXPR_TYPE;
+    Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
+    typeParams->symtab = ast->symtab;
+    astAppendChild(ast, typeParams);
+    return typeParams;
+}
+ 
 static void deriveCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
 	Ast* callee = astGetChild(ast, 0);
 	Ast* args = astGetChild(ast, 1);
@@ -609,13 +618,7 @@ static void deriveCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, Calla
 			TypeInfo* paramType = functionType->paramTypes->elements[j];
 			if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
 				Ast* arg = astGetChild(args, j);
-                if (typeParams == NULL) {
-                    callee->attribute.isGeneric = true;
-                    callee->kind = AST_EXPR_TYPE;
-                    typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
-                    typeParams->symtab = callee->symtab;
-                    astAppendChild(callee, typeParams);
-                }
+                if (typeParams == NULL) typeParams = initCalleeTypeParameters(typeChecker, callee);
 
                 if (arg->type != NULL) {
 					Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(arg->type->shortName->chars));
