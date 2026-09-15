@@ -605,6 +605,12 @@ static Ast* initCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast) {
     return typeParams;
 }
  
+static void deriveCalleeTypeParameter(TypeChecker* typeChecker, Ast* ast, Ast* typeParams) {
+    Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(ast->type->shortName->chars));
+    typeParam->symtab = typeParams->symtab;
+    astAppendChild(typeParams, typeParam);
+}
+
 static void deriveCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
 	Ast* callee = astGetChild(ast, 0);
 	Ast* args = astGetChild(ast, 1);
@@ -619,12 +625,7 @@ static void deriveCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, Calla
 			if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
 				Ast* arg = astGetChild(args, j);
                 if (typeParams == NULL) typeParams = initCalleeTypeParameters(typeChecker, callee);
-
-                if (arg->type != NULL) {
-					Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(arg->type->shortName->chars));
-					typeParam->symtab = typeParams->symtab;
-                    astAppendChild(typeParams, typeParam);
-                }
+                if (arg->type != NULL) deriveCalleeTypeParameter(typeChecker, arg, typeParams);
                 TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
                 break;
 			}

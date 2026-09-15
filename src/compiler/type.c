@@ -472,6 +472,7 @@ static uint32_t hashCallableTypeInfo(TypeInfo* type, uint32_t initialHash) {
     
     if (callableType->attribute.isGeneric) {
 		hash = mixHashTypeName(hash, "<", 1);
+		if (callableType->attribute.isReified) hash = mixHashTypeName(hash, "reified ", 8);
         for (int i = 0; i < callableType->formalTypeParams->count; i++) {
             if (i > 0) hash = mixHashTypeName(hash, ", ", 2);
             TypeInfo* formalType = callableType->formalTypeParams->elements[i];
