@@ -889,7 +889,7 @@ static void typeTableOutputMethods(TypeTable* methods) {
             printf("%s", entry->key->chars);
 
             if (method->declaredType->formalTypeParams != NULL && method->declaredType->formalTypeParams->count > 0) {
-                printf("<%s", method->declaredType->formalTypeParams->elements[0]->shortName->chars);
+                printf("<%s%s", method->declaredType->attribute.isReified ? "reified " : "", method->declaredType->formalTypeParams->elements[0]->shortName->chars);
                 for (int i = 1; i < method->declaredType->formalTypeParams->count; i++) {
                     printf(", %s", method->declaredType->formalTypeParams->elements[i]->shortName->chars);
                 }

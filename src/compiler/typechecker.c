@@ -596,7 +596,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     else ast->type = type;
 }
 
-static Ast* initCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast) {
+static Ast* synthesizeCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast) {
     ast->attribute.isGeneric = true;
     ast->kind = AST_EXPR_TYPE;
     Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
@@ -605,13 +605,13 @@ static Ast* initCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast) {
     return typeParams;
 }
  
-static void deriveCalleeTypeParameter(TypeChecker* typeChecker, Ast* ast, Ast* typeParams) {
+static void synthesizeCalleeTypeParameter(TypeChecker* typeChecker, Ast* ast, Ast* typeParams) {
     Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(ast->type->shortName->chars));
     typeParam->symtab = typeParams->symtab;
     astAppendChild(typeParams, typeParam);
 }
 
-static void deriveCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
+static void inferCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
 	Ast* callee = astGetChild(ast, 0);
 	Ast* args = astGetChild(ast, 1);
 	if (callee->type == NULL || !IS_CALLABLE_TYPE(callee->type)) return;
@@ -624,8 +624,8 @@ static void deriveCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, Calla
 			TypeInfo* paramType = functionType->paramTypes->elements[j];
 			if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
 				Ast* arg = astGetChild(args, j);
-                if (typeParams == NULL) typeParams = initCalleeTypeParameters(typeChecker, callee);
-                if (arg->type != NULL) deriveCalleeTypeParameter(typeChecker, arg, typeParams);
+                if (typeParams == NULL) typeParams = synthesizeCalleeTypeParameters(typeChecker, callee);
+                if (arg->type != NULL) synthesizeCalleeTypeParameter(typeChecker, arg, typeParams);
                 TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
                 break;
 			}
@@ -660,7 +660,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL || item->type == NULL || !IS_CALLABLE_TYPE(item->type)) return;
         CallableTypeInfo* functionType = AS_CALLABLE_TYPE(item->type);
-        if (hasGenericParameters(item->type)) deriveCalleeTypeParameters(typeChecker, ast, functionType);
+        if (hasGenericParameters(item->type)) inferCalleeTypeParameters(typeChecker, ast, functionType);
         CallableTypeInfo* callableType = hasGenericParameters(item->type) ? instantiateGenericFunctionType(typeChecker, callee->type) : functionType;
 
         sprintf_s(calleeDesc, UINT8_MAX, "Function %s", name->chars);
