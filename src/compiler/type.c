@@ -841,6 +841,9 @@ static void typeTableOutputCategory(TypeCategory category) {
         case TYPE_CATEGORY_CALLABLE:
             printf("callable");
             break;
+        case TYPE_CATEGORY_FIELD:
+			printf("field");
+			break;
         case TYPE_CATEGORY_METHOD:
             printf("method");
             break;

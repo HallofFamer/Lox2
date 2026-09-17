@@ -562,6 +562,45 @@ static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableT
     else ast->type = callableType->returnType;
 }
 
+static Ast* synthesizeCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast) {
+    ast->attribute.isGeneric = true;
+    ast->kind = AST_EXPR_TYPE;
+    Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
+    typeParams->symtab = ast->symtab;
+    astAppendChild(ast, typeParams);
+    return typeParams;
+}
+
+static void synthesizeCalleeTypeParameter(TypeChecker* typeChecker, Ast* ast, Ast* typeParams) {
+    Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(ast->type->shortName->chars));
+    typeParam->symtab = typeParams->symtab;
+    astAppendChild(typeParams, typeParam);
+}
+
+static void inferCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
+    Ast* callee = astGetChild(ast, 0);
+    Ast* args = astGetChild(ast, 1);
+    if (callee->type == NULL || !IS_CALLABLE_TYPE(callee->type)) return;
+    GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, functionType->baseType.shortName, functionType->baseType.fullName, (TypeInfo*)functionType);
+    Ast* typeParams = NULL;
+
+    for (int i = 0; i < functionType->formalTypeParams->count; i++) {
+        TypeInfo* formalParamType = functionType->formalTypeParams->elements[i];
+        for (int j = 0; j < functionType->paramTypes->count; j++) {
+            TypeInfo* paramType = functionType->paramTypes->elements[j];
+            if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
+                Ast* arg = astGetChild(args, j);
+                if (typeParams == NULL) typeParams = synthesizeCalleeTypeParameters(typeChecker, callee);
+                if (arg->type != NULL) synthesizeCalleeTypeParameter(typeChecker, arg, typeParams);
+                TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
+                break;
+            }
+        }
+    }
+
+    callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
+}
+
 static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
 	Ast* callee = astGetChild(ast, 0);
     Ast* args = astGetChild(ast, 1);
@@ -584,7 +623,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
             ast->type = callee->type;
         }
         else {
-            GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, type->shortName, type->fullName, type);
+			GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, type->shortName, type->fullName, type);
             for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
                 TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
             }
@@ -594,45 +633,6 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
         }
     }
     else ast->type = type;
-}
-
-static Ast* synthesizeCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast) {
-    ast->attribute.isGeneric = true;
-    ast->kind = AST_EXPR_TYPE;
-    Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
-    typeParams->symtab = ast->symtab;
-    astAppendChild(ast, typeParams);
-    return typeParams;
-}
- 
-static void synthesizeCalleeTypeParameter(TypeChecker* typeChecker, Ast* ast, Ast* typeParams) {
-    Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(ast->type->shortName->chars));
-    typeParam->symtab = typeParams->symtab;
-    astAppendChild(typeParams, typeParam);
-}
-
-static void inferCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
-	Ast* callee = astGetChild(ast, 0);
-	Ast* args = astGetChild(ast, 1);
-	if (callee->type == NULL || !IS_CALLABLE_TYPE(callee->type)) return;
-    GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, functionType->baseType.shortName, functionType->baseType.fullName, (TypeInfo*)functionType);
-    Ast* typeParams = NULL;
-
-    for (int i = 0; i < functionType->formalTypeParams->count; i++) {
-		TypeInfo* formalParamType = functionType->formalTypeParams->elements[i];
-		for (int j = 0; j < functionType->paramTypes->count; j++) {
-			TypeInfo* paramType = functionType->paramTypes->elements[j];
-			if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
-				Ast* arg = astGetChild(args, j);
-                if (typeParams == NULL) typeParams = synthesizeCalleeTypeParameters(typeChecker, callee);
-                if (arg->type != NULL) synthesizeCalleeTypeParameter(typeChecker, arg, typeParams);
-                TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
-                break;
-			}
-		}
-	}
-    
-    callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
 }
 
 static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
