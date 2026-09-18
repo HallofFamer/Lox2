@@ -3,7 +3,7 @@ namespace test.std
 /*
 val obj = Object()
 /* more comments */
-println(obj.toString())
+println(obj)
 */
 
 println("Testing nil...")

@@ -1,0 +1,58 @@
+namespace test.types
+using clox.std.collection.Array
+using clox.std.util.UUID
+
+String identity<T>(T arg) { 
+    return arg.toString()
+}
+
+val id = UUID()
+println("Testing inferred generic type parameters for unreified generic functions: ")
+println(identity<UUID>(id))
+println(identity(id))
+
+
+String identityName<T>(T arg) {
+    return "${T}(${arg})"
+}
+
+println("Testing inferred generic type parameters for reified generic functions: ")
+println(identityName<UUID>(id))
+println(identityName(id))
+
+class IdentityBox<T> {
+
+    val T value
+    
+    __init__(T value) {
+        this.value = value
+    }
+    
+    String identity() { 
+        return this.value.toString()
+    }
+}
+
+println("\nTesting inferred generic type parameters for unreified generic classes: ")
+val identityBox = IdentityBox<UUID>(id)
+println(identityBox.identity())
+val identityBox2 = IdentityBox(id)
+println(identityBox2.identity())
+
+class IdentityNameBox<T> {
+
+    val T value
+    
+    __init__(T value) {
+        this.value = value
+    }
+    
+    String identityName() { 
+        return "${T}(${this.value})"
+    }
+}
+
+val identityNameBox = IdentityNameBox<UUID>(id)
+println(identityNameBox.identityName())
+val identityNameBox2 = IdentityNameBox(id)
+println(identityNameBox2.identityName())

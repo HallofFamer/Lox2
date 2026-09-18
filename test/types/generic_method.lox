@@ -67,6 +67,7 @@ class ProductRepository extends GenericRepository<Product> {
 	}
 }
 
+println("Testing generic method invocation...")
 val products = Array<Product>()
 products.add(Product(1, "Laptop", 999.99))
 products.add(Product(2, "Smartphone", 499.49))

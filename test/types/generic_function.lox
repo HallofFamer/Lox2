@@ -30,12 +30,11 @@ Box<String> createBox() {
     return Box<String>("Hello, World!")
 }
 
+println("Testing generic function call...")
 val id = identity<UUID>(UUID())
 println(id.toString())
-//throw Exception(id)
 
 val box = createBox()
 println(box)
 val content = box.getContent()
 println(content)
-//throw content

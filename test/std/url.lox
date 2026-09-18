@@ -11,7 +11,7 @@ println("URL2 is ${url2}")
 println("URL2 is absolute: ${url2.isAbsolute()}")
 println("URL2 is relative: ${url2.isRelative()}\n")
 
-val url3 = URL.parse("http://www.example.com:8080/dir/file.html?var=val&var2=val2#anchor")
+val url3 = URL.parse("https://www.example.com:8080/dir/file.html?var=val&var2=val2#anchor")
 println("Parsing url3: ")
 println("Scheme: ${url3.scheme}")
 println("Host: ${url3.host}")
