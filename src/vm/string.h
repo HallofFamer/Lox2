@@ -23,6 +23,7 @@ ObjString* formattedStringPerma(VM* vm, const char* format, ...);
 ObjString* capitalizeString(VM* vm, ObjString* string);
 ObjString* concatenateString(VM* vm, ObjString* string, ObjString* string2, const char* separator);
 ObjString* decapitalizeString(VM* vm, ObjString* string);
+ObjString* replaceChar(VM* vm, ObjString* original, char target, char replace);
 ObjString* replaceString(VM* vm, ObjString* original, ObjString* target, ObjString* replace);
 ObjString* replaceAllString(VM* vm, ObjString* original, ObjString* target, ObjString* replace);
 ObjString* reverseString(VM* vm, ObjString* original);

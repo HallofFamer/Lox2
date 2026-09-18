@@ -143,6 +143,8 @@ ObjString* astCreateQualifiedName(VM* vm, Ast* ast);
 Ast* astGetTypeParameters(Ast* ast);
 bool astHasTypeParameters(Ast* ast);
 bool astHasInstantiatedTypeParameters(Ast* ast);
+Ast* astInitTypeParameters(Ast* ast);
+Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type);
 void astOutput(Ast* ast, int indentLevel);
 
 static inline AstNodeCategory astNodeCategory(AstNodeKind kind) {

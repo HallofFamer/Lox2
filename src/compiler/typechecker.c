@@ -562,15 +562,6 @@ static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableT
     else ast->type = callableType->returnType;
 }
 
-static Ast* synthesizeCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast) {
-    ast->attribute.isGeneric = true;
-    ast->kind = AST_EXPR_TYPE;
-    Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
-    typeParams->symtab = ast->symtab;
-    astAppendChild(ast, typeParams);
-    return typeParams;
-}
-
 static void synthesizeCalleeTypeParameter(TypeChecker* typeChecker, Ast* ast, Ast* typeParams) {
     Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(ast->type->shortName->chars));
     typeParam->symtab = typeParams->symtab;
@@ -590,8 +581,8 @@ static void inferCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, Callab
             TypeInfo* paramType = functionType->paramTypes->elements[j];
             if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
                 Ast* arg = astGetChild(args, j);
-                if (typeParams == NULL) typeParams = synthesizeCalleeTypeParameters(typeChecker, callee);
-                if (arg->type != NULL) synthesizeCalleeTypeParameter(typeChecker, arg, typeParams);
+                if (typeParams == NULL) typeParams = astInitTypeParameters(callee);
+                if (arg->type != NULL) if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
                 TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
                 break;
             }
@@ -617,8 +608,8 @@ static void inferBehaviorTypeParameters(TypeChecker* typeChecker, Ast* ast, Call
             TypeInfo* paramType = initializerType->paramTypes->elements[j];
             if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
                 Ast* arg = astGetChild(args, j);
-                if (typeParams == NULL) typeParams = synthesizeCalleeTypeParameters(typeChecker, callee);
-                if (arg->type != NULL) synthesizeCalleeTypeParameter(typeChecker, arg, typeParams);
+                if (typeParams == NULL) typeParams = astInitTypeParameters(callee);
+				if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
                 TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
                 break;
             }
@@ -657,7 +648,7 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
                     TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
                 }
 
-                callee->type = AS_GENERIC_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)calleeType));
+                callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
             }
             ast->type = (TypeInfo*)callee->type;
         }

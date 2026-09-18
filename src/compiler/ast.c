@@ -179,6 +179,22 @@ bool astHasInstantiatedTypeParameters(Ast* ast) {
     return hasInstantiatedParams;
 }
 
+Ast* astInitTypeParameters(Ast* ast) {
+    ast->attribute.isGeneric = true;
+    ast->kind = AST_EXPR_TYPE;
+    Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
+    typeParams->symtab = ast->symtab;
+    astAppendChild(ast, typeParams);
+    return typeParams;
+}
+
+Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
+    Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(type->shortName->chars));
+    typeParam->symtab = ast->symtab;
+    astAppendChild(ast, typeParam);
+    return typeParam;
+}
+
 static void astOutputIndent(int indentLevel) {
     printf("%*s", indentLevel * 2, "");
 }

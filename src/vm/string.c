@@ -180,6 +180,16 @@ ObjString* decapitalizeString(VM* vm, ObjString* string) {
     return takeString(vm, heapChars, (int)string->length);
 }
 
+ObjString* replaceChar(VM* vm, ObjString* original, char target, char replace) {
+	char* heapChars = ALLOCATE(char, (size_t)original->length + 1, original->obj.generation);
+	for (int i = 0; i < original->length; i++) {
+		if (original->chars[i] == target) heapChars[i] = replace;
+		else heapChars[i] = original->chars[i];
+	}
+    heapChars[original->length] = '\0';
+	return takeString(vm, heapChars, (int)original->length);
+}
+
 ObjString* replaceString(VM* vm, ObjString* original, ObjString* target, ObjString* replace) {
     if (original->length == 0 || target->length == 0 || original->length < target->length) return original;
     int startIndex = searchString(vm, original, target, 0);

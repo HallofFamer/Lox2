@@ -48,7 +48,7 @@ static void repl(VM* vm) {
 
 static void runFile(VM* vm, const char* filePath) {
     ObjString* path = newString(vm, filePath);
-    vm->currentModule = newModule(vm, path);
+    vm->currentModule = newModule(vm, replaceChar(vm, path, '\\', '/'));
     vm->currentModule->isRoot = true;
 
     char* source = readFile(filePath);
