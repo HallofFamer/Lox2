@@ -601,6 +601,33 @@ static void inferCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, Callab
     callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
 }
 
+static void inferBehaviorTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* initializerType) {
+    Ast* callee = astGetChild(ast, 0);
+    Ast* args = astGetChild(ast, 1);
+    if (callee->type == NULL || !IS_BEHAVIOR_TYPE(callee->type)) return;
+
+	ObjString* classFullName = getClassNameFromMetaclass(typeChecker->vm, callee->type->fullName);
+	BehaviorTypeInfo* classBehaviorType = AS_BEHAVIOR_TYPE(typeTableGet(typeChecker->vm->typetab, classFullName));
+    GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, classBehaviorType->baseType.shortName, classBehaviorType->baseType.fullName, (TypeInfo*)classBehaviorType);
+    Ast* typeParams = NULL;
+
+    for (int i = 0; i < classBehaviorType->formalTypeParams->count; i++) {
+        TypeInfo* formalParamType = classBehaviorType->formalTypeParams->elements[i];
+        for (int j = 0; j < initializerType->paramTypes->count; j++) {
+            TypeInfo* paramType = initializerType->paramTypes->elements[j];
+            if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
+                Ast* arg = astGetChild(args, j);
+                if (typeParams == NULL) typeParams = synthesizeCalleeTypeParameters(typeChecker, callee);
+                if (arg->type != NULL) synthesizeCalleeTypeParameter(typeChecker, arg, typeParams);
+                TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
+                break;
+            }
+        }
+    }
+
+    callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
+}
+
 static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
 	Ast* callee = astGetChild(ast, 0);
     Ast* args = astGetChild(ast, 1);
@@ -623,13 +650,16 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
             ast->type = callee->type;
         }
         else {
-			GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, type->shortName, type->fullName, type);
-            for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
-                TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
-            }
+			if (initializerType != NULL) inferBehaviorTypeParameters(typeChecker, ast, AS_METHOD_TYPE(initializerType)->declaredType);
+            else {
+                GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, type->shortName, type->fullName, type);
+                for (int i = 0; i < AS_BEHAVIOR_TYPE(type)->formalTypeParams->count; i++) {
+                    TypeInfoArrayAdd(calleeType->actualTypeParams, NULL);
+                }
 
-			calleeType = AS_GENERIC_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)calleeType));
-            ast->type = (TypeInfo*)calleeType;
+                callee->type = AS_GENERIC_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)calleeType));
+            }
+            ast->type = (TypeInfo*)callee->type;
         }
     }
     else ast->type = type;

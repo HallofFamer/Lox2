@@ -274,7 +274,6 @@ static void marshalSerializeTypeTable(Marshaller* marshaller, ByteArray* bytes, 
 		}
 	}
 
-	// Serialize the fields and methods of each behavior type in the type table
 	for (int i = 0; i < module->typeTab->capacity; i++) {
 		TypeEntry* entry = &module->typeTab->entries[i];
 		if (entry != NULL && entry->key != NULL) {
@@ -672,7 +671,6 @@ static bool marshalDeserializeModule(Marshaller* marshaller) {
 
 	bool dependenciesModified = marshalDeserializeDependencies(marshaller);
 	if (dependenciesModified && marshaller->vm->config.marshalTryRecompile) return false;
-
 	marshalDeserializeTypeTable(marshaller);
 	ObjFunction* function = marshalDeserializeFunction(marshaller);
 	ABORT_IFNULL(function, "Failed to deserialize program for file \"%s\".\n", marshaller->module->path->chars);

@@ -1363,7 +1363,9 @@ static void compileIfStatement(Compiler* compiler, Ast* ast) {
     patchJump(compiler, thenJump);
     emitByte(compiler, OP_POP);
 
-    if (astNumChild(ast) > 2) compileChild(compiler, ast, 2);
+    if (astNumChild(ast) > 2) {
+        compileChild(compiler, ast, 2);
+    }
     patchJump(compiler, elseJump);
 }
 

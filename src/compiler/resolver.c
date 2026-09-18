@@ -191,7 +191,8 @@ static void insertTypeParams(Resolver* resolver, ObjString* className) {
 
         for (int i = 0; i < genericBehaviorType->formalTypeParams->count; i++) {
             TypeInfo* typeParam = genericBehaviorType->formalTypeParams->elements[i];
-            insertSymbol(resolver, syntheticToken(typeParam->shortName->chars), SYMBOL_CATEGORY_PLACEHOLDER, SYMBOL_STATE_ACCESSED, typeType, false);
+			Token token = syntheticToken(typeParam->shortName->chars);
+            insertSymbol(resolver, token, SYMBOL_CATEGORY_PLACEHOLDER, SYMBOL_STATE_ACCESSED, typeType, false);
         }
     }
 }

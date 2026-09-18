@@ -680,7 +680,9 @@ void freeTypeTable(TypeTable* typetab, bool freeTypes) {
         }
     }
 
-    if (typetab->entries != NULL) free(typetab->entries);
+    if (typetab->entries != NULL) {
+        free(typetab->entries);
+    }
     free(typetab);
 }
 
@@ -710,6 +712,7 @@ static void typeTableAdjustCapacity(TypeTable* typetab, int capacity) {
         TypeEntry* entry = &typetab->entries[i];
         if (entry->key == NULL) continue;
         TypeEntry* dest = findTypeEntry(entries, capacity, entry->key);
+        
         dest->key = entry->key;
         dest->value = entry->value;
         typetab->count++;
