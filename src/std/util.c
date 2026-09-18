@@ -284,6 +284,7 @@ LOX_METHOD(DateTime, __add__) {
     ASSERT_ARG_COUNT("DateTime::+(duration)", 1);
     ASSERT_ARG_INSTANCE_OF("DateTime::+(duration)", 0, clox.std.util.Duration);
     ObjInstance* self = AS_INSTANCE(receiver);
+
     double timestamp = dateTimeObjGetTimestamp(vm, self) + durationTotalSeconds(vm, AS_INSTANCE(args[0]));
     ObjInstance* dateTime = dateTimeObjFromTimestamp(vm, self->obj.klass, timestamp);
     RETURN_OBJ(dateTime);
@@ -293,6 +294,7 @@ LOX_METHOD(DateTime, __subtract__) {
     ASSERT_ARG_COUNT("DateTime::-(duration)", 1);
     ASSERT_ARG_INSTANCE_OF("DateTime::-(duration)", 0, clox.std.util.Duration);
     ObjInstance* self = AS_INSTANCE(receiver);
+    
     double timestamp = dateTimeObjGetTimestamp(vm, self) - durationTotalSeconds(vm, AS_INSTANCE(args[0]));
     ObjInstance* dateTime = dateTimeObjFromTimestamp(vm, self->obj.klass, timestamp);
     RETURN_OBJ(dateTime);

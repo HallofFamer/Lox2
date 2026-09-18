@@ -2061,6 +2061,14 @@ LOX_METHOD(Type, isPlaceholder) {
     RETURN_BOOL(IS_PLACEHOLDER_TYPE(self->typeInfo));
 }
 
+LOX_METHOD(Type, isReified) {
+	ASSERT_ARG_COUNT("Type::isReified()", 0);
+	ObjType* self = AS_TYPE(receiver);
+	if (IS_BEHAVIOR_TYPE(self->typeInfo)) RETURN_BOOL(AS_BEHAVIOR_TYPE(self->typeInfo)->isReified);
+	else if (IS_CALLABLE_TYPE(self->typeInfo)) RETURN_BOOL(AS_CALLABLE_TYPE(self->typeInfo)->attribute.isReified);
+	else RETURN_FALSE;
+}
+
 LOX_METHOD(Type, isTrait) {
     ASSERT_ARG_COUNT("Type::isTrait()", 0);
     ObjType* self = AS_TYPE(receiver);
@@ -2306,6 +2314,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->typeClass, Type, isMetaclass, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isNative, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isPlaceholder, 0, NATIVE_TYPE(Bool));
+	DEF_METHOD(vm->typeClass, Type, isReified, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isTrait, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isVoid, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, methods, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Method)));

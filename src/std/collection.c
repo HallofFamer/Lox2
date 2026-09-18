@@ -754,6 +754,19 @@ LOX_METHOD(Array, removeAt) {
     RETURN_VAL(element);
 }
 
+LOX_METHOD(Array, reverse) {
+	ASSERT_ARG_COUNT("Array::reverse()", 0);
+	ObjArray* self = AS_ARRAY(receiver);
+	ObjArray* array = newArray(vm);
+	push(vm, OBJ_VAL(array));
+
+	for (int i = self->elements.count - 1; i >= 0; i--) {
+		valueArrayWrite(vm, &array->elements, self->elements.values[i]);
+	}
+    pop(vm);
+	RETURN_OBJ(array);
+}
+
 LOX_METHOD(Array, select) {
     ASSERT_ARG_COUNT("Array::select(closure)", 1);
     ASSERT_ARG_TCALLABLE("Array::select(closure)", 0);
@@ -2421,6 +2434,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->arrayClass, Array, reject, 1, NATIVE_TYPE(clox.std.collection.Array), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(Bool), 1, NATIVE_TYPE(E)));
     DEF_METHOD(vm->arrayClass, Array, remove, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(E));
     DEF_METHOD(vm->arrayClass, Array, removeAt, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Int));
+	DEF_METHOD(vm->arrayClass, Array, reverse, 0, NATIVE_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->arrayClass, Array, select, 1, NATIVE_TYPE(clox.std.collection.Array), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(Bool), 1, NATIVE_TYPE(E)));
     DEF_METHOD(vm->arrayClass, Array, slice, 2, NATIVE_TYPE(clox.std.collection.Array), NATIVE_TYPE(Int), NATIVE_TYPE(Int));
     DEF_METHOD(vm->arrayClass, Array, toString, 0, NATIVE_TYPE(String));

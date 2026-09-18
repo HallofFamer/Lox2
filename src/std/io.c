@@ -254,8 +254,12 @@ LOX_METHOD(File, lastAccessed) {
 LOX_METHOD(File, lastModified) {
     ASSERT_ARG_COUNT("File::lastModified()", 0);
     ObjFile* self = AS_FILE(receiver);
-    if (!loadFileStat(vm, self)) THROW_EXCEPTION(clox.std.io.FileNotFoundException, "Cannot get file last modified date because it does not exist.");
-    ObjInstance* lastModified = dateTimeObjFromTimestamp(vm, getNativeClass(vm, "clox.std.util.DateTime"), (double)self->fsStat->statbuf.st_mtim.tv_sec);
+    if (!loadFileStat(vm, self)) {
+        THROW_EXCEPTION(clox.std.io.FileNotFoundException, "Cannot get file last modified date because it does not exist.");
+    }
+    
+	ObjClass* dateTimeClass = getNativeClass(vm, "clox.std.util.DateTime");
+    ObjInstance* lastModified = dateTimeObjFromTimestamp(vm, dateTimeClass, (double)self->fsStat->statbuf.st_mtim.tv_sec);
     RETURN_OBJ(lastModified);
 }
 

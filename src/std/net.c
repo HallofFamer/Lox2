@@ -257,6 +257,7 @@ LOX_METHOD(HTTPClient, patch) {
     if (curl == NULL) THROW_EXCEPTION(clox.std.net.HTTPException, "Failed to initiate a PATCH request using CURL.");
     CURLResponse curlResponse;
     CURLcode curlCode = httpSendRequest(vm, url, HTTP_PATCH, data, curl, &curlResponse);
+    
     if (curlCode != CURLE_OK) {
         curl_easy_cleanup(curl);
         THROW_EXCEPTION(clox.std.net.HTTPException, "Failed to complete a PATCH request from URL.");
