@@ -619,6 +619,26 @@ static void inferBehaviorTypeParameters(TypeChecker* typeChecker, Ast* ast, Call
     callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
 }
 
+static Ast* inferMethodTypeParameters(TypeChecker* typeChecker, Ast* ast, MethodTypeInfo* methodType) {
+	if (methodType == NULL) return NULL;
+	CallableTypeInfo* declaredType = AS_CALLABLE_TYPE(methodType->declaredType);
+	Ast* typeParams = NULL;
+	
+    for (int i = 0; i < declaredType->formalTypeParams->count; i++) {
+		TypeInfo* formalParamType = declaredType->formalTypeParams->elements[i];
+		for (int j = 0; j < declaredType->paramTypes->count; j++) {
+			TypeInfo* paramType = declaredType->paramTypes->elements[j];
+			if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
+				Ast* arg = astGetChild(ast, j);
+				if (typeParams == NULL) typeParams = astInitTypeParameters(ast);
+				if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
+				break;
+			}
+		}
+	}
+	return typeParams;
+}
+
 static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
 	Ast* callee = astGetChild(ast, 0);
     Ast* args = astGetChild(ast, 1);
@@ -718,10 +738,10 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
         if (methodType->declaredType->formalTypeParams->count > 0) {
             if (astNumChild(ast) < 3) {
                 typeError(typeChecker, "Method %s::%s needs to be invoked with generic type parameters.", receiver->type->shortName->chars, methodName->chars);
-				return;
+                return;
             }
 
-			Ast* typeParams = astLastChild(ast);
+            Ast* typeParams = astLastChild(ast);
             if (typeParams->children->count != methodType->declaredType->formalTypeParams->count) {
                 typeError(typeChecker, "Method %s::%s expects to receive %d generic type parameters but gets %d.", receiver->type->shortName->chars,
                     methodName->chars, methodType->declaredType->formalTypeParams->count, typeParams->children->count);
