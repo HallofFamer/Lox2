@@ -306,6 +306,7 @@ static char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullN
             callableName[length++] = ',';
             callableName[length++] = ' ';
         }
+
         if (paramType != NULL) {
             char* paramTypeName = createTypeName(paramType, isFullName);
             size_t paramTypeLength = strlen(paramTypeName);

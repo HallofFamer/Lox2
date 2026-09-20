@@ -619,8 +619,8 @@ static void inferBehaviorTypeParameters(TypeChecker* typeChecker, Ast* ast, Call
     callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
 }
 
-static Ast* inferMethodTypeParameters(TypeChecker* typeChecker, Ast* ast, MethodTypeInfo* methodType) {
-	if (methodType == NULL) return NULL;
+static void inferMethodTypeParameters(TypeChecker* typeChecker, Ast* ast, MethodTypeInfo* methodType) {
+	if (methodType == NULL) return;
 	CallableTypeInfo* declaredType = AS_CALLABLE_TYPE(methodType->declaredType);
 	Ast* typeParams = NULL;
 	
@@ -636,7 +636,6 @@ static Ast* inferMethodTypeParameters(TypeChecker* typeChecker, Ast* ast, Method
 			}
 		}
 	}
-	return typeParams;
 }
 
 static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
@@ -737,11 +736,10 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
 		TypeInfo* declaredType = (TypeInfo*)methodType->declaredType;
         if (methodType->declaredType->formalTypeParams->count > 0) {
             if (astNumChild(ast) < 3) {
-                typeError(typeChecker, "Method %s::%s needs to be invoked with generic type parameters.", receiver->type->shortName->chars, methodName->chars);
-                return;
+				inferMethodTypeParameters(typeChecker, ast, methodType);
             }
-
             Ast* typeParams = astLastChild(ast);
+
             if (typeParams->children->count != methodType->declaredType->formalTypeParams->count) {
                 typeError(typeChecker, "Method %s::%s expects to receive %d generic type parameters but gets %d.", receiver->type->shortName->chars,
                     methodName->chars, methodType->declaredType->formalTypeParams->count, typeParams->children->count);
