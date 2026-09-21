@@ -391,6 +391,7 @@ static char* createAliasTypeName(AliasTypeInfo* aliasType, bool isFullName) {
                 aliasName[length++] = ',';
                 aliasName[length++] = ' ';
             }
+            
             if (paramType != NULL) {
                 char* paramTypeName = createTypeName(paramType, isFullName);
                 size_t paramTypeLength = strlen(paramTypeName);
