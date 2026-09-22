@@ -954,7 +954,7 @@ static void typeTableOutputCallable(CallableTypeInfo* callable) {
     printf("fun");
 
 	if (callable->formalTypeParams != NULL && callable->formalTypeParams->count > 0) {
-        printf("<%s", callable->formalTypeParams->elements[0]->shortName->chars);
+        printf("<%s%s", callable->attribute.isReified ? "reified " : "", callable->formalTypeParams->elements[0]->shortName->chars);
         for (int i = 1; i < callable->formalTypeParams->count; i++) {
             printf(", %s", callable->formalTypeParams->elements[i]->shortName->chars);
         }

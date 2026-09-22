@@ -562,12 +562,6 @@ static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableT
     else ast->type = callableType->returnType;
 }
 
-static void synthesizeCalleeTypeParameter(TypeChecker* typeChecker, Ast* ast, Ast* typeParams) {
-    Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(ast->type->shortName->chars));
-    typeParam->symtab = typeParams->symtab;
-    astAppendChild(typeParams, typeParam);
-}
-
 static void inferCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
     Ast* callee = astGetChild(ast, 0);
     Ast* args = astGetChild(ast, 1);
