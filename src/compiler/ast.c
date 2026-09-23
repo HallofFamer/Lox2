@@ -181,7 +181,7 @@ bool astHasInstantiatedTypeParameters(Ast* ast) {
 
 Ast* astInitTypeParameters(Ast* ast) {
     ast->attribute.isGeneric = true;
-    ast->kind = AST_EXPR_TYPE;
+    if(ast->kind == AST_EXPR_VARIABLE) ast->kind = AST_EXPR_TYPE;
     Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
     typeParams->symtab = ast->symtab;
     astAppendChild(ast, typeParams);
@@ -191,6 +191,7 @@ Ast* astInitTypeParameters(Ast* ast) {
 Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
     Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(type->shortName->chars));
     typeParam->symtab = ast->symtab;
+    typeParam->type = type;
     astAppendChild(ast, typeParam);
     return typeParam;
 }

@@ -631,14 +631,15 @@ static void inferBehaviorTypeParameters(TypeChecker* typeChecker, Ast* ast, Call
 static void inferMethodTypeParameters(TypeChecker* typeChecker, Ast* ast, MethodTypeInfo* methodType) {
 	if (methodType == NULL) return;
 	CallableTypeInfo* declaredType = AS_CALLABLE_TYPE(methodType->declaredType);
-	Ast* typeParams = NULL;
+    Ast* args = astGetChild(ast, 1);
+    Ast* typeParams = NULL;
 	
     for (int i = 0; i < declaredType->formalTypeParams->count; i++) {
 		TypeInfo* formalParamType = declaredType->formalTypeParams->elements[i];
 		for (int j = 0; j < declaredType->paramTypes->count; j++) {
 			TypeInfo* paramType = declaredType->paramTypes->elements[j];
 			if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
-				Ast* arg = astGetChild(ast, j);
+				Ast* arg = astGetChild(args, j);
 				if (typeParams == NULL) typeParams = astInitTypeParameters(ast);
 				if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
 				break;
