@@ -562,7 +562,7 @@ static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableT
     else ast->type = callableType->returnType;
 }
 
-static void inferCalleeTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
+static void inferFunctionTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
     Ast* callee = astGetChild(ast, 0);
     Ast* args = astGetChild(ast, 1);
     if (callee->type == NULL || !IS_CALLABLE_TYPE(callee->type)) return;
@@ -710,7 +710,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         SymbolItem* item = symbolTableLookup(ast->symtab, name);
         if (item == NULL || item->type == NULL || !IS_CALLABLE_TYPE(item->type)) return;
         CallableTypeInfo* functionType = AS_CALLABLE_TYPE(item->type);
-        if (hasGenericParameters(item->type)) inferCalleeTypeParameters(typeChecker, ast, functionType);
+        if (hasGenericParameters(item->type)) inferFunctionTypeParameters(typeChecker, ast, functionType);
         CallableTypeInfo* callableType = hasGenericParameters(item->type) ? instantiateGenericFunctionType(typeChecker, callee->type) : functionType;
 
         sprintf_s(calleeDesc, UINT8_MAX, "Function %s", name->chars);
