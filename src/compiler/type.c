@@ -1031,7 +1031,10 @@ static bool isCallableEqualType(CallableTypeInfo* type, CallableTypeInfo* type2)
         if (!isEqualType(type->paramTypes->elements[i], type2->paramTypes->elements[i])) return false;
     }
 
-    if (type->formalTypeParams->count != type2->formalTypeParams->count) return false;
+    if (type->formalTypeParams->count != type2->formalTypeParams->count) {
+        return false;
+    }
+
 	for (int i = 0; i < type->formalTypeParams->count; i++) {
         if (!isEqualType(type->formalTypeParams->elements[i], type2->formalTypeParams->elements[i])) return false;
     }

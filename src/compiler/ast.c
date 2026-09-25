@@ -188,8 +188,29 @@ Ast* astInitTypeParameters(Ast* ast) {
     return typeParams;
 }
 
+static Ast* astGenerateBehaviorTypeParameter(Ast* ast, BehaviorTypeInfo* type) {
+	Ast* typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(type->baseType.shortName->chars));
+	if (type->formalTypeParams->count > 0) {
+		Ast* typeParams = astInitTypeParameters(typeParam);
+		for (int i = 0; i < type->formalTypeParams->count; i++) {
+			TypeInfo* formalParamType = type->formalTypeParams->elements[i];
+			Ast* formalParamAst = emptyAst(AST_EXPR_TYPE, syntheticToken(formalParamType->shortName->chars));
+			astAppendChild(typeParams, formalParamAst);
+			formalParamAst->symtab = typeParams->symtab;
+		}
+	}
+	return typeParam;
+}
+
 Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
-    Ast* typeParam = emptyAst(AST_EXPR_VARIABLE, syntheticToken(type->shortName->chars));
+	if (type == NULL) return NULL;
+    Ast* typeParam = NULL;
+
+    if (IS_BEHAVIOR_TYPE(type)) {
+        typeParam = astGenerateBehaviorTypeParameter(ast, AS_BEHAVIOR_TYPE(type));
+    }
+    else return NULL;
+    
     typeParam->symtab = ast->symtab;
     typeParam->type = type;
     astAppendChild(ast, typeParam);
