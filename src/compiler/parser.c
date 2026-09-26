@@ -852,6 +852,11 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
                 return genericType(parser);
             }
         }
+        else if (previousTokenKind(parser) == TOKEN_KIND_IDENTIFIER && (currentTokenKind(parser) == TOKEN_KIND_FUN)) {
+            free(left);
+            resetIndex(parser, index - 2, previous2, true);
+            return genericType(parser);
+        }
         else if (nextTokenKind(parser) != TOKEN_KIND_CLASS && nextTokenKind(parser) != TOKEN_KIND_FUN && nextTokenKind(parser) != TOKEN_KIND_GREATER && nextTokenKind(parser) != TOKEN_KIND_LESS) {
             resetIndex(parser, index, current, false);
             break;
@@ -935,7 +940,10 @@ static Ast* functionParameters(Parser* parser) {
 
 static Ast* lambdaParameters(Parser* parser) {
     Token token = previousToken(parser);
-    if (!match(parser, TOKEN_KIND_PIPE)) return emptyAst(AST_LIST_VAR, token);
+    if (!match(parser, TOKEN_KIND_PIPE)) {
+        return emptyAst(AST_LIST_VAR, token);
+    }
+
     Ast* params = parameterList(parser, true, token);
     consume(parser, TOKEN_KIND_PIPE, "Expect '|' after lambda parameters.");
     return params;

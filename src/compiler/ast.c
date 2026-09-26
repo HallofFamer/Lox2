@@ -202,6 +202,20 @@ static Ast* astGenerateBehaviorTypeParameter(Ast* ast, BehaviorTypeInfo* type) {
 	return typeParam;
 }
 
+static Ast* astGenerateGenericTypeParameter(Ast* ast, GenericTypeInfo* type) {
+	Ast* typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(type->baseType.shortName->chars));
+	if (type->actualTypeParams->count > 0) {
+		Ast* typeParams = astInitTypeParameters(typeParam);
+		for (int i = 0; i < type->actualTypeParams->count; i++) {
+			TypeInfo* actualParamType = type->actualTypeParams->elements[i];
+			Ast* actualParamAst = emptyAst(AST_EXPR_TYPE, syntheticToken(actualParamType->shortName->chars));
+			astAppendChild(typeParams, actualParamAst);
+			actualParamAst->symtab = typeParams->symtab;
+		}
+	}
+	return typeParam;
+}
+
 Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
 	if (type == NULL) return NULL;
     Ast* typeParam = NULL;
@@ -209,6 +223,9 @@ Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
     if (IS_BEHAVIOR_TYPE(type)) {
         typeParam = astGenerateBehaviorTypeParameter(ast, AS_BEHAVIOR_TYPE(type));
     }
+	else if (IS_GENERIC_TYPE(type)) {
+		typeParam = astGenerateGenericTypeParameter(ast, AS_GENERIC_TYPE(type));
+	}
     else return NULL;
     
     typeParam->symtab = ast->symtab;
