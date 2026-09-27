@@ -202,6 +202,27 @@ static Ast* astGenerateBehaviorTypeParameter(Ast* ast, BehaviorTypeInfo* type) {
 	return typeParam;
 }
 
+static Ast* astGenerateCallableTypeParameter(Ast* ast, CallableTypeInfo* type) {
+    Ast* returnType = emptyAst(AST_EXPR_TYPE, syntheticToken(type->returnType->shortName->chars));
+    if (type->attribute.isVoid) {
+        returnType->attribute.isVoid = true;
+    }
+
+	Ast* paramTypes = emptyAst(AST_LIST_EXPR, emptyToken());
+	if (type->paramTypes->count > 0) {
+		for (int i = 0; i < type->paramTypes->count; i++) {
+			TypeInfo* paramType = type->paramTypes->elements[i];
+			Ast* paramTypeAst = emptyAst(AST_EXPR_TYPE, syntheticToken(paramType->shortName->chars));
+			astAppendChild(paramTypes, paramTypeAst);
+			paramTypeAst->symtab = paramTypes->symtab;
+		}
+	}
+    
+	Ast* typeParam = newAst(AST_EXPR_TYPE, syntheticToken("fun"), 2, returnType, paramTypes);
+    typeParam->attribute.isFunction = true;
+	return typeParam;
+}
+
 static Ast* astGenerateGenericTypeParameter(Ast* ast, GenericTypeInfo* type) {
 	Ast* typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(type->baseType.shortName->chars));
 	if (type->actualTypeParams->count > 0) {
@@ -223,9 +244,12 @@ Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
     if (IS_BEHAVIOR_TYPE(type)) {
         typeParam = astGenerateBehaviorTypeParameter(ast, AS_BEHAVIOR_TYPE(type));
     }
-	else if (IS_GENERIC_TYPE(type)) {
-		typeParam = astGenerateGenericTypeParameter(ast, AS_GENERIC_TYPE(type));
-	}
+    else if (IS_CALLABLE_TYPE(type)) {
+        typeParam = astGenerateCallableTypeParameter(ast, AS_CALLABLE_TYPE(type));
+    }
+    else if (IS_GENERIC_TYPE(type)) {
+        typeParam = astGenerateGenericTypeParameter(ast, AS_GENERIC_TYPE(type));
+    }
     else return NULL;
     
     typeParam->symtab = ast->symtab;

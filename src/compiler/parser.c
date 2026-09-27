@@ -852,7 +852,7 @@ static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
                 return genericType(parser);
             }
         }
-        else if (previousTokenKind(parser) == TOKEN_KIND_IDENTIFIER && (currentTokenKind(parser) == TOKEN_KIND_FUN)) {
+        else if ((previousTokenKind(parser) == TOKEN_KIND_IDENTIFIER || previousTokenKind(parser) == TOKEN_KIND_VOID) && (currentTokenKind(parser) == TOKEN_KIND_FUN)) {
             free(left);
             resetIndex(parser, index - 2, previous2, true);
             return genericType(parser);
