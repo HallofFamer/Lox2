@@ -1030,8 +1030,31 @@ LOX_METHOD(Collection, toArray) {
         valueArrayWrite(vm, &array->elements, element);
         hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
     }
+
     pop(vm);
     RETURN_OBJ(array);
+}
+
+LOX_METHOD(Collection, toSet) {
+	ASSERT_ARG_COUNT("Collection::toSet()", 0);
+	Value addMethod = getObjMethod(vm, receiver, "add");
+	Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+	Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+	
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+	Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+	Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+	
+    ObjInstance* set = newInstance(vm, getNativeClass(vm, "clox.std.collection.Set"));
+	push(vm, OBJ_VAL(set));
+	while (AS_BOOL(hasNext)) {
+		Value element = callReentrantMethod(vm, iterator, currentValueMethod);
+		callReentrantMethod(vm, set, addMethod, element);
+		hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+	}
+
+	pop(vm);
+	RETURN_OBJ(set);
 }
 
 LOX_METHOD(Dictionary, __init__) {
@@ -2403,6 +2426,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(collectionClass, Collection, reject, 1, NATIVE_TYPE(clox.std.collection.Collection), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(Bool), 1, NATIVE_TYPE(E)));
     DEF_METHOD(collectionClass, Collection, select, 1, NATIVE_TYPE(clox.std.collection.Collection), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(Bool), 1, NATIVE_TYPE(E)));
     DEF_METHOD(collectionClass, Collection, toArray, 0, NATIVE_TYPE(clox.std.collection.Array));
+	DEF_METHOD(collectionClass, Collection, toSet, 0, NATIVE_TYPE(clox.std.collection.Set));
 
     bindSuperclass(vm, listClass, collectionClass);
     DEF_METHOD(listClass, List, eachIndex, 1, NATIVE_TYPE(void), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(void), 2, NATIVE_TYPE(Int), NATIVE_TYPE(E)));

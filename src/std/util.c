@@ -576,6 +576,7 @@ LOX_METHOD(Promise, then) {
         ObjPromise* thenPromise = promiseWithThen(vm, self);
         Value thenChain = getObjMethod(vm, receiver, "thenChain");
         ObjBoundMethod* thenChainMethod = newBoundMethod(vm, receiver, thenChain);
+        
         promiseCapture(vm, self, "thenPromise", OBJ_VAL(thenPromise));
         promiseCapture(vm, self, "onFulfilled", args[0]);
         promisePushHandler(vm, self, OBJ_VAL(thenChainMethod), thenPromise);

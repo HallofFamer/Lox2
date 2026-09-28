@@ -1659,6 +1659,13 @@ LOX_METHOD(String, reverse) {
     RETURN_OBJ(reverseString(vm, self));
 }
 
+LOX_METHOD(String, reverseIterator) {
+	ASSERT_ARG_COUNT("String::reverseIterator()", 0);
+	ObjString* self = AS_STRING(receiver);
+	ObjString* reversed = reverseString(vm, self);
+    RETURN_OBJ(newIterator(vm, reversed, getNativeClass(vm, "clox.std.lang.StringIterator")));
+}
+
 LOX_METHOD(String, split) {
     ASSERT_ARG_COUNT("String::split(delimiter)", 1);
     ASSERT_ARG_TYPE("String::split(delimiter)", 0, String);
@@ -2195,7 +2202,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->objectClass, Object, objectID, 0, NATIVE_TYPE(Number));
     DEF_METHOD(vm->objectClass, Object, setField, 2, NATIVE_TYPE(void), NATIVE_TYPE(String), NATIVE_TYPE(Object));
     DEF_METHOD(vm->objectClass, Object, toString, 0, NATIVE_TYPE(String));
-    DEF_OPERATOR(vm->objectClass, Object, ==, __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
+    DEF_OPERATOR(vm->objectClass, Object, == , __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
 
     inheritSuperclass(vm, behaviorClass, vm->objectClass);
     behaviorClass->classType = OBJ_CLASS;
@@ -2302,25 +2309,25 @@ void registerLangPackage(VM* vm) {
     DEF_INTERCEPTOR(vm->typeClass, Type, INTERCEPTOR_INIT, __init__, 2, NATIVE_TYPE(Type), NATIVE_TYPE(String), NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, fullName, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, getMethod, 1, NATIVE_TYPE(Method), NATIVE_TYPE(String));
-	DEF_METHOD(vm->typeClass, Type, getTypeParameters, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Type)));
+    DEF_METHOD(vm->typeClass, Type, getTypeParameters, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Type)));
     DEF_METHOD(vm->typeClass, Type, hasMethod, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(String));
-	DEF_METHOD(vm->typeClass, Type, hasTypeParameters, 0, NATIVE_TYPE(Bool));
-	DEF_METHOD(vm->typeClass, Type, isAlias, 0, NATIVE_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, hasTypeParameters, 0, NATIVE_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isAlias, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isBehavior, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isCallable, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isClass, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isGeneric, 0, NATIVE_TYPE(Bool));
-	DEF_METHOD(vm->typeClass, Type, isHigherOrder, 0, NATIVE_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isHigherOrder, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isMetaclass, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isNative, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isPlaceholder, 0, NATIVE_TYPE(Bool));
-	DEF_METHOD(vm->typeClass, Type, isReified, 0, NATIVE_TYPE(Bool));
+    DEF_METHOD(vm->typeClass, Type, isReified, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isTrait, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, isVoid, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->typeClass, Type, methods, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Method)));
     DEF_METHOD(vm->typeClass, Type, name, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, shortName, 0, NATIVE_TYPE(String));
-	DEF_METHOD(vm->typeClass, Type, toBehavior, 0, NATIVE_TYPE(Behavior));
+    DEF_METHOD(vm->typeClass, Type, toBehavior, 0, NATIVE_TYPE(Behavior));
     DEF_METHOD(vm->typeClass, Type, toString, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->typeClass, Type, toType, 0, NATIVE_TYPE(Type));
     DEF_METHOD(vm->typeClass, Type, traits, 0, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(Trait)));
@@ -2340,9 +2347,9 @@ void registerLangPackage(VM* vm) {
 
     DEF_METHOD(comparableTrait, TComparable, compareTo, 1, NATIVE_TYPE(Int), NATIVE_TYPE(TComparable));
     DEF_METHOD(comparableTrait, TComparable, equals, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
-    DEF_OPERATOR(comparableTrait, TComparable, ==, __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
-    DEF_OPERATOR(comparableTrait, TComparable, >, __greater__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
-    DEF_OPERATOR(comparableTrait, TComparable, <, __less__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
+    DEF_OPERATOR(comparableTrait, TComparable, == , __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
+    DEF_OPERATOR(comparableTrait, TComparable, > , __greater__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
+    DEF_OPERATOR(comparableTrait, TComparable, < , __less__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
 
     bindSuperclass(vm, vm->numberClass, vm->objectClass);
     bindTrait(vm, vm->numberClass, comparableTrait);
@@ -2375,13 +2382,13 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->numberClass, Number, tan, 0, NATIVE_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, toInt, 0, NATIVE_TYPE(Int));
     DEF_METHOD(vm->numberClass, Number, toString, 0, NATIVE_TYPE(String));
-    DEF_OPERATOR(vm->numberClass, Number, ==, __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
-    DEF_OPERATOR(vm->numberClass, Number, >, __greater__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
-    DEF_OPERATOR(vm->numberClass, Number, <, __less__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, == , __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
+    DEF_OPERATOR(vm->numberClass, Number, > , __greater__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, < , __less__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
     DEF_OPERATOR(vm->numberClass, Number, +, __add__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, -, __subtract__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, *, __multiply__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
-    DEF_OPERATOR(vm->numberClass, Number, /, __divide__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
+    DEF_OPERATOR(vm->numberClass, Number, / , __divide__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, %, __modulo__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
 
     ObjClass* numberMetaclass = vm->numberClass->obj.klass;
@@ -2464,8 +2471,9 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->stringClass, String, iterator, 0, NATIVE_TYPE(StringIterator));
     DEF_METHOD(vm->stringClass, String, length, 0, NATIVE_TYPE(Int));
     DEF_METHOD(vm->stringClass, String, replace, 2, NATIVE_TYPE(String), NATIVE_TYPE(String), NATIVE_TYPE(String));
-	DEF_METHOD(vm->stringClass, String, replaceAll, 2, NATIVE_TYPE(String), NATIVE_TYPE(String), NATIVE_TYPE(String));
+    DEF_METHOD(vm->stringClass, String, replaceAll, 2, NATIVE_TYPE(String), NATIVE_TYPE(String), NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, reverse, 0, NATIVE_TYPE(String));
+	DEF_METHOD(vm->stringClass, String, reverseIterator, 0, NATIVE_TYPE(StringIterator));
     DEF_METHOD(vm->stringClass, String, split, 1, NATIVE_TYPE_GENERIC(clox.std.collection.Array, 1, NATIVE_TYPE(String)), NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, startsWith, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(String));
     DEF_METHOD(vm->stringClass, String, subString, 2, NATIVE_TYPE(String), NATIVE_TYPE(Int), NATIVE_TYPE(Int));
@@ -2512,7 +2520,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->functionClass, Function, isVariadic, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->functionClass, Function, name, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->functionClass, Function, toString, 0, NATIVE_TYPE(String));
-	DEF_METHOD(vm->functionClass, Function, typeParamCount, 0, NATIVE_TYPE(Int));
+    DEF_METHOD(vm->functionClass, Function, typeParamCount, 0, NATIVE_TYPE(Int));
     DEF_METHOD(vm->functionClass, Function, upvalueCount, 0, NATIVE_TYPE(Int));
     DEF_OPERATOR(vm->functionClass, Function, (), __invoke__, -1, NATIVE_TYPE(Object), NATIVE_TYPE(Object));
 

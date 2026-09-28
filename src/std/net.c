@@ -272,6 +272,7 @@ LOX_METHOD(HTTPClient, patchAsync) {
     ASSERT_ARG_COUNT_ASYNC("HTTPClient::patchAsync(url, data)", 2);
     ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::patchAsync(url, data)", 0, clox.std.lang.String, clox.std.net.URL);
     ASSERT_ARG_TYPE_ASYNC("HTTPClient::patchAsync(url, data)", 1, Dictionary);
+    
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
     ObjDictionary* data = AS_DICTIONARY(args[1]);
@@ -308,6 +309,7 @@ LOX_METHOD(HTTPClient, postAsync) {
     ASSERT_ARG_COUNT_ASYNC("HTTPClient::postAsync(url, data)", 2);
     ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::postAsync(url, data)", 0, clox.std.lang.String, clox.std.net.URL);
     ASSERT_ARG_TYPE_ASYNC("HTTPClient::postAsync(url, data)", 1, Dictionary);
+    
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
     ObjDictionary* data = AS_DICTIONARY(args[1]);
@@ -344,6 +346,7 @@ LOX_METHOD(HTTPClient, putAsync) {
     ASSERT_ARG_COUNT_ASYNC("HTTPClient::putAsync(url, data)", 2);
     ASSERT_ARG_INSTANCE_OF_ANY_ASYNC("HTTPClient::putAsync(url, data)", 0, clox.std.lang.String, clox.std.net.URL);
     ASSERT_ARG_TYPE_ASYNC("HTTPClient::putAsync(url, data)", 1, Dictionary);
+    
     ObjInstance* self = AS_INSTANCE(receiver);
     ObjString* url = httpRawURL(vm, args[0]);
     ObjDictionary* data = AS_DICTIONARY(args[1]);

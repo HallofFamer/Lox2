@@ -623,8 +623,11 @@ LOX_METHOD(FileWriteStream, writeString) {
         ObjString* string = AS_STRING(args[0]);
         uv_buf_t uvBuf = uv_buf_init(string->chars, string->length);
         uv_fs_write(vm->eventLoop, file->fsWrite, (uv_file)file->fsOpen->result, &uvBuf, 1, file->offset, NULL);
+        
         int numWrite = uv_fs_write(vm->eventLoop, file->fsWrite, (uv_file)file->fsOpen->result, &uvBuf, 1, file->offset, NULL);
-        if (numWrite > 0) file->offset += string->length;
+        if (numWrite > 0) {
+            file->offset += string->length;
+        }
     }
     RETURN_NIL;
 }
