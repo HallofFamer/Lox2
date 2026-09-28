@@ -977,6 +977,7 @@ static void typeTableOutputGeneric(GenericTypeInfo* generic) {
     if (generic->actualTypeParams != NULL && generic->actualTypeParams->count > 0) {
 		TypeInfo* actualTypeParam = generic->actualTypeParams->elements[0];
         printf("    actual type parameters: %s", actualTypeParam != NULL ? actualTypeParam->shortName->chars : "dynamic");
+        
         for (int i = 0; i < generic->actualTypeParams->count; i++) {
 			actualTypeParam = generic->actualTypeParams->elements[i];
             printf(", %s", (actualTypeParam != NULL) ? actualTypeParam->shortName->chars : "dynamic");
@@ -990,6 +991,7 @@ static void typeTableOutputAlias(AliasTypeInfo* alias) {
         printf("    target: %s\n", alias->targetType->shortName->chars);
 		if (alias->formalTypeParams != NULL && alias->formalTypeParams->count > 0) {
             printf("    formal type parameters: %s", alias->formalTypeParams->elements[0]->shortName->chars);
+            
             for (int i = 1; i < alias->formalTypeParams->count; i++) {
                 printf(", %s", alias->formalTypeParams->elements[i]->shortName->chars);
             }

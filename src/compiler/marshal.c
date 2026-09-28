@@ -550,6 +550,7 @@ static TypeInfo* marshalDeserializeTypeInfo(Marshaller* marshaller) {
 			TypeInfo* paramType = marshalDeserializeBaseType(marshaller);
 			TypeInfoArrayAdd(callableType->paramTypes, paramType);
 		}
+
 		marshalDeserializeFormalTypeParams(marshaller, callableType->formalTypeParams);
 		return (TypeInfo*)callableType;
 	}

@@ -968,8 +968,10 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     Token name = ast->token;
     ClassResolver classResolver;
     initClassResolver(resolver, &classResolver, name, resolver->currentFunction->scopeDepth + 1, type);
+
     int childIndex = 0;
-    beginScope(resolver, ast, (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS);
+	SymbolScope scope = (type == BEHAVIOR_TRAIT) ? SYMBOL_SCOPE_TRAIT : SYMBOL_SCOPE_CLASS;
+    beginScope(resolver, ast, scope);
     
     if (astHasTypeParameters(ast)) {
         classResolver.isGeneric = true;

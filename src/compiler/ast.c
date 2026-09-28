@@ -237,6 +237,20 @@ static Ast* astGenerateGenericTypeParameter(Ast* ast, GenericTypeInfo* type) {
 	return typeParam;
 }
 
+static Ast* astGenerateAliasTypeParameter(Ast* ast, AliasTypeInfo* type) {
+	Ast* typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(type->baseType.shortName->chars));
+	if (type->formalTypeParams->count > 0) {
+		Ast* typeParams = astInitTypeParameters(typeParam);
+		for (int i = 0; i < type->formalTypeParams->count; i++) {
+			TypeInfo* formalParamType = type->formalTypeParams->elements[i];
+			Ast* formalParamAst = emptyAst(AST_EXPR_TYPE, syntheticToken(formalParamType->shortName->chars));
+			astAppendChild(typeParams, formalParamAst);
+			formalParamAst->symtab = typeParams->symtab;
+		}
+	}
+	return typeParam;
+}
+
 Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
 	if (type == NULL) return NULL;
     Ast* typeParam = NULL;
@@ -250,6 +264,9 @@ Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
     else if (IS_GENERIC_TYPE(type)) {
         typeParam = astGenerateGenericTypeParameter(ast, AS_GENERIC_TYPE(type));
     }
+	else if (IS_ALIAS_TYPE(type)) {
+        typeParam = astGenerateAliasTypeParameter(ast, AS_ALIAS_TYPE(type));
+	}
     else return NULL;
     
     typeParam->symtab = ast->symtab;
