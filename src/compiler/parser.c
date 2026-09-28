@@ -820,50 +820,84 @@ static Ast* lambda(Parser* parser, Token token, bool canAssign) {
 
 static Ast* lessThan(Parser* parser, Token token, Ast* left, bool canAssign) {
     if (left->token.kind != TOKEN_KIND_IDENTIFIER) return binary(parser, token, left, canAssign);
-    int index = parser->index;
-    Token current = parser->current;
-    Token previous2 = parser->tokens->elements[index - 2];
+    int parserIndex = parser->index;
+    Token parserCurrent = parser->current;
+    Token parserPrevious2 = parser->tokens->elements[parserIndex - 2];
     int genericDepth = 1;
 
-    do {
-        advance(parser);
+    /* Non-destructive lookahead that mirrors the original advance()/match
+       loop but uses a local index into the tokens array so parser state is
+       unchanged unless we decide to parse a generic/callable. */
+    int currentIndex = parserIndex;
+    for (;;) {
+        /* advance once (skip new lines like advance does) */
+        currentIndex++;
+        while (parser->tokens->elements[currentIndex].kind == TOKEN_KIND_NEW_LINE) currentIndex++;
 
-        if (currentTokenKind(parser) == TOKEN_KIND_COMMA) {
-            advance(parser);
+        Token currentToken = parser->tokens->elements[currentIndex];
+
+        /* previous token skipping newlines */
+        int previousIndex = currentIndex - 1;
+        if (parser->tokens->elements[previousIndex].kind == TOKEN_KIND_NEW_LINE) previousIndex--;
+        Token previousToken = parser->tokens->elements[previousIndex];
+
+        if (currentToken.kind == TOKEN_KIND_COMMA) {
+            /* original code advanced once more on comma */
+            currentIndex++;
+            while (parser->tokens->elements[currentIndex].kind == TOKEN_KIND_NEW_LINE) currentIndex++;
             continue;
         }
-        else if (previousTokenKind(parser) != TOKEN_KIND_IDENTIFIER && previousTokenKind(parser) != TOKEN_KIND_VOID) {
-            resetIndex(parser, index, current, false);
+        else if (previousToken.kind != TOKEN_KIND_IDENTIFIER && previousToken.kind != TOKEN_KIND_VOID) {
+            /* not a generic/callable sequence */
             break;
         }
-        else if (currentTokenKind(parser) == TOKEN_KIND_LESS) {
+
+        /* check for callable: previous identifier and next token is 'fun' */
+        int nextIndex = currentIndex + 1;
+        while (parser->tokens->elements[nextIndex].kind == TOKEN_KIND_NEW_LINE) nextIndex++;
+        Token nextToken = parser->tokens->elements[nextIndex];
+
+        if (previousToken.kind == TOKEN_KIND_IDENTIFIER && nextToken.kind == TOKEN_KIND_FUN) {
+            free(left);
+            resetIndex(parser, parserIndex, parserCurrent, true);
+            return callableType(parser);
+        }
+        else if (currentToken.kind == TOKEN_KIND_LESS) {
             genericDepth++;
-            advance(parser);
+            /* advance once to continue after '<' */
+            currentIndex++;
+            while (parser->tokens->elements[currentIndex].kind == TOKEN_KIND_NEW_LINE) currentIndex++;
             continue;
         }
-        else if (currentTokenKind(parser) == TOKEN_KIND_GREATER) {
-            while (match(parser, TOKEN_KIND_GREATER)) {
+        else if (currentToken.kind == TOKEN_KIND_GREATER) {
+            /* consume consecutive '>' tokens in lookahead */
+            int tempIndex = currentIndex;
+            while (parser->tokens->elements[tempIndex].kind == TOKEN_KIND_GREATER) {
                 genericDepth--;
+                tempIndex++;
+                while (parser->tokens->elements[tempIndex].kind == TOKEN_KIND_NEW_LINE) tempIndex++;
             }
 
             if (genericDepth == 0) {
                 free(left);
-                resetIndex(parser, index - 2, previous2, true);
+                resetIndex(parser, parserIndex - 2, parserPrevious2, true);
                 return genericType(parser);
             }
+
+            currentIndex = tempIndex;
+            continue;
         }
-        else if ((previousTokenKind(parser) == TOKEN_KIND_IDENTIFIER || previousTokenKind(parser) == TOKEN_KIND_VOID) 
-            && (currentTokenKind(parser) == TOKEN_KIND_FUN || (currentTokenKind(parser) == TOKEN_KIND_CLASS && nextTokenKind(parser == TOKEN_KIND_FUN)))
-            ) {
+        else if ((previousToken.kind == TOKEN_KIND_IDENTIFIER || previousToken.kind == TOKEN_KIND_VOID) && (currentToken.kind == TOKEN_KIND_FUN)) {
             free(left);
-            resetIndex(parser, index - 2, previous2, true);
+            resetIndex(parser, parserIndex - 2, parserPrevious2, true);
             return genericType(parser);
         }
-        else if (nextTokenKind(parser) != TOKEN_KIND_CLASS && nextTokenKind(parser) != TOKEN_KIND_FUN && nextTokenKind(parser) != TOKEN_KIND_GREATER && nextTokenKind(parser) != TOKEN_KIND_LESS) {
-            resetIndex(parser, index, current, false);
-            break;
+        else {
+            if (nextToken.kind != TOKEN_KIND_CLASS && nextToken.kind != TOKEN_KIND_FUN && nextToken.kind != TOKEN_KIND_GREATER && nextToken.kind != TOKEN_KIND_LESS) {
+                break;
+            }
         }
-    } while (true);
+    }
 
     return binary(parser, token, left, canAssign);
 }

@@ -467,6 +467,7 @@ static void printDictionary(ObjDictionary* dictionary) {
         if (IS_UNDEFINED(entry->key)) continue;
         printValue(entry->key);
         printf(": ");
+
         printValue(entry->value);
         startIndex = i + 1;
         break;
@@ -476,6 +477,7 @@ static void printDictionary(ObjDictionary* dictionary) {
         ObjEntry* entry = &dictionary->entries[i];
         if (IS_UNDEFINED(entry->key)) continue;
         printf(", ");
+
         printValue(entry->key);
         printf(": ");
         printValue(entry->value);

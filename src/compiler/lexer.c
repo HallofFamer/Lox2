@@ -138,7 +138,7 @@ static TokenKind checkKeyword(Lexer* lexer, int start, int length, const char* r
 }
 
 static TokenKind identifierType(Lexer* lexer) {
-    if (lexer->start[-1] == '.') return TOKEN_KIND_IDENTIFIER;
+    if (lexer->current - lexer->start > 0 && lexer->start[-1] == '.') return TOKEN_KIND_IDENTIFIER;
 
     switch (lexer->start[0]) {
         case 'a':

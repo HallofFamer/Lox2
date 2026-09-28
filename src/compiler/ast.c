@@ -267,7 +267,9 @@ Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
 	else if (IS_ALIAS_TYPE(type)) {
         typeParam = astGenerateAliasTypeParameter(ast, AS_ALIAS_TYPE(type));
 	}
-    else return NULL;
+    else {
+		typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(type->shortName->chars));
+    }
     
     typeParam->symtab = ast->symtab;
     typeParam->type = type;

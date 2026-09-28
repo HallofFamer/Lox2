@@ -454,6 +454,93 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
     }
 }
 
+static void inferFunctionTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
+    Ast* callee = astGetChild(ast, 0);
+    Ast* args = astGetChild(ast, 1);
+    if (callee->type == NULL || !IS_CALLABLE_TYPE(callee->type)) return;
+    GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, functionType->baseType.shortName, functionType->baseType.fullName, (TypeInfo*)functionType);
+    calleeType->isFullyInstantiated = true;
+    Ast* typeParams = NULL;
+
+    for (int i = 0; i < functionType->formalTypeParams->count; i++) {
+        bool isInstantiated = false;
+        TypeInfo* formalParamType = functionType->formalTypeParams->elements[i];
+        for (int j = 0; j < functionType->paramTypes->count; j++) {
+            TypeInfo* paramType = functionType->paramTypes->elements[j];
+            if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
+                Ast* arg = astGetChild(args, j);
+                if (typeParams == NULL) typeParams = astInitTypeParameters(callee);
+                if (arg->type != NULL) if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
+                TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
+                isInstantiated = true;
+                break;
+            }
+        }
+
+        if (!isInstantiated) {
+            TypeInfoArrayAdd(calleeType->actualTypeParams, formalParamType);
+            calleeType->isFullyInstantiated = false;
+        }
+    }
+
+    callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
+}
+
+static void inferBehaviorTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* initializerType) {
+    Ast* callee = astGetChild(ast, 0);
+    Ast* args = astGetChild(ast, 1);
+    if (callee->type == NULL || !IS_BEHAVIOR_TYPE(callee->type)) return;
+
+    ObjString* classFullName = getClassNameFromMetaclass(typeChecker->vm, callee->type->fullName);
+    BehaviorTypeInfo* classBehaviorType = AS_BEHAVIOR_TYPE(typeTableGet(typeChecker->vm->typetab, classFullName));
+    GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, classBehaviorType->baseType.shortName, classBehaviorType->baseType.fullName, (TypeInfo*)classBehaviorType);
+    calleeType->isFullyInstantiated = true;
+    Ast* typeParams = NULL;
+
+    for (int i = 0; i < classBehaviorType->formalTypeParams->count; i++) {
+        bool isInstantiated = false;
+        TypeInfo* formalParamType = classBehaviorType->formalTypeParams->elements[i];
+        for (int j = 0; j < initializerType->paramTypes->count; j++) {
+            TypeInfo* paramType = initializerType->paramTypes->elements[j];
+            if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
+                Ast* arg = astGetChild(args, j);
+                if (typeParams == NULL) typeParams = astInitTypeParameters(callee);
+                if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
+                TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
+                isInstantiated = true;
+                break;
+            }
+        }
+
+        if (!isInstantiated) {
+            TypeInfoArrayAdd(calleeType->actualTypeParams, formalParamType);
+            calleeType->isFullyInstantiated = false;
+        }
+    }
+
+    callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
+}
+
+static void inferMethodTypeParameters(TypeChecker* typeChecker, Ast* ast, MethodTypeInfo* methodType) {
+    if (methodType == NULL) return;
+    CallableTypeInfo* declaredType = AS_CALLABLE_TYPE(methodType->declaredType);
+    Ast* args = astGetChild(ast, 1);
+    Ast* typeParams = NULL;
+
+    for (int i = 0; i < declaredType->formalTypeParams->count; i++) {
+        TypeInfo* formalParamType = declaredType->formalTypeParams->elements[i];
+        for (int j = 0; j < declaredType->paramTypes->count; j++) {
+            TypeInfo* paramType = declaredType->paramTypes->elements[j];
+            if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
+                Ast* arg = astGetChild(args, j);
+                if (typeParams == NULL) typeParams = astInitTypeParameters(ast);
+                if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
+                break;
+            }
+        }
+    }
+}
+
 static void inferAstTypeFromChild(Ast* ast, int childIndex, SymbolItem* item) {
     Ast* child = astGetChild(ast, childIndex);
     ast->type = child->type;
@@ -560,92 +647,6 @@ static void inferAstTypeFromReturn(TypeChecker* typeChecker, Ast* ast, CallableT
     if (callableType == NULL || callableType->returnType == NULL) return;
     if (callableType->returnType->category == TYPE_CATEGORY_VOID) ast->type = typeChecker->voidType;
     else ast->type = callableType->returnType;
-}
-
-static void inferFunctionTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* functionType) {
-    Ast* callee = astGetChild(ast, 0);
-    Ast* args = astGetChild(ast, 1);
-    if (callee->type == NULL || !IS_CALLABLE_TYPE(callee->type)) return;
-    GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, functionType->baseType.shortName, functionType->baseType.fullName, (TypeInfo*)functionType);
-    calleeType->isFullyInstantiated = true;
-    Ast* typeParams = NULL;
-
-    for (int i = 0; i < functionType->formalTypeParams->count; i++) {
-        bool isInstantiated = false;
-        TypeInfo* formalParamType = functionType->formalTypeParams->elements[i];
-        for (int j = 0; j < functionType->paramTypes->count; j++) {
-            TypeInfo* paramType = functionType->paramTypes->elements[j];
-            if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
-                Ast* arg = astGetChild(args, j);
-                if (typeParams == NULL) typeParams = astInitTypeParameters(callee);
-                if (arg->type != NULL) if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
-                TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
-                break;
-            }
-        }
-
-        if (!isInstantiated) {
-            TypeInfoArrayAdd(calleeType->actualTypeParams, formalParamType);
-            calleeType->isFullyInstantiated = false;
-        }
-    }
-
-    callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
-}
-
-static void inferBehaviorTypeParameters(TypeChecker* typeChecker, Ast* ast, CallableTypeInfo* initializerType) {
-    Ast* callee = astGetChild(ast, 0);
-    Ast* args = astGetChild(ast, 1);
-    if (callee->type == NULL || !IS_BEHAVIOR_TYPE(callee->type)) return;
-
-	ObjString* classFullName = getClassNameFromMetaclass(typeChecker->vm, callee->type->fullName);
-	BehaviorTypeInfo* classBehaviorType = AS_BEHAVIOR_TYPE(typeTableGet(typeChecker->vm->typetab, classFullName));
-    GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, classBehaviorType->baseType.shortName, classBehaviorType->baseType.fullName, (TypeInfo*)classBehaviorType);
-    calleeType->isFullyInstantiated = true;
-    Ast* typeParams = NULL;
-
-    for (int i = 0; i < classBehaviorType->formalTypeParams->count; i++) {
-        bool isInstantiated = false;
-        TypeInfo* formalParamType = classBehaviorType->formalTypeParams->elements[i];
-        for (int j = 0; j < initializerType->paramTypes->count; j++) {
-            TypeInfo* paramType = initializerType->paramTypes->elements[j];
-            if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
-                Ast* arg = astGetChild(args, j);
-                if (typeParams == NULL) typeParams = astInitTypeParameters(callee);
-				if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
-                TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
-                isInstantiated = true;
-                break;
-            }
-        }
-
-		if (!isInstantiated) {
-			TypeInfoArrayAdd(calleeType->actualTypeParams, formalParamType);
-            calleeType->isFullyInstantiated = false;
-		}
-    }
-
-    callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
-}
-
-static void inferMethodTypeParameters(TypeChecker* typeChecker, Ast* ast, MethodTypeInfo* methodType) {
-	if (methodType == NULL) return;
-	CallableTypeInfo* declaredType = AS_CALLABLE_TYPE(methodType->declaredType);
-    Ast* args = astGetChild(ast, 1);
-    Ast* typeParams = NULL;
-	
-    for (int i = 0; i < declaredType->formalTypeParams->count; i++) {
-		TypeInfo* formalParamType = declaredType->formalTypeParams->elements[i];
-		for (int j = 0; j < declaredType->paramTypes->count; j++) {
-			TypeInfo* paramType = declaredType->paramTypes->elements[j];
-			if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
-				Ast* arg = astGetChild(args, j);
-				if (typeParams == NULL) typeParams = astInitTypeParameters(ast);
-				if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
-				break;
-			}
-		}
-	}
 }
 
 static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {

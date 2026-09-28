@@ -487,28 +487,6 @@ ObjClass* getNativeClass(VM* vm, const char* fullName) {
     return AS_CLASS(klass);
 }
 
-TypeInfo* getNativeType(VM* vm, const char* name) {
-    if (name == NULL || strcmp(name, "dynamic") == 0) return NULL;
-    ObjString* shortName = newStringPerma(vm, name);
-    TypeInfo* type = typeTableGet(vm->typetab, shortName);
-
-    if (type == NULL) {
-        ObjString* fullName = concatenateString(vm, vm->currentNamespace->fullName, shortName, ".");
-        type = typeTableGet(vm->typetab, fullName);
-
-        if (type == NULL) {
-            fullName = concatenateString(vm, vm->langNamespace->fullName, shortName, ".");
-            type = typeTableGet(vm->typetab, fullName);
-            
-            if (type == NULL) {
-                runtimeError(vm, "Type '%s' is undefined.", name);
-                exit(70);
-            }
-        }
-    }
-    return type;
-}
-
 ObjNativeFunction* getNativeFunction(VM* vm, const char* name) {
     Value function;
     tableGet(&vm->rootNamespace->values, newStringPerma(vm, name), &function);
@@ -537,6 +515,28 @@ ObjNamespace* getNativeNamespace(VM* vm, const char* name) {
         exit(70);
     }
     return AS_NAMESPACE(namespace);
+}
+
+TypeInfo* getNativeType(VM* vm, const char* name) {
+    if (name == NULL || strcmp(name, "dynamic") == 0) return NULL;
+    ObjString* shortName = newStringPerma(vm, name);
+    TypeInfo* type = typeTableGet(vm->typetab, shortName);
+
+    if (type == NULL) {
+        ObjString* fullName = concatenateString(vm, vm->currentNamespace->fullName, shortName, ".");
+        type = typeTableGet(vm->typetab, fullName);
+
+        if (type == NULL) {
+            fullName = concatenateString(vm, vm->langNamespace->fullName, shortName, ".");
+            type = typeTableGet(vm->typetab, fullName);
+
+            if (type == NULL) {
+                runtimeError(vm, "Type '%s' is undefined.", name);
+                exit(70);
+            }
+        }
+    }
+    return type;
 }
 
 SymbolItem* insertGlobalSymbolTable(VM* vm, const char* symbolName, const char* typeName) {

@@ -59,10 +59,10 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawTy
 
 TypeInfo* declareNativeTypeParameter(VM* vm, const char* shortName);
 ObjClass* getNativeClass(VM* vm, const char* fullName);
-TypeInfo* getNativeType(VM* vm, const char* name);
 ObjNativeFunction* getNativeFunction(VM* vm, const char* name);
 ObjNativeMethod* getNativeMethod(VM* vm, ObjClass* klass, const char* name);
 ObjNamespace* getNativeNamespace(VM* vm, const char* name);
+TypeInfo* getNativeType(VM * vm, const char* name);
 SymbolItem* insertGlobalSymbolTable(VM* vm, const char* symbolName, const char* typeName);
 void loadSourceFile(VM* vm, const char* filePath);
 void registerNativeFunctions(VM* vm);
