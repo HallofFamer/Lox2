@@ -11,6 +11,17 @@ println("Testing inferred generic type parameters for unreified generic function
 println(identity<UUID>(id))
 println(identity(id))
 
+val array = Array<String>()
+array.add("Hello")
+array.add("World")
+println(identity<Array<String>>(array))
+println(identity(array))
+
+val func = Bool fun(Int a, String b) { 
+    return (a > 0) and (b.length > 0)
+}
+println(identity<Bool fun(Int, String)>(func))
+println(identity(func))
 
 String identityName<T>(T arg) {
     return "${T}(${arg})"
@@ -56,3 +67,15 @@ val identityNameBox = IdentityNameBox<UUID>(id)
 println(identityNameBox.identityName())
 val identityNameBox2 = IdentityNameBox(id)
 println(identityNameBox2.identityName())
+
+class IdentityClass { 
+    
+    String getIdentity<T>(T arg) { 
+        return arg.toString()
+    }
+}
+
+val identityObject = IdentityClass()
+println("\nTesting inferred generic type parameters for unreified generic methods: ")
+println(identityObject.getIdentity<UUID>(id))
+println(identityObject.getIdentity(id))

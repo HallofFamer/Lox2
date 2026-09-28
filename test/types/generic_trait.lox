@@ -28,7 +28,6 @@ class Box<T> with TBox<T> {
     }
 
     String toString() {
-        //return "Box<${T}>(${this.content})"
         return "Box(${this.content})"
     }
 }
@@ -59,5 +58,4 @@ println(KeyedBox)
 val box = Box<Int>(42)
 println("Instantiating from generic class Box: ${box}")
 box.setContent(100)
-//box.setContent("Hello World")
 println("Box new content: ${box.getContent()}")

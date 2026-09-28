@@ -36,5 +36,4 @@ println(id.toString())
 
 val box = createBox()
 println(box)
-val content = box.getContent()
-println(content)
+println(box.getContent())

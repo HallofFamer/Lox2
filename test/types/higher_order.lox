@@ -48,5 +48,5 @@ class Calculator {
 val calc = Calculator()
 calc.operation = fun(x, y) { return x + y } 
 println("Operation of 5 + 3 is: ${calc.performOperation(5, 3)}")
-calc.operation = fun(x, y) { return x - y }
+calc.operation = { |x, y| x - y }
 println("Operation of 5 - 3 is: ${calc.performOperation(5, 3)}")
