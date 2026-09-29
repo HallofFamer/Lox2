@@ -348,6 +348,7 @@ static char* createGenericTypeName(GenericTypeInfo* genericType, bool isFullName
             genericName[length++] = ',';
             genericName[length++] = ' ';
         }
+
         if (paramType != NULL) {
             char* paramTypeName = createTypeName(paramType, isFullName);
             size_t paramTypeLength = strlen(paramTypeName);

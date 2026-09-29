@@ -255,25 +255,93 @@ Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
 	if (type == NULL) return NULL;
     Ast* typeParam = NULL;
 
+    /* Create a shell for the type parameter (no nested children yet). */
     if (IS_BEHAVIOR_TYPE(type)) {
-        typeParam = astGenerateBehaviorTypeParameter(ast, AS_BEHAVIOR_TYPE(type));
+        typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(AS_BEHAVIOR_TYPE(type)->baseType.shortName->chars));
     }
     else if (IS_CALLABLE_TYPE(type)) {
-        typeParam = astGenerateCallableTypeParameter(ast, AS_CALLABLE_TYPE(type));
+        typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken("fun"));
+        typeParam->attribute.isFunction = true;
     }
     else if (IS_GENERIC_TYPE(type)) {
-        typeParam = astGenerateGenericTypeParameter(ast, AS_GENERIC_TYPE(type));
+        typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(AS_GENERIC_TYPE(type)->baseType.shortName->chars));
+        typeParam->attribute.isGeneric = true;
     }
-	else if (IS_ALIAS_TYPE(type)) {
-        typeParam = astGenerateAliasTypeParameter(ast, AS_ALIAS_TYPE(type));
-	}
+    else if (IS_ALIAS_TYPE(type)) {
+        typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(AS_ALIAS_TYPE(type)->baseType.shortName->chars));
+    }
     else {
-		typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(type->shortName->chars));
+        typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(type->shortName->chars));
     }
-    
+
+    /* Attach to parent so symtab is propagated correctly before creating nested parts. */
     typeParam->symtab = ast->symtab;
     typeParam->type = type;
     astAppendChild(ast, typeParam);
+
+    /* Now populate nested type parameters (if any) using recursive insertion so
+       nested generics/callables are properly expanded into AST nodes. */
+    if (IS_BEHAVIOR_TYPE(type)) {
+        BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
+        if (behaviorType->formalTypeParams->count > 0) {
+            Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
+            typeParams->symtab = typeParam->symtab;
+            astAppendChild(typeParam, typeParams);
+            for (int i = 0; i < behaviorType->formalTypeParams->count; i++) {
+                TypeInfo* formalParamType = behaviorType->formalTypeParams->elements[i];
+                astInsertTypeParameter(typeParams, formalParamType);
+            }
+        }
+    }
+    else if (IS_CALLABLE_TYPE(type)) {
+        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
+
+        /* return type */
+        Ast* returnType = emptyAst(AST_EXPR_TYPE, syntheticToken(callableType->returnType->shortName->chars));
+        if (callableType->attribute.isVoid) returnType->attribute.isVoid = true;
+        returnType->symtab = typeParam->symtab;
+        astAppendChild(typeParam, returnType);
+        /* populate nested return type if complex */
+        if (callableType->returnType != NULL) {
+            astInsertTypeParameter(returnType, callableType->returnType);
+        }
+
+        /* param types list */
+        Ast* paramTypes = emptyAst(AST_LIST_EXPR, emptyToken());
+        paramTypes->symtab = typeParam->symtab;
+        astAppendChild(typeParam, paramTypes);
+        if (callableType->paramTypes->count > 0) {
+            for (int i = 0; i < callableType->paramTypes->count; i++) {
+                TypeInfo* paramType = callableType->paramTypes->elements[i];
+                astInsertTypeParameter(paramTypes, paramType);
+            }
+        }
+    }
+    else if (IS_GENERIC_TYPE(type)) {
+        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
+        if (genericType->actualTypeParams->count > 0) {
+            Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
+            typeParams->symtab = typeParam->symtab;
+            astAppendChild(typeParam, typeParams);
+            for (int i = 0; i < genericType->actualTypeParams->count; i++) {
+                TypeInfo* actualParamType = genericType->actualTypeParams->elements[i];
+                astInsertTypeParameter(typeParams, actualParamType);
+            }
+        }
+    }
+    else if (IS_ALIAS_TYPE(type)) {
+        AliasTypeInfo* aliasType = AS_ALIAS_TYPE(type);
+        if (aliasType->formalTypeParams->count > 0) {
+            Ast* typeParams = emptyAst(AST_LIST_EXPR, emptyToken());
+            typeParams->symtab = typeParam->symtab;
+            astAppendChild(typeParam, typeParams);
+            for (int i = 0; i < aliasType->formalTypeParams->count; i++) {
+                TypeInfo* formalParamType = aliasType->formalTypeParams->elements[i];
+                astInsertTypeParameter(typeParams, formalParamType);
+            }
+        }
+    }
+
     return typeParam;
 }
 
