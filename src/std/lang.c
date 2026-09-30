@@ -1663,7 +1663,7 @@ LOX_METHOD(String, reverseIterator) {
 	ASSERT_ARG_COUNT("String::reverseIterator()", 0);
 	ObjString* self = AS_STRING(receiver);
 	ObjString* reversed = reverseString(vm, self);
-    RETURN_OBJ(newIterator(vm, reversed, getNativeClass(vm, "clox.std.lang.StringIterator")));
+    RETURN_OBJ(newIterator(vm, OBJ_VAL(reversed), getNativeClass(vm, "clox.std.lang.StringIterator")));
 }
 
 LOX_METHOD(String, split) {
