@@ -256,20 +256,14 @@ Ast* astInsertTypeParameter(Ast* ast, TypeInfo* type) {
     if (type == NULL) return NULL;
     Ast* typeParam = NULL;
 
-    /* Create the base/shell node for the type inline (helpers removed). */
-    if (IS_BEHAVIOR_TYPE(type)) {
-        typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(AS_BEHAVIOR_TYPE(type)->baseType.shortName->chars));
-    }
-    else if (IS_CALLABLE_TYPE(type)) {
+    /* Create the base/shell node for the type. */
+    if (IS_CALLABLE_TYPE(type)) {
         typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken("fun"));
         typeParam->attribute.isFunction = true;
     }
     else if (IS_GENERIC_TYPE(type)) {
         typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(AS_GENERIC_TYPE(type)->baseType.shortName->chars));
         typeParam->attribute.isGeneric = true;
-    }
-    else if (IS_ALIAS_TYPE(type)) {
-        typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(AS_ALIAS_TYPE(type)->baseType.shortName->chars));
     }
     else {
         typeParam = emptyAst(AST_EXPR_TYPE, syntheticToken(type->shortName->chars));

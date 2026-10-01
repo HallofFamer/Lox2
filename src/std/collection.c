@@ -1049,7 +1049,7 @@ LOX_METHOD(Collection, toSet) {
 	push(vm, OBJ_VAL(set));
 	while (AS_BOOL(hasNext)) {
 		Value element = callReentrantMethod(vm, iterator, currentValueMethod);
-		callReentrantMethod(vm, set, addMethod, element);
+		callReentrantMethod(vm, OBJ_VAL(set), addMethod, element);
 		hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
 	}
 
