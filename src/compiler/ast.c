@@ -169,7 +169,7 @@ bool astHasInstantiatedTypeParameters(Ast* ast) {
     bool hasInstantiatedParams = false;
 
     for (int i = 0; i < ast->children->count; i++) {
-        Ast* typeParam = astGetChild(ast, i);
+        Ast* typeParam = astGetChild(ast, i);  
         if (typeParam->type != NULL && !IS_PLACEHOLDER_TYPE(typeParam->type)) {
             hasInstantiatedParams = true;
             break;
@@ -221,6 +221,7 @@ static void astPopulateNestedTypeParameters(Ast* typeParam, TypeInfo* type) {
         Ast* paramTypes = emptyAst(AST_LIST_EXPR, emptyToken());
         paramTypes->symtab = typeParam->symtab;
         astAppendChild(typeParam, paramTypes);
+        
         if (callableType->paramTypes->count > 0) {
             for (int i = 0; i < callableType->paramTypes->count; i++) {
                 TypeInfo* paramType = callableType->paramTypes->elements[i];

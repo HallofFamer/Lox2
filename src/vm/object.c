@@ -198,12 +198,14 @@ ObjGenerator* newGenerator(VM* vm, ObjFrame* frame, ObjGenerator* outer) {
 
 ObjInstance* newInstance(VM* vm, ObjClass* klass) {
     ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE, klass);
+    push(vm, OBJ_VAL(instance));
     initValueArray(&instance->fields, instance->obj.generation);
     instance->obj.shapeID = klass->defaultShapeID;
 
     for (int i = 0; i < klass->defaultInstanceFields.count; i++) {
         valueArrayWrite(vm, &instance->fields, klass->defaultInstanceFields.values[i]);
     }
+    pop(vm);
     return instance;
 }
 
