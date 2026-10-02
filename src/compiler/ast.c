@@ -372,6 +372,7 @@ static void astOutputExprInvoke(Ast* ast, int indentLevel) {
     char* attribute = ast->attribute.isOptional ? "?" : "";
     char* method = tokenToCString(ast->token);
     printf("invoke %s.%s\n", attribute, method);
+
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
 	if (astNumChild(ast) > 2) astOutputChild(ast, indentLevel + 1, 2);

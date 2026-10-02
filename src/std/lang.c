@@ -185,9 +185,12 @@ LOX_METHOD(Behavior, traits) {
     ASSERT_ARG_COUNT("Behavior::traits()", 0);
     ObjClass* self = AS_CLASS(receiver);
     ObjArray* traits = newArray(vm);
+    push(vm, OBJ_VAL(traits));
+
     for (int i = 0; i < self->traits.count; i++) {
         valueArrayWrite(vm, &traits->elements, self->traits.values[i]);
     }
+    pop(vm);
     RETURN_OBJ(traits);
 }
 
