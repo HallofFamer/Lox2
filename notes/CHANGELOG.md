@@ -1,11 +1,16 @@
 # Change Log
 
-### Lox2 v2.2.2(current version)
+### Lox2 v2.2.3(current version)
+- Generic type parameter inference which allows generic type params to be inferred by arguments passed to functions/methods. 
+- Add configuration option `marshalTryRecompile` in lox2.ini, which decides whether to recompile bytecode if source code version or dependencies have changed.
+- Fix segfault issue with no namespace is declared at the top of the script, as well as a GC bug that may free objects while being instantiated in function `newInstance`.
+
+### Lox2 v2.2.2(last version)
 - Introduce fully reified generics with new object type `ObjType` which captures full type information instead of just class/trait.
 - Extend Marshaller to serialize type information for each serialized source code, so it can be used by its dependents during compilation.
 - Fix parser glitch which causes incorrect parsing of nested callable or generic type annotations.
 
-### Lox2 v2.2.1(last version)
+### Lox2 v2.2.1
 - Smart reified generics that only passes type objects as instance fields or function arguments if they are actually being used/inspected. 
 - Implement configuration options `flagUnusedImport` and `flagUndefinedType` in lox2.ini which decide whether to throw warnings/errors when encountering unused imports or undefined type annotations.
 - Fix a glitch that the resolver cannot find and load types from the same namespace without using statement, which causes typechecking errors in some cases.
