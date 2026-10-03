@@ -693,9 +693,7 @@ static TypeEntry* findTypeEntry(TypeEntry* entries, int capacity, ObjString* key
     uint32_t index = key->hash & (capacity - 1);
     for (;;) {
         TypeEntry* entry = &entries[index];
-        if (entry->key == key || entry->key == NULL) {
-            return entry;
-        }
+        if (entry->key == key || entry->key == NULL) return entry;
         index = (index + 1) & (capacity - 1);
     }
 }
