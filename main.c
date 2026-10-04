@@ -47,6 +47,12 @@ static void repl(VM* vm) {
 }
 
 static void runFile(VM* vm, const char* filePath) {
+    size_t pathLen = strlen(filePath);
+    if (pathLen < 4 || strcmp(filePath + pathLen - 4, ".lox") != 0) {
+        fprintf(stderr, "Error: '%s' is not a .lox file\n", filePath);
+        exit(64);
+    }
+
     ObjString* path = newString(vm, filePath);
     vm->currentModule = newModule(vm, replaceChar(vm, path, '\\', '/'));
     vm->currentModule->isRoot = true;

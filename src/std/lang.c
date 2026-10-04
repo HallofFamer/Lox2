@@ -2205,7 +2205,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->objectClass, Object, objectID, 0, NATIVE_TYPE(Number));
     DEF_METHOD(vm->objectClass, Object, setField, 2, NATIVE_TYPE(void), NATIVE_TYPE(String), NATIVE_TYPE(Object));
     DEF_METHOD(vm->objectClass, Object, toString, 0, NATIVE_TYPE(String));
-    DEF_OPERATOR(vm->objectClass, Object, == , __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
+    DEF_OPERATOR(vm->objectClass, Object, ==, __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
 
     inheritSuperclass(vm, behaviorClass, vm->objectClass);
     behaviorClass->classType = OBJ_CLASS;
@@ -2350,9 +2350,9 @@ void registerLangPackage(VM* vm) {
 
     DEF_METHOD(comparableTrait, TComparable, compareTo, 1, NATIVE_TYPE(Int), NATIVE_TYPE(TComparable));
     DEF_METHOD(comparableTrait, TComparable, equals, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
-    DEF_OPERATOR(comparableTrait, TComparable, == , __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
-    DEF_OPERATOR(comparableTrait, TComparable, > , __greater__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
-    DEF_OPERATOR(comparableTrait, TComparable, < , __less__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
+    DEF_OPERATOR(comparableTrait, TComparable, ==, __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
+    DEF_OPERATOR(comparableTrait, TComparable, >, __greater__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
+    DEF_OPERATOR(comparableTrait, TComparable, <, __less__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
 
     bindSuperclass(vm, vm->numberClass, vm->objectClass);
     bindTrait(vm, vm->numberClass, comparableTrait);
@@ -2385,13 +2385,13 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->numberClass, Number, tan, 0, NATIVE_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, toInt, 0, NATIVE_TYPE(Int));
     DEF_METHOD(vm->numberClass, Number, toString, 0, NATIVE_TYPE(String));
-    DEF_OPERATOR(vm->numberClass, Number, == , __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
-    DEF_OPERATOR(vm->numberClass, Number, > , __greater__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
-    DEF_OPERATOR(vm->numberClass, Number, < , __less__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, ==, __equal__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(Object));
+    DEF_OPERATOR(vm->numberClass, Number, >, __greater__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
+    DEF_OPERATOR(vm->numberClass, Number, <, __less__, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(TComparable));
     DEF_OPERATOR(vm->numberClass, Number, +, __add__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, -, __subtract__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, *, __multiply__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
-    DEF_OPERATOR(vm->numberClass, Number, / , __divide__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
+    DEF_OPERATOR(vm->numberClass, Number, /, __divide__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_OPERATOR(vm->numberClass, Number, %, __modulo__, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
 
     ObjClass* numberMetaclass = vm->numberClass->obj.klass;
