@@ -1133,6 +1133,12 @@ LOX_METHOD(Namespace, fullName) {
     RETURN_OBJ(self->fullName);
 }
 
+LOX_METHOD(Namespace, isRoot) {
+	ASSERT_ARG_COUNT("Namespace::isRoot()", 0);
+	ObjNamespace* self = AS_NAMESPACE(receiver);
+	RETURN_BOOL(self->isRoot);
+}
+
 LOX_METHOD(Namespace, shortName) {
     ASSERT_ARG_COUNT("Namespace::shortName()", 0);
     ObjNamespace* self = AS_NAMESPACE(receiver);
@@ -2294,6 +2300,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->namespaceClass, Namespace, clone, 0, NATIVE_TYPE(Namespace));
     DEF_METHOD(vm->namespaceClass, Namespace, enclosing, 0, NATIVE_TYPE(Namespace));
     DEF_METHOD(vm->namespaceClass, Namespace, fullName, 0, NATIVE_TYPE(String));
+	DEF_METHOD(vm->namespaceClass, Namespace, isRoot, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->namespaceClass, Namespace, shortName, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->namespaceClass, Namespace, toString, 0, NATIVE_TYPE(String));
     bindNamespaceClass(vm);
