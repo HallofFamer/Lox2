@@ -476,6 +476,7 @@ static uint32_t hashCallableTypeInfo(TypeInfo* type, uint32_t initialHash) {
     if (callableType->attribute.isGeneric) {
 		hash = mixHashTypeName(hash, "<", 1);
 		if (callableType->attribute.isReified) hash = mixHashTypeName(hash, "reified ", 8);
+        
         for (int i = 0; i < callableType->formalTypeParams->count; i++) {
             if (i > 0) hash = mixHashTypeName(hash, ", ", 2);
             TypeInfo* formalType = callableType->formalTypeParams->elements[i];
@@ -624,6 +625,7 @@ TypeInfo* instantiateTypeParameter(int id, TypeInfo* type, TypeInfoArray* formal
             GenericTypeInfo* genericType = newGenericTypeInfo(id, callableType->baseType.shortName, callableType->baseType.fullName, type);            
             for (int i = 0; i < callableType->formalTypeParams->count; i++) {
                 TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];
+                
                 if (formalTypeParam != NULL && IS_PLACEHOLDER_TYPE(formalTypeParam)) {
                     TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
                     TypeInfoArrayAdd(genericType->actualTypeParams, instantiatedType);

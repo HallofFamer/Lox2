@@ -915,6 +915,26 @@ LOX_METHOD(Collection, collect) {
     RETURN_OBJ(collected);
 }
 
+LOX_METHOD(Collection, conform) {
+    ASSERT_ARG_COUNT("Collection::conform(closure)", 1);
+    ASSERT_ARG_TCALLABLE("Collection::conform(closure)", 0);
+    Value closure = args[0];
+    Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+    Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+    Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+    Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+    Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+    while (AS_BOOL(hasNext)) {
+        Value element = callReentrantMethod(vm, iterator, currentValueMethod);
+        Value result = callReentrantMethod(vm, receiver, closure, element);
+        if (isFalsey(result)) RETURN_FALSE;
+        hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+    }
+    RETURN_TRUE;
+}
+
 LOX_METHOD(Collection, detect) {
     ASSERT_ARG_COUNT("Collection::detect(closure)", 1);
     ASSERT_ARG_TCALLABLE("Collection::detect(closure)", 0);
@@ -2432,6 +2452,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(collectionClass, Collection, add, 1, NATIVE_TYPE(clox.std.collection.Collection), NATIVE_TYPE(E));
     DEF_METHOD(collectionClass, Collection, addAll, 1, NATIVE_TYPE(void), NATIVE_TYPE(clox.std.collection.Collection));
     DEF_METHOD(collectionClass, Collection, collect, 1, NATIVE_TYPE(clox.std.collection.Collection), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(E), 1, NATIVE_TYPE(E)));
+	DEF_METHOD(collectionClass, Collection, conform, 1, NATIVE_TYPE(Bool), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(E), 1, NATIVE_TYPE(E)));
     DEF_METHOD(collectionClass, Collection, detect, 1, NATIVE_TYPE(E), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(Bool), 1, NATIVE_TYPE(E)));
     DEF_METHOD(collectionClass, Collection, each, 1, NATIVE_TYPE(void), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(void), 1, NATIVE_TYPE(E)));
     DEF_METHOD(collectionClass, Collection, isEmpty, 0, NATIVE_TYPE(Bool));
