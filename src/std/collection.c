@@ -599,6 +599,19 @@ LOX_METHOD(Array, collect) {
     RETURN_OBJ(collected);
 }
 
+LOX_METHOD(Array, conform) {
+	ASSERT_ARG_COUNT("Array::conform(closure)", 1);
+	ASSERT_ARG_TCALLABLE("Array::conform(closure)", 0);
+	ObjArray* self = AS_ARRAY(receiver);
+	Value closure = args[0];
+	
+    for (int i = 0; i < self->elements.count; i++) {
+		Value result = callReentrantMethod(vm, receiver, closure, self->elements.values[i]);
+		if (isFalsey(result)) RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+
 LOX_METHOD(Array, contains) {
     ASSERT_ARG_COUNT("Array::contains(element)", 1);
     RETURN_BOOL(valueArrayFirstIndex(vm, &AS_ARRAY(receiver)->elements, args[0]) != -1);
@@ -2475,6 +2488,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->arrayClass, Array, clear, 0, NATIVE_TYPE(void));
     DEF_METHOD(vm->arrayClass, Array, clone, 0, NATIVE_TYPE(clox.std.collection.Array));
     DEF_METHOD(vm->arrayClass, Array, collect, 1, NATIVE_TYPE(clox.std.collection.Array), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(E), 1, NATIVE_TYPE(E)));
+	DEF_METHOD(vm->arrayClass, Array, conform, 1, NATIVE_TYPE(Bool), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(E), 1, NATIVE_TYPE(E)));
     DEF_METHOD(vm->arrayClass, Array, contains, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(E));
     DEF_METHOD(vm->arrayClass, Array, detect, 1, NATIVE_TYPE(E), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(Bool), 1, NATIVE_TYPE(E)));
     DEF_METHOD(vm->arrayClass, Array, each, 1, NATIVE_TYPE(void), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(void), 1, NATIVE_TYPE(E)));
