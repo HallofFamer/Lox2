@@ -68,7 +68,7 @@ static void runFile(VM* vm, const char* filePath) {
 static void runScript(VM* vm, const char* path, const char* script) {
     char scriptPath[UINT8_MAX];
     if (strlen(path) + strlen(script) > UINT8_MAX) {
-        printf("file path/name too long...");
+        fprintf(stderr, "Error: File path/name too long...\n"); 
         exit(74);
     }
     int length = sprintf_s(scriptPath, UINT8_MAX, "%s%s", path, script);

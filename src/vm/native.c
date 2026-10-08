@@ -223,7 +223,6 @@ void defineNativeFunction(VM* vm, const char* name, int arity, bool isAsync, Typ
     SymbolItem* item = insertGlobalSymbolTable(vm, name, NULL);
     if (functionType == NULL) {
         functionType = newCallableTypeInfo(vm->typetab->count + 1, TYPE_CATEGORY_CALLABLE, functionName, returnType);
-        functionType->attribute.isAsync = isAsync;
         functionType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
         va_start(args, function);
@@ -289,7 +288,6 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
         methodType = newMethodTypeInfo(behaviorType->methods->count + 1, methodName, returnType, isAsync, isClass, isInitializer);
 
         declaredType = methodType->declaredType;
-        declaredType->attribute.isAsync = isAsync;
         declaredType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
         if (arity < 0) {

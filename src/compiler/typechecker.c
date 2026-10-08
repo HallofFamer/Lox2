@@ -1555,8 +1555,30 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
 				}
 			}
         }
-    }
+        else if (initializer->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(fieldType->declaredType)) {
+			Ast* keys = astGetChild(initializer, 0);
+			Ast* values = astGetChild(initializer, 1);
+            int numEntries = astNumChild(keys);
+			
+            GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(fieldType->declaredType);
+			TypeInfo* expectedKeyType = genericFieldType->actualTypeParams->elements[0];
+			TypeInfo* expectedValueType = genericFieldType->actualTypeParams->elements[1];
 
+            for (int i = 0; i < numEntries; i++) {
+				Ast* key = astGetChild(keys, i);
+				Ast* value = astGetChild(values, i);
+                if (!isSubtypeOfType(key->type, expectedKeyType)) {
+					typeError(typeChecker, "Key %d in dictionary initializer for instance field '%s' must be a subtype of %s but gets %s.",
+						i, name->chars, expectedKeyType->shortName->chars, key->type->shortName->chars);
+                }
+
+                if (!isSubtypeOfType(value->type, expectedValueType)) {
+					typeError(typeChecker, "Value %d in dictionary initializer for instance field '%s' must be a subtype of %s but gets %s.",
+						i, name->chars, expectedValueType->shortName->chars, value->type->shortName->chars);
+                }
+            }
+        }
+    }
 }
 
 static void typeCheckFunDeclaration(TypeChecker* typeChecker, Ast* ast) {

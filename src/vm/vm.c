@@ -227,6 +227,7 @@ static void makeDictionary(VM* vm, uint8_t entryCount) {
 static ObjArray* makeTraitArray(VM* vm, uint8_t behaviorCount) {
     ObjArray* traits = newArray(vm);
     push(vm, OBJ_VAL(traits));
+
     for (int i = 0; i < behaviorCount; i++) {
         Value trait = peek(vm, i + 1);
         if (!IS_CLASS(trait) || AS_CLASS(trait)->behaviorType != BEHAVIOR_TRAIT) {
