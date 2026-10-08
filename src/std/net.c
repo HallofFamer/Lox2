@@ -295,6 +295,7 @@ LOX_METHOD(HTTPClient, post) {
     if (curl == NULL) THROW_EXCEPTION(clox.std.net.HTTPException, "Failed to initiate a POST request using CURL.");
     CURLResponse curlResponse;
     CURLcode curlCode = httpSendRequest(vm, url, HTTP_POST, data, curl, &curlResponse);
+    
     if (curlCode != CURLE_OK) {
         curl_easy_cleanup(curl);
         THROW_EXCEPTION(clox.std.net.HTTPException, "Failed to complete a POST request from URL.");

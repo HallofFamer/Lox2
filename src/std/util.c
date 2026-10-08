@@ -687,6 +687,7 @@ LOX_METHOD(Random, __init__) {
     ASSERT_ARG_COUNT("Random::__init__()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
     uint64_t seed = (uint64_t)time(NULL);
+    
     pcg32_seed(seed);
     setObjField(vm, self, "seed", INT_VAL(abs((int)seed)));
     RETURN_OBJ(receiver);

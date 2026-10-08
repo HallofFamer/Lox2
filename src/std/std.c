@@ -44,7 +44,6 @@ static void defineCollectionTypes(VM* vm) {
     vm->currentNamespace = collectionNamespace;
 
     TypeInfo* elementType = declareNativeTypeParameter(vm, "E");
-    ObjClass* iterableTrait = getNativeClass(vm, "clox.std.lang.TIterable");
     ObjClass* collectionClass = defineNativeGenericClass(vm, "Collection", 1, elementType);
     ObjClass* listClass = defineNativeGenericClass(vm, "List", 1, elementType);
 
@@ -182,7 +181,6 @@ static void defineUtilTypes(VM* vm) {
     vm->currentNamespace = utilNamespace;
 
     TypeInfo* placeholderType = declareNativeTypeParameter(vm, "T");
-    ObjClass* comparableTrait = getNativeClass(vm, "clox.std.lang.TComparable");
     ObjClass* dateClass = defineNativeClass(vm, "Date");
     ObjClass* dateTimeClass = defineNativeClass(vm, "DateTime");
     ObjClass* durationClass = defineNativeClass(vm, "Duration");

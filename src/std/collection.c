@@ -1159,6 +1159,29 @@ LOX_METHOD(Dictionary, containsValue) {
     RETURN_BOOL(dictContainsValue(AS_DICTIONARY(receiver), args[0]));
 }
 
+LOX_METHOD(Dictionary, conform) {
+	ASSERT_ARG_COUNT("Dictionary::conform(closure)", 1);
+	ASSERT_ARG_TCALLABLE("Dictionary::conform(closure)", 0);
+	ObjDictionary* self = AS_DICTIONARY(receiver);
+	Value closure = args[0];
+	Value iteratorMethod = getObjMethod(vm, receiver, "iterator");
+	Value iterator = callReentrantMethod(vm, receiver, iteratorMethod);
+
+	Value currentIndexMethod = getObjMethod(vm, iterator, "currentIndex");
+	Value currentValueMethod = getObjMethod(vm, iterator, "currentValue");
+	Value moveNextMethod = getObjMethod(vm, iterator, "moveNext");
+	Value hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+
+	while (AS_BOOL(hasNext)) {
+		Value key = callReentrantMethod(vm, iterator, currentIndexMethod);
+		Value value = callReentrantMethod(vm, iterator, currentValueMethod);
+		Value result = callReentrantMethod(vm, receiver, closure, key, value);
+		if (isFalsey(result)) RETURN_FALSE;
+		hasNext = callReentrantMethod(vm, iterator, moveNextMethod);
+	}
+	RETURN_TRUE;
+}
+
 LOX_METHOD(Dictionary, detect) {
     ASSERT_ARG_COUNT("Dictionary::detect(closure)", 1);
     ASSERT_ARG_TCALLABLE("Dictionary::detect(closure)", 0);
@@ -2571,6 +2594,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(vm->dictionaryClass, Dictionary, clear, 0, NATIVE_TYPE(void));
     DEF_METHOD(vm->dictionaryClass, Dictionary, clone, 0, NATIVE_TYPE(clox.std.collection.Dictionary));
     DEF_METHOD(vm->dictionaryClass, Dictionary, collect, 1, NATIVE_TYPE(clox.std.collection.Dictionary), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(V), 2, NATIVE_TYPE(K), NATIVE_TYPE(V)));
+	DEF_METHOD(vm->dictionaryClass, Dictionary, conform, 1, NATIVE_TYPE(Bool), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(Bool), 2, NATIVE_TYPE(K), NATIVE_TYPE(V)));
     DEF_METHOD(vm->dictionaryClass, Dictionary, containsKey, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(K));
     DEF_METHOD(vm->dictionaryClass, Dictionary, containsValue, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(V));
     DEF_METHOD(vm->dictionaryClass, Dictionary, detect, 1, NATIVE_TYPE(V), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(Bool), 2, NATIVE_TYPE(K), NATIVE_TYPE(V)));

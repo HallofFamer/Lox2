@@ -2404,7 +2404,7 @@ void registerLangPackage(VM* vm) {
     ObjClass* numberMetaclass = vm->numberClass->obj.klass;
     DEF_FIELD(numberMetaclass, infinity, Number, false, NUMBER_VAL(INFINITY));
     DEF_FIELD(numberMetaclass, pi, Number, false, NUMBER_VAL(3.14159265358979323846264338327950288));
-    DEF_METHOD(numberMetaclass, NumberClass, parse, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Object));
+    DEF_METHOD(numberMetaclass, NumberClass, parse, 1, NATIVE_TYPE(Number), NATIVE_TYPE(String));
 
     bindSuperclass(vm, vm->intClass, vm->numberClass);
     DEF_INTERCEPTOR(vm->intClass, Int, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(Int), NATIVE_TYPE(Object));
@@ -2434,7 +2434,7 @@ void registerLangPackage(VM* vm) {
     ObjClass* intMetaclass = vm->intClass->obj.klass;
     DEF_FIELD(intMetaclass, max, Int, false, INT_VAL(INT32_MAX));
     DEF_FIELD(intMetaclass, min, Int, false, INT_VAL(INT32_MIN));
-    DEF_METHOD(intMetaclass, IntClass, parse, 1, NATIVE_TYPE(Int), NATIVE_TYPE(Object));
+    DEF_METHOD(intMetaclass, IntClass, parse, 1, NATIVE_TYPE(Int), NATIVE_TYPE(String));
 
     bindSuperclass(vm, vm->floatClass, vm->numberClass);
     DEF_INTERCEPTOR(vm->floatClass, Float, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(Float), NATIVE_TYPE(Object));
@@ -2444,7 +2444,7 @@ void registerLangPackage(VM* vm) {
     ObjClass* floatMetaclass = vm->floatClass->obj.klass;
     DEF_FIELD(floatMetaclass, max, Number, false, NUMBER_VAL(DBL_MAX));
     DEF_FIELD(floatMetaclass, min, Number, true, NUMBER_VAL(DBL_MIN));
-    DEF_METHOD(floatMetaclass, FloatClass, parse, 1, NATIVE_TYPE(Float), NATIVE_TYPE(Object));
+    DEF_METHOD(floatMetaclass, FloatClass, parse, 1, NATIVE_TYPE(Float), NATIVE_TYPE(String));
 
     DEF_METHOD(iterableTrait, TIterable, iterator, 0, NATIVE_TYPE(TIterator));
 

@@ -373,8 +373,8 @@ LOX_METHOD(FileClass, open) {
     ASSERT_ARG_COUNT("File class::open(pathname, mode)", 2);
     ASSERT_ARG_TYPE("File class::open(pathname, mode)", 0, String);
     ASSERT_ARG_TYPE("File class::open(pathname, mode)", 1, String);
-    char* mode = AS_CSTRING(args[1]);
     ObjFile* file = newFile(vm, AS_STRING(args[0]));
+    char* mode = AS_CSTRING(args[1]);
 
     push(vm, OBJ_VAL(file));
     char* streamClass = streamClassName(mode);
