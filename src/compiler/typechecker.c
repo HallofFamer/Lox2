@@ -1541,6 +1541,20 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
             typeError(typeChecker, "Initial value for instance field '%s' must be a subtype of %s but gets %s.",
                 name->chars, fieldType->declaredType->shortName->chars, initializerType->shortName->chars);
         }
+        else if (initializer->kind == AST_EXPR_ARRAY && IS_GENERIC_TYPE(fieldType->declaredType)) {
+			Ast* elements = astGetChild(initializer, 0);
+			int numElements = astNumChild(elements);
+			GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(fieldType->declaredType);
+			TypeInfo* expectedElementType = genericFieldType->actualTypeParams->elements[0];
+
+            for (int i = 0; i < numElements; i++) {
+				Ast* element = astGetChild(elements, i);
+				if (!isSubtypeOfType(element->type, expectedElementType)) {
+					typeError(typeChecker, "Element %d in array initializer for instance field '%s' must be a subtype of %s but gets %s.",
+						i, name->chars, expectedElementType->shortName->chars, element->type->shortName->chars);
+				}
+			}
+        }
     }
 
 }

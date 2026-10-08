@@ -1067,6 +1067,7 @@ static void resolveArray(Resolver* resolver, Ast* ast) {
     if (astHasChild(ast)) {
         Ast* elements = astGetChild(ast, 0);
         elements->symtab = ast->symtab;
+        
         for (int i = 0; i < elements->children->count; i++) {
             resolveChild(resolver, elements, i);
         }

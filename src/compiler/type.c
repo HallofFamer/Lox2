@@ -427,6 +427,7 @@ void freeTypeInfo(TypeInfo* type) {
         BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
         if (behaviorType->traitTypes != NULL) TypeInfoArrayFree(behaviorType->traitTypes);
         if (behaviorType->formalTypeParams != NULL) TypeInfoArrayFree(behaviorType->formalTypeParams);
+        
         freeTypeTable(behaviorType->fields, true);
         freeTypeTable(behaviorType->methods, true);
         free(behaviorType);

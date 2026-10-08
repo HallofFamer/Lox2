@@ -934,7 +934,10 @@ static Ast* parameterList(Parser* parser, bool isLambda, Token token) {
         Ast* param = parameter(parser, isLambda, "Expect variadic parameter name.");
         param->attribute.isVariadic = true;
         astAppendChild(params, param);
-        if (match(parser, TOKEN_KIND_COMMA)) parseErrorAtPrevious(parser, "Cannot have more parameters following variadic parameter.");
+        
+        if (match(parser, TOKEN_KIND_COMMA)) {
+            parseErrorAtPrevious(parser, "Cannot have more parameters following variadic parameter.");
+        }
         return params;
     }
 

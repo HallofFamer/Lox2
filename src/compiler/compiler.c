@@ -1235,10 +1235,11 @@ static void compileCaseStatement(Compiler* compiler, Ast* ast) {
     emitByte(compiler, OP_DUP);
     compileChild(compiler, ast, 0);
     emitByte(compiler, OP_EQUAL);
+
     compiler->currentSwitch->previousCaseSkip = emitJump(compiler, OP_JUMP_IF_FALSE);
     emitByte(compiler, OP_POP);
-
     compileChild(compiler, ast, 1);
+
     compiler->currentSwitch->caseEnds[compiler->currentSwitch->caseCount++] = emitJump(compiler, OP_JUMP);
     patchJump(compiler, compiler->currentSwitch->previousCaseSkip);
     emitByte(compiler, OP_POP);
