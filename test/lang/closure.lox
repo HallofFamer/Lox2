@@ -2,22 +2,22 @@ namespace test.lang
 
 val z = 0
 fun outer() {
-  val x = "value"
-  val y = "value2"
+    val x = "value"
+    val y = "value2"
 
-  fun middle() {
-    println(x)
+    fun middle() {
+        println(x)
     
-    fun inner() {
-      println(y)
+        fun inner() {
+            println(y)
+        }
+
+        println("create inner closure")
+        return inner
     }
 
-    println("create inner closure")
-    return inner
-  }
-
-  println("return from outer")
-  return middle
+    println("return from outer")
+    return middle
 }
 
 val mid = outer()

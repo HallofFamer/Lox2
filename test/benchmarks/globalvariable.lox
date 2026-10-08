@@ -17,6 +17,7 @@ class Zoo {
     this.elephant = 1
     this.fox      = 1
   }
+
   ant()    { return this.aardvark }
   banana() { return this.baboon }
   tuna()   { return this.cat }

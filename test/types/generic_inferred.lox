@@ -17,6 +17,12 @@ array.add("World")
 println(identity<Array<String>>(array))
 println(identity(array))
 
+val array2 = Array<Array<Int>>()
+array2.add([1, 2, 3])
+array2.add([4, 5, 6])
+println(identity<Array<Array<Int>>>(array2))
+println(identity(array2))
+
 val func = Bool fun(Int a, String b) { 
     return (a > 0) and (b.length > 0)
 }

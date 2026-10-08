@@ -1,0 +1,16 @@
+namespace test.types
+using clox.std.collection.Array
+
+class UserProfile {
+
+    val String name
+    val Array<String> roles = ["user", "admin"]
+
+    __init__(String name) {
+        this.name = name
+    }
+}
+
+val userProfile = UserProfile("John Doe")
+println(userProfile.name) 
+println(userProfile.roles)
