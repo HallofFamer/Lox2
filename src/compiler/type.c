@@ -279,6 +279,7 @@ static char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullN
                 callableName[length++] = ',';
                 callableName[length++] = ' ';
             }
+
             if (formalType != NULL) {
                 char* formalTypeName = createTypeName(formalType, isFullName);
                 size_t formalTypeLength = strlen(formalTypeName);

@@ -1558,11 +1558,15 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
         else if (initializer->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(fieldType->declaredType)) {
 			Ast* keys = astGetChild(initializer, 0);
 			Ast* values = astGetChild(initializer, 1);
-            int numEntries = astNumChild(keys);
-			
+            int numEntries = astNumChild(keys);			
             GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(fieldType->declaredType);
+
+			if (genericFieldType->actualTypeParams->count != 2) {
+				typeError(typeChecker, "Dictionary type for instance field '%s' must have exactly two type parameters but gets %d.", name->chars, genericFieldType->actualTypeParams->count);
+                return;
+            }
 			TypeInfo* expectedKeyType = genericFieldType->actualTypeParams->elements[0];
-			TypeInfo* expectedValueType = genericFieldType->actualTypeParams->elements[1];
+            TypeInfo* expectedValueType = genericFieldType->actualTypeParams->elements[1];
 
             for (int i = 0; i < numEntries; i++) {
 				Ast* key = astGetChild(keys, i);
