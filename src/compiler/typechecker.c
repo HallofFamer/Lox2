@@ -364,6 +364,49 @@ static void checkMethodSignatures(TypeChecker* typeChecker, MethodTypeInfo* meth
     }
 }
 
+static void checkArrayLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
+    Ast* elements = astGetChild(ast, 0);
+    int numElements = astNumChild(elements);
+    GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(expectedType);
+    TypeInfo* expectedElementType = genericFieldType->actualTypeParams->elements[0];
+
+    for (int i = 0; i < numElements; i++) {
+        Ast* element = astGetChild(elements, i);
+        if (!isSubtypeOfType(element->type, expectedElementType)) {
+            typeError(typeChecker, "Element %d in array literal must be an instance of %s but gets %s.",
+                i, expectedElementType->shortName->chars, element->type->shortName->chars);
+        }
+    }
+}
+
+static void checkDictionaryLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
+    Ast* keys = astGetChild(ast, 0);
+    Ast* values = astGetChild(ast, 1);
+    int numEntries = astNumChild(keys);
+    GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(expectedType);
+
+    if (genericFieldType->actualTypeParams->count != 2) {
+        typeError(typeChecker, "The type Dictionary must have exactly two type parameters but gets %d.", genericFieldType->actualTypeParams->count);
+        return;
+    }
+    TypeInfo* expectedKeyType = genericFieldType->actualTypeParams->elements[0];
+    TypeInfo* expectedValueType = genericFieldType->actualTypeParams->elements[1];
+
+    for (int i = 0; i < numEntries; i++) {
+        Ast* key = astGetChild(keys, i);
+        Ast* value = astGetChild(values, i);
+        if (!isSubtypeOfType(key->type, expectedKeyType)) {
+            typeError(typeChecker, "Key %d in dictionary literal must be an instance of %s but gets %s.",
+                i, expectedKeyType->shortName->chars, key->type->shortName->chars);
+        }
+
+        if (!isSubtypeOfType(value->type, expectedValueType)) {
+            typeError(typeChecker, "Value %d in dictionary literal must be an instance of %s but gets %s.",
+                i, expectedValueType->shortName->chars, value->type->shortName->chars);
+        }
+    }
+}
+
 static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTypeInfo* subtype, GenericTypeInfo* supertype) {
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(supertype->rawType);
     for (int i = 0; i < behaviorType->methods->capacity; i++) {

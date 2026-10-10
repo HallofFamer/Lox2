@@ -771,7 +771,7 @@ static void typeTableFieldsInheritGeneric(TypeTable* from, TypeTable* to, TypeIn
     for (int i = 0; i < from->capacity; i++) {
         TypeEntry* entry = &from->entries[i];
         if (entry != NULL && entry->key != NULL) {
-            FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);
+            FieldTypeInfo* fromFieldType = AS_FIELD_TYPE(entry->value);      
             if (fromFieldType->declaredType != NULL && (hasGenericParameters(fromFieldType->declaredType) || hasCallableTypeParameters(fromFieldType->declaredType))) {
                 TypeInfo* instantiatedType = instantiateTypeParameter(to->count + 1, fromFieldType->declaredType, formalParams, actualParams);
                 FieldTypeInfo* toFieldType = newFieldTypeInfo(fromFieldType->baseType.id, entry->key, instantiatedType, fromFieldType->isMutable, fromFieldType->hasInitializer);
@@ -879,6 +879,7 @@ static void typeTableOutputFields(TypeTable* fields) {
         TypeEntry* entry = &fields->entries[i];
         if (entry != NULL && entry->key != NULL) {
             FieldTypeInfo* field = AS_FIELD_TYPE(entry->value);
+            
             printf("      %s", field->isMutable ? "var " : "val ");
             if (field->declaredType != NULL) printf("%s ", field->declaredType->shortName->chars);
             printf("%s(index: %d)\n", entry->key->chars, field->index);
