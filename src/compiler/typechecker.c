@@ -291,6 +291,49 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
     }
 }
 
+static void checkArrayLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
+    Ast* elements = astGetChild(ast, 0);
+    int numElements = astNumChild(elements);
+    GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(expectedType);
+    TypeInfo* expectedElementType = genericFieldType->actualTypeParams->elements[0];
+
+    for (int i = 0; i < numElements; i++) {
+        Ast* element = astGetChild(elements, i);
+        if (!isSubtypeOfType(element->type, expectedElementType)) {
+            typeError(typeChecker, "Element %d in array literal must be an instance of %s but gets %s.",
+                i, expectedElementType->shortName->chars, element->type->shortName->chars);
+        }
+    }
+}
+
+static void checkDictionaryLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
+    Ast* keys = astGetChild(ast, 0);
+    Ast* values = astGetChild(ast, 1);
+    int numEntries = astNumChild(keys);
+    GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(expectedType);
+
+    if (genericFieldType->actualTypeParams->count != 2) {
+        typeError(typeChecker, "The type Dictionary must have exactly two type parameters but gets %d.", genericFieldType->actualTypeParams->count);
+        return;
+    }
+    TypeInfo* expectedKeyType = genericFieldType->actualTypeParams->elements[0];
+    TypeInfo* expectedValueType = genericFieldType->actualTypeParams->elements[1];
+
+    for (int i = 0; i < numEntries; i++) {
+        Ast* key = astGetChild(keys, i);
+        Ast* value = astGetChild(values, i);
+        if (!isSubtypeOfType(key->type, expectedKeyType)) {
+            typeError(typeChecker, "Key %d in dictionary literal must be an instance of %s but gets %s.",
+                i, expectedKeyType->shortName->chars, key->type->shortName->chars);
+        }
+
+        if (!isSubtypeOfType(value->type, expectedValueType)) {
+            typeError(typeChecker, "Value %d in dictionary literal must be an instance of %s but gets %s.",
+                i, expectedValueType->shortName->chars, value->type->shortName->chars);
+        }
+    }
+}
+
 static void checkTypeParameters(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
     GenericTypeInfo* genericType = AS_GENERIC_TYPE(ast->type);
@@ -319,6 +362,12 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
                 typeError(typeChecker, "%s expects argument %d to be an instance of %s but gets %s.", 
                     calleeDesc, i + 1, paramType->shortName->chars, arg->type->shortName->chars);
             }
+            else if (arg->kind == AST_EXPR_ARRAY && IS_GENERIC_TYPE(paramType)) {
+                checkArrayLiteral(typeChecker, arg, paramType);
+            }
+			else if (arg->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(paramType)) {
+				checkDictionaryLiteral(typeChecker, arg, paramType);
+			}
             else if (IS_CALLABLE_TYPE(paramType) && arg->kind == AST_EXPR_FUNCTION) {
                 CallableTypeInfo* paramCallableType = AS_CALLABLE_TYPE(paramType);
                 if (arg->type == NULL) arg->type = paramType;
@@ -360,49 +409,6 @@ static void checkMethodSignatures(TypeChecker* typeChecker, MethodTypeInfo* meth
                 typeError(typeChecker, "Method %s::%s expects argument %d to be %s but gets %s.", className->chars, method->baseType.shortName->chars,
                     i + 1, superclassMethod->paramTypes->elements[i]->shortName->chars, subclassMethod->paramTypes->elements[i]->shortName->chars);
             }
-        }
-    }
-}
-
-static void checkArrayLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
-    Ast* elements = astGetChild(ast, 0);
-    int numElements = astNumChild(elements);
-    GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(expectedType);
-    TypeInfo* expectedElementType = genericFieldType->actualTypeParams->elements[0];
-
-    for (int i = 0; i < numElements; i++) {
-        Ast* element = astGetChild(elements, i);
-        if (!isSubtypeOfType(element->type, expectedElementType)) {
-            typeError(typeChecker, "Element %d in array literal must be an instance of %s but gets %s.",
-                i, expectedElementType->shortName->chars, element->type->shortName->chars);
-        }
-    }
-}
-
-static void checkDictionaryLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
-    Ast* keys = astGetChild(ast, 0);
-    Ast* values = astGetChild(ast, 1);
-    int numEntries = astNumChild(keys);
-    GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(expectedType);
-
-    if (genericFieldType->actualTypeParams->count != 2) {
-        typeError(typeChecker, "The type Dictionary must have exactly two type parameters but gets %d.", genericFieldType->actualTypeParams->count);
-        return;
-    }
-    TypeInfo* expectedKeyType = genericFieldType->actualTypeParams->elements[0];
-    TypeInfo* expectedValueType = genericFieldType->actualTypeParams->elements[1];
-
-    for (int i = 0; i < numEntries; i++) {
-        Ast* key = astGetChild(keys, i);
-        Ast* value = astGetChild(values, i);
-        if (!isSubtypeOfType(key->type, expectedKeyType)) {
-            typeError(typeChecker, "Key %d in dictionary literal must be an instance of %s but gets %s.",
-                i, expectedKeyType->shortName->chars, key->type->shortName->chars);
-        }
-
-        if (!isSubtypeOfType(value->type, expectedValueType)) {
-            typeError(typeChecker, "Value %d in dictionary literal must be an instance of %s but gets %s.",
-                i, expectedValueType->shortName->chars, value->type->shortName->chars);
         }
     }
 }
