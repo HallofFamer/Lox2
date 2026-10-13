@@ -1428,6 +1428,12 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
         typeError(typeChecker, "%s expects return value to be an instance of %s but gets %s.", 
             calleeDesc, expectedType->shortName->chars, actualType->shortName->chars);
     }
+    else if (returnValue->kind == AST_EXPR_ARRAY && IS_GENERIC_TYPE(expectedType)) {
+        checkArrayLiteral(typeChecker, returnValue, expectedType);
+    }
+    else if (returnValue->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(expectedType)) {
+        checkDictionaryLiteral(typeChecker, returnValue, expectedType);
+    }
     else if (IS_CALLABLE_TYPE(expectedType) && returnValue->kind == AST_EXPR_FUNCTION) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(expectedType);
         deriveCallableType(typeChecker, returnValue, callableType);
