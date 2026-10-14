@@ -1125,6 +1125,7 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
             else {
                 BehaviorTypeInfo* behaviorSupertype = AS_BEHAVIOR_TYPE(genericSupertype->rawType);
                 if (!isBehaviorSubtypeOfType(subtype, behaviorSupertype)) return false;
+                
                 for (int i = 0; i < type->actualTypeParams->count; i++) {
                     if (!isEqualType(type->actualTypeParams->elements[i], genericSupertype->actualTypeParams->elements[i])) return false;
                 }
@@ -1140,6 +1141,7 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
             else {
                 CallableTypeInfo* callableSupertype = AS_CALLABLE_TYPE(genericSupertype->rawType);
                 if (!isCallableSubtypeOfType(subtype, (TypeInfo*)callableSupertype)) return false;
+                
                 for (int i = 0; i < type->actualTypeParams->count; i++) {
                     if (!isEqualType(type->actualTypeParams->elements[i], genericSupertype->actualTypeParams->elements[i])) return false;
                 }

@@ -334,6 +334,12 @@ static void checkDictionaryLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo*
     }
 }
 
+static void checkFunctionLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
+    CallableTypeInfo* callableType = AS_CALLABLE_TYPE(expectedType);
+    deriveCallableType(typeChecker, ast, callableType);
+    function(typeChecker, ast, callableType, callableType->attribute.isAsync, false, false, callableType->attribute.isLambda);
+}
+
 static void checkTypeParameters(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
     GenericTypeInfo* genericType = AS_GENERIC_TYPE(ast->type);
