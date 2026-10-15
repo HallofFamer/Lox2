@@ -336,7 +336,8 @@ static void checkDictionaryLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo*
 
 static void checkFunctionLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
     CallableTypeInfo* callableType = AS_CALLABLE_TYPE(expectedType);
-    deriveCallableType(typeChecker, ast, callableType);
+    if (ast->type == NULL) ast->type = expectedType;
+    else deriveCallableType(typeChecker, ast, callableType);
     function(typeChecker, ast, callableType, callableType->attribute.isAsync, false, false, callableType->attribute.isLambda);
 }
 
@@ -375,10 +376,7 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
 				checkDictionaryLiteral(typeChecker, arg, paramType);
 			}
             else if (IS_CALLABLE_TYPE(paramType) && arg->kind == AST_EXPR_FUNCTION) {
-                CallableTypeInfo* paramCallableType = AS_CALLABLE_TYPE(paramType);
-                if (arg->type == NULL) arg->type = paramType;
-                else deriveCallableType(typeChecker, arg, paramCallableType);
-                function(typeChecker, arg, paramCallableType, paramCallableType->attribute.isAsync, false, false, paramCallableType->attribute.isLambda);
+				checkFunctionLiteral(typeChecker, arg, paramType);
             }
         }
     }
@@ -1441,9 +1439,7 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
         checkDictionaryLiteral(typeChecker, returnValue, expectedType);
     }
     else if (IS_CALLABLE_TYPE(expectedType) && returnValue->kind == AST_EXPR_FUNCTION) {
-        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(expectedType);
-        deriveCallableType(typeChecker, returnValue, callableType);
-        function(typeChecker, returnValue, callableType, callableType->attribute.isAsync, false, false, callableType->attribute.isLambda);
+        checkFunctionLiteral(typeChecker, returnValue, expectedType);
     }
 }
 
