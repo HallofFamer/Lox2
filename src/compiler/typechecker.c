@@ -1604,6 +1604,9 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
         else if (initializer->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(fieldType->declaredType)) {
 			checkDictionaryLiteral(typeChecker, initializer, fieldType->declaredType);
         }
+        else if (IS_CALLABLE_TYPE(fieldType->declaredType) && initializer->kind == AST_EXPR_FUNCTION) {
+            checkFunctionLiteral(typeChecker, initializer, fieldType->declaredType);
+        }
     }
 }
 

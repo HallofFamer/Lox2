@@ -523,8 +523,7 @@ static uint32_t hashGenericTypeInfo(TypeInfo* type, uint32_t initialHash) {
 
 static uint32_t hashAliasTypeInfo(TypeInfo* type, uint32_t initialHash) {
 	AliasTypeInfo* aliasType = AS_ALIAS_TYPE(type);
-	uint32_t hash = initialHash;
-	return mixHashTypeInfo(aliasType->targetType, hash);
+	return mixHashTypeInfo(aliasType->targetType, initialHash);
 }
 
 uint32_t hashTypeInfo(TypeInfo* type) {
