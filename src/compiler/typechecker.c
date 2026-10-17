@@ -383,10 +383,19 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
     else {
         TypeInfo* paramType = callableType->paramTypes->elements[0];
         for (int i = 0; i < ast->children->count; i++) {
-            TypeInfo* argType = ast->children->elements[i]->type;
-            if (!isSubtypeOfType(argType, paramType)) {
+            Ast* arg = ast->children->elements[i];
+            if (!isSubtypeOfType(arg->type, paramType)) {
                 typeError(typeChecker, "%s expects variadic arguments to be instances of %s but gets %s for argument %d.",
-                    calleeDesc, paramType->shortName->chars, argType->shortName->chars, i + 1);
+                    calleeDesc, paramType->shortName->chars, arg->type->shortName->chars, i + 1);
+            }
+            else if (arg->kind == AST_EXPR_ARRAY && IS_GENERIC_TYPE(paramType)) {
+                checkArrayLiteral(typeChecker, arg, paramType);
+            }
+            else if (arg->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(paramType)) {
+                checkDictionaryLiteral(typeChecker, arg, paramType);
+            }
+            else if (IS_CALLABLE_TYPE(paramType) && arg->kind == AST_EXPR_FUNCTION) {
+                checkFunctionLiteral(typeChecker, arg, paramType);
             }
         }
     }

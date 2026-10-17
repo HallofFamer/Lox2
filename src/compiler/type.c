@@ -556,9 +556,14 @@ TypeInfo* getInnerBaseType(TypeInfo* type) {
 }
 
 static bool hasCallableTypeParameters(TypeInfo* type) {
-    if (type == NULL || !IS_CALLABLE_TYPE(type)) return false;
+    if (type == NULL || !IS_CALLABLE_TYPE(type)) {
+        return false;
+    }
+
     CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
-    if (callableType->formalTypeParams->count > 0 || hasGenericParameters(callableType->returnType)) return true;
+    if (callableType->formalTypeParams->count > 0 || hasGenericParameters(callableType->returnType)) {
+        return true;
+    }
 
     for (int i = 0; i < callableType->paramTypes->count; i++) {
         TypeInfo* paramType = callableType->paramTypes->elements[i];
