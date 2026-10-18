@@ -792,6 +792,13 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
         return NULL;
     }
 
+    Ast* typeParams = astGetChild(ast, 0);
+    TypeInfoArray* formalTypeParams = getTypeParameters(rawType);
+	if (typeParams->children->count != formalTypeParams->count) {
+		semanticError(resolver, "Type %s expects %d generic parameters, but %d were provided.", typeName->chars, formalTypeParams->count, typeParams->children->count);
+		return NULL;
+	}
+
 	GenericTypeInfo* existingGenericType = findGenericTypeFromAst(resolver, ast);
 	if (existingGenericType != NULL) {
         ast->type = (TypeInfo*)existingGenericType;
@@ -801,7 +808,6 @@ static GenericTypeInfo* insertGenericType(Resolver* resolver, Ast* ast) {
 
     GenericTypeInfo* genericType = newGenericTypeInfo(-1, rawType->shortName, rawType->fullName, rawType);
     if (genericType != NULL) {
-        Ast* typeParams = astGetChild(ast, 0);
         for (int i = 0; i < typeParams->children->count; i++) {
             Ast* typeParam = typeParams->children->elements[i];
             insertTypeParameter(resolver, typeParam, i, genericType);

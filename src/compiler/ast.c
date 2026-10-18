@@ -375,7 +375,9 @@ static void astOutputExprInvoke(Ast* ast, int indentLevel) {
 
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
-	if (astNumChild(ast) > 2) astOutputChild(ast, indentLevel + 1, 2);
+    if (astNumChild(ast) > 2) {
+        astOutputChild(ast, indentLevel + 1, 2);
+    }
     free(method);
 }
 
@@ -428,7 +430,7 @@ static void astOutputExprParam(Ast* ast, int indentLevel) {
     char* name = tokenToCString(ast->token);
 
     printf("param %s%s%s\n", mutable, variadic, name);
-    if (astNumChild(ast) > 0) {
+    if (astHasChild(ast)) {
         astOutputChild(ast, indentLevel + 1, 0);
     }
     free(name);

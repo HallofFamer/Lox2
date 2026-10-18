@@ -375,7 +375,7 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
 			else if (arg->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(paramType)) {
 				checkDictionaryLiteral(typeChecker, arg, paramType);
 			}
-            else if (IS_CALLABLE_TYPE(paramType) && arg->kind == AST_EXPR_FUNCTION) {
+            else if (arg->kind == AST_EXPR_FUNCTION && IS_CALLABLE_TYPE(paramType)) {
 				checkFunctionLiteral(typeChecker, arg, paramType);
             }
         }
@@ -394,7 +394,7 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
             else if (arg->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(paramType)) {
                 checkDictionaryLiteral(typeChecker, arg, paramType);
             }
-            else if (IS_CALLABLE_TYPE(paramType) && arg->kind == AST_EXPR_FUNCTION) {
+            else if (arg->kind == AST_EXPR_FUNCTION && IS_CALLABLE_TYPE(paramType)) {
                 checkFunctionLiteral(typeChecker, arg, paramType);
             }
         }
@@ -1447,7 +1447,7 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
     else if (returnValue->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(expectedType)) {
         checkDictionaryLiteral(typeChecker, returnValue, expectedType);
     }
-    else if (IS_CALLABLE_TYPE(expectedType) && returnValue->kind == AST_EXPR_FUNCTION) {
+    else if (returnValue->kind == AST_EXPR_FUNCTION && IS_CALLABLE_TYPE(expectedType)) {
         checkFunctionLiteral(typeChecker, returnValue, expectedType);
     }
 }
@@ -1613,7 +1613,7 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
         else if (initializer->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(fieldType->declaredType)) {
 			checkDictionaryLiteral(typeChecker, initializer, fieldType->declaredType);
         }
-        else if (IS_CALLABLE_TYPE(fieldType->declaredType) && initializer->kind == AST_EXPR_FUNCTION) {
+        else if (initializer->kind == AST_EXPR_FUNCTION && IS_CALLABLE_TYPE(fieldType->declaredType)) {
             checkFunctionLiteral(typeChecker, initializer, fieldType->declaredType);
         }
     }
