@@ -74,14 +74,14 @@ println(identityNameBox.identityName())
 val identityNameBox2 = IdentityNameBox(id)
 println(identityNameBox2.identityName())
 
-class IdentityClass { 
+class IdentityObject { 
     
     String getIdentity<T>(T arg) { 
         return arg.toString()
     }
 }
 
-val identityObject = IdentityClass()
+val identityObject = IdentityObject()
 println("\nTesting inferred generic type parameters for unreified generic methods: ")
 println(identityObject.getIdentity<UUID>(id))
 println(identityObject.getIdentity(id))

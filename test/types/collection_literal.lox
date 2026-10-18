@@ -1,10 +1,12 @@
 namespace test.types
 using clox.std.collection.Array
+using clox.std.collection.Dictionary
 
 class UserProfile {
 
     val String name
     val Array<String> roles = ["user", "admin"]
+    val Dictionary<String, String> settings = ["theme": "dark", "language": "en", "isPremium": "true"]
 
     __init__(String name) {
         this.name = name
@@ -14,3 +16,4 @@ class UserProfile {
 val userProfile = UserProfile("John Doe")
 println(userProfile.name) 
 println(userProfile.roles)
+println(userProfile.settings)

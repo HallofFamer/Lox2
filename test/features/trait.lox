@@ -47,6 +47,9 @@ println("TTruck has method 'carry': ${TTruck.hasMethod("carry")}\n")
 
 class Vehicle with TVehicle { 
 
+    val String color
+    val Number speed
+
     __init__(String color, Number speed){ 
         this.color = color
         this.speed = speed
@@ -73,6 +76,8 @@ println("Vehicle is instance of trait TVehicle: ${vehicle.instanceOf(TVehicle)}"
 println("Vehicle is instance of trait TTruck: ${vehicle.instanceOf(TTruck)}\n")
 
 class Truck extends Vehicle with TTruck { 
+
+    var Number load
 
     __init__(String color, Number speed, Number load) { 
         super.__init__(color, speed)

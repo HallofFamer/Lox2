@@ -3,7 +3,7 @@ using clox.std.collection.Dictionary
 
 class IterableObject with TIterable<Object> { 
     
-    val Dictionary fields = Dictionary()
+    val Dictionary<String, Object> fields = Dictionary<String, Object>()
     var Int position = -1
     var Object value = nil
 

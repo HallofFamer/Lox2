@@ -21,11 +21,10 @@ println("\n")
 println("\nFile stream is at end: ${fileReader.isAtEnd()}")
 println("Closing read stream for file.")
 fileReader.close()
-println("")
 
 val fileOut = File("test/others/file_output.txt")
 println(fileOut)
-println("Creating a write stream for out file.")
+println("\nCreating a write stream for out file.")
 
 val fileWriter = FileWriteStream(fileOut)
 
@@ -39,11 +38,10 @@ fileWriter.writeLine()
 fileWriter.writeString("Hello World!")
 println("Close write stream for file.")
 fileWriter.close()
-println("")
 
 val binaryFileIn = File("test/others/binary_input.bin")
 println(binaryFileIn)
-println("Creating a binary read stream.")
+println("\nCreating a binary read stream.")
 println("Now read the binary file to the screen:")
 
 val binaryReader = BinaryReadStream(binaryFileIn)
