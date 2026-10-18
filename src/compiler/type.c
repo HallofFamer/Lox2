@@ -1035,8 +1035,13 @@ void typeTableOutput(TypeTable* typetab) {
 }
 
 static bool isCallableEqualType(CallableTypeInfo* type, CallableTypeInfo* type2) {
-    if (!isEqualType(type->returnType, type2->returnType)) return false;
-    if (type->paramTypes->count != type2->paramTypes->count) return false;
+    if (!isEqualType(type->returnType, type2->returnType)) {
+        return false;
+    }
+
+    if (type->paramTypes->count != type2->paramTypes->count) {
+        return false;
+    }
     
     for (int i = 0; i < type->paramTypes->count; i++) {
         if (!isEqualType(type->paramTypes->elements[i], type2->paramTypes->elements[i])) return false;

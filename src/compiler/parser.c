@@ -320,6 +320,7 @@ static void synchronize(Parser* parser) {
             case TOKEN_KIND_FUN:
             case TOKEN_KIND_IF:
             case TOKEN_KIND_NAMESPACE:
+			case TOKEN_KIND_REQUIRE:
             case TOKEN_KIND_RETURN:
             case TOKEN_KIND_SWITCH:
             case TOKEN_KIND_TRAIT:
@@ -509,6 +510,7 @@ static Ast* callableType(Parser* parser) {
         do {
             arity++;
             if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
+            
             if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_KIND_VOID) && checkNext(parser, TOKEN_KIND_FUN)) {
                 paramType = callableType(parser);
                 paramType->attribute.isFunction = true;
@@ -546,6 +548,7 @@ static Ast* genericType(Parser* parser) {
     do {
         arity++;
         if (arity > UINT4_MAX) parseErrorAtCurrent(parser, "Can't have more than 15 generic types.");
+        
         if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_KIND_VOID) && checkNext(parser, TOKEN_KIND_FUN)) {
             paramType = callableType(parser);
             paramType->attribute.isFunction = true;

@@ -59,7 +59,6 @@ typedef struct {
 } BehaviorTypeInfo;
 
 typedef struct {
-    bool isAsync;
     bool isClassMethod;
     bool isGeneric;
     bool isInitializer;
@@ -121,7 +120,6 @@ struct TypeTable {
 
 static inline CallableTypeAttribute callableTypeInitAttribute() {
     return (CallableTypeAttribute) {
-        .isAsync = false,
         .isClassMethod = false,
         .isGeneric = false,
         .isInitializer = false,

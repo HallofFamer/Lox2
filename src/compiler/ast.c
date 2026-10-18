@@ -355,7 +355,7 @@ static void astOutputExprDictionary(Ast* ast, int indentLevel) {
 
 static void astOutputExprFunction(Ast* ast, int indentLevel) {
     astOutputIndent(indentLevel);
-    printf("function\n");
+    printf("%s\n", ast->attribute.isLambda ? "lambda" : "function");
     astOutputChild(ast, indentLevel + 1, 0);
     astOutputChild(ast, indentLevel + 1, 1);
     astOutputChild(ast, indentLevel + 1, 2);

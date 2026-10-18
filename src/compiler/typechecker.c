@@ -338,7 +338,7 @@ static void checkFunctionLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* e
     CallableTypeInfo* callableType = AS_CALLABLE_TYPE(expectedType);
     if (ast->type == NULL) ast->type = expectedType;
     else deriveCallableType(typeChecker, ast, callableType);
-    function(typeChecker, ast, callableType, callableType->attribute.isAsync, false, false, callableType->attribute.isLambda);
+    function(typeChecker, ast, callableType, ast->attribute.isAsync, false, false, callableType->attribute.isLambda);
 }
 
 static void checkTypeParameters(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
@@ -767,7 +767,7 @@ static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
         deriveCalleeType(typeChecker, ast, calleeType); 
 		calleeType = AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)calleeType));
         callee->type = (TypeInfo*)calleeType;
-        function(typeChecker, callee, calleeType, calleeType->attribute.isAsync, false, false, calleeType->attribute.isLambda);
+        function(typeChecker, callee, calleeType, ast->attribute.isAsync, false, false, calleeType->attribute.isLambda);
     }
     else if (IS_CALLABLE_TYPE(rawType)) {
         SymbolItem* item = symbolTableLookup(ast->symtab, name);
@@ -1194,7 +1194,7 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     else if (fieldType->declaredType != NULL && value->type != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
         CallableTypeInfo* callableType = AS_CALLABLE_TYPE(fieldType->declaredType);
         deriveCallableType(typeChecker, value, AS_CALLABLE_TYPE(fieldType->declaredType));
-        function(typeChecker, value, callableType, callableType->attribute.isAsync, false, false, callableType->attribute.isLambda);
+        function(typeChecker, value, callableType, ast->attribute.isAsync, false, false, callableType->attribute.isLambda);
     }
     defineAstType(typeChecker, ast, "Nil", NULL);
 }
