@@ -87,6 +87,7 @@ LOX_METHOD(BinaryWriteStream, __init__) {
     if (!setFileField(vm, AS_INSTANCE(receiver), file, "wb")) {
         THROW_EXCEPTION(clox.std.io.IOException, "Cannot create BinaryWriteStream, file either does not exist or require additional permission to access.");
     }
+
     if (!loadFileWrite(vm, file)) THROW_EXCEPTION(clox.std.io.IOException, "Unable to write to binary stream.");
     RETURN_OBJ(self);
 }

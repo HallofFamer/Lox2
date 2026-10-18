@@ -548,9 +548,12 @@ LOX_METHOD(Socket, close) {
 LOX_METHOD(Socket, receive) {
     ASSERT_ARG_COUNT("Socket::receive()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    int descriptor = AS_INT(getObjField(vm, self, "descriptor"));
+    int descriptor = AS_INT(getObjField(vm, self, "descriptor"));  
     char message[UINT8_MAX] = "";
-    if (recv(descriptor, message, UINT8_MAX, 0) < 0) THROW_EXCEPTION(clox.std.net.SocketException, "Failed to receive message from socket.");
+
+    if (recv(descriptor, message, UINT8_MAX, 0) < 0) {
+        THROW_EXCEPTION(clox.std.net.SocketException, "Failed to receive message from socket.");
+    }
     RETURN_STRING(message, (int)strlen(message));
 }
 

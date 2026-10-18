@@ -96,13 +96,13 @@ static void defineLangTypes(VM* vm) {
     vm->currentNamespace = vm->langNamespace;
 
     vm->objectClass = defineSpecialClass(vm, "Object", BEHAVIOR_CLASS);
-    ObjClass* behaviorClass = defineSpecialClass(vm, "Behavior", BEHAVIOR_CLASS);
+    defineSpecialClass(vm, "Behavior", BEHAVIOR_CLASS);
     vm->classClass = defineSpecialClass(vm, "Class", BEHAVIOR_CLASS);
     vm->metaclassClass = defineSpecialClass(vm, "Metaclass", BEHAVIOR_METACLASS);
-    ObjClass* objectMetaclass = defineSpecialClass(vm, "Object class", BEHAVIOR_METACLASS);
-    ObjClass* behaviorMetaclass = defineSpecialClass(vm, "Behavior class", BEHAVIOR_METACLASS);
-    ObjClass* classMetaclass = defineSpecialClass(vm, "Class class", BEHAVIOR_METACLASS);
-    ObjClass* metaclassMetaclass = defineSpecialClass(vm, "Metaclass class", BEHAVIOR_METACLASS);
+    defineSpecialClass(vm, "Object class", BEHAVIOR_METACLASS);
+    defineSpecialClass(vm, "Behavior class", BEHAVIOR_METACLASS);
+    defineSpecialClass(vm, "Class class", BEHAVIOR_METACLASS);
+    defineSpecialClass(vm, "Metaclass class", BEHAVIOR_METACLASS);
 
     vm->methodClass = defineNativeClass(vm, "Method");
     vm->namespaceClass = defineNativeClass(vm, "Namespace");
@@ -121,19 +121,19 @@ static void defineLangTypes(VM* vm) {
 
     vm->nilClass = defineNativeClass(vm, "Nil");
     vm->boolClass = defineNativeClass(vm, "Bool");
-    ObjClass* comparableTrait = defineNativeTrait(vm, "TComparable");
+    defineNativeTrait(vm, "TComparable");
     vm->numberClass = defineNativeClass(vm, "Number");
     vm->intClass = defineNativeClass(vm, "Int");
     vm->floatClass = defineNativeClass(vm, "Float");
 
     TypeInfo* elementType = declareNativeTypeParameter(vm, "E");
-    ObjClass* iterableTrait = defineNativeGenericTrait(vm, "TIterable", 1, elementType);
-    ObjClass* iteratorTrait = defineNativeGenericTrait(vm, "TIterator", 1, elementType);
+    defineNativeGenericTrait(vm, "TIterable", 1, elementType);
+    defineNativeGenericTrait(vm, "TIterator", 1, elementType);
     vm->iteratorClass = defineNativeGenericClass(vm, "Iterator", 1, elementType);
     vm->stringClass = defineNativeClass(vm, "String");
-    ObjClass* stringIteratorClass = defineNativeGenericClass(vm, "StringIterator", 1, elementType);
+    defineNativeGenericClass(vm, "StringIterator", 1, elementType);
 
-    ObjClass* callableTrait = defineNativeTrait(vm, "TCallable");
+    defineNativeTrait(vm, "TCallable");
     vm->functionClass = defineNativeClass(vm, "Function");
     vm->boundMethodClass = defineNativeClass(vm, "BoundMethod");
     vm->generatorClass = defineNativeClass(vm, "Generator");

@@ -790,6 +790,15 @@ LOX_METHOD(Int, gcd) {
     RETURN_INT(gcd(abs(AS_INT_INSTANCE(receiver)), abs(AS_INT_INSTANCE(args[0]))));
 }
 
+LOX_METHOD(Int, highBit) {
+	ASSERT_ARG_COUNT("Int::highBit()", 0);
+	int self = AS_INT_INSTANCE(receiver);
+	if (self == 0) RETURN_INT(0);
+	int bit = 0;
+	while (self >>= 1) bit++;
+	RETURN_INT(bit);
+}
+
 LOX_METHOD(Int, isEven) {
     ASSERT_ARG_COUNT("Int::isEven()", 0);
     RETURN_BOOL(AS_INT_INSTANCE(receiver) % 2 == 0);
@@ -804,6 +813,18 @@ LOX_METHOD(Int, lcm) {
     ASSERT_ARG_COUNT("Int::lcm(other)", 1);
     ASSERT_ARG_TYPE("Int::lcm(other)", 0, Int);
     RETURN_INT(lcm(abs(AS_INT_INSTANCE(receiver)), abs(AS_INT_INSTANCE(args[0]))));
+}
+
+LOX_METHOD(Int, lowBit) {
+    ASSERT_ARG_COUNT("Int::lowBit()", 0);
+    int self = AS_INT_INSTANCE(receiver);
+    if (self == 0) RETURN_INT(0);
+    int bit = 0;
+    while (!(self & 1)) {
+        self >>= 1;
+        bit++;
+    }
+    RETURN_INT(bit);
 }
 
 LOX_METHOD(Int, objectID) {
@@ -2413,9 +2434,11 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->intClass, Int, downTo, 2, NATIVE_TYPE(void), NATIVE_TYPE(Int), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(void), 1, NATIVE_TYPE(Int)));
     DEF_METHOD(vm->intClass, Int, factorial, 0, NATIVE_TYPE(Int));
     DEF_METHOD(vm->intClass, Int, gcd, 1, NATIVE_TYPE(Int), NATIVE_TYPE(Int));
+    DEF_METHOD(vm->intClass, Int, highBit, 0, NATIVE_TYPE(Int));
     DEF_METHOD(vm->intClass, Int, isEven, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->intClass, Int, isOdd, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->intClass, Int, lcm, 1, NATIVE_TYPE(Int), NATIVE_TYPE(Int));
+	DEF_METHOD(vm->intClass, Int, lowBit, 0, NATIVE_TYPE(Int));
     DEF_METHOD(vm->intClass, Int, objectID, 0, NATIVE_TYPE(Number));
     DEF_METHOD(vm->intClass, Int, timesRepeat, 1, NATIVE_TYPE(void), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(void), 1, NATIVE_TYPE(Int)));
     DEF_METHOD(vm->intClass, Int, toBinary, 0, NATIVE_TYPE(String));

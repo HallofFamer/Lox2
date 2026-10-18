@@ -2262,6 +2262,14 @@ LOX_METHOD(Set, subsetOf) {
 	RETURN_BOOL(setSubsetOf(vm, self, other));
 }
 
+LOX_METHOD(Set, supersetOf) {
+	ASSERT_ARG_COUNT("Set::supersetOf(other)", 1);
+	ASSERT_ARG_INSTANCE_OF("Set::supersetOf(other)", 0, clox.std.collection.Set);
+	ObjInstance* self = AS_INSTANCE(receiver);
+	ObjInstance* other = AS_INSTANCE(args[0]);
+	RETURN_BOOL(setSubsetOf(vm, other, self));
+}
+
 LOX_METHOD(Set, symmetricDifference) {
 	ASSERT_ARG_COUNT("Set::symmetricDifference(other)", 1);
 	ASSERT_ARG_INSTANCE_OF("Set::symmetricDifference(other)", 0, clox.std.collection.Set);
@@ -2651,6 +2659,7 @@ void registerCollectionPackage(VM* vm) {
     DEF_METHOD(setClass, Set, length, 0, NATIVE_TYPE(Int));
     DEF_METHOD(setClass, Set, remove, 1, NATIVE_TYPE(E), NATIVE_TYPE(E));
     DEF_METHOD(setClass, Set, subsetOf, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(clox.std.collection.Set));
+	DEF_METHOD(setClass, Set, supersetOf, 1, NATIVE_TYPE(Bool), NATIVE_TYPE(clox.std.collection.Set));
 	DEF_METHOD(setClass, Set, symmetricDifference, 1, NATIVE_TYPE(clox.std.collection.Set), NATIVE_TYPE(clox.std.collection.Set));
     DEF_METHOD(setClass, Set, toArray, 0, NATIVE_TYPE(clox.std.collection.Array));
     DEF_METHOD(setClass, Set, toString, 0, NATIVE_TYPE(String));
