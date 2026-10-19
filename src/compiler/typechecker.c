@@ -341,6 +341,18 @@ static void checkFunctionLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* e
     function(typeChecker, ast, callableType, ast->attribute.isAsync, false, false, callableType->attribute.isLambda);
 }
 
+static void checkExpressionLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
+    if (ast->kind == AST_EXPR_ARRAY && IS_GENERIC_TYPE(expectedType)) {
+        checkArrayLiteral(typeChecker, ast, expectedType);
+    }
+    else if (ast->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(expectedType)) {
+        checkDictionaryLiteral(typeChecker, ast, expectedType);
+    }
+    else if (ast->kind == AST_EXPR_FUNCTION && IS_CALLABLE_TYPE(expectedType)) {
+        checkFunctionLiteral(typeChecker, ast, expectedType);
+    }
+}
+
 static void checkTypeParameters(TypeChecker* typeChecker, Ast* ast, TypeInfo* type) {
     BehaviorTypeInfo* behaviorType = AS_BEHAVIOR_TYPE(type);
     GenericTypeInfo* genericType = AS_GENERIC_TYPE(ast->type);

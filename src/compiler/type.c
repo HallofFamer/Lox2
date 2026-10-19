@@ -43,8 +43,8 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithTraits(int id, TypeCategory category, O
         behaviorType->superclassType = superclassType;
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         behaviorType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-
         if (behaviorType->formalTypeParams != NULL) TypeInfoArrayInit(behaviorType->formalTypeParams);
+
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = newTypeTable(id);
 		behaviorType->isReified = false;
