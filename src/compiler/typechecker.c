@@ -381,14 +381,8 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
                 typeError(typeChecker, "%s expects argument %d to be an instance of %s but gets %s.", 
                     calleeDesc, i + 1, paramType->shortName->chars, arg->type->shortName->chars);
             }
-            else if (arg->kind == AST_EXPR_ARRAY && IS_GENERIC_TYPE(paramType)) {
-                checkArrayLiteral(typeChecker, arg, paramType);
-            }
-			else if (arg->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(paramType)) {
-				checkDictionaryLiteral(typeChecker, arg, paramType);
-			}
-            else if (arg->kind == AST_EXPR_FUNCTION && IS_CALLABLE_TYPE(paramType)) {
-				checkFunctionLiteral(typeChecker, arg, paramType);
+            else {
+				checkExpressionLiteral(typeChecker, arg, paramType);
             }
         }
     }
@@ -400,14 +394,8 @@ static void checkArguments(TypeChecker* typeChecker, const char* calleeDesc, Ast
                 typeError(typeChecker, "%s expects variadic arguments to be instances of %s but gets %s for argument %d.",
                     calleeDesc, paramType->shortName->chars, arg->type->shortName->chars, i + 1);
             }
-            else if (arg->kind == AST_EXPR_ARRAY && IS_GENERIC_TYPE(paramType)) {
-                checkArrayLiteral(typeChecker, arg, paramType);
-            }
-            else if (arg->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(paramType)) {
-                checkDictionaryLiteral(typeChecker, arg, paramType);
-            }
-            else if (arg->kind == AST_EXPR_FUNCTION && IS_CALLABLE_TYPE(paramType)) {
-                checkFunctionLiteral(typeChecker, arg, paramType);
+            else {
+                checkExpressionLiteral(typeChecker, arg, paramType);
             }
         }
     }
@@ -1453,14 +1441,8 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
         typeError(typeChecker, "%s expects return value to be an instance of %s but gets %s.", 
             calleeDesc, expectedType->shortName->chars, actualType->shortName->chars);
     }
-    else if (returnValue->kind == AST_EXPR_ARRAY && IS_GENERIC_TYPE(expectedType)) {
-        checkArrayLiteral(typeChecker, returnValue, expectedType);
-    }
-    else if (returnValue->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(expectedType)) {
-        checkDictionaryLiteral(typeChecker, returnValue, expectedType);
-    }
-    else if (returnValue->kind == AST_EXPR_FUNCTION && IS_CALLABLE_TYPE(expectedType)) {
-        checkFunctionLiteral(typeChecker, returnValue, expectedType);
+    else {
+        checkExpressionLiteral(typeChecker, returnValue, expectedType);
     }
 }
 
@@ -1619,14 +1601,8 @@ static void typeCheckFieldDeclaration(TypeChecker* typeChecker, Ast* ast) {
             typeError(typeChecker, "Initial value for instance field '%s' must be a subtype of %s but gets %s.",
                 name->chars, fieldType->declaredType->shortName->chars, initializerType->shortName->chars);
         }
-        else if (initializer->kind == AST_EXPR_ARRAY && IS_GENERIC_TYPE(fieldType->declaredType)) {
-            checkArrayLiteral(typeChecker, initializer, fieldType->declaredType);
-        }
-        else if (initializer->kind == AST_EXPR_DICTIONARY && IS_GENERIC_TYPE(fieldType->declaredType)) {
-			checkDictionaryLiteral(typeChecker, initializer, fieldType->declaredType);
-        }
-        else if (initializer->kind == AST_EXPR_FUNCTION && IS_CALLABLE_TYPE(fieldType->declaredType)) {
-            checkFunctionLiteral(typeChecker, initializer, fieldType->declaredType);
+        else {
+            checkExpressionLiteral(typeChecker, initializer, fieldType->declaredType);
         }
     }
 }
