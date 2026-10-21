@@ -98,8 +98,8 @@ BehaviorTypeInfo* newBehaviorTypeInfoWithMethods(int id, TypeCategory category, 
         behaviorType->traitTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
         if (behaviorType->traitTypes != NULL) TypeInfoArrayInit(behaviorType->traitTypes);
         behaviorType->formalTypeParams = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
-
         if (behaviorType->formalTypeParams != NULL) TypeInfoArrayInit(behaviorType->formalTypeParams);
+
         behaviorType->fields = newTypeTable(-1);
         behaviorType->methods = methods;
 		behaviorType->isReified = false;

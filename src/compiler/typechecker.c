@@ -1191,10 +1191,8 @@ static void typeCheckPropertySet(TypeChecker* typeChecker, Ast* ast) {
     if (!isSubtypeOfType(value->type, fieldType->declaredType)) {
         typeError(typeChecker, "Assignment to field %s expects type %s but gets %s.", fieldName->chars, fieldType->declaredType->shortName->chars, value->type->shortName->chars);
     }
-    else if (fieldType->declaredType != NULL && value->type != NULL && IS_CALLABLE_TYPE(fieldType->declaredType)) {
-        CallableTypeInfo* callableType = AS_CALLABLE_TYPE(fieldType->declaredType);
-        deriveCallableType(typeChecker, value, AS_CALLABLE_TYPE(fieldType->declaredType));
-        function(typeChecker, value, callableType, ast->attribute.isAsync, false, false, callableType->attribute.isLambda);
+    else {
+		checkExpressionLiteral(typeChecker, value, fieldType->declaredType);
     }
     defineAstType(typeChecker, ast, "Nil", NULL);
 }
