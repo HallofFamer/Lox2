@@ -474,7 +474,7 @@ static bool matchGenericType(Parser* parser) {
 
     // Then, we need to match a list of type parameters. Each type parameter can be any valid type annotation, and they are separated by commas. If any of the type parameters don't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead.
     do {
-        if (!matchType(parser)) return resetIndex(parser, index, current, false);
+        if (!match(parser, TOKEN_KIND_VOID) && !matchType(parser)) return resetIndex(parser, index, current, false);
     } while (match(parser, TOKEN_KIND_COMMA));
 
     // Finally, we need to match the closing greater than symbol. 
@@ -557,6 +557,11 @@ static Ast* genericType(Parser* parser) {
             paramType = genericType(parser);
             paramType->attribute.isGeneric = true;
         }
+		else if (check(parser, TOKEN_KIND_VOID)) {
+            consume(parser, TOKEN_KIND_VOID, "Expect void type.");
+			paramType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+			paramType->attribute.isVoid = true;
+		}
         else paramType = behaviorType(parser);
         astAppendChild(paramTypes, paramType);
     } while (match(parser, TOKEN_KIND_COMMA));
