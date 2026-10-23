@@ -1182,8 +1182,6 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
         return isGenericSubtypeOfType(AS_GENERIC_TYPE(type), type2);
     }
     
-    if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) {
-        return false;
-    }
+    if (!IS_BEHAVIOR_TYPE(type) || !IS_BEHAVIOR_TYPE(type2)) return false;
     return isBehaviorSubtypeOfType(AS_BEHAVIOR_TYPE(type), AS_BEHAVIOR_TYPE(type2));
 }

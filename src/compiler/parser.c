@@ -443,7 +443,7 @@ static bool matchCallableType(Parser* parser) {
 
     // First we need to match a return type declaration, it can be a void keyword or any valid type annotation.
     // If it doesn't match, then this isn't a callable type annotation and we should backtrack and try to parse it as an expression instead.
-    if (!match(parser, TOKEN_KIND_VOID) && !matchType(parser)) {
+    if (!matchType(parser)) {
         return resetIndex(parser, index, current, false);
     }
 
@@ -484,12 +484,19 @@ static bool matchGenericType(Parser* parser) {
 }
 
 static bool matchType(Parser* parser) {
-    return matchBehaviorType(parser) || matchMetaclassType(parser) || matchCallableType(parser) || matchGenericType(parser);
+    return matchBehaviorType(parser) || matchVoidType(parser) || matchMetaclassType(parser) || matchCallableType(parser) || matchGenericType(parser);
 }
 
 static Ast* behaviorType(Parser* parser) {
     consume(parser, TOKEN_KIND_IDENTIFIER, "Expect behavior type.");
     return emptyAst(AST_EXPR_TYPE, previousToken(parser));
+}
+
+static Ast* voidType(Parser* parser) {
+	consume(parser, TOKEN_KIND_VOID, "Expect void type.");
+	Ast* type = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+	type->attribute.isVoid = true;
+	return type;
 }
 
 static Ast* callableType(Parser* parser) {
@@ -558,8 +565,7 @@ static Ast* genericType(Parser* parser) {
             paramType->attribute.isGeneric = true;
         }
 		else if (check(parser, TOKEN_KIND_VOID)) {
-            consume(parser, TOKEN_KIND_VOID, "Expect void type.");
-			paramType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+			paramType = voidType(parser);
 			paramType->attribute.isVoid = true;
 		}
         else paramType = behaviorType(parser);
