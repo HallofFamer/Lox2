@@ -522,6 +522,10 @@ static Ast* callableType(Parser* parser) {
                 paramType = callableType(parser);
                 paramType->attribute.isFunction = true;
             }
+            else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_LESS)) {
+                paramType = genericType(parser);
+                paramType->attribute.isGeneric = true;
+            }
             else paramType = behaviorType(parser);
             astAppendChild(paramTypes, paramType);
         } while (match(parser, TOKEN_KIND_COMMA));
