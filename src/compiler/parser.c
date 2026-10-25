@@ -487,6 +487,9 @@ static bool matchType(Parser* parser) {
     return matchBehaviorType(parser) || matchVoidType(parser) || matchMetaclassType(parser) || matchCallableType(parser) || matchGenericType(parser);
 }
 
+static Ast* callableType(Parser* parser);
+static Ast* genericType(Parser* parser);
+
 static Ast* behaviorType(Parser* parser) {
     consume(parser, TOKEN_KIND_IDENTIFIER, "Expect behavior type.");
     return emptyAst(AST_EXPR_TYPE, previousToken(parser));
@@ -526,6 +529,9 @@ static Ast* callableType(Parser* parser) {
                 paramType = genericType(parser);
                 paramType->attribute.isGeneric = true;
             }
+			else if (check(parser, TOKEN_KIND_VOID)) {
+                parseErrorAtCurrent(parser, "Cannot use void type as a parameter type.");
+			}
             else paramType = behaviorType(parser);
             astAppendChild(paramTypes, paramType);
         } while (match(parser, TOKEN_KIND_COMMA));
