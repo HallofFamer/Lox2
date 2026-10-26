@@ -753,8 +753,8 @@ bool typeTableSet(TypeTable* typetab, ObjString* key, TypeInfo* value) {
     TypeEntry* entry = findTypeEntry(typetab->entries, typetab->capacity, key);
     if (entry->key != NULL) return false;
     typetab->count++;
-
 	value->id = typetab->count;
+
     entry->key = key;
     entry->value = value;
     return true;

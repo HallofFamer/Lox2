@@ -343,6 +343,7 @@ static void synchronize(Parser* parser) {
 
 static Ast* expression(Parser* parser);
 static Ast* variable(Parser* parser, Token token, bool canAssign);
+static Ast* innerType(Parser* parser, bool allowVoid);
 static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam);
 static Ast* statement(Parser* parser);
 static Ast* block(Parser* parser);
@@ -487,9 +488,6 @@ static bool matchType(Parser* parser) {
     return matchBehaviorType(parser) || matchVoidType(parser) || matchMetaclassType(parser) || matchCallableType(parser) || matchGenericType(parser);
 }
 
-static Ast* callableType(Parser* parser);
-static Ast* genericType(Parser* parser);
-
 static Ast* behaviorType(Parser* parser) {
     consume(parser, TOKEN_KIND_IDENTIFIER, "Expect behavior type.");
     return emptyAst(AST_EXPR_TYPE, previousToken(parser));
@@ -520,19 +518,7 @@ static Ast* callableType(Parser* parser) {
         do {
             arity++;
             if (arity > UINT8_MAX) parseErrorAtCurrent(parser, "Can't have more than 255 param types.");
-            
-            if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_KIND_VOID) && checkNext(parser, TOKEN_KIND_FUN)) {
-                paramType = callableType(parser);
-                paramType->attribute.isFunction = true;
-            }
-            else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_LESS)) {
-                paramType = genericType(parser);
-                paramType->attribute.isGeneric = true;
-            }
-			else if (check(parser, TOKEN_KIND_VOID)) {
-                parseErrorAtCurrent(parser, "Cannot use void type as a parameter type.");
-			}
-            else paramType = behaviorType(parser);
+			Ast* paramType = innerType(parser, false);
             astAppendChild(paramTypes, paramType);
         } while (match(parser, TOKEN_KIND_COMMA));
     }
@@ -565,20 +551,7 @@ static Ast* genericType(Parser* parser) {
     do {
         arity++;
         if (arity > UINT4_MAX) parseErrorAtCurrent(parser, "Can't have more than 15 generic types.");
-        
-        if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_KIND_VOID) && checkNext(parser, TOKEN_KIND_FUN)) {
-            paramType = callableType(parser);
-            paramType->attribute.isFunction = true;
-        }
-        else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_LESS)) {
-            paramType = genericType(parser);
-            paramType->attribute.isGeneric = true;
-        }
-		else if (check(parser, TOKEN_KIND_VOID)) {
-			paramType = voidType(parser);
-			paramType->attribute.isVoid = true;
-		}
-        else paramType = behaviorType(parser);
+		paramType = innerType(parser, true);
         astAppendChild(paramTypes, paramType);
     } while (match(parser, TOKEN_KIND_COMMA));
 
@@ -586,6 +559,24 @@ static Ast* genericType(Parser* parser) {
     Ast* type = newAst(AST_EXPR_TYPE, token, 1, paramTypes);
     type->attribute.isGeneric = true;
     return type;
+}
+
+static Ast* innerType(Parser* parser, bool allowVoid) {
+    Ast* innerType = NULL;
+    if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_KIND_VOID) && checkNext(parser, TOKEN_KIND_FUN)) {
+        innerType = callableType(parser);
+        innerType->attribute.isFunction = true;
+    }
+    else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_LESS)) {
+        innerType = genericType(parser);
+        innerType->attribute.isGeneric = true;
+    }
+    else if (allowVoid && check(parser, TOKEN_KIND_VOID)) {
+        innerType = voidType(parser);
+        innerType->attribute.isVoid = true;
+    }
+    else innerType = behaviorType(parser);
+    return innerType;
 }
 
 static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
