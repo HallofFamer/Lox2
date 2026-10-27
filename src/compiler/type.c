@@ -630,9 +630,9 @@ TypeInfo* instantiateTypeParameter(int id, TypeInfo* type, TypeInfoArray* formal
 		CallableTypeInfo* callableType = AS_CALLABLE_TYPE(type);
         if (callableType->formalTypeParams->count > 0) {
             GenericTypeInfo* genericType = newGenericTypeInfo(id, callableType->baseType.shortName, callableType->baseType.fullName, type);            
+            
             for (int i = 0; i < callableType->formalTypeParams->count; i++) {
-                TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];
-                
+                TypeInfo* formalTypeParam = callableType->formalTypeParams->elements[i];              
                 if (formalTypeParam != NULL && IS_PLACEHOLDER_TYPE(formalTypeParam)) {
                     TypeInfo* instantiatedType = instantiateFormalTypeParameter(formalTypeParam, formalParams, actualParams);
                     TypeInfoArrayAdd(genericType->actualTypeParams, instantiatedType);
