@@ -831,9 +831,9 @@ void registerIOPackage(VM* vm) {
     bindSuperclass(vm, binaryWriteStreamClass, writeStreamClass);
     DEF_INTERCEPTOR(binaryWriteStreamClass, BinaryWriteStream, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(clox.std.io.BinaryWriteStream), NATIVE_TYPE(Object));
     DEF_METHOD(binaryWriteStreamClass, BinaryWriteStream, write, 1, NATIVE_TYPE(void), NATIVE_TYPE(Int));
-    DEF_METHOD_ASYNC(binaryWriteStreamClass, BinaryWriteStream, writeAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(Nil)), NATIVE_TYPE(Int));
+    DEF_METHOD_ASYNC(binaryWriteStreamClass, BinaryWriteStream, writeAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(void)), NATIVE_TYPE(Int));
     DEF_METHOD(binaryWriteStreamClass, BinaryWriteStream, writeBytes, 1, NATIVE_TYPE(void), NATIVE_TYPE(clox.std.collection.Array));
-    DEF_METHOD_ASYNC(binaryWriteStreamClass, BinaryWriteStream, writeBytesAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(Nil)), NATIVE_TYPE(clox.std.collection.Array));
+    DEF_METHOD_ASYNC(binaryWriteStreamClass, BinaryWriteStream, writeBytesAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(void)), NATIVE_TYPE(clox.std.collection.Array));
 
     bindSuperclass(vm, fileReadStreamClass, readStreamClass);
     DEF_INTERCEPTOR(fileReadStreamClass, FileReadStream, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(clox.std.io.FileReadStream), NATIVE_TYPE(Object));
@@ -850,13 +850,13 @@ void registerIOPackage(VM* vm) {
     bindSuperclass(vm, fileWriteStreamClass, writeStreamClass);
     DEF_INTERCEPTOR(fileWriteStreamClass, FileWriteStream, INTERCEPTOR_INIT, __init__, 1, NATIVE_TYPE(clox.std.io.FileWriteStream), NATIVE_TYPE(Object));
     DEF_METHOD(fileWriteStreamClass, FileWriteStream, write, 1, NATIVE_TYPE(void), NATIVE_TYPE(String));
-    DEF_METHOD_ASYNC(fileWriteStreamClass, FileWriteStream, writeAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(Nil)), NATIVE_TYPE(String));
+    DEF_METHOD_ASYNC(fileWriteStreamClass, FileWriteStream, writeAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(void)), NATIVE_TYPE(String));
     DEF_METHOD(fileWriteStreamClass, FileWriteStream, writeLine, 0, NATIVE_TYPE(void));
-    DEF_METHOD_ASYNC(fileWriteStreamClass, FileWriteStream, writeLineAsync, 0, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(Nil)));
+    DEF_METHOD_ASYNC(fileWriteStreamClass, FileWriteStream, writeLineAsync, 0, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(void)));
     DEF_METHOD(fileWriteStreamClass, FileWriteStream, writeSpace, 0, NATIVE_TYPE(void));
-    DEF_METHOD_ASYNC(fileWriteStreamClass, FileWriteStream, writeSpaceAsync, 0, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(Nil)));
+    DEF_METHOD_ASYNC(fileWriteStreamClass, FileWriteStream, writeSpaceAsync, 0, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(void)));
     DEF_METHOD(fileWriteStreamClass, FileWriteStream, writeString, 1, NATIVE_TYPE(void), NATIVE_TYPE(String));
-    DEF_METHOD_ASYNC(fileWriteStreamClass, FileWriteStream, writeStringAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(Nil)), NATIVE_TYPE(String));
+    DEF_METHOD_ASYNC(fileWriteStreamClass, FileWriteStream, writeStringAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(void)), NATIVE_TYPE(String));
 
     ObjClass* ioExceptionClass = defineNativeException(vm, "IOException", vm->exceptionClass);
     defineNativeException(vm, "EOFException", ioExceptionClass);

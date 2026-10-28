@@ -44,30 +44,30 @@ static void defineCollectionTypes(VM* vm) {
     vm->currentNamespace = collectionNamespace;
 
     TypeInfo* elementType = declareNativeTypeParameter(vm, "E");
-    ObjClass* collectionClass = defineNativeGenericClass(vm, "Collection", 1, elementType);
-    ObjClass* listClass = defineNativeGenericClass(vm, "List", 1, elementType);
+    defineNativeGenericClass(vm, "Collection", 1, elementType);
+    defineNativeGenericClass(vm, "List", 1, elementType);
 
     vm->arrayClass = defineNativeGenericClass(vm, "Array", 1, elementType);
-    ObjClass* arrayIteratorClass = defineNativeGenericClass(vm, "ArrayIterator", 1, elementType);
-    ObjClass* linkedListClass = defineNativeGenericClass(vm, "LinkedList", 1, elementType);
-    ObjClass* linkedListIteratorClass = defineNativeGenericClass(vm, "LinkedListIterator", 1, elementType);
+    defineNativeGenericClass(vm, "ArrayIterator", 1, elementType);
+    defineNativeGenericClass(vm, "LinkedList", 1, elementType);
+    defineNativeGenericClass(vm, "LinkedListIterator", 1, elementType);
     vm->nodeClass = defineNativeGenericClass(vm, "Node", 1, elementType);
 
     TypeInfo* keyType = declareNativeTypeParameter(vm, "K");
     TypeInfo* valueType = declareNativeTypeParameter(vm, "V");
     vm->dictionaryClass = defineNativeGenericClass(vm, "Dictionary", 2, keyType, valueType);
-    ObjClass* dictionaryIteratorClass = defineNativeGenericClass(vm, "DictionaryIterator", 1, valueType);
+    defineNativeGenericClass(vm, "DictionaryIterator", 1, valueType);
     vm->entryClass = defineNativeGenericClass(vm, "Entry", 2, keyType, valueType);
 
-    ObjClass* setClass = defineNativeGenericClass(vm, "Set", 1, elementType);
-    ObjClass* setIteratorClass = defineNativeGenericClass(vm, "SetIterator", 1, elementType);
+    defineNativeGenericClass(vm, "Set", 1, elementType);
+    defineNativeGenericClass(vm, "SetIterator", 1, elementType);
     vm->rangeClass = defineNativeClass(vm, "Range");
-    ObjClass* rangeIteratorClass = defineNativeClass(vm, "RangeIterator");
+    defineNativeClass(vm, "RangeIterator");
     
-    ObjClass* stackClass = defineNativeGenericClass(vm, "Stack", 1, elementType);
-    ObjClass* stackIteratorClass = defineNativeGenericClass(vm, "StackIterator", 1, elementType);
-    ObjClass* queueClass = defineNativeGenericClass(vm, "Queue", 1, elementType);
-    ObjClass* queueIteratorClass = defineNativeGenericClass(vm, "QueueIterator", 1, elementType);
+    defineNativeGenericClass(vm, "Stack", 1, elementType);
+    defineNativeGenericClass(vm, "StackIterator", 1, elementType);
+    defineNativeGenericClass(vm, "Queue", 1, elementType);
+    defineNativeGenericClass(vm, "QueueIterator", 1, elementType);
     vm->currentNamespace = vm->rootNamespace;
 }
 

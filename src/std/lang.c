@@ -1258,6 +1258,7 @@ LOX_METHOD(Number, compareTo) {
     ASSERT_ARG_TYPE("Number::compareTo(other)", 0, Number);
     double self = AS_NUMBER_INSTANCE(receiver);
     double other = AS_NUMBER_INSTANCE(args[0]);
+    
     if (self > other) RETURN_INT(1);
     else if (self < other) RETURN_INT(-1);
     else RETURN_INT(0);

@@ -970,7 +970,7 @@ void registerNetPackage(VM* vm) {
     DEF_METHOD(httpClientClass, HTTPClient, delete, 1, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object));
     DEF_METHOD_ASYNC(httpClientClass, HTTPClient, deleteAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(Object));
     DEF_METHOD(httpClientClass, HTTPClient, download, 2, NATIVE_TYPE(void), NATIVE_TYPE(Object), NATIVE_TYPE(Object));
-    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, downloadAsync, 2, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(Nil)), NATIVE_TYPE(Object), NATIVE_TYPE(Object));
+    DEF_METHOD_ASYNC(httpClientClass, HTTPClient, downloadAsync, 2, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(void)), NATIVE_TYPE(Object), NATIVE_TYPE(Object));
     DEF_METHOD(httpClientClass, HTTPClient, get, 1, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object));
     DEF_METHOD_ASYNC(httpClientClass, HTTPClient, getAsync, 1, NATIVE_TYPE_GENERIC(clox.std.util.Promise, 1, NATIVE_TYPE(clox.std.net.HTTPResponse)), NATIVE_TYPE(Object));
     DEF_METHOD(httpClientClass, HTTPClient, head, 1, NATIVE_TYPE(clox.std.net.HTTPResponse), NATIVE_TYPE(Object));

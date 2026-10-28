@@ -2021,6 +2021,7 @@ LOX_METHOD(Range, contains) {
     ASSERT_ARG_COUNT("Range::contains(element)", 1);
     if (!IS_INT(args[0])) RETURN_FALSE;
     ObjRange* self = AS_RANGE(receiver);
+    
     int element = AS_INT(args[0]);
     if (self->from < self->to) RETURN_BOOL(element >= self->from && element <= self->to);
     else RETURN_BOOL(element >= self->to && element <= self->from);

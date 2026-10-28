@@ -753,7 +753,7 @@ LOX_METHOD(Regex, __init__) {
 LOX_METHOD(Regex, match) {
     ASSERT_ARG_COUNT("Regex::match(string)", 1);
     ASSERT_ARG_TYPE("Regex::match(string)", 0, String);
-    Value pattern = getObjField(vm, AS_INSTANCE(receiver), "pattern");
+    Value pattern = getObjField(vm, AS_INSTANCE(receiver), "pattern");  
     int length;
     int index = re_match(AS_CSTRING(pattern), AS_CSTRING(args[0]), &length);
     RETURN_BOOL(index != -1);
@@ -763,11 +763,12 @@ LOX_METHOD(Regex, replace) {
     ASSERT_ARG_COUNT("Regex::replace(original, replacement)", 2);
     ASSERT_ARG_TYPE("Regex::replace(original, replacement)", 0, String);
     ASSERT_ARG_TYPE("Regex::replace(original, replacement)", 1, String);
+
     Value pattern = getObjField(vm, AS_INSTANCE(receiver), "pattern");
     ObjString* original = AS_STRING(args[0]);
     ObjString* replacement = AS_STRING(args[1]);
-
     int length;
+
     int index = re_match(AS_CSTRING(pattern), original->chars, &length);
     if (length == -1) RETURN_OBJ(original);
     ObjString* needle = subString(vm, original, index, index + length);
