@@ -40,7 +40,7 @@ class Calculator {
             return this.operation(a, b)
         }
         else { 
-            throw UnsupportedOperationException("Operation is not set.");
+            throw UnsupportedOperationException("Operation is not set.")
         }
     }
 }

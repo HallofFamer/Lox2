@@ -25,4 +25,4 @@ class MilliDuration extends Duration {
 }
 
 val milliDuration = MilliDuration(3, 12, 25, 48, 500)
-println("Other Duration: ${milliDuration.days} days, ${milliDuration.hours} hours, ${milliDuration.minutes} minutes, ${milliDuration.seconds} seconds, ${milliDuration.milliseconds} milliseconds\n")
+println("Millisecond Duration: ${milliDuration.days} days, ${milliDuration.hours} hours, ${milliDuration.minutes} minutes, ${milliDuration.seconds} seconds, ${milliDuration.milliseconds} milliseconds\n")

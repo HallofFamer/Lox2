@@ -15,6 +15,7 @@ println("Range from ${range.from} to ${range.to}")
 
 try { 
     val x = 1 / 0
+	println(x)
 }
 catch (ArithmeticException e) { 
     println("Caught exception with message: ${e.message}\n")

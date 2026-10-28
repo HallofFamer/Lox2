@@ -11,6 +11,10 @@ class UserProfile {
     __init__(String name) {
         this.name = name
     }
+
+    defaultSettings() {
+        return ["theme": "light", "language": "en", "isPremium": "false"]
+    }
 }
 
 val userProfile = UserProfile("John Doe")

@@ -1,0 +1,13 @@
+namespace test.concurrency
+using clox.std.io.File
+using clox.std.util.Promise
+
+async Promise<void> readFileAsync(String filePath) { 
+    val fileReader = await File.openAsync(filePath, "r")
+    println("Successfully opened read stream.")
+
+    await fileReader.closeAsync()
+    println("Read stream has been closed.")
+}
+
+await readFileAsync("test/others/file_input.txt")
