@@ -123,10 +123,10 @@ ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t
     }
 }
 
-void tableRemoveWhite(Table* table) {
+void tableRemoveWhite(Table* table, GCGenerationType generation) {
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &table->entries[i];
-        if (entry->key != NULL && !entry->key->obj.isMarked && entry->key->obj.generation < GC_GENERATION_TYPE_PERMANENT) {
+        if (entry->key != NULL && !entry->key->obj.isMarked && entry->key->obj.generation <= generation) {
             tableDelete(table, entry->key);
         }
     }

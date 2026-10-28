@@ -787,7 +787,7 @@ void collectGarbage(VM* vm, GCGenerationType generation) {
 
     markRoots(vm, generation);
     traceReferences(vm, generation);
-    tableRemoveWhite(&vm->strings);
+    tableRemoveWhite(&vm->strings, generation);
     processRememberedSet(vm, generation);
     sweep(vm, generation);
 

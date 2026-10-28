@@ -163,6 +163,7 @@ static GenericTypeInfo* findGenericTypeInfoWithName(VM* vm, TypeInfo* rawType, i
             genericName[length++] = ',';
             genericName[length++] = ' ';
         }
+
         TypeInfo* paramType = va_arg(*args, TypeInfo*);
         char* paramTypeName = paramType != NULL ? createTypeName(paramType, true) : "dynamic";
         size_t paramTypeLength = strlen(paramTypeName);
@@ -286,7 +287,6 @@ void defineNativeMethod(VM* vm, ObjClass* klass, const char* name, int arity, bo
         va_start(args, method);
         returnType = va_arg(args, TypeInfo*);
         methodType = newMethodTypeInfo(behaviorType->methods->count + 1, methodName, returnType, isAsync, isClass, isInitializer);
-
         declaredType = methodType->declaredType;
         declaredType->attribute.isVoid = (returnType->category == TYPE_CATEGORY_VOID);
 
