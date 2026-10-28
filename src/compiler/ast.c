@@ -719,7 +719,9 @@ static void astOutputDeclField(Ast* ast, int indentLevel) {
 
     if (ast->attribute.isTyped) {
         astOutputChild(ast, indentLevel + 1, 0);
-        if (astNumChild(ast) > 1) astOutputChild(ast, indentLevel + 1, 1);
+        if (astNumChild(ast) > 1) {
+            astOutputChild(ast, indentLevel + 1, 1);
+        }
     }
     else if (astNumChild(ast) > 0) {
         astOutputChild(ast, indentLevel + 1, 0);

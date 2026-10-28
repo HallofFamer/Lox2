@@ -1530,11 +1530,13 @@ static void resolveReturnStatement(Resolver* resolver, Ast* ast) {
     if (resolver->isTopLevel) {
         semanticError(resolver, "Cannot use 'return' from top-level code.");
     }
-    else if (resolver->currentFunction->attribute.isInitializer) {
-        semanticError(resolver, "Cannot use 'return' from an initializer.");
-    }
     else if (astHasChild(ast)) {
-        if (resolver->currentFunction->attribute.isVoid) semanticError(resolver, "Cannot use 'return' from a void function/method.");
+        if (resolver->currentFunction->attribute.isInitializer) {
+            semanticError(resolver, "Cannot return value from an initializer.");
+        }
+        else if (resolver->currentFunction->attribute.isVoid) {
+            semanticError(resolver, "Cannot use 'return' from a void function/method.");
+        }
         resolveChild(resolver, ast, 0);
     }
 }

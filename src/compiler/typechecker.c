@@ -97,6 +97,7 @@ void initTypeChecker(VM* vm, TypeChecker* typeChecker, NameTable* nametab, bool 
     typeChecker->functionType = getNativeType(vm, "Function");
     typeChecker->namespaceType = getNativeType(vm, "Namespace");
     typeChecker->traitType = getNativeType(vm, "Trait");
+    typeChecker->promiseType = getNativeType(vm, "clox.std.util.Promise");
     typeChecker->voidType = getNativeType(vm, "void");
 }
 
@@ -1030,12 +1031,13 @@ static void await(TypeChecker* typeChecker, Ast* ast) {
     Ast* child = astGetChild(ast, 0);
     if (child->type == NULL) return;
 
-    if (!isSubtypeOfType(child->type, getNativeType(typeChecker->vm, "clox.std.util.Promise"))) {
+    if (!isSubtypeOfType(child->type, typeChecker->promiseType)) {
         typeError(typeChecker, "'await' expects expression to be an instance of Promise but gets %s.", child->type->shortName->chars);
     }
     else if (ast->kind == AST_EXPR_AWAIT && IS_GENERIC_TYPE(child->type)) {
         GenericTypeInfo* promiseType = AS_GENERIC_TYPE(child->type);
         ast->type = promiseType->actualTypeParams->elements[0];
+        if (ast->type != NULL && IS_VOID_TYPE(ast->type)) ast->type = typeChecker->nilType;
     }
     else if (ast->kind == AST_STMT_AWAIT) ast->type = typeChecker->nilType;
 }

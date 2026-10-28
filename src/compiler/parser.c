@@ -571,6 +571,10 @@ static Ast* innerType(Parser* parser, bool allowVoid) {
         innerType = genericType(parser);
         innerType->attribute.isGeneric = true;
     }
+    else if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_CLASS)) {
+        innerType = metaclassType(parser);
+        innerType->attribute.isClass = true;
+    }
     else if (check(parser, TOKEN_KIND_VOID)) {
         if (!allowVoid) parseErrorAtCurrent(parser, "Void type is not allowed here.");
         innerType = voidType(parser);
