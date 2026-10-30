@@ -1420,9 +1420,21 @@ static void typeCheckRequireStatement(TypeChecker* typeChecker, Ast* ast) {
 }
 
 static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
-	FunctionTypeChecker* currentFunction = typeChecker->currentFunction->isLambda ? getCurrentMethodTypeChecker(typeChecker) : typeChecker->currentFunction;
+    FunctionTypeChecker* currentFunction = typeChecker->currentFunction->isLambda ? getCurrentMethodTypeChecker(typeChecker) : typeChecker->currentFunction;
     TypeInfo* expectedType = (currentFunction->type != NULL) ? currentFunction->type->returnType : NULL;
-    if (expectedType == NULL || !astHasChild(ast)) return;
+    if (expectedType == NULL || IS_VOID_TYPE(expectedType)) return;
+    else if (!astHasChild(ast)) {
+        char calleeDesc[UINT8_MAX];
+        ObjString* calleeName = createStringFromToken(typeChecker->vm, currentFunction->name);
+        if (currentFunction->isMethod) {
+            ObjString* className = createStringFromToken(typeChecker->vm, typeChecker->currentClass->name);
+            sprintf_s(calleeDesc, UINT8_MAX, "Method %s%s::%s", className->chars, currentFunction->isClass ? " class" : "", calleeName->chars);
+        }
+        else sprintf_s(calleeDesc, UINT8_MAX, "Function %s", calleeName->chars);
+
+        typeError(typeChecker, "%s expects to return a value of type %s but gets no return value.", calleeDesc, expectedType->shortName->chars);
+        return;
+    }
     
     typeCheckChild(typeChecker, ast, 0);
     Ast* returnValue = astGetChild(ast, 0);
@@ -1441,11 +1453,11 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
         if (IS_GENERIC_TYPE(expectedType)) {
             GenericTypeInfo* genericType = AS_GENERIC_TYPE(expectedType);
             if (isSubtypeOfType(genericType->rawType, typeChecker->promiseType) && IS_VOID_TYPE(genericType->actualTypeParams->elements[0])) {
-                typeError(typeChecker, "%s expects to not return a value but gets %s.",
-                    calleeDesc, actualType->shortName->chars);
+                typeError(typeChecker, "%s expects to not return a value but gets %s.", calleeDesc, actualType->shortName->chars);
                 return;
             }
         }
+
         typeError(typeChecker, "%s expects return value to be an instance of %s but gets %s.", 
             calleeDesc, expectedType->shortName->chars, actualType->shortName->chars);
     }
