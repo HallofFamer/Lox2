@@ -547,9 +547,7 @@ TypeInfo* getAliasTargetType(TypeInfo* type) {
 }
 
 TypeInfo* getInnerBaseType(TypeInfo* type) {
-    if (type == NULL) {
-        return NULL;
-    }
+    if (type == NULL) return NULL;
     else if (IS_GENERIC_TYPE(type)) {
         return getInnerBaseType(AS_GENERIC_TYPE(type)->rawType);
     }

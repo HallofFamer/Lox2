@@ -292,6 +292,15 @@ static void deriveCalleeType(TypeChecker* typeChecker, Ast* ast, CallableTypeInf
     }
 }
 
+static void formatCalleeDesc(TypeChecker* typeChecker, FunctionTypeChecker* function, char* calleeDesc) {
+    ObjString* calleeName = createStringFromToken(typeChecker->vm, function->name);
+    if (function->isMethod) {
+        ObjString* className = createStringFromToken(typeChecker->vm, typeChecker->currentClass->name);
+        sprintf_s(calleeDesc, UINT8_MAX, "Method %s%s::%s", className->chars, function->isClass ? " class" : "", calleeName->chars);
+    }
+    else sprintf_s(calleeDesc, UINT8_MAX, "Function %s", calleeName->chars);
+}
+
 static void checkArrayLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
     Ast* elements = astGetChild(ast, 0);
     int numElements = astNumChild(elements);
