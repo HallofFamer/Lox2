@@ -1434,13 +1434,7 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
     if (expectedType == NULL || IS_VOID_TYPE(expectedType)) return;
     else if (!astHasChild(ast)) {
         char calleeDesc[UINT8_MAX];
-        ObjString* calleeName = createStringFromToken(typeChecker->vm, currentFunction->name);
-        if (currentFunction->isMethod) {
-            ObjString* className = createStringFromToken(typeChecker->vm, typeChecker->currentClass->name);
-            sprintf_s(calleeDesc, UINT8_MAX, "Method %s%s::%s", className->chars, currentFunction->isClass ? " class" : "", calleeName->chars);
-        }
-        else sprintf_s(calleeDesc, UINT8_MAX, "Function %s", calleeName->chars);
-
+        formatCalleeDesc(typeChecker, currentFunction, calleeDesc);
         typeError(typeChecker, "%s expects to return a value of type %s but gets no return value.", calleeDesc, expectedType->shortName->chars);
         return;
     }
@@ -1451,13 +1445,7 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
 
     if (!isSubtypeOfType(actualType, expectedType)) {
         char calleeDesc[UINT8_MAX];
-        ObjString* calleeName = createStringFromToken(typeChecker->vm, currentFunction->name);
-
-        if (currentFunction->isMethod) {
-            ObjString* className = createStringFromToken(typeChecker->vm, typeChecker->currentClass->name);
-            sprintf_s(calleeDesc, UINT8_MAX, "Method %s%s::%s", className->chars, currentFunction->isClass ? " class" : "", calleeName->chars);
-        }
-        else sprintf_s(calleeDesc, UINT8_MAX, "Function %s", calleeName->chars);
+        formatCalleeDesc(typeChecker, currentFunction, calleeDesc);
 
         if (IS_GENERIC_TYPE(expectedType)) {
             GenericTypeInfo* genericType = AS_GENERIC_TYPE(expectedType);
