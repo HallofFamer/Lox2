@@ -128,6 +128,16 @@ static TypeInfo* getClassType(TypeChecker* typeChecker, ObjString* shortName, Sy
     return type;
 }
 
+static bool hasNoReturnType(TypeChecker* typeChecker, TypeInfo* type) {
+    if (type == NULL) return false;
+    else if (IS_VOID_TYPE(type)) return true;
+    else if (IS_GENERIC_TYPE(type)) {
+        GenericTypeInfo* genericType = AS_GENERIC_TYPE(type);
+        return isSubtypeOfType(genericType->rawType, typeChecker->promiseType) && IS_VOID_TYPE(genericType->actualTypeParams->elements[0]);
+    }
+    return false;
+}
+
 static TypeInfo* insertHigherOrderType(TypeChecker* typeChecker, TypeInfo* type) {
 	if (isHigherOrderType(type)) {
         char* shortName = createTypeName(type, false);
