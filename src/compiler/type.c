@@ -1115,7 +1115,9 @@ static bool isBehaviorSubtypeOfType(BehaviorTypeInfo* subtype, BehaviorTypeInfo*
 
     if (subtype->traitTypes != NULL && subtype->traitTypes->count > 0) {
         for (int i = 0; i < subtype->traitTypes->count; i++) {
-            if (subtype->traitTypes->elements[i]->id == supertype->baseType.id) return true;
+            if (subtype->traitTypes->elements[i]->id == supertype->baseType.id) {
+                return true;
+            }
         }
     }
     return false;

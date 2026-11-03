@@ -1456,13 +1456,9 @@ static void typeCheckReturnStatement(TypeChecker* typeChecker, Ast* ast) {
     if (!isSubtypeOfType(actualType, expectedType)) {
         char calleeDesc[UINT8_MAX];
         formatCalleeDesc(typeChecker, currentFunction, calleeDesc);
-
-        if (IS_GENERIC_TYPE(expectedType)) {
-            GenericTypeInfo* genericType = AS_GENERIC_TYPE(expectedType);
-            if (isSubtypeOfType(genericType->rawType, typeChecker->promiseType) && IS_VOID_TYPE(genericType->actualTypeParams->elements[0])) {
-                typeError(typeChecker, "%s expects to not return a value but gets %s.", calleeDesc, actualType->shortName->chars);
-                return;
-            }
+        if (hasNoReturnType(typeChecker, expectedType)) {
+            typeError(typeChecker, "%s expects to not return a value but gets %s.", calleeDesc, actualType->shortName->chars);
+            return;
         }
 
         typeError(typeChecker, "%s expects return value to be an instance of %s but gets %s.", 
