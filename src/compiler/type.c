@@ -1070,7 +1070,9 @@ static bool isGenericEqualType(GenericTypeInfo* type, GenericTypeInfo* type2) {
     }
 
     for (int i = 0; i < type->actualTypeParams->count; i++) {
-        if (!isEqualType(type->actualTypeParams->elements[i], type2->actualTypeParams->elements[i])) return false;
+        if (!isEqualType(type->actualTypeParams->elements[i], type2->actualTypeParams->elements[i])) {
+            return false;
+        }
     }
     return true;
 }

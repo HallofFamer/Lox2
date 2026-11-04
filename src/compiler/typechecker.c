@@ -166,6 +166,17 @@ static TypeInfo* instantiateTypeParameterWithName(TypeChecker* typeChecker, Type
     return instantiatedType;
 }
 
+static void instantiateCallableParameters(TypeChecker* typeChecker, TypeInfoArray* paramTypes, TypeInfoArray* formalParams,
+    TypeInfoArray* actualParams, TypeInfoArray* instantiatedParamTypes) {
+    for (int i = 0; i < paramTypes->count; i++) {
+        TypeInfo* paramType = paramTypes->elements[i];
+        if (hasGenericParameters(paramType)) {
+            paramType = instantiateTypeParameterWithName(typeChecker, paramType, formalParams, actualParams);
+        }
+        TypeInfoArrayAdd(instantiatedParamTypes, paramType);
+    }
+}
+
 static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker, TypeInfo* type) {
     if (type == NULL) return NULL;
     if (IS_CALLABLE_TYPE(type)) return AS_CALLABLE_TYPE(type);
@@ -182,13 +193,8 @@ static CallableTypeInfo* instantiateGenericFunctionType(TypeChecker* typeChecker
 		TypeInfoArrayAdd(instantiatedFunctionType->formalTypeParams, functionType->formalTypeParams->elements[i]);
 	}
 
-    for (int i = 0; i < functionType->paramTypes->count; i++) {
-        TypeInfo* paramType = functionType->paramTypes->elements[i];
-        if (hasGenericParameters(paramType)) {
-            paramType = instantiateTypeParameterWithName(typeChecker, paramType, functionType->formalTypeParams, genericFunctionType->actualTypeParams);
-        }
-        TypeInfoArrayAdd(instantiatedFunctionType->paramTypes, paramType);
-    }
+    instantiateCallableParameters(typeChecker, functionType->paramTypes, functionType->formalTypeParams,
+        genericFunctionType->actualTypeParams, instantiatedFunctionType->paramTypes);
     
 	return AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedFunctionType));
 }
@@ -200,13 +206,8 @@ static CallableTypeInfo* instantiateGenericMethodTypeFromAst(TypeChecker* typeCh
         TypeInfoArrayAdd(instantiatedCallableType->formalTypeParams, actualType);
     }
 
-    for (int i = 0; i < declaredType->paramTypes->count; i++) {
-        TypeInfo* paramType = declaredType->paramTypes->elements[i];
-        if (hasGenericParameters(paramType)) {
-            paramType = instantiateTypeParameterWithName(typeChecker, paramType, declaredType->formalTypeParams, instantiatedCallableType->formalTypeParams);
-        }
-        TypeInfoArrayAdd(instantiatedCallableType->paramTypes, paramType);
-    }
+    instantiateCallableParameters(typeChecker, declaredType->paramTypes, declaredType->formalTypeParams,
+        instantiatedCallableType->formalTypeParams, instantiatedCallableType->paramTypes);
 
 	return AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedCallableType));
 }
@@ -224,13 +225,8 @@ static CallableTypeInfo* instantiateGenericMethodType(TypeChecker* typeChecker, 
     CallableTypeInfo* instantiatedMethodType = newCallableTypeInfo(typeChecker->vm->typetab->count + 1, TYPE_CATEGORY_METHOD, rawMethodType->baseType.shortName, returnType);
     instantiatedMethodType->formalTypeParams = rawMethodType->formalTypeParams;    
 
-    for (int i = 0; i < rawMethodType->paramTypes->count; i++) {
-        TypeInfo* paramType = rawMethodType->paramTypes->elements[i];
-        if (hasGenericParameters(paramType)) {
-            paramType = instantiateTypeParameterWithName(typeChecker, paramType, rawBehaviorType->formalTypeParams, genericBehaviorType->actualTypeParams);
-        }
-        TypeInfoArrayAdd(instantiatedMethodType->paramTypes, paramType);
-    }
+    instantiateCallableParameters(typeChecker, rawMethodType->paramTypes, rawBehaviorType->formalTypeParams,
+        genericBehaviorType->actualTypeParams, instantiatedMethodType->paramTypes);
     
 	return AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)instantiatedMethodType));
 }
@@ -461,13 +457,8 @@ static void inheritGenericSupertypeMethods(TypeChecker* typeChecker, BehaviorTyp
                 subMethodType->declaredType->returnType = instantiateTypeParameterWithName(typeChecker, returnType, behaviorType->formalTypeParams, supertype->actualTypeParams);
             }
 
-            for (int i = 0; i < superMethodType->declaredType->paramTypes->count; i++) {
-                TypeInfo* paramType = superMethodType->declaredType->paramTypes->elements[i];
-                if (hasGenericParameters(paramType)) {
-                    paramType = instantiateTypeParameterWithName(typeChecker, paramType, behaviorType->formalTypeParams, supertype->actualTypeParams);
-                }
-                TypeInfoArrayAdd(subMethodType->declaredType->paramTypes, paramType);
-            }
+            instantiateCallableParameters(typeChecker, superMethodType->declaredType->paramTypes, behaviorType->formalTypeParams,
+                supertype->actualTypeParams, subMethodType->declaredType->paramTypes);
 
             subMethodType->declaredType = AS_CALLABLE_TYPE(insertHigherOrderType(typeChecker, (TypeInfo*)subMethodType->declaredType));
             typeTableSet(subtype->methods, superMethodType->baseType.shortName, (TypeInfo*)subMethodType);
