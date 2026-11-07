@@ -532,6 +532,12 @@ static void checkImplementingTraits(TypeChecker* typeChecker, Ast* traitList) {
     }
 }
 
+static void checkSubscriptIndex(TypeChecker* typeChecker, Ast* index, const char* typeName, const char* errorFormat) {
+    if (!isSubtypeOfType(index->type, typeChecker->intType)) {
+        typeError(typeChecker, errorFormat, typeName, index->type->shortName->chars);
+    }
+}
+
 static void inferGenericTypeParameters(Ast* callee, Ast* args, TypeInfoArray* formalTypeParams,
     TypeInfoArray* paramTypes, GenericTypeInfo* calleeType) {
     Ast* typeParams = NULL;
@@ -876,15 +882,11 @@ static void inferAstTypeFromSubscriptGet(TypeChecker* typeChecker, Ast* ast) {
     if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type) || index->type == NULL) return;
 
     if (isSubtypeOfType(receiver->type, typeChecker->stringType)) {
-        if (!isSubtypeOfType(index->type, typeChecker->intType)) {
-            typeError(typeChecker, "String's index must be an instance of Int but gets %s.", index->type->shortName->chars);
-        }
+        checkSubscriptIndex(typeChecker, index, "String", "%s's index must be an instance of Int but gets %s.");
         ast->type = typeChecker->stringType;
     }
     else if (isSubtypeOfType(receiver->type, getNativeType(typeChecker->vm, "clox.std.collection.Array"))) {
-        if (!isSubtypeOfType(index->type, typeChecker->intType)) {
-            typeError(typeChecker, "Array's index must be an instance of Int but gets %s.", index->type->shortName->chars);
-        }
+        checkSubscriptIndex(typeChecker, index, "Array", "%s's index must be an instance of Int but gets %s.");
 
         MethodTypeInfo* methodType = getMethodType(receiver->type, newStringPerma(typeChecker->vm, "[]"));
         CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, (TypeInfo*)methodType->declaredType);
@@ -913,15 +915,11 @@ static void inferAstTypeFromSubscriptSet(TypeChecker* typeChecker, Ast* ast) {
     if (receiver->type == NULL || IS_PLACEHOLDER_TYPE(receiver->type) || index->type == NULL) return;
 
     if (isSubtypeOfType(receiver->type, typeChecker->stringType)) {
-        if (!isSubtypeOfType(index->type, typeChecker->intType)) {
-            typeError(typeChecker, "String's index must be an instance of Int, but gets %s.", index->type->shortName->chars);
-        }
+        checkSubscriptIndex(typeChecker, index, "String", "%s's index must be an instance of Int, but gets %s.");
         ast->type = typeChecker->nilType;
     }
     else if (isSubtypeOfType(receiver->type, getNativeType(typeChecker->vm, "clox.std.collection.Array"))) {
-        if (!isSubtypeOfType(index->type, typeChecker->intType)) {
-            typeError(typeChecker, "Array's index must be an instance of Int, but gets %s.", index->type->shortName->chars);
-        }
+        checkSubscriptIndex(typeChecker, index, "Array", "%s's index must be an instance of Int, but gets %s.");
         MethodTypeInfo* methodType = getMethodType(receiver->type, newStringPerma(typeChecker->vm, "[]="));
 		CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, (TypeInfo*)methodType->declaredType);
         

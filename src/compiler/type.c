@@ -455,7 +455,9 @@ void freeTypeInfo(TypeInfo* type) {
 void freeTempTypes(TypeInfoArray* typeArray) {
     for (int i = 0; i < typeArray->count; i++) {
         TypeInfo* type = typeArray->elements[i];
-        if (type != NULL && type->id == -1) freeTypeInfo(type);
+        if (type != NULL && type->id == -1) {
+            freeTypeInfo(type);
+        }
     }
     free(typeArray);
 }
