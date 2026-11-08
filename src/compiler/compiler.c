@@ -1399,7 +1399,9 @@ static void compileSwitchStatement(Compiler* compiler, Ast* ast) {
         compileChild(compiler, caseList, i);
     }
 
-    if (astNumChild(ast) > 2) compileChild(compiler, ast, 2);
+    if (astNumChild(ast) > 2) {
+        compileChild(compiler, ast, 2);
+    }
     endSwitchCompiler(compiler);
 }
 

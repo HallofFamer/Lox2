@@ -571,7 +571,9 @@ static bool hasCallableTypeParameters(TypeInfo* type) {
 
     for (int i = 0; i < callableType->paramTypes->count; i++) {
         TypeInfo* paramType = callableType->paramTypes->elements[i];
-        if (hasGenericParameters(paramType)) return true;
+        if (hasGenericParameters(paramType)) {
+            return true;
+        }
     }
     return false;
 }

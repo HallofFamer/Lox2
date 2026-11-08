@@ -1460,7 +1460,9 @@ static void resolveCaseStatement(Resolver* resolver, Ast* ast) {
 static void resolveCatchStatement(Resolver* resolver, Ast* ast) {
     beginScope(resolver, ast, SYMBOL_SCOPE_BLOCK);
     SymbolItem* exceptionTypeItem = symbolTableLookup(ast->symtab, createStringFromToken(resolver->vm, ast->token));
-    if (exceptionTypeItem->state == SYMBOL_STATE_DEFINED) exceptionTypeItem->state = SYMBOL_STATE_ACCESSED;
+    if (exceptionTypeItem->state == SYMBOL_STATE_DEFINED) {
+        exceptionTypeItem->state = SYMBOL_STATE_ACCESSED;
+    }
 
     Ast* exceptionVar = astGetChild(ast, 0);
     exceptionVar->symtab = ast->symtab;

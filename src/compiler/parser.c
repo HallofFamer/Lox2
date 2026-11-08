@@ -118,7 +118,7 @@ static void consume(Parser* parser, TokenKind type, const char* message) {
     parseErrorAtCurrent(parser, message);
 }
 
-static void consumerTerminator(Parser* parser, const char* message) {
+static void consumeTerminator(Parser* parser, const char* message) {
     if (parser->current.kind == TOKEN_KIND_SEMICOLON) {
         advance(parser);
         return;
@@ -1065,7 +1065,7 @@ static Ast* fields(Parser* parser, Token* name) {
         field->attribute.isMutable = isMutable;
         field->attribute.isTyped = hasFieldType;
         astAppendChild(fieldList, field);
-        consumerTerminator(parser, "Expect semicolon or new-line after field declaration.");
+        consumeTerminator(parser, "Expect semicolon or new-line after field declaration.");
     }
 
     return fieldList;
@@ -1396,26 +1396,26 @@ static Ast* block(Parser* parser) {
 static Ast* awaitStatement(Parser* parser) {
     Token token = previousToken(parser);
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after awaiting statement.");
+    consumeTerminator(parser, "Expect semicolon or new line after awaiting statement.");
     return newAst(AST_STMT_AWAIT, token, 1, expr);
 }
 
 static Ast* breakStatement(Parser* parser) {
     Ast* stmt = emptyAst(AST_STMT_BREAK, previousToken(parser));
-    consumerTerminator(parser, "Expect semicolon or new line after 'break'.");
+    consumeTerminator(parser, "Expect semicolon or new line after 'break'.");
     return stmt;
 }
 
 static Ast* continueStatement(Parser* parser) {
     Ast* stmt = emptyAst(AST_STMT_CONTINUE, previousToken(parser));
-    consumerTerminator(parser, "Expect semicolon or new line after 'continue'.");
+    consumeTerminator(parser, "Expect semicolon or new line after 'continue'.");
     return stmt;
 }
 
 static Ast* expressionStatement(Parser* parser) {
     Token token = previousToken(parser);
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after expression statement.");
+    consumeTerminator(parser, "Expect semicolon or new line after expression statement.");
     return newAst(AST_STMT_EXPRESSION, token, 1, expr);
 }
 
@@ -1472,7 +1472,7 @@ static Ast* ifStatement(Parser* parser) {
 static Ast* requireStatement(Parser* parser) {
     Token token = previousToken(parser);
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after required statement.");
+    consumeTerminator(parser, "Expect semicolon or new line after required statement.");
     return newAst(AST_STMT_REQUIRE, token, 1, expr);
 }
 
@@ -1483,7 +1483,7 @@ static Ast* returnStatement(Parser* parser) {
     }
     else {
         Ast* expr = expression(parser);
-        consumerTerminator(parser, "Expect semicolon or new line after return statement.");
+        consumeTerminator(parser, "Expect semicolon or new line after return statement.");
         return newAst(AST_STMT_RETURN, token, 1, expr);
     }
 }
@@ -1533,7 +1533,7 @@ static Ast* switchStatement(Parser* parser) {
 static Ast* throwStatement(Parser* parser) {
     Token token = previousToken(parser);
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after throw statement.");
+    consumeTerminator(parser, "Expect semicolon or new line after throw statement.");
     return newAst(AST_STMT_THROW, token, 1, expr);
 }
 
@@ -1585,7 +1585,7 @@ static Ast* usingStatement(Parser* parser) {
         astAppendChild(stmt, alias);
     }
 
-    consumerTerminator(parser, "Expect semicolon or new-line after using statement.");
+    consumeTerminator(parser, "Expect semicolon or new-line after using statement.");
     return stmt;
 }
 
@@ -1606,7 +1606,7 @@ static Ast* yieldStatement(Parser* parser) {
     }
 
     Ast* expr = expression(parser);
-    consumerTerminator(parser, "Expect semicolon or new line after yield statement.");
+    consumeTerminator(parser, "Expect semicolon or new line after yield statement.");
     Ast* ast = newAst(AST_STMT_YIELD, token, 1, expr);
     ast->attribute.isYieldFrom = isYieldFrom;
     return ast;
@@ -1843,7 +1843,7 @@ static Ast* namespaceDeclaration(Parser* parser) {
         namespaceDepth++;
     } while (match(parser, TOKEN_KIND_DOT));
 
-    consumerTerminator(parser, "Expect semicolon or new line after namespace declaration.");
+    consumeTerminator(parser, "Expect semicolon or new line after namespace declaration.");
     return newAst(AST_DECL_NAMESPACE, token, 1, _namespace);
 }
 
@@ -1889,7 +1889,7 @@ static Ast* typeDeclaration(Parser* parser) {
     consume(parser, TOKEN_KIND_EQUAL, "Expect '=' after type name.");
 
     Ast* typeDef = type_(parser, false, true);
-    consumerTerminator(parser, "Expect semicolon or new line after type declaration.");
+    consumeTerminator(parser, "Expect semicolon or new line after type declaration.");
     Ast* ast = newAst(AST_DECL_TYPE, name, 1, typeDef);
 
     if (typeParams != NULL) {
@@ -1922,7 +1922,7 @@ static Ast* varDeclaration(Parser* parser, bool isMutable) {
         astAppendChild(varDecl, expr);
     }
 
-    consumerTerminator(parser, "Expect semicolon or new line after variable declaration.");
+    consumeTerminator(parser, "Expect semicolon or new line after variable declaration.");
     return varDecl;
 }
 
