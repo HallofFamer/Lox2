@@ -10,19 +10,19 @@
 
 typedef struct {
     Obj* object;
-} GCRememberedEntry;
+} GCRemEntry;
 
 typedef struct {
     int count;
     int capacity;
     GCGenerationType generation;
-    GCRememberedEntry* entries;
-} GCRememberedSet;
+    GCRemEntry* entries;
+} GCRemSet;
 
 typedef struct {
     GCGenerationType type;
     Obj* objects;
-    GCRememberedSet remSet;
+    GCRemSet remSet;
     size_t bytesAllocated;
     size_t heapSize;
 } GCGeneration;

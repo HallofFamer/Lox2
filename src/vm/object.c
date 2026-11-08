@@ -429,6 +429,7 @@ void copyObjFields(VM* vm, ObjInstance* fromObject, ObjInstance* toObject) {
 Value getObjMethod(VM* vm, Value object, char* name) {
     ObjClass* klass = getObjClass(vm, object);
     Value method;
+    
     if (!tableGet(&klass->methods, newStringPerma(vm, name), &method)) {
         runtimeError(vm, "Method %s::%s does not exist in class %s.", klass->name->chars, name, klass->name->chars);
         exit(70);

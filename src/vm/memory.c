@@ -33,15 +33,15 @@ void* reallocate(VM* vm, void* pointer, size_t oldSize, size_t newSize, GCGenera
     return result;
 }
 
-static void initGCRememberedSet(GCRememberedSet* rememberedSet, GCGenerationType generation) {
+static void initGCRememberedSet(GCRemSet* rememberedSet, GCGenerationType generation) {
     rememberedSet->capacity = 0;
     rememberedSet->count = 0;
     rememberedSet->generation = generation;
     rememberedSet->entries = NULL;
 }
 
-static void freeGCRememeberedSet(VM* vm, GCRememberedSet* remSet) {
-    FREE_ARRAY(GCRememberedEntry, remSet->entries, remSet->capacity, remSet->generation);
+static void freeGCRememeberedSet(VM* vm, GCRemSet* remSet) {
+    FREE_ARRAY(GCRemEntry, remSet->entries, remSet->capacity, remSet->generation);
     initGCRememberedSet(remSet, remSet->generation);
 }
 
@@ -89,12 +89,12 @@ void freeGC(VM* vm) {
     free(vm->gc);
 }
 
-static GCRememberedEntry* findRememberedSetEntry(GCRememberedEntry* entries, int capacity, Obj* object) {
+static GCRemEntry* findRememberedSetEntry(GCRemEntry* entries, int capacity, Obj* object) {
     uint32_t hash = hashObject(object);
     uint32_t index = (uint32_t)hash & ((uint32_t)capacity - 1);
 
     for (;;) {
-        GCRememberedEntry* entry = &entries[index];
+        GCRemEntry* entry = &entries[index];
         if (entry->object == NULL || entry->object == object) {
             return entry;
         }
@@ -102,41 +102,41 @@ static GCRememberedEntry* findRememberedSetEntry(GCRememberedEntry* entries, int
     }
 }
 
-static bool rememberedSetGetObject(GCRememberedSet* rememberedSet, Obj* object) {
+static bool rememberedSetGetObject(GCRemSet* rememberedSet, Obj* object) {
     if (rememberedSet->count == 0) return false;
-    GCRememberedEntry* entry = findRememberedSetEntry(rememberedSet->entries, rememberedSet->capacity, object);
+    GCRemEntry* entry = findRememberedSetEntry(rememberedSet->entries, rememberedSet->capacity, object);
     if (entry->object == NULL) return false;
     return true;
 }
 
-static void rememberedSetAdjustCapacity(VM* vm, GCRememberedSet* remSet, int capacity) {
-    GCRememberedEntry* entries = ALLOCATE(GCRememberedEntry, capacity, remSet->generation);
+static void rememberedSetAdjustCapacity(VM* vm, GCRemSet* remSet, int capacity) {
+    GCRemEntry* entries = ALLOCATE(GCRemEntry, capacity, remSet->generation);
     for (int i = 0; i < capacity; i++) {
         entries[i].object = NULL;
     }
 
     remSet->count = 0;
     for (int i = 0; i < remSet->capacity; i++) {
-        GCRememberedEntry* entry = &remSet->entries[i];
+        GCRemEntry* entry = &remSet->entries[i];
         if (entry->object == NULL) continue;
-        GCRememberedEntry* dest = findRememberedSetEntry(entries, capacity, entry->object);
+        GCRemEntry* dest = findRememberedSetEntry(entries, capacity, entry->object);
         dest->object = entry->object;
         remSet->count++;
     }
 
-    FREE_ARRAY(GCRememberedEntry, remSet->entries, remSet->capacity, remSet->generation);
+    FREE_ARRAY(GCRemEntry, remSet->entries, remSet->capacity, remSet->generation);
     remSet->entries = entries;
     remSet->capacity = capacity;
 }
 
-static bool rememberedSetPutObject(VM* vm, GCRememberedSet* remSet, Obj* object) {
+static bool rememberedSetPutObject(VM* vm, GCRemSet* remSet, Obj* object) {
     ENSURE_OBJECT_ID(object);
     if (remSet->count + 1 > remSet->capacity * TABLE_MAX_LOAD) {
         int capacity = GROW_CAPACITY(remSet->capacity);
         rememberedSetAdjustCapacity(vm, remSet, capacity);
     }
 
-    GCRememberedEntry* entry = findRememberedSetEntry(remSet->entries, remSet->capacity, object);
+    GCRemEntry* entry = findRememberedSetEntry(remSet->entries, remSet->capacity, object);
     bool isNewObject = entry->object == NULL;
     if (isNewObject) {
 #ifdef DEBUG_LOG_GC
@@ -198,9 +198,9 @@ static void markGlobals(VM* vm, GCGenerationType generation) {
 }
 
 void markRememberedSet(VM* vm, GCGenerationType generation) {
-    GCRememberedSet* remSet = &vm->gc->generations[generation]->remSet;
+    GCRemSet* remSet = &vm->gc->generations[generation]->remSet;
     for (int i = 0; i < remSet->capacity; i++) {
-        GCRememberedEntry* entry = &remSet->entries[i];
+        GCRemEntry* entry = &remSet->entries[i];
         markObject(vm, entry->object, GC_GENERATION_TYPE_PERMANENT);
     }
 }
@@ -759,11 +759,11 @@ static void sweep(VM* vm, GCGenerationType generation) {
 
 static void processRememberedSet(VM* vm, GCGenerationType generation) {
     if (generation >= GC_GENERATION_TYPE_OLD) return;
-    GCRememberedSet* currentRemSet = &GET_GC_GENERATION(generation)->remSet;
-    GCRememberedSet* nextRemSet = &GET_GC_GENERATION(generation + 1)->remSet;
+    GCRemSet* currentRemSet = &GET_GC_GENERATION(generation)->remSet;
+    GCRemSet* nextRemSet = &GET_GC_GENERATION(generation + 1)->remSet;
 
     for (int i = 0; i < currentRemSet->capacity; i++) {
-        GCRememberedEntry* entry = &currentRemSet->entries[i];
+        GCRemEntry* entry = &currentRemSet->entries[i];
         if (entry->object == NULL) continue;
 
         entry->object->isMarked = false;

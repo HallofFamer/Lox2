@@ -51,7 +51,6 @@ ObjClass* createClass(VM* vm, ObjString* name, ObjClass* metaclass, BehaviorType
 }
 
 void initTrait(VM* vm, ObjClass* trait, ObjString* name) {
-    push(vm, OBJ_VAL(trait));
     trait->behaviorType = BEHAVIOR_TRAIT;
     trait->behaviorID = vm->behaviorCount++;
     trait->name = (name != NULL) ? name : createBehaviorName(vm, BEHAVIOR_TRAIT, NULL);
@@ -73,7 +72,6 @@ void initTrait(VM* vm, ObjClass* trait, ObjString* name) {
     initValueArray(&trait->fields, trait->obj.generation);
     initTable(&trait->methods, trait->obj.generation);
     initValueArray(&trait->defaultInstanceFields, trait->obj.generation);
-    pop(vm);
 }
 
 ObjClass* createTrait(VM* vm, ObjString* name) {
