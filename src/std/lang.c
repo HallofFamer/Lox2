@@ -1234,6 +1234,12 @@ LOX_METHOD(Number, atan) {
     RETURN_NUMBER(atan(AS_NUMBER_INSTANCE(receiver)));
 }
 
+LOX_METHOD(Number, atan2) {
+    ASSERT_ARG_COUNT("Number::atan2(other)", 1);
+    ASSERT_ARG_TYPE("Number::atan2(other)", 0, Number);
+    RETURN_NUMBER(atan2(AS_NUMBER_INSTANCE(receiver), AS_NUMBER_INSTANCE(args[0])));
+}
+
 LOX_METHOD(Number, cbrt) {
     ASSERT_ARG_COUNT("Number::cbrt()", 0);
     RETURN_NUMBER(cbrt(AS_NUMBER_INSTANCE(receiver)));
@@ -2391,6 +2397,7 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->numberClass, Number, acos, 0, NATIVE_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, asin, 0, NATIVE_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, atan, 0, NATIVE_TYPE(Number));
+    DEF_METHOD(vm->numberClass, Number, atan2, 1, NATIVE_TYPE(Number), NATIVE_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, cbrt, 0, NATIVE_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, ceil, 0, NATIVE_TYPE(Number));
     DEF_METHOD(vm->numberClass, Number, clone, 0, NATIVE_TYPE(Number));

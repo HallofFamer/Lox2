@@ -384,7 +384,9 @@ static ObjInstance* setCopy(VM* vm, ObjInstance* original) {
     pop(vm);
 
     ObjInstance* copied = newInstance(vm, getNativeClass(vm, "clox.std.collection.Set"));
+    push(vm, OBJ_VAL(copied));
     setObjField(vm, copied, "dict", OBJ_VAL(dict2));
+    pop(vm);
     return copied;
 }
 
@@ -406,7 +408,9 @@ static ObjInstance* setDifference(VM* vm, ObjInstance* set1, ObjInstance* set2) 
 
 	pop(vm);
 	ObjInstance* differenceSet = newInstance(vm, getNativeClass(vm, "clox.std.collection.Set"));
+    push(vm, OBJ_VAL(differenceSet));
 	setObjField(vm, differenceSet, "dict", OBJ_VAL(differenceDict));
+    pop(vm);
 	return differenceSet;
 }
 
@@ -444,7 +448,9 @@ static ObjInstance* setIntersection(VM* vm, ObjInstance* set1, ObjInstance* set2
 
 	pop(vm);
 	ObjInstance* intersectionSet = newInstance(vm, getNativeClass(vm, "clox.std.collection.Set"));
+    push(vm, OBJ_VAL(intersectionSet));
 	setObjField(vm, intersectionSet, "dict", OBJ_VAL(intersectionDict));
+    pop(vm);
 	return intersectionSet;
 }
 
@@ -490,7 +496,9 @@ static ObjInstance* setSymmetricDifference(VM* vm, ObjInstance* set1, ObjInstanc
 
 	pop(vm);
 	ObjInstance* symmetricDifferenceSet = newInstance(vm, getNativeClass(vm, "clox.std.collection.Set"));
+    push(vm, OBJ_VAL(symmetricDifferenceSet));
 	setObjField(vm, symmetricDifferenceSet, "dict", OBJ_VAL(symmetricDifferenceDict));
+    pop(vm);
 	return symmetricDifferenceSet;
 }
 
@@ -546,7 +554,9 @@ static ObjInstance* setUnion(VM* vm, ObjInstance* set1, ObjInstance* set2) {
 	pop(vm);
 
 	ObjInstance* unionSet = newInstance(vm, getNativeClass(vm, "clox.std.collection.Set"));
+    push(vm, OBJ_VAL(unionSet));
 	setObjField(vm, unionSet, "dict", OBJ_VAL(unionDict));
+    pop(vm);
 	return unionSet;
 }
 

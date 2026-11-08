@@ -404,7 +404,9 @@ LOX_METHOD(Duration, __add__) {
 
     durationFromSeconds(duration, durationTotalSeconds(vm, self) + durationTotalSeconds(vm, AS_INSTANCE(args[0])));
     ObjInstance* object = newInstance(vm, self->obj.klass);
+    push(vm, OBJ_VAL(object));
     durationObjInit(vm, duration, object);
+    pop(vm);
     RETURN_OBJ(object);
 }
 
@@ -416,7 +418,9 @@ LOX_METHOD(Duration, __subtract__) {
 
     durationFromSeconds(duration, durationTotalSeconds(vm, self) - durationTotalSeconds(vm, AS_INSTANCE(args[0])));
     ObjInstance* object = newInstance(vm, self->obj.klass);
+    push(vm, OBJ_VAL(object));
     durationObjInit(vm, duration, object);
+    pop(vm);
     RETURN_OBJ(object);
 }
 

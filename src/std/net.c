@@ -804,9 +804,12 @@ LOX_METHOD(URLClass, parse) {
     ASSERT_ARG_TYPE("URL class::parse(url)", 0, String);
     ObjInstance* instance = newInstance(vm, AS_CLASS(receiver));
     push(vm, OBJ_VAL(instance));
+    
     ObjString* url = AS_STRING(args[0]);
     struct yuarel component;
-    if (yuarel_parse(&component, url->chars) == -1) THROW_EXCEPTION(clox.std.net.URLException, "Failed to parse the supplied url.");
+    if (yuarel_parse(&component, url->chars) == -1) {
+        THROW_EXCEPTION(clox.std.net.URLException, "Failed to parse the supplied url.");
+    }
 
     setObjField(vm, instance, "scheme", OBJ_VAL(newString(vm, component.scheme != NULL ? component.scheme : "")));
     setObjField(vm, instance, "host", OBJ_VAL(newString(vm, component.host != NULL ? component.host : "")));

@@ -181,15 +181,15 @@ static void defineUtilTypes(VM* vm) {
     vm->currentNamespace = utilNamespace;
 
     TypeInfo* placeholderType = declareNativeTypeParameter(vm, "T");
-    ObjClass* dateClass = defineNativeClass(vm, "Date");
-    ObjClass* dateTimeClass = defineNativeClass(vm, "DateTime");
-    ObjClass* durationClass = defineNativeClass(vm, "Duration");
+    defineNativeClass(vm, "Date");
+    defineNativeClass(vm, "DateTime");
+    defineNativeClass(vm, "Duration");
     
     vm->promiseClass = defineNativeGenericClass(vm, "Promise", 1, placeholderType);
-    ObjClass* randomClass = defineNativeClass(vm, "Random");
-    ObjClass* regexClass = defineNativeClass(vm, "Regex");
+    defineNativeClass(vm, "Random");
+    defineNativeClass(vm, "Regex");
     vm->timerClass = defineNativeClass(vm, "Timer");
-    ObjClass* uuidClass = defineNativeClass(vm, "UUID");
+    defineNativeClass(vm, "UUID");
 
     vm->currentNamespace = vm->rootNamespace;
 }
