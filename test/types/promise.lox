@@ -11,3 +11,4 @@ async Promise<void> readFileAsync(String filePath) {
 }
 
 await readFileAsync("test/others/file_input.txt")
+println("File reading operation completed.")

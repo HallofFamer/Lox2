@@ -18,6 +18,7 @@ class UserProfile {
 }
 
 val userProfile = UserProfile("John Doe")
+println("User Profile:")
 println(userProfile.name) 
 println(userProfile.roles)
 println(userProfile.settings)
