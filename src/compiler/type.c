@@ -1039,6 +1039,10 @@ void typeTableOutput(TypeTable* typetab) {
 }
 
 static bool isCallableEqualType(CallableTypeInfo* type, CallableTypeInfo* type2) {
+    if (type->attribute.isReified != type2->attribute.isReified) {
+        return false;
+    }
+
     if (!isEqualType(type->returnType, type2->returnType)) {
         return false;
     }

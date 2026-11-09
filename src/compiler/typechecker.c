@@ -570,10 +570,10 @@ static void inferFunctionTypeParameters(TypeChecker* typeChecker, Ast* ast, Call
     Ast* callee = astGetChild(ast, 0);
     Ast* args = astGetChild(ast, 1);
     if (callee->type == NULL || !IS_CALLABLE_TYPE(callee->type)) return;
+    
     GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, functionType->baseType.shortName, functionType->baseType.fullName, (TypeInfo*)functionType);
     calleeType->isFullyInstantiated = true;
     inferGenericTypeParameters(callee, args, functionType->formalTypeParams, functionType->paramTypes, calleeType);
-
     callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
 }
 
@@ -585,9 +585,9 @@ static void inferBehaviorTypeParameters(TypeChecker* typeChecker, Ast* ast, Call
     ObjString* classFullName = getClassNameFromMetaclass(typeChecker->vm, callee->type->fullName);
     BehaviorTypeInfo* classBehaviorType = AS_BEHAVIOR_TYPE(typeTableGet(typeChecker->vm->typetab, classFullName));
     GenericTypeInfo* calleeType = newGenericTypeInfo(typeChecker->vm->typetab->count + 1, classBehaviorType->baseType.shortName, classBehaviorType->baseType.fullName, (TypeInfo*)classBehaviorType);
+    
     calleeType->isFullyInstantiated = true;
     inferGenericTypeParameters(callee, args, classBehaviorType->formalTypeParams, initializerType->paramTypes, calleeType);
-
     callee->type = insertHigherOrderType(typeChecker, (TypeInfo*)calleeType);
 }
 
@@ -649,6 +649,7 @@ static void inferAstTypeFromBinaryOperator(TypeChecker* typeChecker, Ast* ast, S
     ObjString* methodName = copyStringPerma(typeChecker->vm, ast->token.start, ast->token.length);
     MethodTypeInfo* methodType = getMethodType(receiver->type, methodName);
     if (methodType == NULL) return;
+    
     CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, (TypeInfo*)methodType->declaredType);
     if (callableType->paramTypes->count == 0) return;
     TypeInfo* paramType = callableType->paramTypes->elements[0];
