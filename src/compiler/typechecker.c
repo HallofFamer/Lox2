@@ -755,6 +755,30 @@ static void inferAstTypeFromInitializer(TypeChecker* typeChecker, Ast* ast, Type
     else ast->type = type;
 }
 
+static TypeInfo* prepareInvokedMethodType(TypeChecker* typeChecker, Ast* ast, MethodTypeInfo* methodType, TypeInfo* receiverType, ObjString* methodName, bool inferMissingTypeParameters) {
+    TypeInfo* declaredType = (TypeInfo*)methodType->declaredType;
+    if (methodType->declaredType->formalTypeParams->count == 0) return declaredType;
+
+    if (inferMissingTypeParameters) {
+        if (astNumChild(ast) < 3) {
+            inferMethodTypeParameters(typeChecker, ast, methodType);
+        }
+    }
+    else if (astNumChild(ast) < 2) {
+        typeError(typeChecker, "Method %s::%s needs to be invoked with generic type parameters.", receiverType->shortName->chars, methodName->chars);
+        return NULL;
+    }
+
+    Ast* typeParams = astLastChild(ast);
+    if (typeParams->children->count != methodType->declaredType->formalTypeParams->count) {
+        typeError(typeChecker, "Method %s::%s expects to receive %d generic type parameters but gets %d.", receiverType->shortName->chars,
+            methodName->chars, methodType->declaredType->formalTypeParams->count, typeParams->children->count);
+        return NULL;
+    }
+
+    return (TypeInfo*)instantiateGenericMethodTypeFromAst(typeChecker, methodType->declaredType, typeParams);
+}
+
 static void inferAstTypeFromCall(TypeChecker* typeChecker, Ast* ast) {
     Ast* callee = astGetChild(ast, 0);
     if (callee->type == NULL) return;
@@ -812,21 +836,8 @@ static void inferAstTypeFromInvoke(TypeChecker* typeChecker, Ast* ast) {
     MethodTypeInfo* methodType = getMethodType(receiver->type, methodName);
 
     if (methodType != NULL) {
-		TypeInfo* declaredType = (TypeInfo*)methodType->declaredType;
-        if (methodType->declaredType->formalTypeParams->count > 0) {
-            if (astNumChild(ast) < 3) {
-				inferMethodTypeParameters(typeChecker, ast, methodType);
-            }
-            Ast* typeParams = astLastChild(ast);
-
-            if (typeParams->children->count != methodType->declaredType->formalTypeParams->count) {
-                typeError(typeChecker, "Method %s::%s expects to receive %d generic type parameters but gets %d.", receiver->type->shortName->chars,
-                    methodName->chars, methodType->declaredType->formalTypeParams->count, typeParams->children->count);
-                return;
-			}
-
-            declaredType = (TypeInfo*)instantiateGenericMethodTypeFromAst(typeChecker, methodType->declaredType, typeParams);
-        }
+        TypeInfo* declaredType = prepareInvokedMethodType(typeChecker, ast, methodType, receiver->type, methodName, true);
+        if (declaredType == NULL) return;
 
         CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, receiver->type, declaredType);
         char methodDesc[UINT8_MAX];
@@ -854,23 +865,8 @@ static void inferAstTypeFromSuperInvoke(TypeChecker* typeChecker, Ast* ast) {
 
     MethodTypeInfo* methodType = getMethodType(superType, methodName);
     if (methodType == NULL) return;
-    TypeInfo* declaredType = (TypeInfo*)methodType->declaredType;
-
-    if (methodType->declaredType->formalTypeParams->count > 0) {
-        if (astNumChild(ast) < 2) {
-            typeError(typeChecker, "Method %s::%s needs to be invoked with generic type parameters.", superType->shortName->chars, methodName->chars);
-            return;
-        }
-
-        Ast* typeParams = astLastChild(ast);
-        if (typeParams->children->count != methodType->declaredType->formalTypeParams->count) {
-            typeError(typeChecker, "Method %s::%s expects to receive %d generic type parameters but gets %d.", superType->shortName->chars,
-                methodName->chars, methodType->declaredType->formalTypeParams->count, typeParams->children->count);
-            return;
-        }
-
-        declaredType = (TypeInfo*)instantiateGenericMethodTypeFromAst(typeChecker, methodType->declaredType, typeParams);
-    }
+    TypeInfo* declaredType = prepareInvokedMethodType(typeChecker, ast, methodType, superType, methodName, false);
+    if (declaredType == NULL) return;
 
     CallableTypeInfo* callableType = instantiateGenericMethodType(typeChecker, superType, declaredType);
     char methodDesc[UINT8_MAX];

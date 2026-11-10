@@ -1137,7 +1137,9 @@ static bool isCallableSubtypeOfType(CallableTypeInfo* type, TypeInfo* type2) {
             return true;
         }
     }
-    else if (IS_CALLABLE_TYPE(type2)) return isCallableEqualType(type, AS_CALLABLE_TYPE(type2));
+    else if (IS_CALLABLE_TYPE(type2)) {
+        return isCallableEqualType(type, AS_CALLABLE_TYPE(type2));
+    }
     return false;
 }
 
