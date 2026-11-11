@@ -317,6 +317,7 @@ static void formatCalleeDesc(TypeChecker* typeChecker, FunctionTypeChecker* func
 }
 
 static void checkArrayLiteral(TypeChecker* typeChecker, Ast* ast, TypeInfo* expectedType) {
+    if (astNumChild(ast) == 0) return;
     Ast* elements = astGetChild(ast, 0);
     int numElements = astNumChild(elements);
     GenericTypeInfo* genericFieldType = AS_GENERIC_TYPE(expectedType);

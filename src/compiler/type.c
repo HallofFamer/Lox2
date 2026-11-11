@@ -1155,7 +1155,9 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
                 if (!isBehaviorSubtypeOfType(subtype, behaviorSupertype)) return false;
                 
                 for (int i = 0; i < type->actualTypeParams->count; i++) {
-                    if (!isEqualType(type->actualTypeParams->elements[i], genericSupertype->actualTypeParams->elements[i])) return false;
+                    if (!isEqualType(type->actualTypeParams->elements[i], genericSupertype->actualTypeParams->elements[i])) {
+                        return false;
+                    }
                 }
                 return true;
             }
