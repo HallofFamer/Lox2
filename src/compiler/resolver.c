@@ -441,6 +441,12 @@ static void endScope(Resolver* resolver) {
     if (resolver->isTopLevel) resolver->globalSymtab = resolver->currentSymtab;
 }
 
+static Ast* astGetChildInitSymtab(Ast* parent, int childIndex) {
+    Ast* child = astGetChild(parent, childIndex);
+    child->symtab = parent->symtab;
+    return child;
+}
+
 static SymbolItem* declareVariable(Resolver* resolver, Ast* ast, bool isMutable) {
     SymbolCategory category = (resolver->currentSymtab == resolver->rootSymtab) ? SYMBOL_CATEGORY_GLOBAL : SYMBOL_CATEGORY_LOCAL;
     ObjString* name = createStringFromToken(resolver->vm, ast->token);
@@ -875,8 +881,7 @@ static void parameters(Resolver* resolver, Ast* ast) {
 }
 
 static void block(Resolver* resolver, Ast* ast) {
-    Ast* stmts = astGetChild(ast, 0);
-    stmts->symtab = ast->symtab;
+    Ast* stmts = astGetChildInitSymtab(ast, 0);
     for (int i = 0; i < stmts->children->count; i++) {
         resolveChild(resolver, stmts, i);
     }
@@ -949,16 +954,16 @@ static void function(Resolver* resolver, Ast* ast, bool isLambda, bool isAsync) 
     }
 
     Ast* returnType = astGetChild(ast, 0);
-    returnType->symtab = ast->symtab;
+    returnType = astGetChildInitSymtab(ast, 0);
     if (!ast->attribute.isVoid) resolveChild(resolver, ast, 0);
     else returnType->type = typeTableGet(resolver->vm->typetab, resolver->vm->voidString);
 
     Ast* params = astGetChild(ast, 1);
-    params->symtab = ast->symtab;
+    params = astGetChildInitSymtab(ast, 1);
     resolveChild(resolver, ast, 1);
 
     Ast* blk = astGetChild(ast, 2);
-    blk->symtab = ast->symtab;
+    blk = astGetChildInitSymtab(ast, 2);
 	functionResolver.atBody = true;
     block(resolver, blk);
     endScope(resolver);
@@ -986,7 +991,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
 
     if (type == BEHAVIOR_CLASS) {
         Ast* superclass = astGetChild(ast, childIndex);
-        superclass->symtab = ast->symtab;
+        superclass = astGetChildInitSymtab(ast, childIndex);
         classResolver.superClass = superclass->token;
         resolveChild(resolver, ast, childIndex);
         childIndex++;
@@ -1013,8 +1018,7 @@ static void behavior(Resolver* resolver, BehaviorType type, Ast* ast) {
     }
     else ast->type = getNativeType(resolver->vm, "Trait class");
 
-    Ast* traitList = astGetChild(ast, childIndex);
-    traitList->symtab = ast->symtab;
+    Ast* traitList = astGetChildInitSymtab(ast, childIndex);
     if (astNumChild(traitList) > 0) {
         resolveChild(resolver, ast, childIndex);
         if (!classResolver.isAnonymous) bindTraitTypes(resolver, resolver->currentClass->name, traitList);
@@ -1071,8 +1075,7 @@ static void resolveAnd(Resolver* resolver, Ast* ast) {
 
 static void resolveArray(Resolver* resolver, Ast* ast) {
     if (astHasChild(ast)) {
-        Ast* elements = astGetChild(ast, 0);
-        elements->symtab = ast->symtab;
+        Ast* elements = astGetChildInitSymtab(ast, 0);
         
         for (int i = 0; i < elements->children->count; i++) {
             resolveChild(resolver, elements, i);
@@ -1112,10 +1115,8 @@ static void resolveClass(Resolver* resolver, Ast* ast) {
 
 static void resolveDictionary(Resolver* resolver, Ast* ast) {
     uint8_t entryCount = 0;
-    Ast* keys = astGetChild(ast, 0);
-    keys->symtab = ast->symtab;
-    Ast* values = astGetChild(ast, 1);
-    values->symtab = ast->symtab;
+    Ast* keys = astGetChildInitSymtab(ast, 0);
+    Ast* values = astGetChildInitSymtab(ast, 1);
 
     while (entryCount < keys->children->count) {
         resolveChild(resolver, keys, entryCount);
@@ -1133,15 +1134,13 @@ static void resolveGrouping(Resolver* resolver, Ast* ast) {
 }
 
 static void resolveInterpolation(Resolver* resolver, Ast* ast) {
-    Ast* exprs = astGetChild(ast, 0);
-    exprs->symtab = ast->symtab;
+    Ast* exprs = astGetChildInitSymtab(ast, 0);
     int count = 0;
 
     while (count < exprs->children->count) {
         bool concatenate = false;
         bool isString = false;
-        Ast* expr = astGetChild(exprs, count);
-        expr->symtab = exprs->symtab;
+        Ast* expr = astGetChildInitSymtab(exprs, count);
 
         if (expr->kind == AST_EXPR_LITERAL && expr->token.kind == TOKEN_KIND_STRING) {
             resolveChild(resolver, exprs, count);
@@ -1464,13 +1463,11 @@ static void resolveCatchStatement(Resolver* resolver, Ast* ast) {
         exceptionTypeItem->state = SYMBOL_STATE_ACCESSED;
     }
 
-    Ast* exceptionVar = astGetChild(ast, 0);
-    exceptionVar->symtab = ast->symtab;
+    Ast* exceptionVar = astGetChildInitSymtab(ast, 0);
     SymbolItem* exceptionVarItem = declareVariable(resolver, exceptionVar, false);
     exceptionVarItem->state = SYMBOL_STATE_DEFINED;
 
-    Ast* blk = astGetChild(ast, 1);
-    blk->symtab = ast->symtab;
+    Ast* blk = astGetChildInitSymtab(ast, 1);
     block(resolver, blk);
     endScope(resolver);
 }
@@ -1499,12 +1496,10 @@ static void resolveFinallyStatement(Resolver* resolver, Ast* ast) {
 static void resolveForStatement(Resolver* resolver, Ast* ast) {
     resolver->loopDepth++;
     beginScope(resolver, ast, SYMBOL_SCOPE_BLOCK);
-    Ast* decl = astGetChild(ast, 0);
-    decl->symtab = ast->symtab;
+    Ast* decl = astGetChildInitSymtab(ast, 0);
 
     for (int i = 0; i < decl->children->count; i++) {
-        Ast* varDecl = astGetChild(decl, i);
-        varDecl->symtab = decl->symtab;
+        Ast* varDecl = astGetChildInitSymtab(decl, i);
         SymbolItem* item = declareVariable(resolver, varDecl, varDecl->attribute.isMutable);
         item->state = SYMBOL_STATE_DEFINED;
     }
@@ -1546,8 +1541,7 @@ static void resolveReturnStatement(Resolver* resolver, Ast* ast) {
 static void resolveSwitchStatement(Resolver* resolver, Ast* ast) {
     resolver->switchDepth++;
     resolveChild(resolver, ast, 0);
-    Ast* caseList = astGetChild(ast, 1);
-    caseList->symtab = ast->symtab;
+    Ast* caseList = astGetChildInitSymtab(ast, 1);
 
     for (int i = 0; i < caseList->children->count; i++) {
         resolveChild(resolver, caseList, i);
@@ -1579,8 +1573,7 @@ static void resolveUsingStatement(Resolver* resolver, Ast* ast) {
         semanticError(resolver, "Can only use 'using' from top-level code.");
     }
 
-    Ast* _namespace = astGetChild(ast, 0);
-    _namespace->symtab = ast->symtab;
+    Ast* _namespace = astGetChildInitSymtab(ast, 0);
     int namespaceDepth = astNumChild(_namespace);
     uint8_t index = 0;
 
@@ -1782,10 +1775,8 @@ static void resolveNamespaceDeclaration(Resolver* resolver, Ast* ast) {
         return;
     }
 
-    Ast* identifiers = astGetChild(ast, 0);
-    identifiers->symtab = ast->symtab;
-    Ast* identifier = astGetChild(identifiers, 0);
-    identifier->symtab = identifiers->symtab;
+    Ast* identifiers = astGetChildInitSymtab(ast, 0);
+    Ast* identifier = astGetChildInitSymtab(identifiers, 0);
     insertSymbol(resolver, identifier->token, SYMBOL_CATEGORY_GLOBAL, SYMBOL_STATE_ACCESSED, NULL, false);
     resolver->currentNamespace = astCreateQualifiedName(resolver->vm, ast);
 }
