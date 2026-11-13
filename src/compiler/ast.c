@@ -89,6 +89,12 @@ Ast* astGetChild(Ast* ast, int index) {
     return ast->children->elements[index];
 }
 
+Ast* astGetChildInitSymtab(Ast* parent, int index) {
+    Ast* child = astGetChild(parent, index);
+    child->symtab = parent->symtab;
+    return child;
+}
+
 bool astHasChild(Ast* ast) {
     return (ast->children != NULL && ast->children->count > 0);
 }
