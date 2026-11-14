@@ -441,12 +441,6 @@ static void endScope(Resolver* resolver) {
     if (resolver->isTopLevel) resolver->globalSymtab = resolver->currentSymtab;
 }
 
-static Ast* astGetChildInitSymtab(Ast* parent, int childIndex) {
-    Ast* child = astGetChild(parent, childIndex);
-    child->symtab = parent->symtab;
-    return child;
-}
-
 static SymbolItem* declareVariable(Resolver* resolver, Ast* ast, bool isMutable) {
     SymbolCategory category = (resolver->currentSymtab == resolver->rootSymtab) ? SYMBOL_CATEGORY_GLOBAL : SYMBOL_CATEGORY_LOCAL;
     ObjString* name = createStringFromToken(resolver->vm, ast->token);

@@ -531,7 +531,9 @@ static uint32_t hashAliasTypeInfo(TypeInfo* type, uint32_t initialHash) {
 }
 
 uint32_t hashTypeInfo(TypeInfo* type) {
-    if (type == NULL || IS_FIELD_TYPE(type) || IS_METHOD_TYPE(type)) return 0;
+    if (type == NULL || IS_FIELD_TYPE(type) || IS_METHOD_TYPE(type)) {
+        return 0;
+    }
     if (IS_BEHAVIOR_TYPE(type) || IS_PLACEHOLDER_TYPE(type) || IS_ALIAS_TYPE(type) || IS_VOID_TYPE(type)) {
         return type->fullName->hash;
     }
