@@ -1,11 +1,16 @@
 # Change Log
 
-### Lox2 v2.2.3(current version)
+### Lox2 v2.2.4(current version)
+- Typecheck against field declarations for array and dictionary literals if containing invalid elements/entries.
+- Allow void type as generic type argument, useful for certain types such as `Promise<void>`. 
+- Fix an issue that compiler accepts any file extensions to be compiled as Lox2 source code, which may lead to unexpected behavior.
+
+### Lox2 v2.2.3(last version)
 - Generic type parameter inference which allows generic type params to be inferred by arguments passed to functions/methods. 
 - Add configuration option `marshalTryRecompile` in lox2.ini, which decides whether to recompile bytecode if source code version or dependencies have changed.
 - Fix segfault issue with no namespace is declared at the top of the script, as well as a GC bug that may free objects while being instantiated in function `newInstance`.
 
-### Lox2 v2.2.2(last version)
+### Lox2 v2.2.2
 - Introduce fully reified generics with new object type `ObjType` which captures full type information instead of just class/trait.
 - Extend Marshaller to serialize type information for each serialized source code, so it can be used by its dependents during compilation.
 - Fix parser glitch which causes incorrect parsing of nested callable or generic type annotations.

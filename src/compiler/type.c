@@ -1120,7 +1120,9 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2) {
 static bool isBehaviorSubtypeOfType(BehaviorTypeInfo* subtype, BehaviorTypeInfo* supertype) {
     TypeInfo* superclassType = subtype->superclassType;
     while (superclassType != NULL) {
-        if (superclassType->id == supertype->baseType.id) return true;
+        if (superclassType->id == supertype->baseType.id) {
+            return true;
+        }
         superclassType = AS_BEHAVIOR_TYPE(getInnerBaseType(superclassType))->superclassType;
     }
 

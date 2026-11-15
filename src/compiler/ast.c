@@ -89,9 +89,9 @@ Ast* astGetChild(Ast* ast, int index) {
     return ast->children->elements[index];
 }
 
-Ast* astGetChildInitSymtab(Ast* parent, int index) {
-    Ast* child = astGetChild(parent, index);
-    child->symtab = parent->symtab;
+Ast* astGetChildInitSymtab(Ast* ast, int index) {
+    Ast* child = astGetChild(ast, index);
+    child->symtab = ast->symtab;
     return child;
 }
 
