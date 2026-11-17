@@ -96,7 +96,7 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 ### Lox2 v2.4.0
 - Support for structural pattern matching using `match` keyword, remove `switch` statement as it has been superceded.
 - Enhanced Generics/parametric polymorphism with constraints on generic type parameters using `extends` or `with` keywords.
-- Improved type system with non-nullable by default for type declaration, as well as covariant method parameter/return types.
+- Improved type system with non-nullable by default for type declaration, as well as covariant method return types.
 - Foreign function interface(FFI) as a way to write Lox2 libraries in C and load in lox script.
 
 ### Lox2 v2.5.0
@@ -112,14 +112,14 @@ For a list of implemented features, please see [CHANGELOG.md](https://github.com
 - Add Lox2 CLI to run Lox scripts easily from command line, backed by libuv. 
 
 ### Lox2 v2.7.0
-- Add control flow graph (CFG) and data flow analysis in the compiler, which can be used for constant propagation and other optimizations.
-- Improvement of JIT compiler with further optimizations made possible from Lox2's new CFG and preliminary data flow analysis.
 - First class continuation with keyword `thisContext`, enabling manipulation of call stack in userland.
+- Improvement of JIT compiler with additional optimizations such as trace stitching and guard optimization.
+- Introduction of Control Flow Graph(CFG) as prerequisite for future tiered JIT compilation pipeline. 
 - Add new package `clox.ext.gui` which supports writing GUI applications using gtk binding for Lox2.
 
 ### Lox2 v2.8.0
 - Extension methods which allow adding new methods to existing classes without modifying their source code.
-- Further improvement of JIT compiler with introduction of SSA IR form that enables more optimizations for generated native code.
+- Implementation of tiered JIT compilation pipeline with optimzing JIT compiler tier that make use of control and data flow analysis.
 - Function and Method parameter labels similar to Smalltalk, Objective C and Swift using `label:` notation.
 - Introduction of Lox2's package manager(name to be determined) which allows installing Lox2 packages from a central repository.
 
@@ -148,7 +148,7 @@ client.close()
 
 #### Windows(with git, cmake and vcpkg, need to replace [$VCPKG_PATH] with installation path of vcpkg)
 ```
-git clone -b v2.2.3 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.2.4 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 cmake -DCMAKE_TOOLCHAIN_FILE:STRING="[$VCPKG_PATH]/scripts/buildsystems/vcpkg.cmake" -S . -B ./build
 cmake --build build --target install --config Release
@@ -157,7 +157,7 @@ Lox2
 
 #### Linux(with git, cmake, curl and libuv, need to install one of the libcurl4-dev and libuv1.dev packages)
 ```
-git clone -b v2.2.3 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.2.4 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 mkdir build
 cmake -S . -B ./build
@@ -167,13 +167,13 @@ Lox2
 
 #### Docker(linux, need to replace [$LinuxDockerfile] by actual docker file name, ie. UbuntuDockerfile)
 ```
-git clone -b v2.2.3 https://github.com/HallofFamer/Lox2.git
+git clone -b v2.2.4 https://github.com/HallofFamer/Lox2.git
 cd Lox2
 docker build -t lox2:linux -f Docker/[$LinuxDockerfile] .
-docker run -w /Lox2-2.2.3/Lox2 -i -t lox2:linux
+docker run -w /Lox2-2.2.4/Lox2 -i -t lox2:linux
 ```
 
-Note: It is recommended to clone from the latest stable release branch("v2.2.3" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
+Note: It is recommended to clone from the latest stable release branch("v2.2.4" at this moment), as the master branch receives updates regularly and some changes may break existing code. 
 
 
 ## Credits & Special Thanks
