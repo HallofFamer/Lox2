@@ -333,6 +333,7 @@ LOX_METHOD(HTTPClient, put) {
     if (curl == NULL) THROW_EXCEPTION(clox.std.net.HTTPException, "Failed to initiate a PUT request using CURL.");
     CURLResponse curlResponse;
     CURLcode curlCode = httpSendRequest(vm, url, HTTP_PUT, data, curl, &curlResponse);
+    
     if (curlCode != CURLE_OK) {
         curl_easy_cleanup(curl);
         THROW_EXCEPTION(clox.std.net.HTTPException, "Failed to complete a PUT request from URL.");

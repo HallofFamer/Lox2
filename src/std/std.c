@@ -76,15 +76,15 @@ static void defineIOTypes(VM* vm) {
     vm->currentNamespace = ioNamespace;
 
     vm->fileClass = defineNativeClass(vm, "File");
-    ObjClass* closableTrait = defineNativeTrait(vm, "TClosable");
-    ObjClass* ioStreamClass = defineNativeClass(vm, "IOStream");
-    ObjClass* readStreamClass = defineNativeClass(vm, "ReadStream");
-    ObjClass* writeStreamClass = defineNativeClass(vm, "WriteStream");
+    defineNativeTrait(vm, "TClosable");
+    defineNativeClass(vm, "IOStream");
+    defineNativeClass(vm, "ReadStream");
+    defineNativeClass(vm, "WriteStream");
 
-    ObjClass* binaryReadStreamClass = defineNativeClass(vm, "BinaryReadStream");
-    ObjClass* binaryWriteStreamClass = defineNativeClass(vm, "BinaryWriteStream");
-    ObjClass* fileReadStreamClass = defineNativeClass(vm, "FileReadStream");
-    ObjClass* fileWriteStreamClass = defineNativeClass(vm, "FileWriteStream");
+    defineNativeClass(vm, "BinaryReadStream");
+    defineNativeClass(vm, "BinaryWriteStream");
+    defineNativeClass(vm, "FileReadStream");
+    defineNativeClass(vm, "FileWriteStream");
     vm->currentNamespace = vm->rootNamespace;
 }
 

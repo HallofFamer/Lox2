@@ -827,10 +827,22 @@ LOX_METHOD(Int, lowBit) {
     RETURN_INT(bit);
 }
 
+LOX_METHOD(Int, lShift) {
+    ASSERT_ARG_COUNT("Int::lShift(other)", 1);
+    ASSERT_ARG_TYPE("Int::lShift(other)", 0, Int);
+    RETURN_INT(AS_INT_INSTANCE(receiver) << AS_INT_INSTANCE(args[0]));
+}
+
 LOX_METHOD(Int, objectID) {
     ASSERT_ARG_COUNT("Int::objectID()", 0);
     if (IS_INT(receiver)) RETURN_NUMBER((double)(8 * (uint64_t)AS_INT_INSTANCE(receiver) + 4));
     else RETURN_NUMBER(fetchObjectID(vm, AS_OBJ(receiver)));
+}
+
+LOX_METHOD(Int, rShift) {
+    ASSERT_ARG_COUNT("Int::rShift(other)", 1);
+    ASSERT_ARG_TYPE("Int::rShift(other)", 0, Int);
+    RETURN_INT(AS_INT_INSTANCE(receiver) >> AS_INT_INSTANCE(args[0]));
 }
 
 LOX_METHOD(Int, timesRepeat) {
@@ -2447,7 +2459,9 @@ void registerLangPackage(VM* vm) {
     DEF_METHOD(vm->intClass, Int, isOdd, 0, NATIVE_TYPE(Bool));
     DEF_METHOD(vm->intClass, Int, lcm, 1, NATIVE_TYPE(Int), NATIVE_TYPE(Int));
 	DEF_METHOD(vm->intClass, Int, lowBit, 0, NATIVE_TYPE(Int));
+    DEF_METHOD(vm->intClass, Int, lShift, 1, NATIVE_TYPE(Int), NATIVE_TYPE(Int));
     DEF_METHOD(vm->intClass, Int, objectID, 0, NATIVE_TYPE(Number));
+    DEF_METHOD(vm->intClass, Int, rShift, 1, NATIVE_TYPE(Int), NATIVE_TYPE(Int));
     DEF_METHOD(vm->intClass, Int, timesRepeat, 1, NATIVE_TYPE(void), NATIVE_TYPE_CALLABLE(NATIVE_TYPE(void), 1, NATIVE_TYPE(Int)));
     DEF_METHOD(vm->intClass, Int, toBinary, 0, NATIVE_TYPE(String));
     DEF_METHOD(vm->intClass, Int, toFloat, 0, NATIVE_TYPE(Float));

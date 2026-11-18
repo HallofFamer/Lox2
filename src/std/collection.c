@@ -367,10 +367,12 @@ static Value newCollection(VM* vm, ObjClass* klass) {
         }
         default: {
             ObjInstance* collection = newInstance(vm, klass);
+            push(vm, OBJ_VAL(collection));
             if (klass->isNative) {
                 Value initMethod = getObjMethod(vm, OBJ_VAL(collection), "__init__");
                 callReentrantMethod(vm, OBJ_VAL(collection), initMethod);
             }
+            pop(vm);
             return OBJ_VAL(collection);
         }
     }

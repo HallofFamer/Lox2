@@ -490,10 +490,11 @@ LOX_METHOD(FileReadStream, readString) {
     ASSERT_ARG_COUNT("FileReadStream::readString(length)", 1);
     ASSERT_ARG_TYPE("FileReadStream::readString(length)", 0, Int);
     ObjFile* file = getFileField(vm, AS_INSTANCE(receiver), "file");
+    
     int length = AS_INT(args[0]);
     if (length < 0) THROW_EXCEPTION_FMT(clox.std.lang.IllegalArgumentException, "Method FileReadStream::readString(length) expects argument 1 to be a positive integer but got %g.", length);
-
     if (!file->isOpen) THROW_EXCEPTION(clox.std.io.IOException, "Cannot read the next line because file is already closed.");
+    
     if (file->fsOpen == NULL) RETURN_NIL;
     else {
         ObjString* string = fileReadString(vm, file, length);

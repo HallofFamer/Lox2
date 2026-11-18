@@ -87,7 +87,8 @@ LOX_METHOD(Date, getTimestamp) {
 LOX_METHOD(Date, toDateTime) {
     ASSERT_ARG_COUNT("Date::toDateTime()", 0);
     ObjInstance* self = AS_INSTANCE(receiver);
-    ObjInstance* dateTime = newInstance(vm, getNativeClass(vm, "clox.std.util.DateTime"));
+    ObjClass* dateTimeClass = getNativeClass(vm, "clox.std.util.DateTime");
+    ObjInstance* dateTime = newInstance(vm, dateTimeClass);
     push(vm, OBJ_VAL(dateTime));
 
     copyObjField(vm, self, dateTime, "year");
