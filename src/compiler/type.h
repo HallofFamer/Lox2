@@ -17,6 +17,7 @@ DECLARE_BUFFER(TypeInfoArray, TypeInfo*)
 #define IS_PLACEHOLDER_TYPE(type) (type->category == TYPE_CATEGORY_PLACEHOLDER)
 #define IS_GENERIC_TYPE(type) (type->category == TYPE_CATEGORY_GENERIC)
 #define IS_ALIAS_TYPE(type) (type->category == TYPE_CATEGORY_ALIAS)
+#define IS_UNION_TYPE(type) (type->category == TYPE_CATEGORY_UNION)
 #define IS_VOID_TYPE(type) (type->category == TYPE_CATEGORY_VOID)
 
 #define AS_BEHAVIOR_TYPE(type) ((BehaviorTypeInfo*)type)
@@ -25,6 +26,7 @@ DECLARE_BUFFER(TypeInfoArray, TypeInfo*)
 #define AS_METHOD_TYPE(type) ((MethodTypeInfo*)type)
 #define AS_GENERIC_TYPE(type) ((GenericTypeInfo*)type)
 #define AS_ALIAS_TYPE(type) ((AliasTypeInfo*)type)
+#define AS_UNION_TYPE(type) ((UnionTypeInfo*)type)
 
 typedef enum {
     TYPE_CATEGORY_NONE,
@@ -37,6 +39,7 @@ typedef enum {
     TYPE_CATEGORY_PLACEHOLDER,
     TYPE_CATEGORY_GENERIC,
     TYPE_CATEGORY_ALIAS,
+    TYPE_CATEGORY_UNION,
     TYPE_CATEGORY_VOID
 } TypeCategory;
 
@@ -107,6 +110,11 @@ typedef struct {
 } AliasTypeInfo;
 
 typedef struct {
+    TypeInfo baseType;
+    TypeInfoArray* memberTypes;
+} UnionTypeInfo;
+
+typedef struct {
     ObjString* key;
     TypeInfo* value;
 } TypeEntry;
@@ -174,7 +182,7 @@ bool isEqualType(TypeInfo* type, TypeInfo* type2);
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2);
 
 static inline bool isHigherOrderType(TypeInfo* type) {
-    return (type != NULL) && (IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type) || IS_ALIAS_TYPE(type));
+    return (type != NULL) && (IS_CALLABLE_TYPE(type) || IS_GENERIC_TYPE(type) || IS_ALIAS_TYPE(type) || IS_UNION_TYPE(type));
 }
 
 #endif // !clox_type_h

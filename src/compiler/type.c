@@ -875,6 +875,9 @@ static void typeTableOutputCategory(TypeCategory category) {
         case TYPE_CATEGORY_ALIAS:
             printf("typealias");
             break;
+        case TYPE_CATEGORY_UNION:
+            printf("union");
+            break;
         case TYPE_CATEGORY_VOID:
             printf("void");
             break;

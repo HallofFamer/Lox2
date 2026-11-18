@@ -47,6 +47,7 @@ const char* tokenNames[] = {
     [TOKEN_KIND_CLASS]          = "TOKEN_CLASS",
     [TOKEN_KIND_CONTINUE]       = "TOKEN_CONTINUE",
     [TOKEN_KIND_DEFAULT]        = "TOKEN_DEFAULT",
+    [TOKEN_KIND_DYNAMIC]        = "TOKEN_DYNAMIC",
     [TOKEN_KIND_ELSE]           = "TOKEN_ELSE",
     [TOKEN_KIND_EXTENDS]        = "TOKEN_EXTENDS",
     [TOKEN_KIND_FALSE]          = "TOKEN_FALSE",

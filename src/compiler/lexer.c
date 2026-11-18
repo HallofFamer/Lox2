@@ -152,6 +152,7 @@ static TokenKind identifierType(Lexer* lexer) {
                     case 'w': return checkKeyword(lexer, 2, 3, "ait", TOKEN_KIND_AWAIT);
                 }
             }
+            break;
         case 'b': return checkKeyword(lexer, 1, 4, "reak", TOKEN_KIND_BREAK);
         case 'c':
             if (lexer->current - lexer->start > 1) {
@@ -167,7 +168,15 @@ static TokenKind identifierType(Lexer* lexer) {
                     case 'o': return checkKeyword(lexer, 2, 6, "ntinue", TOKEN_KIND_CONTINUE);
                 }
             }
-        case 'd': return checkKeyword(lexer, 1, 6, "efault", TOKEN_KIND_DEFAULT);
+            break;
+        case 'd':
+            if (lexer->current - lexer->start > 1) {
+                switch (lexer->start[1]) {
+                    case 'e': return checkKeyword(lexer, 2, 5, "fault", TOKEN_KIND_DEFAULT);
+                    case 'y': return checkKeyword(lexer, 2, 5, "namic", TOKEN_KIND_DYNAMIC);
+                }
+            }
+            break;
         case 'e': 
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
@@ -175,6 +184,7 @@ static TokenKind identifierType(Lexer* lexer) {
                     case 'x': return checkKeyword(lexer, 2, 5, "tends", TOKEN_KIND_EXTENDS);
                 }
             }
+            break;
         case 'f':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
@@ -185,6 +195,7 @@ static TokenKind identifierType(Lexer* lexer) {
                     case 'u': return checkKeyword(lexer, 2, 1, "n", TOKEN_KIND_FUN);
                 }
             }
+            break;
         case 'i': return checkKeyword(lexer, 1, 1, "f", TOKEN_KIND_IF);
         case 'n':
             if (lexer->current - lexer->start > 1) {
@@ -193,6 +204,7 @@ static TokenKind identifierType(Lexer* lexer) {
                     case 'i': return checkKeyword(lexer, 2, 1, "l", TOKEN_KIND_NIL);
                 }
             }
+            break;
         case 'o': return checkKeyword(lexer, 1, 1, "r", TOKEN_KIND_OR);
         case 'r':
             if (lexer->current - lexer->start > 2 && lexer->start[1] == 'e') {
@@ -201,6 +213,7 @@ static TokenKind identifierType(Lexer* lexer) {
                     case 't': return checkKeyword(lexer, 3, 3, "urn", TOKEN_KIND_RETURN);
                 }
             }
+            break;
         case 's':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
@@ -208,6 +221,7 @@ static TokenKind identifierType(Lexer* lexer) {
                     case 'w': return checkKeyword(lexer, 2, 4, "itch", TOKEN_KIND_SWITCH);
                 }
             }
+            break;
         case 't':
             if (lexer->current - lexer->start > 1) {
                 switch (lexer->start[1]) {
