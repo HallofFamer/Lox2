@@ -7,6 +7,9 @@ println(Brioche())
 
 class Pair { 
 
+    var first
+	var second
+
     equals(pair) { 
         return (this.first == pair.first) and (this.second == pair.second)
     }    

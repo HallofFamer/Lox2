@@ -6,19 +6,19 @@ val promise = Promise({|fulfill, reject|
     Timer.timeout({ 
         fulfill(1)
     }, 500)
-});
+})
 
 val promise2 = Promise({|fulfill, reject| 
     Timer.timeout({ 
         fulfill(2)
     }, 1000)
-});
+})
 
 val promise3 = Promise({|fulfill, reject| 
     Timer.timeout({ 
         fulfill(3)
     }, 300)
-});
+})
 
 Promise.all([promise, promise2, promise3])
        .then({|result| println("promise all fulfilled with result: ${result}") })

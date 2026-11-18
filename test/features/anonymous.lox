@@ -26,7 +26,7 @@ val listenerClass = class extends Listener with listenerTrait {
             println("Invalid port number specified: ${port}")
         }
     }
-};
+}
 
 println("Creating anonymous trait: ")
 println(listenerTrait)
