@@ -1265,8 +1265,9 @@ static void resolveType(Resolver* resolver, Ast* ast) {
         SymbolItem* item = symbolTableLookup(resolver->currentSymtab, createStringFromToken(resolver->vm, ast->token));
         if (item != NULL && item->isImported) item->state = SYMBOL_STATE_ACCESSED;
         resolveChild(resolver, ast, 0);
+        Ast* typeParams = astGetChild(ast, 0);
 
-        if (astHasInstantiatedTypeParameters(astGetChild(ast, 0))) {
+        if (astHasInstantiatedTypeParameters(typeParams)) {
             insertGenericType(resolver, ast);
         }
         else {
@@ -1275,9 +1276,7 @@ static void resolveType(Resolver* resolver, Ast* ast) {
             if (strstr(baseType->fullName->chars, " class") != NULL) {
                 baseType = typeTableGet(resolver->vm->typetab, getClassNameFromMetaclass(resolver->vm, baseType->fullName));
             }
-
             TypeInfoArray* formalTypeParams = getTypeParameters(baseType);
-            Ast* typeParams = astGetChild(ast, 0);
 
             for (int i = 0; i < typeParams->children->count; i++) {
                 Ast* typeParam = astGetChild(typeParams, i);

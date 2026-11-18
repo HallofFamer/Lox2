@@ -247,6 +247,35 @@ AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjS
     return aliasType;
 }
 
+UnionTypeInfo* newUnionTypeInfo(int id, ObjString* shortName, ObjString* fullName) {
+    UnionTypeInfo* unionType = (UnionTypeInfo*)newTypeInfo(id, sizeof(UnionTypeInfo), TYPE_CATEGORY_UNION, shortName, fullName);
+    if (unionType != NULL) {
+        unionType->memberTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        if (unionType->memberTypes != NULL) TypeInfoArrayInit(unionType->memberTypes);
+    }
+    return unionType;
+}
+
+UnionTypeInfo* newUnionTypeInfoWithMembers(int id, ObjString* shortName, ObjString* fullName, int numTypes, ...) {
+    UnionTypeInfo* unionType = (UnionTypeInfo*)newTypeInfo(id, sizeof(UnionTypeInfo), TYPE_CATEGORY_UNION, shortName, fullName);
+    if (unionType != NULL) {
+        unionType->memberTypes = (TypeInfoArray*)malloc(sizeof(TypeInfoArray));
+        
+        if (unionType->memberTypes != NULL) {
+            TypeInfoArrayInit(unionType->memberTypes);
+            va_list args;
+            va_start(args, numTypes);
+            
+            for (int i = 0; i < numTypes; i++) {
+                TypeInfo* type = va_arg(args, TypeInfo*);
+                TypeInfoArrayAdd(unionType->memberTypes, type);
+            }
+            va_end(args);
+        }
+    }
+    return unionType;
+}
+
 static char* createCallableTypeName(CallableTypeInfo* callableType, bool isFullName) {
     char* callableName = bufferNewCString(UINT16_MAX);
     size_t length = 0;

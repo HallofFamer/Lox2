@@ -86,6 +86,7 @@ typedef enum {
 typedef struct {
     bool isAsync;
     bool isClass;
+    bool isDynamic;
     bool isFunction;
     bool isGeneric;
     bool isInitializer;
@@ -115,6 +116,7 @@ static inline AstAttribute astInitAttribute() {
     return (AstAttribute) {
         .isAsync = false,
         .isClass = false,
+        .isDynamic = false,
         .isFunction = false,
         .isGeneric = false,
         .isInitializer = false,

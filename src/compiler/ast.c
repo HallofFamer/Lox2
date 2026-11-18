@@ -729,7 +729,7 @@ static void astOutputDeclField(Ast* ast, int indentLevel) {
             astOutputChild(ast, indentLevel + 1, 1);
         }
     }
-    else if (astNumChild(ast) > 0) {
+    else if (astHasChild(ast)) {
         astOutputChild(ast, indentLevel + 1, 0);
     }
     free(name);

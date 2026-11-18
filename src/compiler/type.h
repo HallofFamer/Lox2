@@ -154,6 +154,8 @@ GenericTypeInfo* newGenericTypeInfo(int id, ObjString* shortName, ObjString* ful
 GenericTypeInfo* newGenericTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* rawType, int numParameters, ...);
 AliasTypeInfo* newAliasTypeInfo(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType);
 AliasTypeInfo* newAliasTypeInfoWithParameters(int id, ObjString* shortName, ObjString* fullName, TypeInfo* targetType, int numParameters, ...);
+UnionTypeInfo* newUnionTypeInfo(int id, ObjString* shortName, ObjString* fullName);
+UnionTypeInfo* newUnionTypeInfoWithMembers(int id, ObjString* shortName, ObjString* fullName, int numTypes, ...);
 
 char* createTypeName(TypeInfo* type, bool isFullName);
 void freeTypeInfo(TypeInfo* type);

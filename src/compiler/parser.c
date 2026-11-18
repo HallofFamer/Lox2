@@ -1310,6 +1310,7 @@ ParseRule parseRules[] = {
     [TOKEN_KIND_CLASS]            = {class_,        NULL,        PREC_NONE,        true},
     [TOKEN_KIND_CONTINUE]         = {NULL,          NULL,        PREC_NONE,        false},
     [TOKEN_KIND_DEFAULT]          = {NULL,          NULL,        PREC_NONE,        false},
+    [TOKEN_KIND_DYNAMIC]          = {NULL,          NULL,        PREC_NONE,        false},
     [TOKEN_KIND_ELSE]             = {NULL,          NULL,        PREC_NONE,        false},
     [TOKEN_KIND_EXTENDS]          = {NULL,          NULL,        PREC_NONE,        false},
     [TOKEN_KIND_FALSE]            = {literal,       NULL,        PREC_NONE,        true},
