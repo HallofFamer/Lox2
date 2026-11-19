@@ -1048,6 +1048,17 @@ static void typeTableOutputAlias(AliasTypeInfo* alias) {
     }
 }
 
+static void typeTableOutputUnion(UnionTypeInfo* unionType) {
+    if (unionType->memberTypes != NULL && unionType->memberTypes->count > 0) {
+        printf("    member types: %s", unionType->memberTypes->elements[0]->shortName->chars);
+
+        for (int i = 1; i < unionType->memberTypes->count; i++) {
+            printf(", %s", unionType->memberTypes->elements[i]->shortName->chars);
+        }
+        printf("\n");
+    }
+}
+
 static void typeTableOutputEntry(TypeEntry* entry) {
     printf("  %s", entry->value->shortName->chars);
     if (IS_BEHAVIOR_TYPE(entry->value)) printf("(%s)", entry->value->fullName->chars);
@@ -1058,6 +1069,7 @@ static void typeTableOutputEntry(TypeEntry* entry) {
     else if (IS_CALLABLE_TYPE(entry->value)) typeTableOutputCallable(AS_CALLABLE_TYPE(entry->value));
     else if (IS_GENERIC_TYPE(entry->value)) typeTableOutputGeneric(AS_GENERIC_TYPE(entry->value));
     else if (IS_ALIAS_TYPE(entry->value)) typeTableOutputAlias(AS_ALIAS_TYPE(entry->value));
+    else if (IS_UNION_TYPE(entry->value)) typeTableOutputUnion(AS_UNION_TYPE(entry->value));
     printf("\n");
 }
 

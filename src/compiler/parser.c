@@ -315,6 +315,7 @@ static void synchronize(Parser* parser) {
             case TOKEN_KIND_ASYNC:
             case TOKEN_KIND_AWAIT:
             case TOKEN_KIND_CLASS:
+            case TOKEN_KIND_DYNAMIC:
             case TOKEN_KIND_FOR:
             case TOKEN_KIND_FROM:
             case TOKEN_KIND_FUN:
