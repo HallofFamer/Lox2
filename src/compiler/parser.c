@@ -494,13 +494,6 @@ static Ast* behaviorType(Parser* parser) {
     return emptyAst(AST_EXPR_TYPE, previousToken(parser));
 }
 
-static Ast* voidType(Parser* parser) {
-	consume(parser, TOKEN_KIND_VOID, "Expect void type.");
-	Ast* type = emptyAst(AST_EXPR_TYPE, previousToken(parser));
-	type->attribute.isVoid = true;
-	return type;
-}
-
 static Ast* callableType(Parser* parser) {
     advance(parser);
     Ast* returnType = emptyAst(AST_EXPR_TYPE, previousToken(parser));
@@ -562,6 +555,20 @@ static Ast* genericType(Parser* parser) {
     return type;
 }
 
+static Ast* voidType(Parser* parser) {
+    consume(parser, TOKEN_KIND_VOID, "Expect void type.");
+    Ast* type = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+    type->attribute.isVoid = true;
+    return type;
+}
+
+static Ast* dynamicType(Parser* parser) {
+    consume(parser, TOKEN_KIND_DYNAMIC, "Expect dynamic type.");
+    Ast* type = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+    type->attribute.isDynamic = true;
+    return type;
+}
+
 static Ast* innerType(Parser* parser, bool allowVoid) {
     Ast* innerType = NULL;
     if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_KIND_VOID) && checkNext(parser, TOKEN_KIND_FUN)) {
@@ -598,8 +605,8 @@ static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
     else if ((checkParam && checkBoth(parser, TOKEN_KIND_IDENTIFIER)) || (!checkParam && check(parser, TOKEN_KIND_IDENTIFIER))) {
         return behaviorType(parser);
     }
-    else if (allowEmpty) {
-        return emptyAst(AST_EXPR_TYPE, emptyToken());
+    else if (check(parser, TOKEN_KIND_DYNAMIC) || allowEmpty) {
+        return dynamicType(parser);
     }
     else {
         parseErrorAtCurrent(parser, "Invalid type specified.");

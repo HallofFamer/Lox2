@@ -256,6 +256,12 @@ UnionTypeInfo* newUnionTypeInfo(int id, ObjString* shortName, ObjString* fullNam
     return unionType;
 }
 
+static int compareTypeInfo(const void* a, const void* b) {
+    TypeInfo* typeA = *(TypeInfo**)a;
+    TypeInfo* typeB = *(TypeInfo**)b;
+    return (typeA->id > typeB->id) - (typeA->id < typeB->id);
+}
+
 UnionTypeInfo* newUnionTypeInfoWithMembers(int id, ObjString* shortName, ObjString* fullName, int numTypes, ...) {
     UnionTypeInfo* unionType = (UnionTypeInfo*)newTypeInfo(id, sizeof(UnionTypeInfo), TYPE_CATEGORY_UNION, shortName, fullName);
     if (unionType != NULL) {
@@ -270,7 +276,9 @@ UnionTypeInfo* newUnionTypeInfoWithMembers(int id, ObjString* shortName, ObjStri
                 TypeInfo* type = va_arg(args, TypeInfo*);
                 TypeInfoArrayAdd(unionType->memberTypes, type);
             }
+
             va_end(args);
+            qsort(unionType->memberTypes->elements, unionType->memberTypes->count, sizeof(TypeInfo*), compareTypeInfo);
         }
     }
     return unionType;
