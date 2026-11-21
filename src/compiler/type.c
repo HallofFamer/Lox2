@@ -486,6 +486,11 @@ void freeTypeInfo(TypeInfo* type) {
         if (aliasType->formalTypeParams != NULL) TypeInfoArrayFree(aliasType->formalTypeParams);
         free(aliasType);
     }
+    else if (IS_UNION_TYPE(type)) {
+        UnionTypeInfo* unionType = AS_UNION_TYPE(type);
+        if (unionType->memberTypes != NULL) TypeInfoArrayFree(unionType->memberTypes);
+        free(unionType);
+    }
     else free(type);
 }
 

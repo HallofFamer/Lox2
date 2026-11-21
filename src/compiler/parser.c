@@ -588,6 +588,10 @@ static Ast* innerType(Parser* parser, bool allowVoid) {
         innerType = voidType(parser);
         innerType->attribute.isVoid = true;
     }
+    else if (check(parser, TOKEN_KIND_DYNAMIC)) {
+        innerType = dynamicType(parser);
+        innerType->attribute.isDynamic = true;
+    }
     else innerType = behaviorType(parser);
     return innerType;
 }
