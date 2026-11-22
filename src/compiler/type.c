@@ -451,6 +451,34 @@ static char* createAliasTypeName(AliasTypeInfo* aliasType, bool isFullName) {
     return aliasName;
 }
 
+static char* createUnionTypeName(UnionTypeInfo* unionType, bool isFullName) {
+    char* unionName = bufferNewCString(UINT16_MAX);
+    size_t length = 0;
+
+    for (int i = 0; i < unionType->memberTypes->count; i++) {
+        TypeInfo* memberType = unionType->memberTypes->elements[i];
+        if (i > 0) {
+            memcpy(unionName + length, " | ", 3);
+            length += 3;
+        }
+
+        if (memberType != NULL) {
+            char* memberTypeName = createTypeName(memberType, isFullName);
+            size_t memberTypeLength = strlen(memberTypeName);
+            memcpy(unionName + length, memberTypeName, memberTypeLength);
+            length += memberTypeLength;
+            if (isHigherOrderType(memberType)) free(memberTypeName);
+        }
+        else {
+            memcpy(unionName + length, "dynamic", 7);
+            length += 7;
+        }
+    }
+
+    unionName[length] = '\0';
+    return unionName;
+}
+
 char* createTypeName(TypeInfo* type, bool isFullName) {
     if (IS_CALLABLE_TYPE(type)) return createCallableTypeName(AS_CALLABLE_TYPE(type), isFullName);
     else if (IS_GENERIC_TYPE(type)) return createGenericTypeName(AS_GENERIC_TYPE(type), isFullName);

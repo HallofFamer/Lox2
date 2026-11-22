@@ -426,10 +426,6 @@ static bool matchBehaviorType(Parser* parser) {
     return match(parser, TOKEN_KIND_IDENTIFIER);
 }
 
-static bool matchVoidType(Parser* parser) {
-    return match(parser, TOKEN_KIND_VOID);
-}
-
 static bool matchMetaclassType(Parser* parser) {
     if (check(parser, TOKEN_KIND_IDENTIFIER) && checkNext(parser, TOKEN_KIND_CLASS)) {
         advance(parser);
@@ -483,6 +479,14 @@ static bool matchGenericType(Parser* parser) {
     // If it doesn't match, then this isn't a generic type annotation and we should backtrack and try to parse it as an expression instead. If it does match, then this is a valid generic type annotation and we can return true.
     if (!match(parser, TOKEN_KIND_GREATER)) return resetIndex(parser, index, current, false);
     return resetIndex(parser, index, current, true);
+}
+
+static bool matchVoidType(Parser* parser) {
+    return match(parser, TOKEN_KIND_VOID);
+}
+
+static bool matchDynamicType(Parser* parser) {
+    return match(parser, TOKEN_KIND_DYNAMIC);
 }
 
 static bool matchType(Parser* parser) {
