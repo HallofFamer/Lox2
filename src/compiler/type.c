@@ -483,6 +483,7 @@ char* createTypeName(TypeInfo* type, bool isFullName) {
     if (IS_CALLABLE_TYPE(type)) return createCallableTypeName(AS_CALLABLE_TYPE(type), isFullName);
     else if (IS_GENERIC_TYPE(type)) return createGenericTypeName(AS_GENERIC_TYPE(type), isFullName);
     else if (IS_ALIAS_TYPE(type)) return createAliasTypeName(AS_ALIAS_TYPE(type), isFullName);
+    else if (IS_UNION_TYPE(type)) return createUnionTypeName(AS_UNION_TYPE(type), isFullName);
     else return isFullName ? type->fullName->chars : type->shortName->chars;
 }
 

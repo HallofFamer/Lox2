@@ -490,7 +490,7 @@ static bool matchDynamicType(Parser* parser) {
 }
 
 static bool matchType(Parser* parser) {
-    return matchBehaviorType(parser) || matchVoidType(parser) || matchMetaclassType(parser) || matchCallableType(parser) || matchGenericType(parser);
+    return matchBehaviorType(parser) || matchVoidType(parser) || matchMetaclassType(parser) || matchCallableType(parser) || matchGenericType(parser) || matchDynamicType(parser);
 }
 
 static Ast* behaviorType(Parser* parser) {
