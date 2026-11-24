@@ -1277,6 +1277,16 @@ static bool isGenericSubtypeOfType(GenericTypeInfo* type, TypeInfo* type2) {
     return false;
 }
 
+static bool isUnionSubtypeOfType(TypeInfo* type, UnionTypeInfo* type2) {
+    for (int i = 0; i < type2->memberTypes->count; i++) {
+        TypeInfo* memberType = type2->memberTypes->elements[i];
+        if (isSubtypeOfType(type, memberType)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
     if (strcmp(type->shortName->chars, "Nil") == 0) return true;
@@ -1285,6 +1295,10 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
 
     if (IS_ALIAS_TYPE(type) || IS_ALIAS_TYPE(type2)) {
         return isSubtypeOfType(getAliasTargetType(type), getAliasTargetType(type2));
+    }
+
+    if (IS_UNION_TYPE(type2)) {
+        return isUnionSubtypeOfType(type, AS_UNION_TYPE(type2));
     }
 
     if (IS_CALLABLE_TYPE(type)) {
