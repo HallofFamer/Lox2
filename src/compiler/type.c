@@ -1287,6 +1287,16 @@ static bool isUnionSubtypeOfType(TypeInfo* type, UnionTypeInfo* type2) {
     return false;
 }
 
+static bool isUnionSubtypeOfUnionType(UnionTypeInfo* type, UnionTypeInfo* type2) {
+    for (int i = 0; i < type->memberTypes->count; i++) {
+        TypeInfo* memberType = type->memberTypes->elements[i];
+        if (!isUnionSubtypeOfType(memberType, type2)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     if (isEqualType(type, type2)) return true;
     if (strcmp(type->shortName->chars, "Nil") == 0) return true;

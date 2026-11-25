@@ -575,7 +575,8 @@ static Ast* dynamicType(Parser* parser) {
 
 static Ast* innerType(Parser* parser, bool allowVoid) {
     Ast* innerType = NULL;
-    if (checkEither(parser, TOKEN_KIND_IDENTIFIER, TOKEN_KIND_VOID) && checkNext(parser, TOKEN_KIND_FUN)) {
+    if ((check(parser, TOKEN_KIND_IDENTIFIER) || check(parser, TOKEN_KIND_VOID) || check(parser, TOKEN_KIND_DYNAMIC)) 
+        && checkNext(parser, TOKEN_KIND_FUN)) {
         innerType = callableType(parser);
         innerType->attribute.isFunction = true;
     }
