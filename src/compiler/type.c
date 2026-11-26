@@ -1308,7 +1308,8 @@ bool isSubtypeOfType(TypeInfo* type, TypeInfo* type2) {
     }
 
     if (IS_UNION_TYPE(type2)) {
-        return isUnionSubtypeOfType(type, AS_UNION_TYPE(type2));
+        if (IS_UNION_TYPE(type)) return isUnionSubtypeOfUnionType(AS_UNION_TYPE(type), AS_UNION_TYPE(type2));
+        else return isUnionSubtypeOfType(type, AS_UNION_TYPE(type2));
     }
 
     if (IS_CALLABLE_TYPE(type)) {

@@ -422,6 +422,10 @@ static Ast* binary(Parser* parser, Token token, Ast* left, bool canAssign) {
     return newAst(AST_EXPR_BINARY, token, 2, left, right);
 }
 
+static bool checkNoReturnType(Parser* parser) {
+    return check(parser, TOKEN_KIND_FUN) || check(parser, TOKEN_KIND_VOID) || check(parser, TOKEN_KIND_DYNAMIC);
+}
+
 static bool matchBehaviorType(Parser* parser) {
     return match(parser, TOKEN_KIND_IDENTIFIER);
 }
