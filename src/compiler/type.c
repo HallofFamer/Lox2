@@ -462,17 +462,11 @@ static char* createUnionTypeName(UnionTypeInfo* unionType, bool isFullName) {
             length += 3;
         }
 
-        if (memberType != NULL) {
-            char* memberTypeName = createTypeName(memberType, isFullName);
-            size_t memberTypeLength = strlen(memberTypeName);
-            memcpy(unionName + length, memberTypeName, memberTypeLength);
-            length += memberTypeLength;
-            if (isHigherOrderType(memberType)) free(memberTypeName);
-        }
-        else {
-            memcpy(unionName + length, "dynamic", 7);
-            length += 7;
-        }
+        char* memberTypeName = createTypeName(memberType, isFullName);
+        size_t memberTypeLength = strlen(memberTypeName);
+        memcpy(unionName + length, memberTypeName, memberTypeLength);
+        length += memberTypeLength;
+        if (isHigherOrderType(memberType)) free(memberTypeName);
     }
 
     unionName[length] = '\0';

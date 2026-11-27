@@ -426,6 +426,10 @@ static bool checkNoReturnType(Parser* parser) {
     return check(parser, TOKEN_KIND_FUN) || check(parser, TOKEN_KIND_VOID) || check(parser, TOKEN_KIND_DYNAMIC);
 }
 
+static bool checkReturnType(Parser* parser) {
+    return check(parser, TOKEN_KIND_IDENTIFIER) || check(parser, TOKEN_KIND_VOID) || check(parser, TOKEN_KIND_DYNAMIC);
+}
+
 static bool matchBehaviorType(Parser* parser) {
     return match(parser, TOKEN_KIND_IDENTIFIER);
 }
@@ -1785,9 +1789,7 @@ static bool matchFunDeclarationWithReturnType(Parser* parser, bool* hasReturnTyp
 static bool matchFunDeclarationWithoutReturnType(Parser* parser) {
 	// If the declaration starts with 'fun' or 'void' and is followed by an identifier, it's a valid function declaration without a return type annotation. 
     // Advance the parser and return true in this case. Otherwise, return false.
-    if ((check(parser, TOKEN_KIND_FUN) || check(parser, TOKEN_KIND_VOID) || check(parser, TOKEN_KIND_DYNAMIC)) 
-        && checkNext(parser, TOKEN_KIND_IDENTIFIER)) 
-    {
+    if (checkNoReturnType(parser) && checkNext(parser, TOKEN_KIND_IDENTIFIER)) {
         advance(parser);
 		return true;
     }
