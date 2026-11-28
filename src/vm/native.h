@@ -43,6 +43,7 @@
 #define NATIVE_TYPE_CALLABLE_0(type) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_CALLABLE, emptyString(vm), type, 0)
 #define NATIVE_TYPE_CALLABLE(type, numParams, ...) defineCallableTypeInfoWithName(vm, TYPE_CATEGORY_CALLABLE, emptyString(vm), type, numParams, __VA_ARGS__)
 #define NATIVE_TYPE_GENERIC(rawType, numParams, ...) defineGenericTypeInfoWithName(vm, emptyString(vm), getNativeType(vm, #rawType), numParams, __VA_ARGS__)
+#define NATIVE_TYPE_UNION(numTypes, ...) defineUnionTypeInfoWithName(vm, emptyString(vm), numTypes, __VA_ARGS__)
 
 ObjClass* defineNativeClass(VM* vm, const char* name);
 ObjClass* defineNativeGenericClass(VM* vm, const char* name, int numParams, ...);
@@ -56,6 +57,7 @@ ObjNamespace* defineNativeNamespace(VM* vm, const char* name, ObjNamespace* encl
 ObjClass* defineNativeException(VM* vm, const char* name, ObjClass* superClass);
 TypeInfo* defineCallableTypeInfoWithName(VM* vm, TypeCategory category, ObjString* name, TypeInfo* returnType, int numParams, ...);
 TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawType, int numParams, ...);
+TypeInfo* defineUnionTypeInfoWithName(VM * vm, ObjString * name, int numTypes, ...);
 
 TypeInfo* declareNativeTypeParameter(VM* vm, const char* shortName);
 ObjClass* getNativeClass(VM* vm, const char* fullName);

@@ -102,9 +102,9 @@ static GCRemEntry* findRememberedSetEntry(GCRemEntry* entries, int capacity, Obj
     }
 }
 
-static bool rememberedSetGetObject(GCRemSet* rememberedSet, Obj* object) {
-    if (rememberedSet->count == 0) return false;
-    GCRemEntry* entry = findRememberedSetEntry(rememberedSet->entries, rememberedSet->capacity, object);
+static bool rememberedSetGetObject(GCRemSet* remSet, Obj* object) {
+    if (remSet->count == 0) return false;
+    GCRemEntry* entry = findRememberedSetEntry(remSet->entries, remSet->capacity, object);
     if (entry->object == NULL) return false;
     return true;
 }

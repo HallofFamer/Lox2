@@ -182,6 +182,34 @@ static GenericTypeInfo* findGenericTypeInfoWithName(VM* vm, TypeInfo* rawType, i
     return NULL;
 }
 
+static UnionTypeInfo* findUnionTypeInfoWithName(VM* vm, int numTypes, va_list* args) {
+    char* unionName = bufferNewCString(UINT16_MAX);
+    size_t length = 0;
+
+    for (int i = 0; i < numTypes; i++) {
+        if (i > 0) {
+            unionName[length++] = ' ';
+            unionName[length++] = '|';
+            unionName[length++] = ' ';
+        }
+
+        TypeInfo* type = va_arg(*args, TypeInfo*);
+        char* typeName = type != NULL ? createTypeName(type, true) : "dynamic";
+        size_t typeLength = strlen(typeName);
+        memcpy(unionName + length, typeName, typeLength);
+        length += typeLength;
+    }
+
+    unionName[length] = '\0';
+    ObjString* fullUnionName = takeStringPerma(vm, unionName, (int)length);
+    TypeInfo* existingType = typeTableGet(vm->typetab, fullUnionName);
+    
+    if (existingType != NULL && IS_UNION_TYPE(existingType)) {
+        return AS_UNION_TYPE(existingType);
+    }
+    return NULL;
+}
+
 ObjClass* defineNativeClass(VM* vm, const char* name) {
     ObjString* className = newStringPerma(vm, name);
     ObjClass* nativeClass = newClass(vm, className, OBJ_INSTANCE);
@@ -464,6 +492,32 @@ TypeInfo* defineGenericTypeInfoWithName(VM* vm, ObjString* name, TypeInfo* rawTy
     genericType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
 	typeTableSet(vm->typetab, genericType->baseType.fullName, (TypeInfo*)genericType);
     return (TypeInfo*)genericType;
+}
+
+TypeInfo* defineUnionTypeInfoWithName(VM* vm, ObjString* name, int numTypes, ...) {
+    va_list args;
+    va_start(args, numTypes);
+    UnionTypeInfo* existingUnionType = findUnionTypeInfoWithName(vm, numTypes, &args);
+    va_end(args);
+
+    if (existingUnionType != NULL) {
+        return (TypeInfo*)existingUnionType;
+    }
+    UnionTypeInfo* unionType = newUnionTypeInfo(vm->typetab->count + 1, name, name);
+    va_start(args, numTypes);
+
+    for (int i = 0; i < numTypes; i++) {
+        TypeInfo* type = va_arg(args, TypeInfo*);
+        TypeInfoArrayAdd(unionType->memberTypes, type);
+    }
+    va_end(args);
+
+    char* shortName = createTypeName((TypeInfo*)unionType, false);
+    char* fullName = createTypeName((TypeInfo*)unionType, true);
+    unionType->baseType.shortName = takeStringPerma(vm, shortName, (int)strlen(shortName));
+    unionType->baseType.fullName = takeStringPerma(vm, fullName, (int)strlen(fullName));
+    typeTableSet(vm->typetab, unionType->baseType.fullName, (TypeInfo*)unionType);
+    return (TypeInfo*)unionType;
 }
 
 TypeInfo* declareNativeTypeParameter(VM* vm, const char* shortName) {

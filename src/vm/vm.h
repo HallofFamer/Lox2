@@ -92,6 +92,7 @@ struct VM {
     int namespaceCount;
     int moduleCount;
     int promiseCount;
+    int typeTableCount;
 
     Table classes;
     Table namespaces;

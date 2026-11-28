@@ -105,6 +105,7 @@ void initVM(VM* vm) {
     vm->namespaceCount = 0;
     vm->moduleCount = 1;
     vm->promiseCount = 0;
+    vm->typeTableCount = 1;
     vm->objectIndex = 0;
 
     initTable(&vm->classes, GC_GENERATION_TYPE_PERMANENT);
