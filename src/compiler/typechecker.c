@@ -553,6 +553,7 @@ static void inferGenericTypeParameters(Ast* callee, Ast* args, TypeInfoArray* fo
             if (strcmp(paramType->shortName->chars, formalParamType->shortName->chars) == 0) {
                 Ast* arg = astGetChild(args, j);
                 if (typeParams == NULL) typeParams = astInitTypeParameters(callee);
+                
                 if (arg->type != NULL) astInsertTypeParameter(typeParams, arg->type);
                 TypeInfoArrayAdd(calleeType->actualTypeParams, arg->type);
                 isInstantiated = true;

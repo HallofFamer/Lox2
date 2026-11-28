@@ -426,7 +426,7 @@ static bool checkNoReturnType(Parser* parser) {
     return check(parser, TOKEN_KIND_FUN) || check(parser, TOKEN_KIND_VOID) || check(parser, TOKEN_KIND_DYNAMIC);
 }
 
-static bool checkReturnType(Parser* parser) {
+static bool checkAnnotatedReturnType(Parser* parser) {
     return check(parser, TOKEN_KIND_IDENTIFIER) || check(parser, TOKEN_KIND_VOID) || check(parser, TOKEN_KIND_DYNAMIC);
 }
 
@@ -576,7 +576,7 @@ static Ast* voidType(Parser* parser) {
 
 static Ast* dynamicType(Parser* parser) {
     consume(parser, TOKEN_KIND_DYNAMIC, "Expect dynamic type.");
-    Ast* type = emptyAst(AST_EXPR_TYPE, previousToken(parser));
+    Ast* type = emptyAst(AST_EXPR_TYPE, emptyToken());
     type->attribute.isDynamic = true;
     return type;
 }
@@ -622,8 +622,11 @@ static Ast* type_(Parser* parser, bool allowEmpty, bool checkParam) {
     else if ((checkParam && checkBoth(parser, TOKEN_KIND_IDENTIFIER)) || (!checkParam && check(parser, TOKEN_KIND_IDENTIFIER))) {
         return behaviorType(parser);
     }
-    else if (check(parser, TOKEN_KIND_DYNAMIC) || allowEmpty) {
+    else if (check(parser, TOKEN_KIND_DYNAMIC)) {
         return dynamicType(parser);
+    }
+    else if (allowEmpty) {
+        return emptyAst(AST_EXPR_TYPE, emptyToken());
     }
     else {
         parseErrorAtCurrent(parser, "Invalid type specified.");

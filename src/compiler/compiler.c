@@ -977,7 +977,9 @@ static void compileInterpolation(Compiler* compiler, Ast* ast) {
 
         compileChild(compiler, exprs, count);
         expr = astGetChild(exprs, count);
-        if (expr->type == NULL || IS_PLACEHOLDER_TYPE(expr->type) || !isSubtypeOfType(expr->type, getNativeType(compiler->vm, "String"))) {
+        if (expr->type == NULL || IS_PLACEHOLDER_TYPE(expr->type) 
+            || !isSubtypeOfType(expr->type, getNativeType(compiler->vm, "String"))) 
+        {
             invokeMethod(compiler, 0, "toString", 8);
         }
 

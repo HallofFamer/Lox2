@@ -274,7 +274,18 @@ UnionTypeInfo* newUnionTypeInfoWithMembers(int id, ObjString* shortName, ObjStri
             
             for (int i = 0; i < numTypes; i++) {
                 TypeInfo* type = va_arg(args, TypeInfo*);
-                TypeInfoArrayAdd(unionType->memberTypes, type);
+
+                for (int j = 0; j < unionType->memberTypes->count; j++) {
+                    TypeInfo* existingType = unionType->memberTypes->elements[j];
+                    if (isSubtypeOfType(type, existingType)) {
+                        type = NULL;
+                        break;
+                    }
+                }
+
+                if (type != NULL) {
+                    TypeInfoArrayAdd(unionType->memberTypes, type);
+                }
             }
 
             va_end(args);
